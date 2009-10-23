@@ -34,7 +34,7 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 code: lorem
         });
-        var minibuffer = new XCodeEditor({});
+        var minibuffer = new XCodeEditor({ highlightCurrentLine: false });
         layout.packWidget(minibuffer, { pos: "bottom" });
         layout.packWidget(new DlResizeBar({ horiz: true, widget: minibuffer, invert: true }), { pos: "bottom" });
         layout.packWidget(editor, { pos: "top", fill: "*" });
@@ -42,6 +42,7 @@ try {
         dlg.setSize({ x: 800, y: 600 });
         dlg._focusedWidget = editor;
         dlg.show(true);
+        dlg.maximize(true);
 } catch(ex) {
         console.log(ex);
 }

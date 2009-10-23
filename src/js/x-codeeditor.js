@@ -37,11 +37,12 @@ DEFINE_CLASS("XCodeEditor", DlContainer, function(D, P, DOM){
         };
 
         D.DEFAULT_ARGS = {
-                _code       : [ "code"       , null ],
+                _code                : [ "code"       , null ],
+                highlightCurrentLine : [ "highlightCurrentLine", true ],
 
                 // override in DlWidget
-                _focusable  : [ "focusable"  , true ],
-                _fillParent : [ "fillParent" , true ]
+                _focusable           : [ "focusable"  , true ],
+                _fillParent          : [ "fillParent" , true ]
         };
 
         D.FIXARGS = function(args) {
@@ -163,14 +164,20 @@ DEFINE_CLASS("XCodeEditor", DlContainer, function(D, P, DOM){
 
         P.signalError = function(text) {
                 // XMSG.addMsg("error", text);
-                if (window.console)
-                        console.log("ERROR: %s", text);
+                this.quickPopup({
+                        content: text.htmlEscape(),
+                        widget: this,
+                        anchor: this.getElement()
+                });
         };
 
         P.signalInfo = function(text) {
                 // XMSG.addMsg("info", text);
-                if (window.console)
-                        console.log("INFO: %s", text);
+                this.quickPopup({
+                        content: text.htmlEscape(),
+                        widget: this,
+                        anchor: this.getElement()
+                });
         };
 
         P.createMarker = function(pos, before, name) {
@@ -197,6 +204,18 @@ DEFINE_CLASS("XCodeEditor", DlContainer, function(D, P, DOM){
                 return this.__code || (this.__code = this.code.join("\n"));
         };
 
+        P.getCodeSize = function() {
+                if (this.__size)
+                        return this.__size;
+                var size = 0;
+                this.code.foreach(function(line){
+                        size += line.length + 1;
+                });
+                if (size > 0)
+                        size--;
+                return this.__size = size;
+        };
+
         P.charAtRowCol = function(row, col) {
                 var a = this.code[row];
                 if (!a)
@@ -220,18 +239,6 @@ DEFINE_CLASS("XCodeEditor", DlContainer, function(D, P, DOM){
 
         P.getLineDivElement = function(row) {
                 return this.getContentElement().childNodes[row];
-        };
-
-        P.getCodeSize = function() {
-                if (this.__size)
-                        return this.__size;
-                var size = 0;
-                this.code.foreach(function(line){
-                        size += line.length + 1;
-                });
-                if (size > 0)
-                        size--;
-                return this.__size = size;
         };
 
         P.ensureCaretVisible = function() {
@@ -563,10 +570,12 @@ DEFINE_CLASS("XCodeEditor", DlContainer, function(D, P, DOM){
                 if (ch == "\n" || !ch)
                         ch = "&nbsp;";
                 this.getCaretElement().innerHTML = ch;
-                if (this.__hoverLine != null)
-                        DOM.delClass(this.getLineDivElement(this.__hoverLine), "XCodeEditor-current-line");
-                DOM.addClass(this.getLineDivElement(rc.row), "XCodeEditor-current-line");
-                this.__hoverLine = rc.row;
+                if (this.highlightCurrentLine) {
+                        if (this.__hoverLine != null)
+                                DOM.delClass(this.getLineDivElement(this.__hoverLine), "XCodeEditor-current-line");
+                        DOM.addClass(this.getLineDivElement(rc.row), "XCodeEditor-current-line");
+                        this.__hoverLine = rc.row;
+                }
         };
 
         P._updateMarkers = function(offset, delta, min) {
@@ -1207,8 +1216,8 @@ XCodeEditor.newCommands((function(){
                 dlg.setSize({ x: 350, y: 250 });
                 entry.addEventListener("onKeyPress", function(ev){
                         if (ev.keyCode != DlKeyboard.ESCAPE) {
-                                dlg.destroy();
                                 cont.call(this, entry);
+                                dlg.destroy();
                         }
                 }.clearingTimeout(2, this));
                 dlg.show(true);
@@ -1221,6 +1230,7 @@ XCodeEditor.newCommands((function(){
                 yank_from_operating_system: function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
                                 this.cmd("insert", entry.getValue());
+                                this.cmd("recenter_top_bottom");
                         });
                 },
 
@@ -1451,58 +1461,58 @@ DEFINE_CLASS("XCodeEditor_Keymap_Emacs", XCodeEditor_Keymap, function(D, P){
 
         D.KEYS = {
                 // movement
-                "ARROW_UP && C-p"            : "backward_line",
-                "ARROW_DOWN && C-n"          : "forward_line",
-                "ARROW_LEFT && C-b"          : "backward_char",
-                "ARROW_RIGHT && C-f"         : "forward_char",
-                "HOME"                       : "beginning_of_indentation_or_line",
-                "END && C-e"                 : "end_of_line",
-                "C-a"                        : "beginning_of_line",
-                "C-HOME && M-<"              : "beginning_of_buffer",
-                "C-END && M->"               : "end_of_buffer",
-                "C-ARROW_RIGHT && M-f"       : "forward_word",
-                "C-ARROW_LEFT && M-b"        : "backward_word",
-                "C-ARROW_DOWN"               : "forward_paragraph",
-                "C-ARROW_UP"                 : "backward_paragraph",
-                "C-l"                        : "recenter_top_bottom",
-                "PAGE_UP && M-v"             : "scroll_up",
-                "PAGE_DOWN && C-v"           : "scroll_down",
+                "ARROW_UP && C-p"                         : "backward_line",
+                "ARROW_DOWN && C-n"                       : "forward_line",
+                "ARROW_LEFT && C-b"                       : "backward_char",
+                "ARROW_RIGHT && C-f"                      : "forward_char",
+                "HOME"                                    : "beginning_of_indentation_or_line",
+                "END && C-e"                              : "end_of_line",
+                "C-a"                                     : "beginning_of_line",
+                "C-HOME && M-<"                           : "beginning_of_buffer",
+                "C-END && M->"                            : "end_of_buffer",
+                "C-ARROW_RIGHT && M-f"                    : "forward_word",
+                "C-ARROW_LEFT && M-b"                     : "backward_word",
+                "C-ARROW_DOWN"                            : "forward_paragraph",
+                "C-ARROW_UP"                              : "backward_paragraph",
+                "C-l"                                     : "recenter_top_bottom",
+                "PAGE_UP && M-v"                          : "scroll_up",
+                "PAGE_DOWN && C-v"                        : "scroll_down",
 
                 // basic editing
-                "BACKSPACE"                  : "backward_delete_char",
-                "DELETE && C-d"              : "delete_char",
-                "ENTER && C-m"               : "newline",
-                "M-d"                        : "kill_word",
-                "C-BACKSPACE && M-BACKSPACE" : "backward_kill_word",
-                "C-k"                        : "kill_line",
-                "C-y"                        : "yank",
-                "M-y"                        : "yank_pop",
-                "C-SPACE"                    : "set_mark_command",
-                "C-x C-x"                    : "exchange_point_and_mark",
-                "C-w"                        : "kill_region",
-                "M-t"                        : "transpose_words",
-                "C-t"                        : "transpose_chars",
-                "M-w"                        : "copy_region_as_kill",
-                "M-c"                        : "capitalize_word",
-                "M-u"                        : "upcase_word",
-                "M-l"                        : "downcase_word",
-                "F11"                        : "nuke_trailing_whitespace",
-                "TAB"                        : "indent_line",
-                "M-q"                        : "fill_paragraph",
-                "C-/ && C-x u && C-_"        : "undo",
-                "INSERT"                     : "overwrite_mode",
-                "M-s"                        : "center_line",
-                "C-s"                        : "isearch_forward",
-                "C-r"                        : "isearch_backward",
+                "BACKSPACE"                               : "backward_delete_char",
+                "DELETE && C-d"                           : "delete_char",
+                "ENTER && C-m"                            : "newline",
+                "M-d"                                     : "kill_word",
+                "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
+                "C-k"                                     : "kill_line",
+                "C-y"                                     : "yank",
+                "M-y"                                     : "yank_pop",
+                "C-SPACE"                                 : "set_mark_command",
+                "C-x C-x"                                 : "exchange_point_and_mark",
+                "C-w"                                     : "kill_region",
+                "M-t"                                     : "transpose_words",
+                "C-t"                                     : "transpose_chars",
+                "M-w"                                     : "copy_region_as_kill",
+                "M-c"                                     : "capitalize_word",
+                "M-u"                                     : "upcase_word",
+                "M-l"                                     : "downcase_word",
+                "F11"                                     : "nuke_trailing_whitespace",
+                "TAB"                                     : "indent_line",
+                "M-q"                                     : "fill_paragraph",
+                "C-/ && C-x u && C-_"                     : "undo",
+                "INSERT"                                  : "overwrite_mode",
+                "M-s"                                     : "center_line",
+                "C-s"                                     : "isearch_forward",
+                "C-r"                                     : "isearch_backward",
 
                 // necessary evil
-                "C-S-y"                      : "yank_from_operating_system",
-                "M-S-w"                      : "copy_for_operating_system",
-                "C-S-w"                      : "kill_for_operating_system",
+                "C-S-y"                                   : "yank_from_operating_system",
+                "M-S-w"                                   : "copy_for_operating_system",
+                "C-S-w"                                   : "kill_for_operating_system",
 
                 // my stuff, sorry if these have different meaning from the standard Emacs keys
-                "M-C-d"                      : "delete_region_or_line",
-                "M-S-y"                      : "yank_shift", // that's the reverse of yank_shift
+                "M-C-d"                                   : "delete_region_or_line",
+                "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
 
                 // DEBUG
                 "C-x =": function() {
