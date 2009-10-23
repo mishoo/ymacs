@@ -1,0 +1,1 @@
+montage -adjoin -background transparent -geometry 27x16 quit-btn.png quit-btn-hover.png quit-btn-active.png maximize-btn.png maximize-btn-hover.png maximize-btn-active.png minimize-btn.png minimize-btn-hover.png minimize-btn-active.png tmp.png

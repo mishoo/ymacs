@@ -1,0 +1,16 @@
+html, body { margin: 0; padding: 0; background-color: #ffee99; color: #000; }
+
+body, table { font: 13px tahoma,verdana,sans-serif; }
+
+.msg { margin: 0.5em; }
+
+.sep {
+  font-size: 1px;
+  line-height: 1px;
+  overflow: hidden;
+  height: 1px;
+  margin: 6px 0;
+  background-color: #f00;
+}
+
+.current { background-color: #fe0; }

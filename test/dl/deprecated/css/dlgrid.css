@@ -1,0 +1,33 @@
+.DlGrid { position: relative; background-color: #f8f0ff; border: 1px solid #659; }
+.DlGrid-Table { table-layout: fixed; }
+.DlGrid-Table td { overflow: hidden; }
+.DlGrid-Headers { overflow: hidden; background-color: #cbe; position: relative; width: 5px; }
+.DlGrid-Body { overflow: auto; }
+.DlGrid-cellData { overflow: hidden; padding: 2px 5px; white-space: nowrap; }
+
+.DlGrid-Body .DlGrid-Table { border-collapse: collapse; }
+.DlGrid-Body .DlGrid-Table td { border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; }
+
+.DlGrid-Handles { position: absolute; left: 0; top: 0; white-space: nowrap; overflow: visible; width: 10000px; height: 1px; }
+.DlGrid-resizeHandle { width: 7px; position: absolute; top: 0;
+  margin-left: -4px;
+  cursor: e-resize;
+  background-color: #000; filter: alpha(opacity=1); opacity: 0.01; /**/
+}
+
+.DlGrid-align-left { text-align: left; }
+.DlGrid-align-center { text-align: center; }
+.DlGrid-align-right { text-align: right; }
+
+.DlGridRow-focus .DlGrid-cellData { padding: 1px 5px; border-top: 1px dotted #000; border-bottom: 1px dotted #000; }
+.DlGridRow-focus td { background-color: #e8e0ff; color: #54a; }
+.DlGridRow-hover { background-color: #e8e0ee; }
+.DlGridRow-1 td { background-color: #76c; color: #fff; }
+.DlGridRow-active td { background-color: #98e; color: #fff; }
+
+.DlGridHeadLabel-sort-up .DlButton-inner { background-image: url("img/arrows/sort-ascending.gif"); background-repeat: no-repeat; background-position: 100% 50%; }
+.DlGridHeadLabel-sort-down .DlButton-inner { background-image: url("img/arrows/sort-descending.gif"); background-repeat: no-repeat; background-position: 100% 50%; }
+.DlGrid-align-right .DlButton-inner { background-position: 0 50%; }
+
+.DlGridHeadLabel { border-width: 0 1px 1px 0; }
+.DlGridHeadLabel .DlButton-inner { border: none; padding-top: 3px; padding-bottom: 3px; }

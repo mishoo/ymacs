@@ -1,0 +1,35 @@
+.XCodeEditor {
+  background-color: #325;
+  color: wheat;
+  font-family: monospace;
+  white-space: pre;
+  line-height: 15px;
+}
+
+.XCodeEditor-caret {
+  position: absolute;
+  opacity: 0.5;
+  background-color: #aaa;
+}
+
+.XCodeEditor-focus .XCodeEditor-caret {
+  opacity: 1;
+  background-color: #f51;
+  color: #324;
+  margin: 0;
+  border: 0;
+}
+
+.XCodeEditor-focus .XCodeEditor-caret-blink {
+  visibility: hidden;
+}
+
+.XCodeEditor-current-line {
+  background-color: #231343;
+}
+
+.XCodeEditor-overwrite-mode .XCodeEditor-caret {
+  -moz-border-radius: 15px;
+  background-color: #97f;
+  color: #fff;
+}

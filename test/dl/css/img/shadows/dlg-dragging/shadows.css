@@ -1,0 +1,222 @@
+.DlDialog-Dragging .DlDialog-Rel .Shadow-T { left: 17px; right: 14px; top: -14px; background: url("$DIR/T.png") repeat-x 0 0; height: 14px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-B { left: 17px; right: 14px; background: url("$DIR/B.png") repeat-x 0 0; bottom: -16px; height: 16px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-TL { left: -15px; width: 32px; top: -13px; background: url("$DIR/TL.png") no-repeat 0 0; height: 23px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-BR { width: 31px; right: -17px; background: url("$DIR/BR.png") no-repeat 0 0; bottom: -15px; height: 21px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-R { width: 17px; right: -17px; top: 10px; background: url("$DIR/R.png") repeat-y 0 0; bottom: 6px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-TR { width: 31px; right: -17px; top: -13px; background: url("$DIR/TR.png") no-repeat 0 0; height: 23px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-BL { left: -15px; width: 32px; background: url("$DIR/BL.png") no-repeat 0 0; bottom: -15px; height: 21px; }
+.DlDialog-Dragging .DlDialog-Rel .Shadow-L { left: -15px; width: 15px; top: 10px; background: url("$DIR/L.png") repeat-y 0 0; bottom: 6px; }
+
+
+/*
+$VAR1 = {
+          'T' => {
+                   'css' => {
+                              'left' => '17px',
+                              'right' => '14px',
+                              'top' => '-14px',
+                              'background' => 'url("$DIR/T.png") repeat-x 0 0',
+                              'height' => '14px'
+                            },
+                   'origsize' => {
+                                   'y' => 24,
+                                   'x' => 300
+                                 },
+                   'cut' => {
+                              'x' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 14,
+                                    'x' => 16
+                                  },
+                   'diff' => 10,
+                   'sel' => [
+                              32,
+                              0,
+                              300,
+                              24
+                            ],
+                   'name' => 'T.png'
+                 },
+          'B' => {
+                   'css' => {
+                              'left' => '17px',
+                              'right' => '14px',
+                              'background' => 'url("$DIR/B.png") repeat-x 0 0',
+                              'bottom' => '-16px',
+                              'height' => '16px'
+                            },
+                   'origsize' => {
+                                   'y' => 22,
+                                   'x' => 300
+                                 },
+                   'cut' => {
+                              'x' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 16,
+                                    'x' => 16
+                                  },
+                   'diff' => 6,
+                   'sel' => [
+                              32,
+                              244,
+                              300,
+                              22
+                            ],
+                   'name' => 'B.png'
+                 },
+          'TL' => {
+                    'css' => {
+                               'left' => '-15px',
+                               'width' => '32px',
+                               'top' => '-13px',
+                               'background' => 'url("$DIR/TL.png") no-repeat 0 0',
+                               'height' => '23px'
+                             },
+                    'origsize' => {
+                                    'y' => 24,
+                                    'x' => 32
+                                  },
+                    'finalsize' => {
+                                     'y' => 23,
+                                     'x' => 32
+                                   },
+                    'sel' => [
+                               0,
+                               0,
+                               32,
+                               24
+                             ],
+                    'name' => 'TL.png'
+                  },
+          'BR' => {
+                    'css' => {
+                               'width' => '31px',
+                               'right' => '-17px',
+                               'background' => 'url("$DIR/BR.png") no-repeat 0 0',
+                               'bottom' => '-15px',
+                               'height' => '21px'
+                             },
+                    'origsize' => {
+                                    'y' => 22,
+                                    'x' => 31
+                                  },
+                    'finalsize' => {
+                                     'y' => 21,
+                                     'x' => 31
+                                   },
+                    'sel' => [
+                               332,
+                               244,
+                               31,
+                               22
+                             ],
+                    'name' => 'BR.png'
+                  },
+          'R' => {
+                   'css' => {
+                              'width' => '17px',
+                              'right' => '-17px',
+                              'top' => '10px',
+                              'background' => 'url("$DIR/R.png") repeat-y 0 0',
+                              'bottom' => '6px'
+                            },
+                   'origsize' => {
+                                   'y' => 220,
+                                   'x' => 31
+                                 },
+                   'cut' => {
+                              'y' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 16,
+                                    'x' => 17
+                                  },
+                   'diff' => 14,
+                   'sel' => [
+                              332,
+                              24,
+                              31,
+                              220
+                            ],
+                   'name' => 'R.png'
+                 },
+          'TR' => {
+                    'css' => {
+                               'width' => '31px',
+                               'right' => '-17px',
+                               'top' => '-13px',
+                               'background' => 'url("$DIR/TR.png") no-repeat 0 0',
+                               'height' => '23px'
+                             },
+                    'origsize' => {
+                                    'y' => 24,
+                                    'x' => 31
+                                  },
+                    'finalsize' => {
+                                     'y' => 23,
+                                     'x' => 31
+                                   },
+                    'sel' => [
+                               332,
+                               0,
+                               31,
+                               24
+                             ],
+                    'name' => 'TR.png'
+                  },
+          'BL' => {
+                    'css' => {
+                               'left' => '-15px',
+                               'width' => '32px',
+                               'background' => 'url("$DIR/BL.png") no-repeat 0 0',
+                               'bottom' => '-15px',
+                               'height' => '21px'
+                             },
+                    'origsize' => {
+                                    'y' => 22,
+                                    'x' => 32
+                                  },
+                    'finalsize' => {
+                                     'y' => 21,
+                                     'x' => 32
+                                   },
+                    'sel' => [
+                               0,
+                               244,
+                               32,
+                               22
+                             ],
+                    'name' => 'BL.png'
+                  },
+          'L' => {
+                   'css' => {
+                              'left' => '-15px',
+                              'width' => '15px',
+                              'top' => '10px',
+                              'background' => 'url("$DIR/L.png") repeat-y 0 0',
+                              'bottom' => '6px'
+                            },
+                   'origsize' => {
+                                   'y' => 220,
+                                   'x' => 32
+                                 },
+                   'cut' => {
+                              'y' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 16,
+                                    'x' => 15
+                                  },
+                   'diff' => 17,
+                   'sel' => [
+                              0,
+                              24,
+                              32,
+                              220
+                            ],
+                   'name' => 'L.png'
+                 }
+        };
+*/
