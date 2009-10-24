@@ -1,4 +1,4 @@
-.Ymacs_Buffer {
+.Ymacs_Frame {
   background-color: #325;
   color: wheat;
   font-family: monospace;
@@ -12,7 +12,7 @@
   background-color: #aaa;
 }
 
-.Ymacs_Buffer-focus .Ymacs-caret {
+.Ymacs_Frame-focus .Ymacs-caret {
   opacity: 1;
   background-color: #f51;
   color: #324;
@@ -20,11 +20,11 @@
   border: 0;
 }
 
-.Ymacs_Buffer-focus .Ymacs-caret-blink {
+.Ymacs_Frame-focus .Ymacs-caret-blink {
   visibility: hidden;
 }
 
-.Ymacs-current-line {
+.Ymacs_Frame-focus .Ymacs-current-line {
   background-color: #231343;
 }
 
@@ -32,4 +32,9 @@
   -moz-border-radius: 15px;
   background-color: #97f;
   color: #fff;
+}
+
+.Ymacs_Message_Popup {
+  background-color: wheat;
+  padding: 10px;
 }

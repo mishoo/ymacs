@@ -32,15 +32,22 @@ try {
         var editor = window.editor = new Ymacs_Buffer({
                 // code: info
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
-                // code: lorem
+                code: lorem
         });
+        var editor_frame = new Ymacs_Frame({ buffer: editor });
+        var editor_frame2 = new Ymacs_Frame({ buffer: editor });
+
         var minibuffer = new Ymacs_Buffer({ highlightCurrentLine: false });
-        layout.packWidget(minibuffer, { pos: "bottom" });
-        layout.packWidget(new DlResizeBar({ horiz: true, widget: minibuffer, invert: true }), { pos: "bottom" });
-        layout.packWidget(editor, { pos: "top", fill: "*" });
+        var minibuffer_frame = new Ymacs_Frame({ buffer: minibuffer });
         editor.minibuffer = minibuffer;
+
+        layout.packWidget(minibuffer_frame, { pos: "bottom" });
+        layout.packWidget(new DlResizeBar({ horiz: true, widget: minibuffer_frame, invert: true }), { pos: "bottom" });
+        layout.packWidget(editor_frame, { pos: "left", fill: "50%" });
+        layout.packWidget(new DlResizeBar({ widget: editor_frame }), { pos: "left" });
+        layout.packWidget(editor_frame2, { pos: "right", fill: "*" });
         dlg.setSize({ x: 800, y: 600 });
-        dlg._focusedWidget = editor;
+        dlg._focusedWidget = editor_frame;
         dlg.show(true);
         dlg.maximize(true);
 } catch(ex) {

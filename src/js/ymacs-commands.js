@@ -387,10 +387,7 @@ Ymacs_Buffer.newCommands({
         },
 
         recenter_top_bottom: function() {
-                var row = this._rowcol.row,
-                line = this.getLineDivElement(row),
-                div = this.getElement();
-                div.scrollTop = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
+                this._centerOnCaret();
         },
 
         _apply_operation_on_word: function (op) {
@@ -463,15 +460,19 @@ Ymacs_Buffer.newCommands({
         },
 
         scroll_down: function() {
-                var hl = this._heightInLines();
-                this.cmd("forward_line", Math.round(hl / 1.33));
-                this.cmd("recenter_top_bottom");
+                this.whenActiveFrame(function(frame){
+                        var hl = frame.heightInLines();
+                        this.cmd("forward_line", Math.round(hl / 1.33));
+                        this.cmd("recenter_top_bottom");
+                });
         },
 
         scroll_up: function() {
-                var hl = this._heightInLines();
-                this.cmd("backward_line", Math.round(hl / 1.33));
-                this.cmd("recenter_top_bottom");
+                this.whenActiveFrame(function(frame){
+                        var hl = frame.heightInLines();
+                        this.cmd("backward_line", Math.round(hl / 1.33));
+                        this.cmd("recenter_top_bottom");
+                });
         },
 
         nuke_trailing_whitespace: function() {
@@ -544,10 +545,9 @@ Ymacs_Buffer.newCommands({
 Ymacs_Buffer.newCommands((function(){
 
         function modalTextarea(title, text, cont) {
-                var dlg = new DlDialog({ parent  : this.getParentDialog() || this,
-                                         title   : title,
-                                         quitBtn : "destroy",
-                                         modal   : true });
+                var dlg = this.createDialog({ title   : title,
+                                              quitBtn : "destroy",
+                                              modal   : true });
                 var entry = new DlEntry({ parent: dlg, type: "textarea", fillParent: true, value: text });
                 dlg._focusedWidget = entry;
                 dlg.setSize({ x: 350, y: 250 });
@@ -558,7 +558,6 @@ Ymacs_Buffer.newCommands((function(){
                         }
                 }.clearingTimeout(2, this));
                 dlg.show(true);
-                dlg.addEventListener("onDestroy", this.focus.clearingTimeout(2, this));
                 entry.select();
         };
 
@@ -567,7 +566,7 @@ Ymacs_Buffer.newCommands((function(){
                 yank_from_operating_system: function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
                                 this.cmd("insert", entry.getValue());
-                                this.cmd("recenter_top_bottom");
+                                // this.cmd("recenter_top_bottom");
                         });
                 },
 
