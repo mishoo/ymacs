@@ -35,7 +35,7 @@ try {
                 code: lorem
         });
         var editor_frame = new Ymacs_Frame({ buffer: editor });
-        var editor_frame2 = new Ymacs_Frame({ buffer: editor });
+        // var editor_frame2 = new Ymacs_Frame({ buffer: editor });
 
         var minibuffer = new Ymacs_Buffer({ highlightCurrentLine: false });
         var minibuffer_frame = new Ymacs_Frame({ buffer: minibuffer });
@@ -43,9 +43,10 @@ try {
 
         layout.packWidget(minibuffer_frame, { pos: "bottom" });
         layout.packWidget(new DlResizeBar({ horiz: true, widget: minibuffer_frame, invert: true }), { pos: "bottom" });
-        layout.packWidget(editor_frame, { pos: "left", fill: "50%" });
-        layout.packWidget(new DlResizeBar({ widget: editor_frame }), { pos: "left" });
-        layout.packWidget(editor_frame2, { pos: "right", fill: "*" });
+        layout.packWidget(editor_frame, { pos: "top", fill: "*" });
+        // layout.packWidget(editor_frame, { pos: "left", fill: "50%" });
+        // layout.packWidget(new DlResizeBar({ widget: editor_frame }), { pos: "left" });
+        // layout.packWidget(editor_frame2, { pos: "right", fill: "*" });
         dlg.setSize({ x: 800, y: 600 });
         dlg._focusedWidget = editor_frame;
         dlg.show(true);

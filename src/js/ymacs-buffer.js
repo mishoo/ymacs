@@ -244,6 +244,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 if (arguments.length == 0)
                         om = this.overwriteMode;
                 this.callHooks("onOverwriteMode", this.overwriteMode = !om);
+                this.signalInfo(om ? "Insert mode" : "Overwrite mode");
         };
 
         P.setMinibuffer = function(text) {
