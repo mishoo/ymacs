@@ -23,7 +23,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         P.MULTILINE_COMMENT_END = "*/";
         P.STRING = "\"";
         P.STRING2 = "'";
-        P.OPERATORS = "-+=/!%^&|*<>".split("").toHash(true);
+        P.OPERATORS = "-+=/!%^&|*<>:?".split("").toHash(true);
         P.KEYWORDS = {};
         P.KEYWORDS_TYPE = {};
         P.KEYWORDS_CONST = {};
@@ -35,10 +35,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         P.skipWhitespace = function() {
                 while (!this.eof() && this.peek() in this.WHITE_SPACE)
                         this.next();
-        };
-
-        P.position = function() {
-                return this.buffer._rowColToPosition(this.line, this.col);
         };
 
         P.get = function() {
@@ -202,14 +198,14 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         this.consumeString(this.STRING);
                         this.next(); // skip end quote
 
-                } else if (this.lookingAt(this.STRING2)) {
+                } else if (this.STRING2 && this.lookingAt(this.STRING2)) {
                         this.next(); // skip start quote
                         type = "string";
                         this.consumeString(this.STRING2);
                         this.next(); // skip end quote
 
                 } else if (this.isIdentifierStart()) {
-                        var id = this.consumeIdentifier();
+                        var id = info.name = this.consumeIdentifier();
                         if (id in this.KEYWORDS)
                                 type = "keyword";
                         else if (id in this.KEYWORDS_TYPE)
