@@ -1,21 +1,3 @@
-.Ymacs_Frame .fontlock-line-comment,
-.Ymacs_Frame .fontlock-multiline-comment {
-  color: #add8e6;
-}
-
-.Ymacs_Frame .fontlock-string {
-  color: #87cefa;
-}
-
-.Ymacs_Frame .fontlock-keyword {
-  color: #afeeee;
-  font-weight: bold;
-}
-
-.Ymacs_Frame .fontlock-constant {
-  color: #98fb98;
-}
-
 .Ymacs_Frame .fontlock-type {
   color: #87ceeb;
   font-weight: bold;
@@ -25,9 +7,9 @@
 .Ymacs_Frame .fontlock-function-name   { color: rgb(135, 206, 250);  font-weight: 700; font-style: normal;  font-stretch: normal; text-decoration: none; }
 .Ymacs_Frame .fontlock-variable-name   { color: rgb(238, 221, 130);  font-weight: 700; font-style: normal;  font-stretch: normal; text-decoration: none; }
 .Ymacs_Frame .fontlock-constant   { color: rgb(127, 255, 212); font-style: normal;  font-weight: 500;  font-stretch: normal; text-decoration: none; }
-.Ymacs_Frame .fontlock-string   { color: rgb(255, 160, 122); font-style: normal;  font-weight: 500;  font-stretch: normal; text-decoration: none; }
+.Ymacs_Frame .fontlock-string   { color: rgb(220, 160, 80); font-style: normal;  font-weight: 500;  font-stretch: normal; text-decoration: none; }
 .Ymacs_Frame .fontlock-keyword   { color: rgb(0, 255, 255);  font-weight: 700; font-style: normal;  font-stretch: normal; text-decoration: none; }
 .Ymacs_Frame .fontlock-line-comment,
-.Ymacs_Frame .fontlock-multiline-comment   { color: rgb(255, 69, 0); font-style: normal;  font-weight: 500;  font-stretch: normal; text-decoration: none; }
+.Ymacs_Frame .fontlock-multiline-comment   { color: rgb(69, 255, 0); font-style: normal;  font-weight: 500;  font-stretch: normal; text-decoration: none; }
 .Ymacs_Frame .fontlock-number { color: yellow; }
 .Ymacs_Frame .fontlock-operator { color: #aac; }

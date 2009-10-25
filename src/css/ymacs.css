@@ -1,7 +1,7 @@
 @import url("ymacs-syntax.css");
 
 .Ymacs_Frame {
-  background-color: #325;
+  background-color: #224;
   color: wheat;
   font-family: monospace;
   white-space: pre;
@@ -27,7 +27,7 @@
 }
 
 .Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #231343;
+  background-color: #234353;
 }
 
 .Ymacs-overwrite-mode .Ymacs-caret {
