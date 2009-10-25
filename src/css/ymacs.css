@@ -1,9 +1,11 @@
+@import url("ymacs-syntax.css");
+
 .Ymacs_Frame {
   background-color: #325;
   color: wheat;
   font-family: monospace;
   white-space: pre;
-  line-height: 15px;
+  line-height: 17px;
 }
 
 .Ymacs-caret {

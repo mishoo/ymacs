@@ -146,7 +146,7 @@ Ymacs_Buffer.newCommands({
         },
 
         indent_line: function() {
-                this.signalError("Heh, you wish!");
+                this.cmd("insert", "    ");
         },
 
         insert_text: function(txt) {

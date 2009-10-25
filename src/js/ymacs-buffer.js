@@ -169,6 +169,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__redoQueue = [];
                 this.markers = [ this.caretMarker, this.markMarker ]; // resetting the code invalidates markers
                 this.code = code.split(/\n/);
+                if (this.tokenizer) {
+                        this.tokenizer.reset();
+                }
                 this.callHooks("onResetCode", this.code);
                 this.caretMarker.setPosition(0, false, true);
                 this.markMarker.setPosition(0, true);
@@ -353,20 +356,32 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._replaceLine = function(row, text) {
                 this.code[row] = text;
-                if (this.__preventUpdates == 0)
-                        this.callHooks("onLineChange", row, text);
+                if (this.__preventUpdates == 0) {
+                        if (this.tokenizer) {
+                                this.tokenizer.quickUpdate(row);
+                        }
+                        this.callHooks("onLineChange", row);
+                }
         };
 
         P._deleteLine = function(row) {
                 this.code.splice(row, 1);
-                if (this.__preventUpdates == 0)
+                if (this.__preventUpdates == 0) {
+                        if (this.tokenizer) {
+                                this.tokenizer.quickDeleteLine(row);
+                        }
                         this.callHooks("onDeleteLine", row);
+                }
         };
 
         P._insertLine = function(row, text) {
                 this.code.splice(row, 0, text);
-                if (this.__preventUpdates == 0)
-                        this.callHooks("onInsertLine", row, text);
+                if (this.__preventUpdates == 0) {
+                        if (this.tokenizer) {
+                                this.tokenizer.quickInsertLine(row);
+                        }
+                        this.callHooks("onInsertLine", row);
+                }
         };
 
         P._insertText = function(text, pos) {

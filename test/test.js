@@ -32,8 +32,15 @@ try {
         var editor = window.editor = new Ymacs_Buffer({
                 // code: info
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
-                code: lorem
+                // code: lorem
         });
+        editor.tokenizer = new Ymacs_Tokenizer_JS({ buffer: editor });
+        editor.setCode("\
+function() {\n\
+    // this is a comment\n\
+    var a = a + 0xFB;\n\
+    return \"a string\";\n\
+}\n");
         var editor_frame = new Ymacs_Frame({ buffer: editor });
         // var editor_frame2 = new Ymacs_Frame({ buffer: editor });
 

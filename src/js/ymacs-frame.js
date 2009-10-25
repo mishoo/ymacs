@@ -135,14 +135,22 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }
         };
 
+        P._getLineHTML = function(row) {
+                var line = this.buffer.code[row];
+                if (line == "") {
+                        line = "&nbsp;";
+                } else if (this.buffer.tokenizer) {
+                        line = this.buffer.tokenizer.highlightLine(row);
+                } else {
+                        line = line.htmlEscape();
+                }
+                return line;
+        };
+
         P._redrawBuffer = function() {
-                this.setContent(this.buffer.code.map(function(line){
-                        if (line == "")
-                                line = "&nbsp;";
-                        else
-                                line = line.htmlEscape();
-                        return line.htmlEmbed("div", "line");
-                }).join(""));
+                this.setContent(this.buffer.code.map(function(line, i){
+                        return this._getLineHTML(i).htmlEmbed("div", "line");
+                }, this).join(""));
         };
 
         P.heightInLines = function() {
@@ -151,22 +159,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         /* -----[ event handlers ]----- */
 
-        P._on_bufferLineChange = function(row, text) {
-                if (text == "")
-                        text = "&nbsp;";
-                else
-                        text = text.htmlEscape();
+        P._on_bufferLineChange = function(row) {
                 var div = this.getLineDivElement(row);
-                div.innerHTML = text;
+                div.innerHTML = this._getLineHTML(row);
         };
 
-        P._on_bufferInsertLine = function(row, text) {
-                var div = DOM.createElement("div", null, { className: "line" });
-                if (text == "")
-                        text = "&nbsp;";
-                else
-                        text = text.htmlEscape();
-                div.innerHTML = text;
+        P._on_bufferInsertLine = function(row) {
+                var div = DOM.createFromHtml(this._getLineHTML(row).htmlEmbed("div", "line"));
                 this.getContentElement().insertBefore(div, this.getLineDivElement(row));
         };
 
