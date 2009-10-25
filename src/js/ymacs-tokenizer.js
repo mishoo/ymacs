@@ -1,18 +1,18 @@
 DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
+        function CMP_INT(a, b) { return parseInt(a, 10) - parseInt(b, 10); };
+
         D.DEFAULT_ARGS = [ "onChange" ];
 
         D.DEFAULT_ARGS = {
                 buffer : [ "buffer"  , null ],
-                line   : [ "line"    , 0 ],
-                col    : [ "col"     , 0 ]
+                pos    : [ "pos", 0 ]
         };
 
         D.CONSTRUCT = function() {
                 this.syntax = [];
                 this.parens = [];
-                this.code = this.buffer.code;
-                this.quickUpdate = this.quickUpdate.clearingTimeout(50, this);
+                this._do_quickUpdate = this._do_quickUpdate.clearingTimeout(50, this);
         };
 
         P.WHITE_SPACE = " \xa0\t\n\r".split("").toHash(true);
@@ -23,7 +23,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         P.MULTILINE_COMMENT_END = "*/";
         P.STRING = "\"";
         P.STRING2 = "'";
-        P.OPERATORS = "-+=/!%^&|*<>:?".split("").toHash(true);
+        P.OPERATORS = "-+=/!%^&|*<>:?,".split("").toHash(true);
         P.KEYWORDS = {};
         P.KEYWORDS_TYPE = {};
         P.KEYWORDS_CONST = {};
@@ -32,67 +32,54 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         P.CLOSE_PAREN = ")]}".split("").toHash(true);
         P.MATCH_PAREN = { "{" : "}", "[" : "]", "(" : ")" };
 
+        P.code = function() {
+                return this.buffer.getCode();
+        };
+
+        P.get = function() {
+                return this.code().charAt(this.pos++);
+        };
+
+        P.next = function() {
+                this.pos++;
+        };
+
+        P.eol = function() {
+                return this.peek() == "\n";
+        };
+
+        P.eof = function() {
+                return this.pos >= this.code().length;
+        };
+
+        P.peek = function() {
+                return this.code().charAt(this.pos);
+        };
+
+        P.back = function() {
+                this.pos--;
+        };
+
+        P.forward = function(n) {
+                this.pos += n;
+        };
+
         P.skipWhitespace = function() {
                 while (!this.eof() && this.peek() in this.WHITE_SPACE)
                         this.next();
         };
 
-        P.get = function() {
-                var line = this.code[this.line], ch = line && (this.col == line.length ? "\n" : line.charAt(this.col));
-                this.next();
-                return ch;
-        };
-
-        P.next = function() {
-                if (this.col < this.code[this.line].length) {
-                        ++this.col;
-                } else {
-                        ++this.line;
-                        this.col = 0;
-                }
-        };
-
-        P.eol = function() {
-                return this.col == this.code[this.line].length;
-        };
-
-        P.eof = function() {
-                return this.line >= this.code.length || (
-                        this.line == this.code.length - 1 && this.col == this.code[this.line].length
-                );
-        };
-
-        P.peek = function() {
-                var line = this.code[this.line];
-                return line && (this.col == line.length ? "\n" : line.charAt(this.col));
-        };
-
-        P.back = function() {
-                if (this.col > 0) {
-                        --this.col;
-                } else {
-                        --this.line;
-                        this.col = 0;
-                }
-        };
-
-        P.forward = function(n) {
-                if (n == null) n = 1;
-                while (!this.eof() && n-- > 0)
-                        this.next();
-        };
-
         P.lookingAt = function(what) {
                 if (what instanceof RegExp) {
-                        what.lastIndex = this.col;
-                        var m = what.exec(this.code[this.line]);
-                        return m && m.index == this.col && what.lastIndex;
+                        what.lastIndex = this.pos;
+                        var m = what.exec(this.code());
+                        return m && m.index == this.pos && what.lastIndex;
                 } else if (typeof what == "object") {
                         for (i in what)
                                 if (this.lookingAt(i))
                                         return i;
                 } else {
-                        return this.code[this.line].substr(this.col, what.length) == what && this.col + what.length;
+                        return this.code().substr(this.pos, what.length) == what && this.pos + what.length;
                 }
         };
 
@@ -181,7 +168,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
         P.readToken = function() {
                 this.skipWhitespace();
-                var type, info = { begin: [ this.line, this.col ] };
+                var type, info = { begin: this.pos };
                 if (this.lookingAt(this.LINE_COMMENT)) {
                         type = "line-comment";
                         this.consumeLineComment();
@@ -235,50 +222,29 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         }
                         type = "close-paren";
 
-                } else if (this.lookingAt(/[0-9]|\.[0-9]/g)) {
+                } else if (this.lookingAt(/[0-9]|\.[0-9]/)) {
                         this.consumeNumber();
                         type = "number";
                 }
 
                 if (type) {
                         info.type = type;
-                        info.end = [ this.line, this.col ];
+                        info.end = this.pos;
+                        info.len = info.end - info.begin;
                         return info;
                 }
         };
 
-        P.add_syntax = function(info) {
-                var line = info.begin[0], col = info.begin[1],
-                    s = this.syntax[line] || (this.syntax[line] = {}),
-                    old = s[col], removed = false;
-                s[col] = info;
-                return !old || old.type != info.type || old.end[1] != info.end[1] || old.end[0] != info.end[0];
-        };
-
         P.tokenize = function() {
-                this.line = 0;
-                this.col = 0;
-                var changes = {};
+                this.pos = 0;
+                var changes = { min: 0, max: 0 };
                 while (!this.eof()) {
                         var info = this.readToken();
                         if (info) {
-                                var i = info.begin[0], last = info.end[0];
-                                if (i == last && this.add_syntax(info)) {
-                                        changes[i] = true;
-                                } else {
-                                        var tmp = Object.makeCopy(info);
-                                        while (i < last) {
-                                                tmp.end = [ i, this.code[i].length ];
-                                                if (this.add_syntax(tmp))
-                                                        changes[i] = true;
-                                                tmp = Object.makeCopy(tmp);
-                                                i++;
-                                                tmp.begin = [ i, 0 ];
-                                        }
-                                        tmp.end = info.end;
-                                        if (this.add_syntax(tmp))
-                                                changes[i] = true;
-                                }
+                                for (var i = info.begin; i < info.end; ++i)
+                                        this.syntax[i] = info;
+                                changes.min = Math.min(changes.min, this.buffer._positionToRowCol(info.begin).row);
+                                changes.max = Math.max(changes.max, this.buffer._positionToRowCol(info.end).row);
                         } else {
                                 this.next(); // skip characters we didn't match
                         }
@@ -286,45 +252,66 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 return changes;
         };
 
+        // P.getSyntax = function() {
+        //         var a = Array.hashKeys(this.syntax);
+        //         a.sort(CMP_INT);
+        //         return a.map(function(key){
+        //                 return this[key];
+        //         }, this.syntax);
+        // };
+
         P.highlightLine = function(line) {
-                var syntax = this.syntax[line], text = this.code[line];
-                if (!syntax)
-                        return text.htmlEscape();
-                var hl = "", last = 0;
-                Array.hashKeys(syntax).mergeSort(function(a, b){
-                        return parseInt(a) - parseInt(b);
-                }).foreach(function(i){
+                var text = this.code(),
+                    begin = this.buffer._rowColToPosition(line, 0),
+                    end = begin + this.buffer.code[line].length,
+                    buf = String.buffer(),
+                    syntax = this.syntax;
+                for (var i = begin; i < end;) {
                         var s = syntax[i];
-                        if (i > last)
-                                hl += text.substring(last, i);
-                        hl += "<span class='fontlock-" + s.type + "'>" + text.substring(i, s.end[1]).htmlEscape() + "</span>";
-                        last = s.end[1];
-                });
-                if (last < text.length)
-                        hl += text.substr(last);
-                return hl;
+                        if (s) {
+                                var tmp = Math.min(i + s.len, end);
+                                buf("<span class='fontlock-", s.type, "'>",
+                                    text.substring(i, tmp).htmlEscape(),
+                                    "</span>");
+                                i = tmp;
+                        } else {
+                                buf(text.charAt(i).htmlEscape());
+                                ++i;
+                        }
+                }
+                return buf.get();
         };
 
         P.reset = function() {
                 this.syntax = [];
                 this.parens = [];
-                this.code = this.buffer.code;
                 return this.tokenize();
         };
 
-        P.quickUpdate = function(row) {
-                var changed = Array.hashKeys(this.reset());
-                changed.foreach(function(row){
-                        this.buffer.callHooks("onLineChange", row);
-                }, this);
+        P.quickUpdate = function(offset, delta) {
+                // console.log("offset: %o, delta: %o", offset, delta);
+                if (delta < 0) {
+                        this.syntax.splice(offset, delta);
+                } else if (delta > 0) {
+                        var a = [ offset, 0 ];
+                        delta.times(function(){
+                                this.push(null);
+                        }, a);
+                        this.syntax.splice.apply(this.syntax, a);
+                }
+                this._do_quickUpdate();
+        };
+
+        P._do_quickUpdate = function() {
+                var changed = this.reset(), i = changed.min, n = changed.max;
+                while (i <= n)
+                        this.buffer.callHooks("onLineChange", i++);
         };
 
         P.quickInsertLine = function(row) {
-                this.syntax.splice(row, 0, null);
         };
 
         P.quickDeleteLine = function(row) {
-                this.syntax.splice(row, 1);
         };
 
 });

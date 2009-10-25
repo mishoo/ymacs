@@ -357,9 +357,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._replaceLine = function(row, text) {
                 this.code[row] = text;
                 if (this.__preventUpdates == 0) {
-                        if (this.tokenizer) {
-                                this.tokenizer.quickUpdate(row);
-                        }
                         this.callHooks("onLineChange", row);
                 }
         };
@@ -367,9 +364,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._deleteLine = function(row) {
                 this.code.splice(row, 1);
                 if (this.__preventUpdates == 0) {
-                        if (this.tokenizer) {
-                                this.tokenizer.quickDeleteLine(row);
-                        }
                         this.callHooks("onDeleteLine", row);
                 }
         };
@@ -377,9 +371,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._insertLine = function(row, text) {
                 this.code.splice(row, 0, text);
                 if (this.__preventUpdates == 0) {
-                        if (this.tokenizer) {
-                                this.tokenizer.quickInsertLine(row);
-                        }
                         this.callHooks("onInsertLine", row);
                 }
         };
@@ -519,8 +510,16 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._updateMarkers = function(offset, delta, min) {
                 this.__size = null;
                 this.__code = null;
-                if (this.__undoInProgress == 0)
+                if (this.__undoInProgress == 0) {
                         this.markers.map("editorChange", offset, delta, min || 0);
+                }
+                if (this.tokenizer) {
+                        this.tokenizer.quickUpdate(offset, delta);
+                }
+        };
+
+        // XXX: should we call quickUpdate on the tokenizer here?
+        P._beforeUpdateMarkers = function(offset, delta, min) {
         };
 
         P._saveExcursion = function(cont, preventUpdates) {
