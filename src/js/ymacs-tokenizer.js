@@ -88,12 +88,9 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
         P.lookingAt = function(what) {
                 if (what instanceof RegExp) {
-                        var code = this.buffer.getCode();
-                        var pos = this.position();
-                        what.lastIndex = pos;
-                        var m = what.exec(code);
-                        // console.log("looking for %o in %o from %o", what, code, pos);
-                        return m && m.index == pos && what.lastIndex;
+                        what.lastIndex = this.col;
+                        var m = what.exec(this.code[this.line]);
+                        return m && m.index == this.col && what.lastIndex;
                 } else if (typeof what == "object") {
                         for (i in what)
                                 if (this.lookingAt(i))
@@ -259,21 +256,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                     s = this.syntax[line] || (this.syntax[line] = {}),
                     old = s[col], removed = false;
                 s[col] = info;
-                for (var i = col + 1; i < info.end[1]; ++i) {
-                        if (s[i]) {
-                                removed = true;
-                                delete s[i];
-                        }
-                }
                 return !old || old.type != info.type || old.end[1] != info.end[1] || old.end[0] != info.end[0];
-        };
-
-        P.del_syntax = function(line, col) {
-                var s = this.syntax[line];
-                if (s && s[col]) {
-                        delete s[col];
-                        return true;
-                }
         };
 
         P.tokenize = function() {
@@ -290,11 +273,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                         var tmp = Object.makeCopy(info);
                                         while (i < last) {
                                                 tmp.end = [ i, this.code[i].length ];
-                                                if (this.add_syntax(tmp)) {
+                                                if (this.add_syntax(tmp))
                                                         changes[i] = true;
-                                                        this.syntax[i] = {};
-                                                        this.syntax[i][tmp.begin[1]] = tmp;
-                                                }
                                                 tmp = Object.makeCopy(tmp);
                                                 i++;
                                                 tmp.begin = [ i, 0 ];
@@ -304,9 +284,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                                 changes[i] = true;
                                 }
                         } else {
-                                if (this.del_syntax(this.line, this.col)) {
-                                        changes[this.line] = true;
-                                }
                                 this.next(); // skip characters we didn't match
                         }
                 }
