@@ -55,7 +55,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 // }
                 cont();
                 i++;
-                this.timerUpdate = setTimeout(doit, 1000);
+                this.timerUpdate = setTimeout(doit, 660);
         };
 
         P.next = function() {
@@ -67,7 +67,12 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.lookingAt = function(what) {
-                return this.buffer.code[this.line].substr(this.col, what.length) == what;
+                var line = this.buffer.code[this.line];
+                if (what instanceof RegExp) {
+                        return what.test(line.substr(this.col));
+                } else {
+                        return line.substr(this.col, what.length) == what;
+                }
         };
 
         P.eol = function() {
@@ -113,15 +118,19 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
 
         P.IDENTIFIER_CHARS = "$_0123456789".split("").toHash(true);
         P.IDENTIFIER_START = "$_".split("").toHash(true);
+        P.STRING_CHARS = { '"' : '"', "'" : "'" };
+        P.MLC_STARTER = "/*";
+        P.MLC_STOPPER = "*/";
+        P.COMMENT = "//";
 
         P.readMultilineComment = function() {
                 var line = this.buffer.code[this.line];
                 if (line != null) {
-                        var pos = line.indexOf("*/", this.col);
+                        var pos = line.indexOf(this.MLC_STOPPER, this.col);
                         if (pos >= 0) {
                                 this.onToken(this.col, pos, "mcomment");
-                                this.onToken(pos, pos + 2, "mcomment-stopper");
-                                this.col = pos + 2;
+                                this.onToken(pos, pos + this.MLC_STOPPER.length, "mcomment-stopper");
+                                this.col = pos + this.MLC_STOPPER.length;
                                 return true;
                         } else {
                                 this.onToken(this.col, line.length, "mcomment");
@@ -176,43 +185,27 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                 return true;
         };
 
-        P.readToken = function() {
-                while (!this.eof()) {
-                        var ch = this.peek();
-                        if (!ch) {
-                                // eol
-                                if (!this.eof()) {
-                                        this.makeContinuation(this.readToken);
-                                        return true;
-                                }
-                                return true;
+        P.readNumber = function() {
+                var start = this.col, hasdot = false, hase = false, hex = false, ch, code;
+                while (!this.eof() && !this.eol()) {
+                        ch = this.peek();
+                        code = ch.charCodeAt(0);
+                        if ((code < 48 || code > 57) && !(hex && ((code >= 65 && code <= 70) ||
+                                                                  (code >= 97 && code <= 102)))) {
+                                if (ch == ".") {
+                                        if (hasdot) break;
+                                        hasdot = true;
+                                } else if (ch == "x") {
+                                        if (hex) break;
+                                        hex = true;
+                                } else if (ch == "e") {
+                                        if (hase) break;
+                                        hase = true;
+                                } else break;
                         }
-
-                        if (ch == "\"" || ch == "\'") {
-                                this.onToken(this.col, this.col + 1, "string-starter");
-                                this.col++;
-                                if (!this.readString(ch)) {
-                                        return false;
-                                }
-                        } else if (this.lookingAt("/*")) {
-                                this.onToken(this.col, this.col + 2, "mcomment-starter");
-                                this.col += 2;
-                                if (!this.readMultilineComment()) {
-                                        return false;
-                                }
-                        } else if (this.lookingAt("//")) {
-                                this.onToken(this.col, this.col + 2, "comment-starter");
-                                this.col += 2;
-                                this.readComment();
-                        } else if (this.isIdentifierStart()) {
-                                this.readIdentifier();
-                        }
-
-                        else {
-                                this.onToken(this.col, this.col + 1, "clean");
-                                this.next();
-                        }
+                        this.next();
                 }
+                this.onToken(start, this.col, "number");
                 return true;
         };
 
@@ -226,6 +219,52 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                 if (ch == null)
                         ch = this.peek();
                 return ch && (ch.toUpperCase() != ch.toLowerCase() || ch in this.IDENTIFIER_CHARS);
+        };
+
+        P.readToken = function() {
+                while (!this.eof()) {
+                        var ch = this.peek();
+                        if (!ch) {
+                                // eol
+                                if (!this.eof()) {
+                                        this.makeContinuation(this.readToken);
+                                        return true;
+                                }
+                                return true;
+                        }
+
+                        if (ch in this.STRING_CHARS) {
+                                this.onToken(this.col, this.col + ch.length, "string-starter");
+                                this.col += ch.length;
+                                if (!this.readString(this.STRING_CHARS[ch])) {
+                                        return false;
+                                }
+
+                        } else if (this.lookingAt(this.MLC_STARTER)) {
+                                this.onToken(this.col, this.col + this.MLC_STARTER.length, "mcomment-starter");
+                                this.col += this.MLC_STARTER.length;
+                                if (!this.readMultilineComment()) {
+                                        return false;
+                                }
+
+                        } else if (this.lookingAt(this.COMMENT)) {
+                                this.onToken(this.col, this.col + this.COMMENT.length, "comment-starter");
+                                this.col += this.COMMENT.length;
+                                this.readComment();
+
+                        } else if (this.lookingAt(/^[0-9]|\.[0-9]/)) {
+                                this.readNumber();
+
+                        } else if (this.isIdentifierStart()) {
+                                this.readIdentifier();
+                        }
+
+                        else {
+                                this.onToken(this.col, this.col + 1, "clean");
+                                this.next();
+                        }
+                }
+                return true;
         };
 
         // reserved names

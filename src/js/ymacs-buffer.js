@@ -608,12 +608,25 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 } else {
                         var prop = this._textProperties[row];
                         if (prop) {
-                                prop.r_foreach(function(prop){
-                                        line = line.substring(0, prop.c1) +
-                                                "<span class='" + prop.type + "'>" +
-                                                line.substring(prop.c1, prop.c2).htmlEscape() +
-                                                "</span>" + line.substring(prop.c2);
-                                });
+                                var text = "", last = 0, n = prop.length, i, tmp;
+                                for (i = 0; i < n; ++i) {
+                                        tmp = prop[i];
+                                        if (tmp.c1 > last)
+                                                text += line.substring(last, tmp.c1).htmlEscape();
+                                        text += "<span class='" + tmp.type + "'>" +
+                                                line.substring(tmp.c1, tmp.c2).htmlEscape() +
+                                                "</span>";
+                                        last = tmp.c2;
+                                };
+                                if (last < line.length)
+                                        text += line.substring(last).htmlEscape();
+                                line = text;
+                                // prop.r_foreach(function(prop){
+                                //         line = line.substring(0, prop.c1) +
+                                //                 "<span class='" + prop.type + "'>" +
+                                //                 line.substring(prop.c1, prop.c2).htmlEscape() +
+                                //                 "</span>" + line.substring(prop.c2);
+                                // });
                                 // delete this._textProperties[row];
                         } else {
                                 line = line.htmlEscape();

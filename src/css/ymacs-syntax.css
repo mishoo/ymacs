@@ -5,13 +5,13 @@
 .Ymacs_Frame .constant   { color: rgb(127, 255, 212); font-style: normal;  }
 .Ymacs_Frame .string { color: rgb(220, 160, 80); font-style: normal;  }
 .Ymacs_Frame .string-starter,
-.Ymacs_Frame .string-stopper { color: rgb(255, 80, 80); }
+.Ymacs_Frame .string-stopper { color: #a56500; }
 .Ymacs_Frame .keyword   { color: rgb(0, 255, 255);  font-weight: bold; }
 .Ymacs_Frame .comment,
-.Ymacs_Frame .mcomment { color: rgb(69, 255, 0); font-style: normal; }
+.Ymacs_Frame .mcomment { color: rgb(255, 64, 64); font-style: normal; }
 .Ymacs_Frame .comment-starter,
 .Ymacs_Frame .mcomment-starter,
-.Ymacs_Frame .mcomment-stopper { color: #5b5; }
+.Ymacs_Frame .mcomment-stopper { color: #a50000; }
 .Ymacs_Frame .number { color: yellow; }
 .Ymacs_Frame .operator { color: #fff; }
 .Ymacs_Frame .error { color: #f52; font-weight: bold; }
