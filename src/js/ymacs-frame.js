@@ -137,21 +137,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }
         };
 
-        P._getLineHTML = function(row, highlight) {
-                var line = this.buffer.code[row];
-                if (line == "") {
-                        line = "&nbsp;";
-                } else if (highlight && this.buffer.tokenizer) {
-                        line = this.buffer.tokenizer.highlightLine(row);
-                } else {
-                        line = line.htmlEscape();
-                }
-                return line;
+        P._getLineHTML = function(row) {
+                return this.buffer.formatLineHTML(row);
         };
 
         P._redrawBuffer = function() {
                 this.setContent(this.buffer.code.map(function(line, i){
-                        return this._getLineHTML(i, true).htmlEmbed("div", "line");
+                        return this._getLineHTML(i).htmlEmbed("div", "line");
                 }, this).join(""));
         };
 
@@ -165,7 +157,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 for (var row in this._dirty) {
                         var div = this.getLineDivElement(row);
                         if (div)
-                                div.innerHTML = this._getLineHTML(row, true);
+                                div.innerHTML = this._getLineHTML(row);
+                        delete this._dirty[row];
                 }
         };
 

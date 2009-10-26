@@ -34,7 +34,7 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 // code: lorem
         });
-        editor.tokenizer = new Ymacs_Tokenizer_JS({ buffer: editor });
+        editor.setTokenizer(new Ymacs_Tokenizer_JS({ buffer: editor }));
         editor.setCode("\
 function() {\n\
     // this is a comment\n\
@@ -63,3 +63,14 @@ function() {\n\
 }
 
 DynarchDomUtils.trash($("x-loading"));
+
+
+
+(function() {
+
+        window.prs = new Ymacs_Tokenizer_JS({ buffer: editor });
+        prs.addEventListener("onFoundToken", function(line, start, stop, what) {
+                console.log("%o(%o:%o) : %s", line, start, stop, what);
+        });
+
+})();

@@ -48,7 +48,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         D.DEFAULT_ARGS = {
-                _code: [ "code", null ]
+                _code     : [ "code"      , null ],
+                tokenizer : [ "tokenizer" , null ]
         };
 
         D.FIXARGS = function(args) {
@@ -86,6 +87,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         word_ng       : { test: TEST_UNICODE_WORD_CHAR },
                         paragraph_sep : /\n\s*\n/g
                 };
+                this._tokenizerEvents = {
+                        "onFoundToken": this._on_tokenizerFoundToken.$(this)
+                };
+                this._textProperties = [];
                 this.keymap = [];
                 this._keymap_isearch = new Ymacs_Keymap_ISearch({ editor: this });
                 this.pushKeymap(this.makeDefaultKeymap());
@@ -169,12 +174,23 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__redoQueue = [];
                 this.markers = [ this.caretMarker, this.markMarker ]; // resetting the code invalidates markers
                 this.code = code.split(/\n/);
+                this._textProperties = new Array(this.code.length);
                 if (this.tokenizer) {
                         this.tokenizer.reset();
                 }
                 this.callHooks("onResetCode", this.code);
                 this.caretMarker.setPosition(0, false, true);
                 this.markMarker.setPosition(0, true);
+        };
+
+        P.setTokenizer = function(tok) {
+                if (this.tokenizer != null) {
+                        this.tokenizer.removeEventListener(this._tokenizerEvents);
+                }
+                this.tokenizer = tok;
+                if (tok) {
+                        tok.addEventListener(this._tokenizerEvents);
+                }
         };
 
         P.getCode = function() {
@@ -288,6 +304,16 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this.activeFrame.focus();
         };
 
+        P.getActiveFrame = function() {
+                return this.activeFrame;
+        };
+
+        P.whenActiveFrame = function(cont) {
+                var frame = this.getActiveFrame();
+                if (frame)
+                        return cont.call(this, frame);
+        };
+
         /* -----[ not-so-public API ]----- */
 
         // BEGIN: undo queue
@@ -355,6 +381,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         // END: undo
 
         P._replaceLine = function(row, text) {
+                this._textProperties[row] = null;
                 this.code[row] = text;
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onLineChange", row);
@@ -362,6 +389,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._deleteLine = function(row) {
+                this._textProperties.splice(row, 1);
                 this.code.splice(row, 1);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onDeleteLine", row);
@@ -369,6 +397,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._insertLine = function(row, text) {
+                this._textProperties.splice(row, 0, null);
                 this.code.splice(row, 0, text);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onInsertLine", row);
@@ -562,14 +591,53 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.activeFrame.centerOnCaret();
         };
 
-        P.getActiveFrame = function() {
-                return this.activeFrame;
+        P._on_tokenizerFoundToken = function(row, c1, c2, what) {
+                // console.log("Found token: %o %o %o %o", row, c1, c2, what);
+                if (c2 > c1) {
+                        var a = this._textProperties[row] || (this._textProperties[row] = []);
+                        if (insertProp(a, c1, c2, what) && this.__preventUpdates == 0) {
+                                this.callHooks("onLineChange", row);
+                        }
+                }
         };
 
-        P.whenActiveFrame = function(cont) {
-                var frame = this.getActiveFrame();
-                if (frame)
-                        return cont.call(this, frame);
+        P.formatLineHTML = function(row) {
+                var line = this.code[row];
+                if (line == "") {
+                        line = "\n";
+                } else {
+                        var prop = this._textProperties[row];
+                        if (prop) {
+                                prop.r_foreach(function(prop){
+                                        line = line.substring(0, prop.c1) +
+                                                "<span class='" + prop.type + "'>" +
+                                                line.substring(prop.c1, prop.c2).htmlEscape() +
+                                                "</span>" + line.substring(prop.c2);
+                                });
+                                // delete this._textProperties[row];
+                        } else {
+                                line = line.htmlEscape();
+                        }
+                }
+                return line;
+        };
+
+        function insertProp(a, c1, c2, type) {
+                if (type != "clean") {
+                        for (var i = 0; i < a.length; ++i) {
+                                var tmp = a[i];
+                                if (tmp.c1 == c1) {
+                                        if (tmp.c2 == c2 && tmp.type == type)
+                                                return false;
+                                        a.splice(i, 1, { c1: c1, c2: c2, type: type });
+                                        return true;
+                                }
+                                if (tmp.c1 > c1)
+                                        break;
+                        }
+                        a.splice(i, 0, { c1: c1, c2: c2, type: type });
+                }
+                return true;
         };
 
 });
