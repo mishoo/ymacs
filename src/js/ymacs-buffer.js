@@ -384,11 +384,15 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this._recordChange(1, pos, text.length);
                 var rc = this._positionToRowCol(pos);
                 var lines = text.split(/\n/), i = rc.row, rest = this.code[i].substr(rc.col);
-                this._replaceLine(i, this.code[i].substr(0, rc.col) + lines.shift());
-                lines.foreach(function(text){
-                        this._insertLine(++i, text);
-                }, this);
-                this._replaceLine(i, this.code[i] + rest);
+                if (lines.length > 1) {
+                        this._replaceLine(i, this.code[i].substr(0, rc.col) + lines.shift());
+                        lines.foreach(function(text){
+                                this._insertLine(++i, text);
+                        }, this);
+                        this._replaceLine(i, this.code[i] + rest);
+                } else {
+                        this._replaceLine(i, this.code[i].substr(0, rc.col) + lines[0] + this.code[i].substr(rc.col));
+                }
                 this._updateMarkers(pos, text.length);
         };
 
@@ -516,10 +520,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 if (this.tokenizer) {
                         this.tokenizer.quickUpdate(offset, delta);
                 }
-        };
-
-        // XXX: should we call quickUpdate on the tokenizer here?
-        P._beforeUpdateMarkers = function(offset, delta, min) {
         };
 
         P._saveExcursion = function(cont, preventUpdates) {

@@ -13,3 +13,4 @@
 .Ymacs_Frame .fontlock-multiline-comment   { color: rgb(69, 255, 0); font-style: normal;  font-weight: 500;  font-stretch: normal; text-decoration: none; }
 .Ymacs_Frame .fontlock-number { color: yellow; }
 .Ymacs_Frame .fontlock-operator { color: #fff; }
+.Ymacs_Frame .fontlock-error { color: #f52; font-weight: bold; }

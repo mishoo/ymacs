@@ -26,6 +26,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onResetCode     : this._on_bufferResetCode.$(this),
                         onOverwriteMode : this._on_bufferOverwriteMode.$(this)
                 };
+                this._dirty = {};
                 tmp = this._moreBufferEvents = Object.makeCopy(tmp);
                 tmp.onMessage = this._on_bufferMessage.$(this);
                 var buffer = this.buffer;
@@ -99,9 +100,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.centerOnCaret = function() {
                 var row = this.buffer._rowcol.row,
-                line = this.getLineDivElement(row),
-                div = this.getElement();
+                    line = this.getLineDivElement(row),
+                    div = this.getElement();
                 div.scrollTop = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
+                // this._redrawBuffer();
         };
 
         P.__restartBlinking = function() {
@@ -135,11 +137,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }
         };
 
-        P._getLineHTML = function(row) {
+        P._getLineHTML = function(row, highlight) {
                 var line = this.buffer.code[row];
                 if (line == "") {
                         line = "&nbsp;";
-                } else if (this.buffer.tokenizer) {
+                } else if (highlight && this.buffer.tokenizer) {
                         line = this.buffer.tokenizer.highlightLine(row);
                 } else {
                         line = line.htmlEscape();
@@ -149,7 +151,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._redrawBuffer = function() {
                 this.setContent(this.buffer.code.map(function(line, i){
-                        return this._getLineHTML(i).htmlEmbed("div", "line");
+                        return this._getLineHTML(i, true).htmlEmbed("div", "line");
                 }, this).join(""));
         };
 
@@ -159,9 +161,18 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         /* -----[ event handlers ]----- */
 
-        P._on_bufferLineChange = function(row) {
-                var div = this.getLineDivElement(row);
-                div.innerHTML = this._getLineHTML(row);
+        P._do_bufferLineChange = function() {
+                for (var row in this._dirty) {
+                        var div = this.getLineDivElement(row);
+                        if (div)
+                                div.innerHTML = this._getLineHTML(row, true);
+                }
+        };
+
+        P._on_bufferLineChange = function(row, highlight) {
+                clearTimeout(this._lineChangeTimer);
+                this._dirty[row] = true;
+                this._lineChangeTimer = this._do_bufferLineChange.delayed(0, this);
         };
 
         P._on_bufferInsertLine = function(row) {

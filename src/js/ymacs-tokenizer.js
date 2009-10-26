@@ -64,11 +64,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 this.pos += n;
         };
 
-        P.skipWhitespace = function() {
-                while (!this.eof() && this.peek() in this.WHITE_SPACE)
-                        this.next();
-        };
-
         P.lookingAt = function(what) {
                 if (what instanceof RegExp) {
                         what.lastIndex = this.pos;
@@ -105,22 +100,21 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         esc = "\\";
                 while (!this.eof()) {
                         ch = this.get();
-                        if (ch === end && !escape) {
-                                this.back();
+                        if (ch === end && !escape)
                                 break;
-                        }
                         escape = (ch === esc && !escape);
                 }
+                this.back();
         };
 
         P.consumeLineComment = function() {
-                while (!this.eof() && !this.eol())
-                        this.next();
+                var pos = this.code().indexOf("\n", this.pos);
+                this.pos = pos >= 0 ? pos : this.code().length;
         };
 
         P.consumeMultilineComment = function(end) {
-                while (!(this.eof() || this.lookingAt(end)))
-                        this.next();
+                var pos = this.code().indexOf(end, this.pos);
+                this.pos = pos >= 0 ? pos : this.code().length;
         };
 
         P.consumeNumber = function() {
@@ -167,7 +161,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.readToken = function() {
-                this.skipWhitespace();
                 var type, info = { begin: this.pos };
                 if (this.lookingAt(this.LINE_COMMENT)) {
                         type = "line-comment";
@@ -201,6 +194,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                 type = "constant";
                         else if (id in this.BUILTIN)
                                 type = "builtin";
+                        else
+                                type = "identifier";
 
                 } else if (this.isOperatorChar()) {
                         this.consumeOperator();
@@ -214,13 +209,19 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 } else if (this.peek() in this.CLOSE_PAREN) {
                         var last = this.parens.pop();
                         info.paren = this.get();
+                        type = "close-paren";
                         if (last) {
                                 info.match = last;
                                 last.match = info;
                                 if (this.MATCH_PAREN[last.paren] === info.paren)
                                         info.ok = last.ok = true;
+                                else {
+                                        type += " fontlock-error";
+                                        last.type += " fontlock-error";
+                                }
+                        } else {
+                                type += " fontlock-error";
                         }
-                        type = "close-paren";
 
                 } else if (this.lookingAt(/[0-9]|\.[0-9]/)) {
                         this.consumeNumber();
@@ -229,26 +230,50 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
                 if (type) {
                         info.type = type;
-                        info.end = this.pos;
+                        info.end = this.eof() ? this.code().length : this.pos;
                         info.len = info.end - info.begin;
                         return info;
                 }
         };
 
-        P.tokenize = function() {
-                this.pos = 0;
-                var changes = { min: 0, max: 0 };
-                while (!this.eof()) {
+        P.tokenize = function(from, limit) {
+                this.pos = from || 0;
+                var changes = { min: this.code().length, max: 0 };
+                while (!this.eof() && (!limit || this.pos <= changes.max)) {
+                        while (!this.eof() && this.peek() in this.WHITE_SPACE) {
+                                var old = this.syntax[this.pos];
+                                if (old) {
+                                        changes.min = Math.min(changes.min, old.begin);
+                                        changes.max = Math.max(changes.max, old.end);
+                                }
+                                this.syntax[this.pos] = null;
+                                this.next(); // skip characters we didn't match
+                        }
                         var info = this.readToken();
                         if (info) {
-                                for (var i = info.begin; i < info.end; ++i)
+                                var max = changes.max, min = changes.min, old;
+                                for (var i = info.begin; i < info.end; ++i) {
+                                        old = this.syntax[i];
+                                        if (old) {
+                                                min = Math.min(min, old.begin);
+                                                max = Math.max(max, old.end);
+                                        }
                                         this.syntax[i] = info;
-                                changes.min = Math.min(changes.min, this.buffer._positionToRowCol(info.begin).row);
-                                changes.max = Math.max(changes.max, this.buffer._positionToRowCol(info.end).row);
+                                }
+                                changes.min = Math.min(min, info.begin);
+                                changes.max = Math.max(max, info.end);
                         } else {
+                                var old = this.syntax[this.pos];
+                                if (old) {
+                                        changes.min = Math.min(changes.min, old.begin);
+                                        changes.max = Math.max(changes.max, old.end);
+                                }
+                                this.syntax[this.pos] = null;
                                 this.next(); // skip characters we didn't match
                         }
                 }
+                changes.min = this.buffer._positionToRowCol(changes.min).row;
+                changes.max = this.buffer._positionToRowCol(changes.max).row;
                 return changes;
         };
 
@@ -262,8 +287,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
         P.highlightLine = function(line) {
                 var text = this.code(),
-                    begin = this.buffer._rowColToPosition(line, 0),
-                    end = begin + this.buffer.code[line].length,
+                    lineText = this.buffer.code[line];
+
+                var begin = this.buffer._rowColToPosition(line, 0),
+                    end = begin + lineText.length,
                     buf = String.buffer(),
                     syntax = this.syntax;
                 for (var i = begin; i < end;) {
@@ -283,7 +310,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.reset = function() {
-                this.syntax = [];
+                // this.syntax = [];
                 this.parens = [];
                 return this.tokenize();
         };
@@ -291,21 +318,39 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         P.quickUpdate = function(offset, delta) {
                 // console.log("offset: %o, delta: %o", offset, delta);
                 if (delta < 0) {
-                        this.syntax.splice(offset, delta);
+                        this.syntax.splice(offset, -delta);
+                        offset += delta;
                 } else if (delta > 0) {
                         var a = [ offset, 0 ];
+                        var s = this.syntax[offset];
+                        if (s) {
+                                s.end += delta;
+                                s.len += delta;
+                        }
                         delta.times(function(){
-                                this.push(null);
+                                this.push(s);
                         }, a);
                         this.syntax.splice.apply(this.syntax, a);
                 }
+                if (this._quickUpdateOffset == null)
+                        this._quickUpdateOffset = offset;
+                else
+                        this._quickUpdateOffset = Math.min(offset, this._quickUpdateOffset);
                 this._do_quickUpdate();
         };
 
         P._do_quickUpdate = function() {
-                var changed = this.reset(), i = changed.min, n = changed.max;
+                var offset = this._quickUpdateOffset;
+                var syntax = this.syntax[offset];
+                if (syntax)
+                        offset = syntax.begin;
+                else
+                        offset = this.buffer._rowColToPosition(this.buffer._positionToRowCol(offset).row, 0);
+                var changed = this.tokenize(offset, true), i = changed.min, n = changed.max;
+                console.log(changed);
                 while (i <= n)
-                        this.buffer.callHooks("onLineChange", i++);
+                        this.buffer.callHooks("onLineChange", i++, true);
+                this._quickUpdateOffset = null;
         };
 
         P.quickInsertLine = function(row) {
