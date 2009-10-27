@@ -1,10 +1,53 @@
-DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
-
-        D.DEFAULT_EVENTS = [ "onFoundToken" ];
+DEFINE_CLASS("Ymacs_String_Stream", DlEventProxy, function(D, P){
 
         D.DEFAULT_ARGS = {
                 buffer: [ "buffer", null ]
         };
+
+        D.CONSTRUCT = function() {
+                this.line = 0;
+                this.col = 0;
+        };
+
+        P.nextCol = function() {
+                ++this.col;
+        };
+
+        P.prevCol = function() {
+                --this.col;
+        };
+
+        P.peek = function() {
+                return this.buffer.code[this.line].charAt(this.col);
+        };
+
+        P.lookingAt = function(what) {
+                var line = this.buffer.code[this.line];
+                if (what instanceof RegExp) {
+                        return what.exec(line.substr(this.col));
+                } else {
+                        return line.substr(this.col, what.length) == what;
+                }
+        };
+
+        P.eol = function() {
+                return this.col == this.buffer.code[this.line].length;
+        };
+
+        P.eof = function() {
+                var n = this.buffer.code.length, l = this.line;
+                return l >= n || l == n - 1 && this.eol();
+        };
+
+        P.length = function() {
+                return this.buffer.code.length;
+        };
+
+});
+
+DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
+
+        D.DEFAULT_EVENTS = [ "onFoundToken" ];
 
         D.CONSTRUCT = function() {
                 this.continuations = [];
@@ -40,52 +83,21 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 }
                 var doit = function() {
                         var n = 10;
+                        if (this.length())
+                                this.buffer.ymacs.updateProgress("Coloring", i / this.length());
                         while (i < this.continuations.length) {
                                 if (n == 0) {
                                         this.timerUpdate = setTimeout(doit, 50);
-                                        break;
+                                        return;
                                 }
-                                // if (this.continuations[i]()) {
-                                //         this.stopUpdate();
-                                //         break;
-                                // }
                                 this.continuations[i]();
                                 i++; n--;
                         }
+                        this.buffer.ymacs.updateProgress("Coloring", null);
                 }.$(this);
-                // if (!cont()) {
-                //         i++;
-                //         this.timerUpdate = setTimeout(doit, 1000);
-                // }
                 cont();
                 i++;
                 this.timerUpdate = setTimeout(doit, 660);
-        };
-
-        P.next = function() {
-                this.col++;
-        };
-
-        P.peek = function() {
-                return this.buffer.code[this.line].charAt(this.col);
-        };
-
-        P.lookingAt = function(what) {
-                var line = this.buffer.code[this.line];
-                if (what instanceof RegExp) {
-                        return what.exec(line.substr(this.col));
-                } else {
-                        return line.substr(this.col, what.length) == what;
-                }
-        };
-
-        P.eol = function() {
-                return this.col == this.buffer.code[this.line].length;
-        };
-
-        P.eof = function() {
-                var n = this.buffer.code.length, l = this.line;
-                return l >= n || l == n - 1 && this.eol();
         };
 
         P.makeContinuation = function(cont) {
@@ -171,7 +183,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 var start = this.col, id = "";
                 while (!this.eof() && this.isIdentifierChar()) {
                         id += this.peek();
-                        this.next();
+                        this.nextCol();
                 }
                 var type = id in this.KEYWORDS ? "keyword"
                         : id in this.KEYWORDS_TYPE ? "type"
@@ -212,7 +224,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                         hase = true;
                                 } else break;
                         }
-                        this.next();
+                        this.nextCol();
                 }
                 this.onToken(start, this.col, "number");
                 return true;
@@ -258,7 +270,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         } else if (!this.readMore()) {
                                 // this.onToken(this.col, this.col + 1, "clean");
                                 this.buffer.callHooks("onLineChange", this.line);
-                                this.next();
+                                this.nextCol();
                         }
                 }
                 return true;

@@ -14,7 +14,10 @@
   background-color: #aaa;
 }
 
+.Ymacs_Minibuffer .Ymacs-caret { visibility: hidden; }
+
 .Ymacs_Frame-focus .Ymacs-caret {
+  visibility: visible !important;
   opacity: 1;
   background-color: #f51;
   color: #324;
@@ -23,7 +26,7 @@
 }
 
 .Ymacs_Frame-focus .Ymacs-caret-blink {
-  visibility: hidden;
+  visibility: hidden !important;
 }
 
 .Ymacs_Frame-focus .Ymacs-current-line {
@@ -39,4 +42,15 @@
 .Ymacs_Message_Popup {
   background-color: wheat;
   padding: 10px;
+}
+
+.Ymacs_Modeline {
+  font-family: monospace;
+  white-space: pre;
+  line-height: 17px;
+  background-color: wheat;
+  color: #224;
+}
+.Ymacs_Modeline:after {
+  content: "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
 }

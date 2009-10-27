@@ -10,8 +10,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "onOverwriteMode"
         ];
 
+        D.DEFAULT_ARGS = {
+                _code     : [ "code"      , null ],
+                ymacs     : [ "ymacs"     , null ],
+                tokenizer : [ "tokenizer" , null ]
+        };
+
         var MAX_UNDO_RECORDS = 50000; // XXX: should we not limit?
-        var REQUEUE_REDO = 0;
 
         function MRK(x) {
                 return x instanceof Ymacs_Marker ? x.getPosition() : x;
@@ -45,11 +50,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         D.newCommands = P.newCommands = function(cmds) {
                 Object.merge(this.COMMANDS, cmds);
-        };
-
-        D.DEFAULT_ARGS = {
-                _code     : [ "code"      , null ],
-                tokenizer : [ "tokenizer" , null ]
         };
 
         D.FIXARGS = function(args) {
@@ -95,8 +95,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._keymap_isearch = new Ymacs_Keymap_ISearch({ editor: this });
                 this.pushKeymap(this.makeDefaultKeymap());
                 this.setCode(this._code);
-                this.killRing = [];
-                this.killMasterOfRings = [];
                 this._lastCommandWasKill = 0;
                 delete this["_code"];
         };
@@ -160,6 +158,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.createMarker = function(pos, before, name) {
+                if (pos == null)
+                        pos = this.point();
                 return new Ymacs_Marker({ editor: this, pos: pos, name: name, before: before });
         };
 
@@ -266,10 +266,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.signalInfo(om ? "Insert mode" : "Overwrite mode");
         };
 
+        P.getMinibuffer = function() {
+                return this.ymacs.minibuffer;
+        };
+
         P.setMinibuffer = function(text) {
-                if (this.minibuffer) {
-                        this.minibuffer.setCode(text);
-                        this.minibuffer.cmd("end_of_buffer");
+                if (this.ymacs.minibuffer) {
+                        this.ymacs.minibuffer.setCode(text);
+                        this.ymacs.minibuffer.cmd("end_of_buffer");
                 }
         };
 
@@ -492,13 +496,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 p2 = MRK(p2);
                 var text = this._bufferSubstring(p1, p2);
                 if (!this._lastCommandWasKill) {
-                        if (this.killRing.length && (this.killMasterOfRings.length == 0 ||
-                                                     this.killMasterOfRings.peek().join("") != this.killRing.join("")))
-                                this.killMasterOfRings.push(this.killRing);
-                        this.killRing = [];
+                        this.ymacs.killRingToMaster();
                 }
-                prepend ? this.killRing.unshift(text)
-                        : this.killRing.push(text);
+                this.ymacs.pushToKillRing(text, prepend);
                 if (!noDelete)
                         this._deleteText(p1, p2);
                 this._lastCommandWasKill++;

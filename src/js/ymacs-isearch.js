@@ -8,8 +8,8 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                 "C-s": "isearch_forward",
                 "C-r": "isearch_backward",
                 "BACKSPACE": function() {
-                        if (this.minibuffer.point() > this._isearchContext.mbMark.getPosition()) {
-                                this.minibuffer.cmd("backward_delete_char");
+                        if (this.getMinibuffer().point() > this._isearchContext.mbMark.getPosition()) {
+                                this.getMinibuffer().cmd("backward_delete_char");
                                 this.cmd("goto_char", this._isearchContext.point);
                                 updateIsearch.call(this, this._isearchContext.forward);
                         }
@@ -30,7 +30,7 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         this._isearchContext = {
                                 forward : fw,
                                 point   : this.point(),
-                                mbMark  : this.minibuffer.createMarker(this.minibuffer.point(), true)
+                                mbMark  : this.getMinibuffer().createMarker(null, true)
                         };
                         return true;
                 }
@@ -41,8 +41,8 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                 this._isearchContext.point = this.point();
                 var text = getText(this);
                 if (!/\S/.test(text) && this._isearchLastText) {
-                        this.minibuffer._placeUndoBoundary();
-                        this.minibuffer.cmd("insert", this._isearchLastText);
+                        this.getMinibuffer()._placeUndoBoundary();
+                        this.getMinibuffer().cmd("insert", this._isearchLastText);
                         text = this._isearchLastText;
                 }
                 return doSearch.call(this, text);
@@ -68,7 +68,7 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
                 isearch_get_search_text: function() {
                         if (this._isearchContext) {
-                                return this.minibuffer._bufferSubstring(this._isearchContext.mbMark);
+                                return this.getMinibuffer()._bufferSubstring(this._isearchContext.mbMark);
                         }
                 },
 
@@ -92,15 +92,15 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         var pos2 = this.point();
                         if (pos2 != pos) {
                                 var word = this._bufferSubstring(pos, pos2);
-                                this.minibuffer._placeUndoBoundary();
-                                this.minibuffer.cmd("insert", word.toLowerCase());
+                                this.getMinibuffer()._placeUndoBoundary();
+                                this.getMinibuffer().cmd("insert", word.toLowerCase());
                         }
                 },
 
                 isearch_printing_char: function() {
                         var ev = this.interactiveEvent;
                         if (ev.charCode && !ev.ctrlKey && !ev.altKey) {
-                                this.minibuffer.cmd("self_insert_command", ev);
+                                this.getMinibuffer().cmd("self_insert_command", ev);
                                 var text = getText(this);
                                 this.cmd("goto_char", this._isearchContext.point);
                                 doSearch.call(this, text);

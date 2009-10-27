@@ -5,6 +5,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         D.DEFAULT_ARGS = {
                 highlightCurrentLine : [ "highlightCurrentLine", true ],
                 buffer               : [ "buffer", null ],
+                ymacs                : [ "ymacs", null ],
 
                 // override in DlContainer
                 _scrollBars           : [ "scroll"    , true ],
@@ -206,12 +207,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_focus = function() {
+                this.ymacs.activeFrame = this;
                 this.buffer.activeFrame = this;
                 this.buffer.addEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 
         P._on_blur = function() {
                 this.buffer.activeFrame = null;
+                this.ymacs.activeFrame = null;
                 this.buffer.removeEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 

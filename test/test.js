@@ -28,7 +28,6 @@ Nullam vitae tellus enim, id suscipit nisl. Mauris elementum scelerisque lacus a
 
 try {
         var dlg = new DlDialog({ title: "Ymacs", resizable: true, quitBtn: "destroy" });
-        var layout = new DlLayout({ parent: dlg, outerSpace: 2 });
         var editor = window.editor = new Ymacs_Buffer({
                 // code: info
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
@@ -41,21 +40,10 @@ function() {\n\
     var a = a + 0xFB;\n\
     return \"a string\";\n\
 }\n");
-        var editor_frame = new Ymacs_Frame({ buffer: editor });
-        // var editor_frame2 = new Ymacs_Frame({ buffer: editor });
 
-        var minibuffer = new Ymacs_Buffer({ highlightCurrentLine: false });
-        var minibuffer_frame = new Ymacs_Frame({ buffer: minibuffer });
-        editor.minibuffer = minibuffer;
-
-        layout.packWidget(minibuffer_frame, { pos: "bottom" });
-        layout.packWidget(new DlResizeBar({ horiz: true, widget: minibuffer_frame, invert: true }), { pos: "bottom" });
-        layout.packWidget(editor_frame, { pos: "top", fill: "*" });
-        // layout.packWidget(editor_frame, { pos: "left", fill: "50%" });
-        // layout.packWidget(new DlResizeBar({ widget: editor_frame }), { pos: "left" });
-        // layout.packWidget(editor_frame2, { pos: "right", fill: "*" });
+        var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ editor ] });
+        dlg._focusedWidget = ymacs;
         dlg.setSize({ x: 800, y: 600 });
-        dlg._focusedWidget = editor_frame;
         dlg.show(true);
         dlg.maximize(true);
 } catch(ex) {

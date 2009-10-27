@@ -346,14 +346,13 @@ Ymacs_Buffer.newCommands({
 
         yank: function() {
                 var point = this.point();
-                this._insertText(this.killRing.join(""));
+                this._insertText(this.ymacs.killRingText());
                 this.cmd("set_mark_command", point);
         },
 
         yank_pop: function() {
-                if (/^yank/.test(this.previousCommand) && this.killMasterOfRings.length > 0) {
-                        this.killMasterOfRings.unshift(this.killRing);
-                        this.killRing = this.killMasterOfRings.pop();
+                if (/^yank/.test(this.previousCommand)) {
+                        this.ymacs.rotateKillRing(false);
                         this._deleteText(this.caretMarker, this.markMarker);
                         this.cmd("yank");
                 } else {
@@ -362,9 +361,8 @@ Ymacs_Buffer.newCommands({
         },
 
         yank_shift: function() {
-                if (/^yank/.test(this.previousCommand) && this.killMasterOfRings.length > 0) {
-                        this.killMasterOfRings.push(this.killRing);
-                        this.killRing = this.killMasterOfRings.shift();
+                if (/^yank/.test(this.previousCommand)) {
+                        this.ymacs.rotateKillRing(true);
                         this._deleteText(this.caretMarker, this.markMarker);
                         this.cmd("yank");
                 } else {
@@ -536,6 +534,10 @@ Ymacs_Buffer.newCommands({
 
         bind_variables: function() {
                 return this.withVariables.apply(this, arguments);
+        },
+
+        buffer_substring: function(start, end) {
+                return this._bufferSubstring(start, end);
         }
 
 });
