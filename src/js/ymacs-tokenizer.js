@@ -34,11 +34,15 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         if (cont)
                                 break;
                 }
+                if (!cont) {
+                        this.update(0);
+                        return;
+                }
                 var doit = function() {
                         var n = 10;
                         while (i < this.continuations.length) {
                                 if (n == 0) {
-                                        this.timerUpdate = setTimeout(doit, 100);
+                                        this.timerUpdate = setTimeout(doit, 50);
                                         break;
                                 }
                                 // if (this.continuations[i]()) {
@@ -69,7 +73,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         P.lookingAt = function(what) {
                 var line = this.buffer.code[this.line];
                 if (what instanceof RegExp) {
-                        return what.test(line.substr(this.col));
+                        return what.exec(line.substr(this.col));
                 } else {
                         return line.substr(this.col, what.length) == what;
                 }
@@ -112,17 +116,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 this.callHooks("onFoundToken", this.line, c1, c2, type);
         };
 
-});
-
-DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
-
-        P.IDENTIFIER_CHARS = "$_0123456789".split("").toHash(true);
-        P.IDENTIFIER_START = "$_".split("").toHash(true);
-        P.STRING_CHARS = { '"' : '"', "'" : "'" };
-        P.MLC_STARTER = "/*";
-        P.MLC_STOPPER = "*/";
-        P.COMMENT = "//";
-
         P.readMultilineComment = function() {
                 var line = this.buffer.code[this.line];
                 if (line != null) {
@@ -149,19 +142,23 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                 }
         };
 
-        P.readString = function(end) {
+        P.readString = function(end, className, allowNewline) {
                 var line = this.buffer.code[this.line], pos = this.col, esc = false, ch;
                 while (line != null) {
                         ch = line.charAt(pos);
                         if (!ch) {
                                 // end of line
-                                this.onToken(this.col, pos, "string");
-                                this.makeContinuation(this.readString, end);
-                                return false;
+                                this.onToken(this.col, pos, className);
+                                if (esc || allowNewline) {
+                                        this.makeContinuation(this.readString, end, className, allowNewline);
+                                        return false;
+                                }
+                                this.col = pos;
+                                return true;
                         }
                         if (ch === end && !esc) {
-                                this.onToken(this.col, pos, "string");
-                                this.onToken(pos, pos + 1, "string-stopper");
+                                this.onToken(this.col, pos, className);
+                                this.onToken(pos, pos + 1, className + "-stopper");
                                 this.col = pos + 1;
                                 return true;
                         }
@@ -183,6 +180,18 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                         : "variable";
                 this.onToken(start, this.col, type);
                 return true;
+        };
+
+        P.isIdentifierStart = function(ch) {
+                if (ch == null)
+                        ch = this.peek();
+                return ch && (ch.toUpperCase() != ch.toLowerCase() || ch in this.IDENTIFIER_START);
+        };
+
+        P.isIdentifierChar = function(ch) {
+                if (ch == null)
+                        ch = this.peek();
+                return ch && (ch.toUpperCase() != ch.toLowerCase() || ch in this.IDENTIFIER_CHARS);
         };
 
         P.readNumber = function() {
@@ -209,18 +218,6 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                 return true;
         };
 
-        P.isIdentifierStart = function(ch) {
-                if (ch == null)
-                        ch = this.peek();
-                return ch && (ch.toUpperCase() != ch.toLowerCase() || ch in this.IDENTIFIER_START);
-        };
-
-        P.isIdentifierChar = function(ch) {
-                if (ch == null)
-                        ch = this.peek();
-                return ch && (ch.toUpperCase() != ch.toLowerCase() || ch in this.IDENTIFIER_CHARS);
-        };
-
         P.readToken = function() {
                 while (!this.eof()) {
                         var ch = this.peek();
@@ -236,7 +233,7 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                         if (ch in this.STRING_CHARS) {
                                 this.onToken(this.col, this.col + ch.length, "string-starter");
                                 this.col += ch.length;
-                                if (!this.readString(this.STRING_CHARS[ch])) {
+                                if (!this.readString(this.STRING_CHARS[ch], "string")) {
                                         return false;
                                 }
 
@@ -252,20 +249,34 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
                                 this.col += this.COMMENT.length;
                                 this.readComment();
 
-                        } else if (this.lookingAt(/^[0-9]|\.[0-9]/)) {
+                        } else if (this.lookingAt(this.NUMBER_START)) {
                                 this.readNumber();
 
                         } else if (this.isIdentifierStart()) {
                                 this.readIdentifier();
-                        }
 
-                        else {
-                                this.onToken(this.col, this.col + 1, "clean");
+                        } else if (!this.readMore()) {
+                                // this.onToken(this.col, this.col + 1, "clean");
+                                this.buffer.callHooks("onLineChange", this.line);
                                 this.next();
                         }
                 }
                 return true;
         };
+
+        P.readMore = Function.noop;
+
+});
+
+DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
+
+        P.IDENTIFIER_CHARS = "$_0123456789".split("").toHash(true);
+        P.IDENTIFIER_START = "$_".split("").toHash(true);
+        P.NUMBER_START = /^[0-9]|\.[0-9]/;
+        P.STRING_CHARS = { '"' : '"', "'" : "'" };
+        P.MLC_STARTER = "/*";
+        P.MLC_STOPPER = "*/";
+        P.COMMENT = "//";
 
         // reserved names
 
@@ -279,13 +290,53 @@ super switch synchronized throw \
 throws transient try typeof var void let \
 yield volatile while with".trim().split(/\s+/).toHash(true);
 
-        P.KEYWORDS_TYPE = "boolean byte char double float int long short void".trim().split(/\s+/).toHash(true);
+        P.KEYWORDS_TYPE = "boolean byte char double float int long short void \
+Array Date Function Math Number Object RegExp String".trim().split(/\s+/).toHash(true);
 
         P.KEYWORDS_CONST = "false null undefined Infinity NaN true arguments this".trim().split(/\s+/).toHash(true);
 
-        P.BUILTIN = "$ Array Date Function Infinity Math NaN Number \
-Object Packages RegExp String decodeURI decodeURIComponent \
+        P.BUILTIN = "Infinity NaN \
+Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-parseInt undefined window document".trim().split(/\s+/).toHash(true);
+parseInt undefined window document alert".trim().split(/\s+/).toHash(true);
+
+        P.readLiteralRegexp = function() {
+                return this.readString("/", "regexp");
+        };
+
+        P.readMore = function() {
+                // literal regexp
+                if (this.peek() == "/") {
+                        var pos = this.buffer._rowColToPosition(this.line, this.col), str = this.buffer._bufferSubstring(0, pos);
+                        if (/[\](){},;+\-*=?&:\[][\s\xa0]*$/.test(str)) {
+                                this.onToken(this.col, ++this.col, "regexp-starter");
+                                return this.readLiteralRegexp();
+                        }
+                }
+                return D.BASE.readMore.apply(this, arguments);
+        };
+
+});
+
+DEFINE_CLASS("Ymacs_Tokenizer_JS_DynarchLIB", Ymacs_Tokenizer_JS, function(D, P){
+
+        P.BUILTIN = Object.makeCopy(P.BUILTIN);
+        Object.merge(P.BUILTIN, "DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
+DEFAULT_ARGS DEFAULT_EVENTS \
+FIXARGS CONSTRUCT BEFORE_BASE FINISH_OBJECT_DEF \
+D P $".split(/\s+/).toHash(true));
+
+        P.readIdentifier = function() {
+                var m;
+                // DynarchLIB class name
+                if ((m = this.lookingAt(/^Dl[a-zA-Z0-9$_]+/i))) {
+                        var id = m[0];
+                        if (window[id]) {
+                                this.onToken(this.col, this.col += id.length, "type");
+                                return true;
+                        }
+                }
+                return D.BASE.readIdentifier.apply(this, arguments);
+        };
 
 });

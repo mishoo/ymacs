@@ -517,11 +517,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._rowColToPosition = function(row, col) {
-                var pos = 0, i = 0;
-                while (i < row && i < (this.code.length - 1))
-                        pos += this.code[i++].length + 1; // one for the newline
-                pos += Math.min(col, this.code[i].length);
-                return pos;
+                var pos = 0, i = Math.min(row, this.code.length - 1), n = i;
+                if (i < 0)
+                        return 0;
+                while (--i >= 0)
+                        pos += this.code[i].length + 1; // one for the newline
+                return pos + Math.min(col, this.code[n].length);
         };
 
         P._boundPosition = function(pos) {
@@ -601,6 +602,22 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        function insertProp(a, c1, c2, type) {
+                for (var i = 0; i < a.length; ++i) {
+                        var tmp = a[i];
+                        if (tmp.c1 == c1) {
+                                if (tmp.c2 == c2 && tmp.type == type)
+                                        return false;
+                                a.splice(i, 1, { c1: c1, c2: c2, type: type });
+                                return true;
+                        }
+                        if (tmp.c1 > c1)
+                                break;
+                }
+                a.splice(i, 0, { c1: c1, c2: c2, type: type });
+                return true;
+        };
+
         P.formatLineHTML = function(row) {
                 var line = this.code[row];
                 if (line == "") {
@@ -633,24 +650,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         }
                 }
                 return line;
-        };
-
-        function insertProp(a, c1, c2, type) {
-                if (type != "clean") {
-                        for (var i = 0; i < a.length; ++i) {
-                                var tmp = a[i];
-                                if (tmp.c1 == c1) {
-                                        if (tmp.c2 == c2 && tmp.type == type)
-                                                return false;
-                                        a.splice(i, 1, { c1: c1, c2: c2, type: type });
-                                        return true;
-                                }
-                                if (tmp.c1 > c1)
-                                        break;
-                        }
-                        a.splice(i, 0, { c1: c1, c2: c2, type: type });
-                }
-                return true;
         };
 
 });

@@ -3,15 +3,21 @@
 .Ymacs_Frame .function-name   { color: rgb(135, 206, 250);  font-weight: bold; }
 .Ymacs_Frame .variable-name   { color: rgb(238, 221, 130);  font-weight: bold; }
 .Ymacs_Frame .constant   { color: rgb(127, 255, 212); font-style: normal;  }
+
 .Ymacs_Frame .string { color: rgb(220, 160, 80); font-style: normal;  }
 .Ymacs_Frame .string-starter,
 .Ymacs_Frame .string-stopper { color: #a56500; }
+
+.Ymacs_Frame .regexp { color: rgb(220, 160, 80); font-style: normal;  }
+.Ymacs_Frame .regexp-starter,
+.Ymacs_Frame .regexp-stopper { color: #a56500; }
+
 .Ymacs_Frame .keyword   { color: rgb(0, 255, 255);  font-weight: bold; }
 .Ymacs_Frame .comment,
-.Ymacs_Frame .mcomment { color: rgb(255, 64, 64); font-style: normal; }
+.Ymacs_Frame .mcomment { color: rgb(255, 96, 96); font-style: normal; }
 .Ymacs_Frame .comment-starter,
 .Ymacs_Frame .mcomment-starter,
-.Ymacs_Frame .mcomment-stopper { color: #a50000; }
+.Ymacs_Frame .mcomment-stopper { color: #999; }
 .Ymacs_Frame .number { color: yellow; }
 .Ymacs_Frame .operator { color: #fff; }
 .Ymacs_Frame .error { color: #f52; font-weight: bold; }

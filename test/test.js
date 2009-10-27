@@ -34,7 +34,7 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 // code: lorem
         });
-        editor.setTokenizer(new Ymacs_Tokenizer_JS({ buffer: editor }));
+        editor.setTokenizer(new Ymacs_Tokenizer_JS_DynarchLIB({ buffer: editor }));
         editor.setCode("\
 function() {\n\
     // this is a comment\n\
