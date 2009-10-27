@@ -546,6 +546,9 @@ Ymacs_Buffer.newCommands({
 
 Ymacs_Buffer.newCommands((function(){
 
+        // <XXX>
+        // this should be moved some level up if it proves to be more
+        // generably useful
         function modalTextarea(title, text, cont) {
                 var dlg = this.createDialog({ title   : title,
                                               quitBtn : "destroy",
@@ -562,13 +565,14 @@ Ymacs_Buffer.newCommands((function(){
                 dlg.show(true);
                 entry.select();
         };
+        // </XXX>
 
         return {
 
                 yank_from_operating_system: function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
                                 this.cmd("insert", entry.getValue());
-                                // this.cmd("recenter_top_bottom");
+                                this.cmd.delayed(20, this, "recenter_top_bottom");
                         });
                 },
 
