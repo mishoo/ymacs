@@ -189,9 +189,11 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         : id in this.KEYWORDS_TYPE ? "type"
                         : id in this.KEYWORDS_CONST ? "constant"
                         : id in this.BUILTIN ? "builtin"
-                        : "variable";
-                this.onToken(start, this.col, type);
-                return true;
+                        : null;
+                if (type) {
+                        this.onToken(start, this.col, type);
+                        return true;
+                }
         };
 
         P.isIdentifierStart = function(ch) {
@@ -264,8 +266,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         } else if (this.lookingAt(this.NUMBER_START)) {
                                 this.readNumber();
 
-                        } else if (this.isIdentifierStart()) {
-                                this.readIdentifier();
+                        } else if (this.isIdentifierStart() && this.readIdentifier()) {
 
                         } else if (!this.readMore()) {
                                 // this.onToken(this.col, this.col + 1, "clean");
@@ -284,7 +285,7 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
 
         P.IDENTIFIER_CHARS = "$_0123456789".split("").toHash(true);
         P.IDENTIFIER_START = "$_".split("").toHash(true);
-        P.NUMBER_START = /^[0-9]|\.[0-9]/;
+        P.NUMBER_START = /^[0-9]|^\.[0-9]/;
         P.STRING_CHARS = { '"' : '"', "'" : "'" };
         P.MLC_STARTER = "/*";
         P.MLC_STOPPER = "*/";
@@ -313,14 +314,18 @@ encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
 parseInt undefined window document alert".trim().split(/\s+/).toHash(true);
 
         P.readLiteralRegexp = function() {
-                return this.readString("/", "regexp");
+                var ret = this.readString("/", "regexp"),
+                    m = ret && this.lookingAt(/^[gmsiy]+/);
+                if (m)
+                        this.onToken(this.col, this.col += m[0].length, "regexp-modifier");
+                return ret;
         };
 
         P.readMore = function() {
                 // literal regexp
                 if (this.peek() == "/") {
                         var pos = this.buffer._rowColToPosition(this.line, this.col), str = this.buffer._bufferSubstring(0, pos);
-                        if (/[\](){},;+\-*=?&:\[][\s\xa0]*$/.test(str)) {
+                        if (/[\[({,;+\-*=?&:][\x20\t\n\xa0]*$/.test(str)) {
                                 this.onToken(this.col, ++this.col, "regexp-starter");
                                 return this.readLiteralRegexp();
                         }

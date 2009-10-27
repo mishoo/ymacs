@@ -34,6 +34,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.buffer = null;
                 if (buffer)
                         this.setBuffer(buffer);
+                this.addEventListener("onResize", this.centerOnCaret);
         };
 
         P.initDOM = function() {

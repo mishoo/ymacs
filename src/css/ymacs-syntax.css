@@ -8,9 +8,10 @@
 .Ymacs_Frame .string-starter,
 .Ymacs_Frame .string-stopper { color: #a56500; }
 
-.Ymacs_Frame .regexp { color: rgb(220, 160, 80); font-style: normal;  }
+.Ymacs_Frame .regexp { color: #e4f; font-style: normal;  }
 .Ymacs_Frame .regexp-starter,
-.Ymacs_Frame .regexp-stopper { color: #a56500; }
+.Ymacs_Frame .regexp-stopper,
+.Ymacs_Frame .regexp-modifier { color: #f4c; font-weight: bold; }
 
 .Ymacs_Frame .keyword   { color: rgb(0, 255, 255);  font-weight: bold; }
 .Ymacs_Frame .comment,
