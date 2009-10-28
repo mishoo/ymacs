@@ -114,7 +114,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                         pr.push(i + ": " + Math.round(this.progress[i] * 100) + "%");
                 }
                 if (pr.length > 0) {
-                        ml(" (", pr.join(", "), ")");
+                        ml("(", pr.join(", "), ")");
                 }
                 this.modeline.setContent(ml.get());
         };

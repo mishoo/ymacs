@@ -3,16 +3,16 @@
 DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         D.DEFAULT_ARGS = {
-                highlightCurrentLine : [ "highlightCurrentLine", true ],
-                buffer               : [ "buffer", null ],
-                ymacs                : [ "ymacs", null ],
+                highlightCurrentLine : [ "highlightCurrentLine" , true ],
+                buffer               : [ "buffer"               , null ],
+                ymacs                : [ "ymacs"                , null ],
 
                 // override in DlContainer
-                _scrollBars          : [ "scroll"    , true ],
+                _scrollBars          : [ "scroll"               , true ],
 
                 // override in DlWidget
-                _focusable           : [ "focusable"  , true ],
-                _fillParent          : [ "fillParent" , true ]
+                _focusable           : [ "focusable"            , true ],
+                _fillParent          : [ "fillParent"           , true ]
         };
 
         var BLINK_TIMEOUT = 200;

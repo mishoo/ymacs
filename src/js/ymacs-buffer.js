@@ -250,12 +250,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 }
                         }
                         ++this.inInteractiveCommand;
-                        var ret = func.apply(this, arguments);
-                        --this.inInteractiveCommand;
-                        this.previousCommand = cmd;
-                        this.sameCommandCount++;
-                        this.ensureCaretVisible();
-                        return ret;
+                        try {
+                                return func.apply(this, arguments);
+                        } finally {
+                                --this.inInteractiveCommand;
+                                this.previousCommand = cmd;
+                                this.sameCommandCount++;
+                                this.ensureCaretVisible();
+                        }
                 }.$A(this, args);
         };
 
