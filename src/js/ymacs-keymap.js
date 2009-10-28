@@ -176,6 +176,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-w"                                     : "kill_region",
                 "M-t"                                     : "transpose_words",
                 "C-t"                                     : "transpose_chars",
+                "C-x C-t"                                 : "transpose_lines",
                 "M-w"                                     : "copy_region_as_kill",
                 "M-c"                                     : "capitalize_word",
                 "M-u"                                     : "upcase_word",

@@ -223,8 +223,7 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
-        forward_word: function(x) {
-                if (x == null) x = 1;
+        forward_word: function() {
                 var word = this.syntax.word_ng, end = false;
                 while (!end && !word.test(this.charAt()))
                         if (!this.cmd("forward_char"))
@@ -234,8 +233,7 @@ Ymacs_Buffer.newCommands({
                                 end = true;
         },
 
-        backward_word: function(x) {
-                if (x == null) x = 1;
+        backward_word: function() {
                 var word = this.syntax.word_ng, end = false;
                 while (!end && !word.test(this.charAt(-1)))
                         if (!this.cmd("backward_char"))
@@ -245,7 +243,7 @@ Ymacs_Buffer.newCommands({
                                 end = true;
         },
 
-        forward_paragraph: function(x) {
+        forward_paragraph: function() {
                 this.cmd("forward_whitespace");
                 if (this.cmd("search_forward_regexp", this.syntax.paragraph_sep))
                         this.cmd("goto_char", this.cmd("match_beginning") + 1);
@@ -253,7 +251,7 @@ Ymacs_Buffer.newCommands({
                         this.cmd("end_of_buffer");
         },
 
-        backward_paragraph: function(x) {
+        backward_paragraph: function() {
                 this.cmd("backward_whitespace");
                 if (this.cmd("search_backward_regexp", this.syntax.paragraph_sep))
                         this.cmd("goto_char", this.cmd("match_end") - 1);
@@ -269,23 +267,40 @@ Ymacs_Buffer.newCommands({
                 if (this.syntax.word_ng.test(this.charAt()))
                         this.cmd("forward_word");
 
-                // save next word position
-                var wp1 = this.cmd("save_excursion", function(){
-                        this.cmd("forward_word");
-                        var p1 = this.point();
-                        this.cmd("backward_word");
-                        return [ p1, this.point() ];
-                });
+                // // save next word position
+                // var wp1 = this.cmd("save_excursion", function(){
+                //         this.cmd("forward_word");
+                //         var p1 = this.point();
+                //         this.cmd("backward_word");
+                //         return [ p1, this.point() ];
+                // });
 
-                // save previous word position
-                var wp2 = this.cmd("save_excursion", function(){
-                        this.cmd("backward_word");
-                        var p1 = this.point();
-                        this.cmd("forward_word");
-                        return [ p1, this.point() ];
-                });
+                // // save previous word position
+                // var wp2 = this.cmd("save_excursion", function(){
+                //         this.cmd("backward_word");
+                //         var p1 = this.point();
+                //         this.cmd("forward_word");
+                //         return [ p1, this.point() ];
+                // });
 
-                this.cmd("goto_char", this._swapAreas(wp1.concat(wp2)));
+                // this.cmd("goto_char", this._swapAreas(wp1.concat(wp2)));
+
+                var a = [];
+                this.cmd("forward_word"); a.push(this.point());
+                this.cmd("backward_word"); a.push(this.point());
+                this.cmd("backward_word"); a.push(this.point());
+                this.cmd("forward_word"); a.push(this.point());
+                this.cmd("goto_char", this._swapAreas(a));
+        },
+
+        transpose_lines: function() {
+                var a = [];
+                this.cmd("backward_line");
+                this.cmd("beginning_of_line"); a.push(this.point());
+                this.cmd("end_of_line"); a.push(this.point());
+                this.cmd("forward_char"); a.push(this.point());
+                this.cmd("end_of_line"); a.push(this.point());
+                this.cmd("goto_char", this._swapAreas(a) + 1);
         },
 
         transpose_chars: function() {
@@ -526,7 +541,7 @@ Ymacs_Buffer.newCommands({
                 // no notion of transient region
                 this.cmd("beginning_of_line");
                 var pos = this.point();
-                if (this.cmd("forward_line")) {
+                if (this.cmd("forward_line") || this.cmd("end_of_line")) {
                         this._deleteText(pos, this.point());
                         return true;
                 }

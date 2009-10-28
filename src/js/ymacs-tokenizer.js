@@ -346,7 +346,7 @@ D P $".split(/\s+/).toHash(true));
         P.readIdentifier = function() {
                 var m;
                 // DynarchLIB class name
-                if ((m = this.lookingAt(/^Dl[a-zA-Z0-9$_]+/i))) {
+                if ((m = this.lookingAt(/^Dl[a-zA-Z0-9$_]+/))) {
                         var id = m[0];
                         if (window[id]) {
                                 this.onToken(this.col, this.col += id.length, "type");
