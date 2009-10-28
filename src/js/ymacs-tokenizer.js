@@ -82,9 +82,9 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         return;
                 }
                 var doit = function() {
-                        var n = 10;
-                        if (this.length())
-                                this.buffer.ymacs.updateProgress("Coloring", i / this.length());
+                        var n = 10, len = this.length();
+                        if (len > 0)
+                                this.buffer.ymacs.updateProgress("Coloring", i / len);
                         while (i < this.continuations.length) {
                                 if (n == 0) {
                                         this.timerUpdate = setTimeout(doit, 50);
@@ -110,7 +110,15 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         this.buffer._textProperties[line] = null;
                         return cont.apply(this, args) && this.readToken();
                 }.$(this);
-                this.continuations.splice(line + 1, this.continuations.length);
+                this.continuations.splice(line + 1, this.continuations.length + 1);
+        };
+
+        P.quickInsertLine = function(row, n) {
+                this.continuations.splice(row, this.continuations.length + 1);
+        };
+
+        P.quickDeleteLine = function(row, n) {
+                this.continuations.splice(row, this.continuations.length + 1);
         };
 
         P.quickUpdate = function(offset, delta) {
@@ -118,10 +126,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         offset += delta;
                 var line = this.buffer._positionToRowCol(offset).row;
                 this.update(line);
-        };
-
-        P.highlightLine = function(row) {
-                return this.buffer.code[row].htmlEscape();
         };
 
         P.onToken = function(c1, c2, type) {

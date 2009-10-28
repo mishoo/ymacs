@@ -8,7 +8,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 ymacs                : [ "ymacs", null ],
 
                 // override in DlContainer
-                _scrollBars           : [ "scroll"    , true ],
+                _scrollBars          : [ "scroll"    , true ],
 
                 // override in DlWidget
                 _focusable           : [ "focusable"  , true ],
@@ -160,8 +160,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         var div = this.getLineDivElement(row);
                         if (div)
                                 div.innerHTML = this._getLineHTML(row);
-                        delete this._dirty[row];
                 }
+                this._dirty = {};
         };
 
         P._on_bufferLineChange = function(row, highlight) {

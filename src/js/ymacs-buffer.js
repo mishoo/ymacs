@@ -395,6 +395,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._deleteLine = function(row) {
                 this._textProperties.splice(row, 1);
                 this.code.splice(row, 1);
+                this.tokenizer.quickDeleteLine(row, 1);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onDeleteLine", row);
                 }
@@ -403,6 +404,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._insertLine = function(row, text) {
                 this._textProperties.splice(row, 0, null);
                 this.code.splice(row, 0, text);
+                this.tokenizer.quickInsertLine(row, 1);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onInsertLine", row);
                 }
