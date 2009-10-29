@@ -594,6 +594,7 @@ Ymacs_Buffer.newCommands((function(){
 
                 yank_from_operating_system: function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
+                                this.cmd("set_mark_command");
                                 this.cmd("insert", entry.getValue());
                                 this.cmd.delayed(20, this, "recenter_top_bottom");
                         });

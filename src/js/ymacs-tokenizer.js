@@ -53,7 +53,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.continuations = [];
                 this.line = -1;
                 this.col = 0;
-                this.makeContinuation(this.readToken);
+                this.makeContinuationNofollow(this.readToken);
                 this.timerUpdate = null;
         };
 
@@ -77,37 +77,78 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
 
         P.update = function(line) {
                 this.stopUpdate();
-                var self = this, cont, i = line;
-                for (; i >= 0; --i) {
-                        if ((cont = this.continuations[i]))
-                                break;
-                }
-                if (!cont) {
-                        dlconsole.log("TOKENIZER PROBLEM: no continuation found before line %d!", line);
-                        // XXX: there's a problem here.
-                        return;
-                }
+                var self = this, cont = this.continuations, i = line;
                 var doit = function() {
-                        var n = 10, len = self.length();
+                        var n = 10, len = self.length(), func;
                         if (len > 0)
                                 self.showProgress(i / len);
-                        // note that we can't cache self.continuations
-                        // or self.continuations.length here, because
-                        // each time we call a continuation, another
-                        // one possibly gets pushed into the list.
-                        while (i < self.continuations.length) {
+                        // note that we can't cache continuations.length here, because each time we call a
+                        // continuation, another one possibly gets pushed into the list.
+                        OUTER: while (i < cont.length || cont.length < len) {
+
+                                for (; i >= 0; --i) {
+                                        if ((func = cont[i]))
+                                                break;
+                                }
+
                                 if (n == 0) {
+                                        // put a null after it, if it's not the last one.  this seems to be a good
+                                        // way to remember where we were, in case we are interrupted.  cont[i] will
+                                        // get called on next iteration, which will restore the value that we null
+                                        // out here.
+                                        if (i < cont.length - 1)
+                                                cont[i + 1] = null;
                                         self.timerUpdate = setTimeout(doit, 50);
                                         return;
                                 }
-                                self.continuations[i]();
-                                i++; n--;
+
+                                if (!func)
+                                        return; // something's fishy, we should actually restart here but this will happen in some other part of the code.
+
+                                func();
+
+                                if (self.buffer.lastColoredLine != i &&
+                                    self.buffer.code[i].length > 0 // don't stop on an empty line since they don't trigger onChange events
+                                   ) {
+                                        // If highlighting wasn't affected on some line, we can presumably stop.
+                                        // However, we still need to check if we highlighted all code.  To do this,
+                                        // we test if we have as many continuations as lines of code, and if so, we
+                                        // fast forward to re-highlight the one that is before a non-highlighted
+                                        // line.  This will continue to build continuations, if needed, until all
+                                        // code is colored.
+                                        for (var j = i + 1; j < cont.length - 1; ++j) {
+                                                // note that at i + 1 we cannot have a null continuation, since we
+                                                // just called cont[i].
+                                                if (cont[j + 1] == null) {
+                                                        i = j; // restart from this one
+                                                        continue OUTER;
+                                                }
+                                        }
+                                        // since all continuations were non-null, therefore executed, we could
+                                        // probably stop here, but we need to check if there are enough
+                                        // continuations.
+
+                                        // if (cont.length == len)
+                                        //         return; // XXX: progress
+                                        i = cont.length;
+                                } else
+                                        ++i;
+                                --n;
                         }
+                        // Dude, WTF.  If there still are null continuations here, we should of course handle them.
+                        // Getting tired of this shit.
+                        // for (var j = 0; j < cont.length - 1; ++j) {
+                        //         if (cont[j] && cont[j + 1] == null) {
+                        //                 i = j; // restart from this one
+                        //                 return doit();
+                        //         }
+                        // }
                         self.showProgress(null);
                 };
-                cont();
-                i++;
-                this.timerUpdate = setTimeout(doit, 660);
+                // cont();
+                // i++;
+                // this.timerUpdate = setTimeout(doit, 500);
+                doit();
         };
 
         P.makeContinuation = function(cont) {
@@ -121,14 +162,35 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 }.$(this);
         };
 
-        P.quickInsertLine = function(row, n) {
-                if (this.continuations.length >= row)
-                        this.continuations.splice(row, 0, null);
+        P.makeContinuationNofollow = function(cont) {
+                var line = ++this.line,
+                    col = this.col = 0,
+                    args = Array.$(arguments, 1);
+                this.continuations[line] = function() {
+                        this.line = line;
+                        this.col = col;
+                        return cont.apply(this, args);
+                }.$(this);
         };
 
-        P.quickDeleteLine = function(row, n) {
-                if (this.continuations.length > row)
-                        this.continuations.splice(row, 1);
+        P.quickInsertLine = function(row) {
+                this.stopUpdate();
+                var a = this.continuations;
+                if (a.length >= row) {
+                        if (row < a.length)
+                                a[row] = null; // invalidate next continuation
+                        a.splice(row, 0, null);
+                }
+        };
+
+        P.quickDeleteLine = function(row) {
+                this.stopUpdate();
+                var a = this.continuations;
+                if (a.length > row) {
+                        a.splice(row, 1);
+                        if (row < a.length)
+                                a[row] = null; // invalidate next continuation
+                }
         };
 
         P.quickUpdate = function(offset, delta) {
@@ -250,7 +312,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         if (!ch) {
                                 // eol
                                 if (!this.eof()) {
-                                        this.makeContinuation(this.readToken);
+                                        // standard continuation on the next line
+                                        this.makeContinuationNofollow(this.readToken);
                                         return true;
                                 }
                                 return true;
@@ -323,7 +386,7 @@ Array Date Function Math Number Object RegExp String".trim().split(/\s+/).toHash
         P.BUILTIN = "Infinity NaN \
 Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-parseInt undefined window document alert".trim().split(/\s+/).toHash(true);
+parseInt undefined window document alert prototype constructor".trim().split(/\s+/).toHash(true);
 
         P.readLiteralRegexp = function() {
                 var ret = this.readString("/", "regexp"),
