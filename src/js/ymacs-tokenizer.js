@@ -108,7 +108,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 func();
 
                                 if (self.buffer.lastColoredLine != i &&
-                                    self.buffer.code[i].length > 0 // don't stop on an empty line since they don't trigger onChange events
+                                    // self.buffer.code[i].length > 0 // don't stop on an empty line since they don't trigger onChange events
+                                    self.buffer._textProperties.props[i] && self.buffer._textProperties.props[i].length > 0
                                    ) {
                                         // If highlighting wasn't affected on some line, we can presumably stop.
                                         // However, we still need to check if we highlighted all code.  To do this,
