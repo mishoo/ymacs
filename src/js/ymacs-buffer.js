@@ -90,7 +90,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._tokenizerEvents = {
                         "onFoundToken": this._on_tokenizerFoundToken.$(this)
                 };
-                this._textProperties = [];
+                this._textProperties = new Ymacs_Text_Properties({});
+                this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
                 this.keymap = [];
                 this._keymap_isearch = new Ymacs_Keymap_ISearch({ editor: this });
                 this.pushKeymap(this.makeDefaultKeymap());
@@ -174,7 +175,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__redoQueue = [];
                 this.markers = [ this.caretMarker, this.markMarker ]; // resetting the code invalidates markers
                 this.code = code.split(/\n/);
-                this._textProperties = new Array(this.code.length);
+                this._textProperties.reset();
                 if (this.tokenizer) {
                         this.tokenizer.reset();
                 }
@@ -387,7 +388,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         // END: undo
 
         P._replaceLine = function(row, text) {
-                this._textProperties[row] = null;
+                // this._textProperties[row] = null; // XXX: OLD
                 this.code[row] = text;
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onLineChange", row);
@@ -395,7 +396,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._deleteLine = function(row) {
-                this._textProperties.splice(row, 1);
+                this._textProperties.deleteLine(row);
                 this.code.splice(row, 1);
                 this.tokenizer.quickDeleteLine(row, 1);
                 if (this.__preventUpdates == 0) {
@@ -404,7 +405,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._insertLine = function(row, text) {
-                this._textProperties.splice(row, 0, null);
+                this._textProperties.insertLine(row);
                 this.code.splice(row, 0, text);
                 this.tokenizer.quickInsertLine(row, 1);
                 if (this.__preventUpdates == 0) {
@@ -597,63 +598,21 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._on_tokenizerFoundToken = function(row, c1, c2, what) {
-                // console.log("Found token: %o %o %o %o", row, c1, c2, what);
-                if (c2 > c1) {
-                        var a = this._textProperties[row] || (this._textProperties[row] = []);
-                        if (insertProp(a, c1, c2, what) && this.__preventUpdates == 0) {
-                                this.callHooks("onLineChange", row);
+                if (this.__preventUpdates == 0) {
+                        if (what) {
+                                this._textProperties.addLineProps(row, c1, c2, "css", what);
+                        } else {
+                                this._textProperties.removeLineProps(row, c1, c2, "css");
                         }
                 }
         };
 
-        function insertProp(a, c1, c2, type) {
-                for (var i = 0; i < a.length; ++i) {
-                        var tmp = a[i];
-                        if (tmp.c1 == c1) {
-                                if (tmp.c2 == c2 && tmp.type == type)
-                                        return false;
-                                a.splice(i, 1, { c1: c1, c2: c2, type: type });
-                                return true;
-                        }
-                        if (tmp.c1 > c1)
-                                break;
-                }
-                a.splice(i, 0, { c1: c1, c2: c2, type: type });
-                return true;
+        P._on_textPropertiesChange = function(row) {
+                this.callHooks("onLineChange", row);
         };
 
         P.formatLineHTML = function(row) {
-                var line = this.code[row];
-                if (line == "") {
-                        line = "\n";
-                } else {
-                        var prop = this._textProperties[row];
-                        if (prop) {
-                                var text = "", last = 0, n = prop.length, i, tmp;
-                                for (i = 0; i < n; ++i) {
-                                        tmp = prop[i];
-                                        if (tmp.c1 > last)
-                                                text += line.substring(last, tmp.c1).htmlEscape();
-                                        text += "<span class='" + tmp.type + "'>" +
-                                                line.substring(tmp.c1, tmp.c2).htmlEscape() +
-                                                "</span>";
-                                        last = tmp.c2;
-                                };
-                                if (last < line.length)
-                                        text += line.substring(last).htmlEscape();
-                                line = text;
-                                // prop.r_foreach(function(prop){
-                                //         line = line.substring(0, prop.c1) +
-                                //                 "<span class='" + prop.type + "'>" +
-                                //                 line.substring(prop.c1, prop.c2).htmlEscape() +
-                                //                 "</span>" + line.substring(prop.c2);
-                                // });
-                                // delete this._textProperties[row];
-                        } else {
-                                line = line.htmlEscape();
-                        }
-                }
-                return line;
+                return this._textProperties.getLineHTML(row, this.code[row]);
         };
 
 });

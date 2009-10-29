@@ -34,8 +34,7 @@ Ymacs_Buffer.newCommands({
         },
 
         beginning_of_line: function() {
-                var rc = this._rowcol;
-                return this._repositionCaret(this._rowColToPosition(rc.row, 0));
+                return this._repositionCaret(this._rowColToPosition(this._rowcol.row, 0));
         },
 
         back_to_indentation: function() {

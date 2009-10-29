@@ -107,7 +107,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
-                        this.buffer._textProperties[line] = null;
+                        // this.buffer._textProperties[line] = null; XXX: OLD
                         return cont.apply(this, args) && this.readToken();
                 }.$(this);
                 this.continuations.splice(line + 1, this.continuations.length + 1);
@@ -194,10 +194,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         : id in this.KEYWORDS_CONST ? "constant"
                         : id in this.BUILTIN ? "builtin"
                         : null;
-                if (type) {
-                        this.onToken(start, this.col, type);
-                        return true;
-                }
+                this.onToken(start, this.col, type);
+                return true;
         };
 
         P.isIdentifierStart = function(ch) {
@@ -273,8 +271,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         } else if (this.isIdentifierStart() && this.readIdentifier()) {
 
                         } else if (!this.readMore()) {
-                                // this.onToken(this.col, this.col + 1, "clean");
-                                this.buffer.callHooks("onLineChange", this.line);
+                                this.onToken(this.col, this.col + 1, null);
                                 this.nextCol();
                         }
                 }
