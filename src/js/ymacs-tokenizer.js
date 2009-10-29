@@ -69,6 +69,12 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.timerUpdate = null;
         };
 
+        P.showProgress = function(prog) {
+                this.buffer.whenYmacs(function(ymacs){
+                        ymacs.updateProgress("Coloring", prog);
+                });
+        };
+
         P.update = function(line) {
                 this.stopUpdate();
                 var self = this, cont, i = line;
@@ -83,9 +89,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 }
                 var doit = function() {
                         var n = 10, len = self.length();
-                        if (len > 0) self.buffer.whenYmacs(function(ymacs){
-                                ymacs.updateProgress("Coloring", i / len);
-                        });
+                        if (len > 0)
+                                self.showProgress(i / len);
                         // note that we can't cache self.continuations
                         // or self.continuations.length here, because
                         // each time we call a continuation, another
@@ -98,9 +103,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 self.continuations[i]();
                                 i++; n--;
                         }
-                        self.buffer.whenYmacs(function(ymacs){
-                                ymacs.updateProgress("Coloring", null);
-                        });
+                        self.showProgress(null);
                 };
                 cont();
                 i++;
@@ -114,18 +117,18 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
-                        // this.buffer._textProperties[line] = null; XXX: OLD
                         return cont.apply(this, args) && this.readToken();
                 }.$(this);
-                this.continuations.splice(line + 1, this.continuations.length + 1);
         };
 
         P.quickInsertLine = function(row, n) {
-                this.continuations.splice(row, this.continuations.length + 1);
+                if (this.continuations.length >= row)
+                        this.continuations.splice(row, 0, null);
         };
 
         P.quickDeleteLine = function(row, n) {
-                this.continuations.splice(row, this.continuations.length + 1);
+                if (this.continuations.length > row)
+                        this.continuations.splice(row, 1);
         };
 
         P.quickUpdate = function(offset, delta) {

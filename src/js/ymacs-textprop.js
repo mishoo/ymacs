@@ -65,13 +65,17 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
         // class="$css"> ... </span> tags in the given text.  "css"
         // properties are added as the tokenizer parses the code and
         // sends onFoundToken events.
+        //
+        // XXX: this function will be called a lot of times; seems
+        // complicated for what it does. Figure out if it can be
+        // optimized.
         P.getLineHTML = function(row, text) {
                 var p = this.props[row];
                 if (text == "")
                         return "<br/>";
                 if (!p || p.length == 0)
                         return text.htmlEscape();
-                var i = 0, n = text.length, last = null, o, ret = "";
+                var i = 0, n = text.length, last = null, o, ret = "", ch;
                 while (i < n) {
                         o = p[i];
                         o = o && o.css;
@@ -84,7 +88,16 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
                                 ret += "</span>";
                         }
                         last = o;
-                        ret += text.charAt(i);
+                        // XXX: Should have used a hash rather than a
+                        // switch statement?  I'm not sure but I have
+                        // a feeling that switch is faster.
+                        ch = text.charAt(i);
+                        switch (ch) {
+                            case "<" : ret += "&lt;"; break;
+                            case ">" : ret += "&gt;"; break;
+                            case "&" : ret += "&amp;"; break;
+                            default  : ret += ch; break;
+                        }
                         ++i;
                 }
                 if (last)
@@ -93,16 +106,3 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
         };
 
 });
-
-// function test_tx(){
-//         var text = "check this out";
-//         var tp = new Ymacs_Text_Properties({});
-//         tp.addLineProps(0, 6, 10, "css", "keyword");
-//         tp.addLineProps(0, 11, 14, "css", "crap");
-//         tp.addLineProps(0, 0, 5, "css", "test");
-//         tp.addLineProps(0, 2, 3, "css", null);
-//         console.time("test");
-//         text = tp.getLineHTML(0, text);
-//         console.timeEnd("test");
-//         console.log(text);
-// };
