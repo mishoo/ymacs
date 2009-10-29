@@ -79,6 +79,14 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         }
                 },
 
+                isearch_forward_regexp: function() {
+                        this.signalError("Not implemented, but should be easy.  Volunteers?");
+                },
+
+                isearch_backward_regexp: function() {
+                        this.signalError("Not implemented, but should be easy.  Volunteers?");
+                },
+
                 isearch_backward: function() {
                         if (!initIsearch.call(this, false)) {
                                 if (!updateIsearch.call(this, false))

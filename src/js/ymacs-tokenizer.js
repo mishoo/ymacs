@@ -71,31 +71,37 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
 
         P.update = function(line) {
                 this.stopUpdate();
-                var cont, i = line;
+                var self = this, cont, i = line;
                 for (; i >= 0; --i) {
                         if ((cont = this.continuations[i]))
                                 break;
                 }
                 if (!cont) {
-                        console.log("TOKENIZER PROBLEM: no continuation found before line %d!", line);
+                        dlconsole.log("TOKENIZER PROBLEM: no continuation found before line %d!", line);
                         // XXX: there's a problem here.
-                        this.update(0);
                         return;
                 }
                 var doit = function() {
-                        var n = 10, len = this.length();
-                        if (len > 0)
-                                this.buffer.ymacs.updateProgress("Coloring", i / len);
-                        while (i < this.continuations.length) {
+                        var n = 10, len = self.length();
+                        if (len > 0) self.buffer.whenYmacs(function(ymacs){
+                                ymacs.updateProgress("Coloring", i / len);
+                        });
+                        // note that we can't cache self.continuations
+                        // or self.continuations.length here, because
+                        // each time we call a continuation, another
+                        // one possibly gets pushed into the list.
+                        while (i < self.continuations.length) {
                                 if (n == 0) {
-                                        this.timerUpdate = setTimeout(doit, 50);
+                                        self.timerUpdate = setTimeout(doit, 50);
                                         return;
                                 }
-                                this.continuations[i]();
+                                self.continuations[i]();
                                 i++; n--;
                         }
-                        this.buffer.ymacs.updateProgress("Coloring", null);
-                }.$(this);
+                        self.buffer.whenYmacs(function(ymacs){
+                                ymacs.updateProgress("Coloring", null);
+                        });
+                };
                 cont();
                 i++;
                 this.timerUpdate = setTimeout(doit, 660);

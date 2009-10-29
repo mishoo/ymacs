@@ -189,6 +189,8 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-s"                                     : "center_line",
                 "C-s"                                     : "isearch_forward",
                 "C-r"                                     : "isearch_backward",
+                "M-C-s"                                   : "isearch_forward_regexp",
+                "M-C-r"                                   : "isearch_backward_regexp",
 
                 // necessary evil
                 "C-S-y"                                   : "yank_from_operating_system",

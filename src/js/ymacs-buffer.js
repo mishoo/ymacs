@@ -271,19 +271,18 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.getMinibuffer = function() {
-                return this.ymacs.minibuffer;
+                return this.whenYmacs(function(ymacs) { return ymacs.minibuffer; });
         };
 
         P.setMinibuffer = function(text) {
-                if (this.ymacs.minibuffer) {
-                        this.ymacs.minibuffer.setCode(text);
-                        this.ymacs.minibuffer.cmd("end_of_buffer");
-                }
+                this.whenMinibuffer(function(mb){
+                        mb.setCode(text);
+                        mb.cmd("end_of_buffer");
+                });
         };
 
         P.ensureCaretVisible = function() {
-                if (this.activeFrame)
-                        this.activeFrame.ensureCaretVisible();
+                this.whenActiveFrame("ensureCaretVisible");
         };
 
         P.cmd = function(cmd) {
@@ -316,10 +315,46 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return this.activeFrame;
         };
 
+        // This function receives a string and a continuation.  If
+        // there is an object property or variable named $what, then
+        // $cont is called in the context of this object and given the
+        // value of $what as first argument.  The returned value is
+        // passed back to caller.
+        //
+        // The continuation can also be a string, in which case it's
+        // assumed to be a method in the value of $what, thus called
+        // on it.
+        //
+        // This is a bit messy, but should work well as long as we
+        // don't use the same name for both an object property and a
+        // variable in this.variables.  Otherwise, the property takes
+        // precedence.
+        P.when = function(what, cont) {
+                what = this[what] || this.getq(what);
+                if (what != null) {
+                        if (cont instanceof Function)
+                                return cont.call(this, what);
+                        else
+                                return what[cont]();
+                }
+        };
+
         P.whenActiveFrame = function(cont) {
-                var frame = this.getActiveFrame();
-                if (frame)
-                        return cont.call(this, frame);
+                return this.when("activeFrame", cont);
+        };
+
+        P.whenYmacs = function(cont) {
+                return this.when("ymacs", cont);
+        };
+
+        P.whenMinibuffer = function(cont) {
+                // In fact, we should move when() into some base
+                // object... but which one?  JS doesn't have multiple
+                // inheritance, though we could easily "invent" it.
+                return this.whenYmacs(function(ymacs){
+                        if (ymacs.minibuffer)
+                                return cont.call(this, ymacs.minibuffer);
+                });
         };
 
         /* -----[ not-so-public API ]----- */
