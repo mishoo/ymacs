@@ -609,6 +609,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._on_textPropertiesChange = function(row) {
+                this.lastColoredLine = row;
                 this.callHooks("onLineChange", row);
         };
 

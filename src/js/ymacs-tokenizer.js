@@ -71,13 +71,14 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
 
         P.update = function(line) {
                 this.stopUpdate();
-                var cont;
-                for (var i = line; i >= 0; --i) {
-                        cont = this.continuations[line];
-                        if (cont)
+                var cont, i = line;
+                for (; i >= 0; --i) {
+                        if ((cont = this.continuations[i]))
                                 break;
                 }
                 if (!cont) {
+                        console.log("TOKENIZER PROBLEM: no continuation found before line %d!", line);
+                        // XXX: there's a problem here.
                         this.update(0);
                         return;
                 }
@@ -337,6 +338,11 @@ parseInt undefined window document alert".trim().split(/\s+/).toHash(true);
 
 });
 
+// the JS_DynarchLIB tokenizer recognizes and highlights some
+// constructs that are widely used in DL.  DynarchLIB class names are
+// also recognized, so long as they are actually loaded (i.e. DlWidget
+// is highlighted as type only if window.DlWidget exists).  Not sure
+// this was a good idea.
 DEFINE_CLASS("Ymacs_Tokenizer_JS_DynarchLIB", Ymacs_Tokenizer_JS, function(D, P){
 
         P.BUILTIN = Object.makeCopy(P.BUILTIN);
