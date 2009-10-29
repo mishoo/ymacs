@@ -15,7 +15,16 @@ Ymacs_Buffer.newCommands({
         forward_line: function(x) {
                 if (x == null) x = 1;
                 var rc = this._rowcol;
-                return this._repositionCaret(this._rowColToPosition(rc.row + x, rc.col));
+                if (!/^(forward|backward)_line$/.test(this.previousCommand)) {
+                        this.setq("line_movement_requested_col", rc.col);
+                }
+                var ret = this._repositionCaret(
+                        this._rowColToPosition(rc.row + x,
+                                               Math.max(rc.col,
+                                                        this.getq("line_movement_requested_col")))); // starting to look like Lisp, eh?
+                if (!ret)
+                        this.setq("line_movement_requested_col", rc.col);
+                return ret;
         },
 
         backward_line: function(x) {

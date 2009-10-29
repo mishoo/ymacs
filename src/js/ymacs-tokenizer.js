@@ -178,7 +178,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 this.col = pos + 1;
                                 return true;
                         }
-                        esc = (ch === "\\" && !esc);
+                        esc = (ch === this.ESCAPE_CHAR && !esc);
                         ++pos;
                 };
         };
@@ -288,6 +288,7 @@ DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
         P.IDENTIFIER_START = "$_".split("").toHash(true);
         P.NUMBER_START = /^[0-9]|^\.[0-9]/;
         P.STRING_CHARS = { '"' : '"', "'" : "'" };
+        P.ESCAPE_CHAR = "\\";
         P.MLC_STARTER = "/*";
         P.MLC_STOPPER = "*/";
         P.COMMENT = "//";

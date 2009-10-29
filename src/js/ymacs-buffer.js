@@ -73,9 +73,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.currentCommand = null;
                 this.inInteractiveCommand = 0;
                 this.variables = {
-                        case_fold_search : true,
-                        fill_column      : 78,
-                        tab_width        : 8
+                        case_fold_search            : true,
+                        line_movement_requested_col : 0,
+                        fill_column                 : 78,
+                        tab_width                   : 8
                 };
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
