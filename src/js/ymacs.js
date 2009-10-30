@@ -100,7 +100,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         };
 
         P.updateProgress = function(name, val) {
-                if (val == 1 || val == null)
+                if (val == null)
                         delete this.progress[name];
                 else
                         this.progress[name] = val;
@@ -111,12 +111,12 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 var ml = String.buffer("--Ymacs--");
                 var pr = [];
                 for (var i in this.progress) {
-                        pr.push(i + ": " + Math.round(this.progress[i] * 100) + "%");
+                        pr.push(i + ": " + this.progress[i]);
                 }
                 if (pr.length > 0) {
                         ml("(", pr.join(", "), ")");
                 }
-                this.modeline.setContent(ml.get());
+                this.modeline.setContent(ml.get().htmlEscape());
         };
 
 });

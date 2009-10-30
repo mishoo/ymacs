@@ -334,17 +334,22 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 if (what != null) {
                         if (cont instanceof Function)
                                 return cont.call(this, what);
-                        else
-                                return what[cont]();
+                        else {
+                                return what[cont].apply(what, Array.$(arguments, 2));
+                        }
                 }
         };
 
-        P.whenActiveFrame = function(cont) {
-                return this.when("activeFrame", cont);
+        P.whenActiveFrame = function() {
+                var a = Array.$(arguments);
+                a.unshift("activeFrame");
+                return this.when.apply(this, a);
         };
 
-        P.whenYmacs = function(cont) {
-                return this.when("ymacs", cont);
+        P.whenYmacs = function() {
+                var a = Array.$(arguments);
+                a.unshift("ymacs");
+                return this.when.apply(this, a);
         };
 
         P.whenMinibuffer = function(cont) {
@@ -432,8 +437,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._deleteLine = function(row) {
-                this._textProperties.deleteLine(row);
                 this.code.splice(row, 1);
+                this._textProperties.deleteLine(row);
                 this.tokenizer.quickDeleteLine(row);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onDeleteLine", row);
@@ -441,8 +446,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._insertLine = function(row, text) {
-                this._textProperties.insertLine(row);
                 this.code.splice(row, 0, text);
+                this._textProperties.insertLine(row);
                 this.tokenizer.quickInsertLine(row);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onInsertLine", row);
@@ -630,7 +635,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._centerOnCaret = function() {
-                this.activeFrame.centerOnCaret();
+                this.whenActiveFrame("centerOnCaret");
         };
 
         P._on_tokenizerFoundToken = function(row, c1, c2, what) {

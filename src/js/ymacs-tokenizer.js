@@ -55,6 +55,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.col = 0;
                 this.makeContinuationNofollow(this.readToken);
                 this.timerUpdate = null;
+                this.currentUpdate = null;
+                this.stoppedUpdates = [];
         };
 
         P.reset = function() {
@@ -66,89 +68,73 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
 
         P.stopUpdate = function() {
                 clearTimeout(this.timerUpdate);
+                if (this.currentUpdate != null) {
+                        this.stoppedUpdates.push(this.currentUpdate);
+                }
                 this.timerUpdate = null;
+                this.currentUpdate = null;
+                this.showProgress(null);
         };
 
-        P.showProgress = function(prog) {
+        P.showProgress = function(line) {
                 this.buffer.whenYmacs(function(ymacs){
-                        ymacs.updateProgress("Coloring", prog);
-                });
+                        var progress, len;
+                        if (line != null) {
+                                len = this.length();
+                                progress = Math.round(100 * line / len) + "% [" + line + " of " + len + "]";
+                        }
+                        ymacs.updateProgress("Coloring", progress);
+                }.$(this));
         };
 
         P.update = function(line) {
+                // console.log("starting on line %d", line);
                 this.stopUpdate();
-                var self = this, cont = this.continuations, i = line;
+                var cont = this.continuations, n;
                 var doit = function() {
-                        var n = 10, len = self.length(), func;
-                        if (len > 0)
-                                self.showProgress(i / len);
-                        // note that we can't cache continuations.length here, because each time we call a
-                        // continuation, another one possibly gets pushed into the list.
-                        OUTER: while (i < cont.length || cont.length < len) {
+                        var func;
+                        n = 15;
+                        while (line < cont.length) {
+                                while (line >= 0 && !(func = cont[line]))
+                                        --line;
+                                if (line < 0) {
+                                        // console.log("Something's fishy: couldn't find any previous continuation");
+                                        this.currentUpdate = null;
+                                        return this.stopUpdate();
+                                }
+                                func();
+                                this.stoppedUpdates.remove(line);
 
-                                for (; i >= 0; --i) {
-                                        if ((func = cont[i]))
-                                                break;
+                                var nextCont = cont[line + 1];
+                                var canStop = !nextCont || (nextCont.multiline == func.multiline);
+                                if (canStop &&
+                                    this.buffer.lastColoredLine != line &&
+                                    cont.length == this.length() &&
+                                    (line >= this.length() || this.buffer.code[line].length > 0) &&
+                                    cont.grep(function(c) { return c == null }).length == 0) {
+                                        // console.log("Stopping on %s", line < this.length() ? this.buffer.code[line] : "EOF");
+                                        // console.log("Continuations: %d, length: %d", cont.length, this.length());
+                                        break;
                                 }
 
-                                if (n == 0) {
-                                        // put a null after it, if it's not the last one.  this seems to be a good
-                                        // way to remember where we were, in case we are interrupted.  cont[i] will
-                                        // get called on next iteration, which will restore the value that we null
-                                        // out here.
-                                        if (i < cont.length - 1)
-                                                cont[i + 1] = null;
-                                        self.timerUpdate = setTimeout(doit, 50);
+                                ++line;
+                                --n;
+                                if (n == 0 && line < cont.length) {
+                                        // DEBUG
+                                        // this.buffer.whenActiveFrame("centerOnLine", line);
+                                        this.currentUpdate = line;
+                                        this.timerUpdate = setTimeout(doit, 50);
+                                        this.showProgress(line);
                                         return;
                                 }
-
-                                if (!func)
-                                        return; // something's fishy, we should actually restart here but this will happen in some other part of the code.
-
-                                func();
-
-                                if (self.buffer.lastColoredLine != i &&
-                                    // self.buffer.code[i].length > 0 // don't stop on an empty line since they don't trigger onChange events
-                                    self.buffer._textProperties.props[i] && self.buffer._textProperties.props[i].length > 0
-                                   ) {
-                                        // If highlighting wasn't affected on some line, we can presumably stop.
-                                        // However, we still need to check if we highlighted all code.  To do this,
-                                        // we test if we have as many continuations as lines of code, and if so, we
-                                        // fast forward to re-highlight the one that is before a non-highlighted
-                                        // line.  This will continue to build continuations, if needed, until all
-                                        // code is colored.
-                                        for (var j = i + 1; j < cont.length - 1; ++j) {
-                                                // note that at i + 1 we cannot have a null continuation, since we
-                                                // just called cont[i].
-                                                if (cont[j + 1] == null) {
-                                                        i = j; // restart from this one
-                                                        continue OUTER;
-                                                }
-                                        }
-                                        // since all continuations were non-null, therefore executed, we could
-                                        // probably stop here, but we need to check if there are enough
-                                        // continuations.
-
-                                        // if (cont.length == len)
-                                        //         return; // XXX: progress
-                                        i = cont.length;
-                                } else
-                                        ++i;
-                                --n;
                         }
-                        // Dude, WTF.  If there still are null continuations here, we should of course handle them.
-                        // Getting tired of this shit.
-                        // for (var j = 0; j < cont.length - 1; ++j) {
-                        //         if (cont[j] && cont[j + 1] == null) {
-                        //                 i = j; // restart from this one
-                        //                 return doit();
-                        //         }
-                        // }
-                        self.showProgress(null);
-                };
-                // cont();
-                // i++;
-                // this.timerUpdate = setTimeout(doit, 500);
+                        this.currentUpdate = null;
+                        this.stopUpdate();
+                        if (this.stoppedUpdates.length > 0) {
+                                this.stoppedUpdates.sort();
+                                this.update(this.stoppedUpdates.shift());
+                        }
+                }.$(this);
                 doit();
         };
 
@@ -156,10 +142,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 var line = ++this.line,
                     col = this.col = 0,
                     args = Array.$(arguments, 1);
-                this.continuations[line] = function() {
+                return this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
-                        return cont.apply(this, args) && this.readToken();
+                        return cont.apply(this, args) && this.line == line && this.readToken();
                 }.$(this);
         };
 
@@ -167,7 +153,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 var line = ++this.line,
                     col = this.col = 0,
                     args = Array.$(arguments, 1);
-                this.continuations[line] = function() {
+                return this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
                         return cont.apply(this, args);
@@ -175,7 +161,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         };
 
         P.quickInsertLine = function(row) {
-                this.stopUpdate();
                 var a = this.continuations;
                 if (a.length >= row) {
                         if (row < a.length)
@@ -185,7 +170,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         };
 
         P.quickDeleteLine = function(row) {
-                this.stopUpdate();
                 var a = this.continuations;
                 if (a.length > row) {
                         a.splice(row, 1);
@@ -198,6 +182,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 if (delta < 0)
                         offset += delta;
                 var line = this.buffer._positionToRowCol(offset).row;
+                if (line > 0)
+                        --line;
                 this.update(line);
         };
 
@@ -216,7 +202,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 return true;
                         } else {
                                 this.onToken(this.col, line.length, "mcomment");
-                                this.makeContinuation(this.readMultilineComment);
+                                this.makeContinuation(this.readMultilineComment).multiline = true;
                                 return false;
                         }
                 }
@@ -239,7 +225,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 // end of line
                                 this.onToken(this.col, pos, className);
                                 if (esc || allowNewline) {
-                                        this.makeContinuation(this.readString, end, className, allowNewline);
+                                        this.makeContinuation(this.readString, end, className, allowNewline).multiline = true;
                                         return false;
                                 }
                                 this.col = pos;

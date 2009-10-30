@@ -101,9 +101,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.centerOnCaret = function() {
-                var row = this.buffer._rowcol.row,
-                    line = this.getLineDivElement(row),
-                    div = this.getElement();
+                this.centerOnLine(this.buffer._rowcol.row);
+        };
+
+        P.centerOnLine = function(row) {
+                var line = this.getLineDivElement(row), div = this.getElement();
                 div.scrollTop = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
                 // this._redrawBuffer();
         };
