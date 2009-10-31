@@ -1,3 +1,5 @@
+/* general stuff */
+
 .Ymacs_Frame .type { color: #87ceeb; font-weight: bold; }
 .Ymacs_Frame .builtin   { color: rgb(176, 196, 222); }
 .Ymacs_Frame .function-name   { color: rgb(135, 206, 250);  font-weight: bold; }
@@ -22,3 +24,14 @@
 .Ymacs_Frame .number { color: yellow; }
 .Ymacs_Frame .operator { color: #fff; }
 .Ymacs_Frame .error { color: #f52; font-weight: bold; }
+
+/* XML mode */
+.Ymacs_Frame .xml-open-tag { color: rgb(0, 255, 255); font-weight: bold; }
+.Ymacs_Frame .xml-close-tag { color: rgb(0, 255, 255); }
+.Ymacs_Frame .xml-attribute { color: rgb(176, 196, 222); }
+.Ymacs_Frame .xml-entity-starter,
+.Ymacs_Frame .xml-entity-stopper { color: #f4c; }
+.Ymacs_Frame .xml-entity { color: #e4f; font-style: normal;  }
+.Ymacs_Frame .xml-shorttag-slash { color: #f51; }
+.Ymacs_Frame .xml-open-bracket,
+.Ymacs_Frame .xml-close-bracket { color: #bac; }

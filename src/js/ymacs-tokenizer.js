@@ -49,12 +49,27 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
 
         D.DEFAULT_EVENTS = [ "onFoundToken" ];
 
+        P.KEYWORDS = {};
+        P.KEYWORDS_TYPE = {};
+        P.KEYWORDS_CONST = {};
+        P.KEYWORDS_BUILTIN = {};
+
+        P.IDENTIFIER_CHARS = "$_0123456789".split("").toHash(true);
+        P.IDENTIFIER_START = "$_".split("").toHash(true);
+        P.NUMBER_START = /^[0-9]|^\.[0-9]/;
+        P.STRING_CHARS = { '"' : '"', "'" : "'" };
+        P.ESCAPE_CHAR = "\\";
+        P.MLC_STARTER = null;
+        P.MLC_STOPPER = null;
+        P.COMMENT = null;
+
         D.CONSTRUCT = function() {
                 this.continuations = [];
                 this.line = -1;
                 this.col = 0;
-                this.makeContinuationNofollow(this.defaultReader);
+                this.nextReader = this.readToken;
                 this.timerUpdate = null;
+                this.makeContinuationNofollow(this.nextReader);
         };
 
         P.reset = function() {
@@ -84,10 +99,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         P.update = function(line) {
                 this.stopUpdate();
                 var cont = this.continuations, n;
-                var doit = function(timeout) {
+                var doit = function(timeout, howMany) {
                         var func;
-                        n = 10;
-                        while (line < cont.length) {
+                        n = howMany || 10;
+                        while (line < cont.length || cont.length < this.length()) {
                                 while (line >= 0 && !(func = cont[line]))
                                         --line;
                                 if (line < 0)
@@ -105,17 +120,19 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         }
                         this.stopUpdate();
                 }.$(this);
-                doit(500);
+                doit(500, 2);
         };
 
         P.makeContinuation = function(cont) {
                 var line = ++this.line,
-                    col = this.col = 0,
-                    args = Array.$(arguments, 1);
+                    col  = this.col = 0,
+                    args = Array.$(arguments, 1),
+                    reader = this.nextReader;
                 return this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
-                        return cont.apply(this, args) && this.line == line && this.defaultReader();
+                        this.nextReader = reader;
+                        return cont.apply(this, args) && this.line == line && this.nextReader();
                 }.$(this);
         };
 
@@ -164,7 +181,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 return true;
                         } else {
                                 this.onToken(this.col, line.length, "mcomment");
-                                this.makeContinuation(this.readMultilineComment).multiline = true;
+                                this.makeContinuation(this.readMultilineComment);
                                 return false;
                         }
                 }
@@ -187,7 +204,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                 // end of line
                                 this.onToken(this.col, pos, className);
                                 if (esc || allowNewline) {
-                                        this.makeContinuation(this.readString, end, className, allowNewline).multiline = true;
+                                        this.makeContinuation(this.readString, end, className, allowNewline);
                                         return false;
                                 }
                                 this.col = pos;
@@ -213,7 +230,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 var type = id in this.KEYWORDS ? "keyword"
                         : id in this.KEYWORDS_TYPE ? "type"
                         : id in this.KEYWORDS_CONST ? "constant"
-                        : id in this.BUILTIN ? "builtin"
+                        : id in this.KEYWORDS_BUILTIN ? "builtin"
                         : defaultType;
                 this.onToken(start, this.col, type);
                 return true;
@@ -275,14 +292,14 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                                         return false;
                                 }
 
-                        } else if (this.lookingAt(this.MLC_STARTER)) {
+                        } else if (this.MLC_STARTER && this.lookingAt(this.MLC_STARTER)) {
                                 this.onToken(this.col, this.col + this.MLC_STARTER.length, "mcomment-starter");
                                 this.col += this.MLC_STARTER.length;
                                 if (!this.readMultilineComment()) {
                                         return false;
                                 }
 
-                        } else if (this.lookingAt(this.COMMENT)) {
+                        } else if (this.COMMENT && this.lookingAt(this.COMMENT)) {
                                 this.onToken(this.col, this.col + this.COMMENT.length, "comment-starter");
                                 this.col += this.COMMENT.length;
                                 this.readComment();
@@ -300,8 +317,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 }
                 return true;
         };
-
-        P.defaultReader = P.readToken;
 
         P.readMore = Function.noop;
 

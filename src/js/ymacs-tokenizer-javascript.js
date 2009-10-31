@@ -1,10 +1,5 @@
 DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
 
-        P.IDENTIFIER_CHARS = "$_0123456789".split("").toHash(true);
-        P.IDENTIFIER_START = "$_".split("").toHash(true);
-        P.NUMBER_START = /^[0-9]|^\.[0-9]/;
-        P.STRING_CHARS = { '"' : '"', "'" : "'" };
-        P.ESCAPE_CHAR = "\\";
         P.MLC_STARTER = "/*";
         P.MLC_STOPPER = "*/";
         P.COMMENT = "//";
@@ -26,7 +21,7 @@ Array Date Function Math Number Object RegExp String".trim().split(/\s+/).toHash
 
         P.KEYWORDS_CONST = "false null undefined Infinity NaN true arguments this".trim().split(/\s+/).toHash(true);
 
-        P.BUILTIN = "Infinity NaN \
+        P.KEYWORDS_BUILTIN = "Infinity NaN \
 Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
 parseInt undefined window document alert prototype constructor".trim().split(/\s+/).toHash(true);
@@ -60,8 +55,8 @@ parseInt undefined window document alert prototype constructor".trim().split(/\s
 // this was a good idea.
 DEFINE_CLASS("Ymacs_Tokenizer_JS_DynarchLIB", Ymacs_Tokenizer_JS, function(D, P){
 
-        P.BUILTIN = Object.makeCopy(P.BUILTIN);
-        Object.merge(P.BUILTIN, "DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
+        P.KEYWORDS_BUILTIN = Object.makeCopy(P.KEYWORDS_BUILTIN);
+        Object.merge(P.KEYWORDS_BUILTIN, "DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
 DEFAULT_ARGS DEFAULT_EVENTS \
 FIXARGS CONSTRUCT BEFORE_BASE FINISH_OBJECT_DEF \
 D P $".split(/\s+/).toHash(true));

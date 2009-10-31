@@ -33,13 +33,18 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 // code: lorem
         });
-        editor.setTokenizer(new Ymacs_Tokenizer_JS_DynarchLIB({ buffer: editor }));
+        editor.setTokenizer(new Ymacs_Tokenizer_XML({ buffer: editor }));
         editor.setCode("\
-function() {\n\
-    // this is a comment\n\
-    var a = a + 0xFB;\n\
-    return \"a string\";\n\
-}\n");
+<html>\n\
+  <head>\n\
+    <title>Ymacs -- Open Source Source Code Editor. :-p</title>\n\
+  </head>\n\
+  <body style=\"margin: 1em auto; width: 80%\"\n\
+        id=\"foo\">\n\
+    <h1 class=\"PageTitle\">Cool, isn't it?</h1>\n\
+  </body>\n\
+</html>\
+");
 
         var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ editor ] });
         dlg._focusedWidget = ymacs;
