@@ -184,7 +184,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "F11"                                     : "nuke_trailing_whitespace",
                 "TAB"                                     : "indent_line",
                 "M-q"                                     : "fill_paragraph",
-                "C-/ && C-x u && C-_"                     : "undo",
+                "C-/ && C-x u && C-_ && C-z"              : "undo",
                 "INSERT"                                  : "overwrite_mode",
                 "M-s"                                     : "center_line",
                 "C-s"                                     : "isearch_forward",

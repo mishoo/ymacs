@@ -75,7 +75,8 @@ DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
                                 }
                         }
                         else if (this.lookingAt(/^<\x2f/)) {
-                                this.onToken(this.col, this.col += 2, "xml-open-bracket");
+                                this.onToken(this.col, ++this.col, "xml-open-bracket");
+                                this.onToken(this.col, ++this.col, "xml-shorttag-slash");
                                 this.readEndTag();
                         }
                         else if (ch == "<") {
@@ -88,6 +89,9 @@ DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
                                 this.onToken(this.col, ++this.col, "xml-entity-starter");
                                 this.onToken(this.col, this.col += m[0].length - 2, "xml-entity");
                                 this.onToken(this.col, ++this.col, "xml-entity-stopper");
+                        }
+                        else if (ch == "&") {
+                                this.onToken(this.col, ++this.col, "error");
                         }
                         else if (!this.readMore()) {
                                 this.onToken(this.col, this.col + 1, null);
