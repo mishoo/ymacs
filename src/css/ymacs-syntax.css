@@ -23,7 +23,7 @@
 .Ymacs_Frame .mcomment-stopper { color: #999; }
 .Ymacs_Frame .number { color: yellow; }
 .Ymacs_Frame .operator { color: #fff; }
-.Ymacs_Frame .error { color: #f52; font-weight: bold; }
+.Ymacs_Frame .error { color: #ff0; background-color: #c00; font-weight: bold; }
 
 /* XML mode */
 .Ymacs_Frame .xml-open-tag { color: rgb(0, 255, 255); font-weight: bold; }

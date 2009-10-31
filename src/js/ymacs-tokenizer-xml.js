@@ -2,9 +2,6 @@
 
 DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
 
-        // XXX: we should more closely resemble this:
-        // http://www.w3.org/TR/REC-xml/#NT-NameStartChar
-
         P.IDENTIFIER_START = Object.makeCopy(P.IDENTIFIER_START);
         Object.merge(P.IDENTIFIER_START, {
                 ":" : true
@@ -33,10 +30,7 @@ DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
                                 this.onToken(this.col, ++this.col, "xml-close-bracket");
                                 return true;
                         }
-                        else if (this.isIdentifierStart() &&
-                                   this.lookingAt(/^[^\s]+\s*=/) &&
-                                   this.readIdentifier("xml-attribute")) {
-                                // nothing here, readIdentifier does the job
+                        else if (this.isIdentifierStart() && this.readIdentifier("xml-attribute")) {
                         }
                         else if (ch in this.STRING_CHARS) {
                                 this.onToken(this.col, this.col + ch.length, "string-starter");
@@ -47,9 +41,12 @@ DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
                                 }
                                 this.nextReader = this.readToken;
                         }
+                        else if (ch != "!" && ch != "=" && !/\s/.test(ch)) {
+                                // anything else not allowed here
+                                this.onToken(this.col, ++this.col, "error");
+                        }
                         else {
-                                this.onToken(this.col, this.col + 1, null);
-                                this.nextCol();
+                                this.onToken(this.col, ++this.col, null);
                         }
                 };
         };

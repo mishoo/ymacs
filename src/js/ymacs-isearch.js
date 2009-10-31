@@ -18,7 +18,7 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
         };
 
         D.CONSTRUCT = function() {
-                this.defaultHandler = this.makeHandler(this.editor.COMMANDS["isearch_printing_char"], "isearch_printing_char");
+                this.defaultHandler = this.makeHandler(this.buffer.COMMANDS["isearch_printing_char"], "isearch_printing_char");
                 this.defineKeys(D.KEYS);
         };
 

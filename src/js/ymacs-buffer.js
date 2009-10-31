@@ -94,7 +94,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._textProperties = new Ymacs_Text_Properties({});
                 this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
                 this.keymap = [];
-                this._keymap_isearch = new Ymacs_Keymap_ISearch({ editor: this });
+                this._keymap_isearch = new Ymacs_Keymap_ISearch({ buffer: this });
                 this.pushKeymap(this.makeDefaultKeymap());
                 this.setCode(this._code);
                 this._lastCommandWasKill = 0;
@@ -148,7 +148,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.makeDefaultKeymap = function() {
-                return new Ymacs_Keymap_Emacs({ editor: this });
+                return new Ymacs_Keymap_Emacs({ buffer: this });
         };
 
         P.signalError = function(text) {

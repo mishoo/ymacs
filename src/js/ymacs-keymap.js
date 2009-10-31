@@ -10,7 +10,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
 
         D.DEFAULT_ARGS = {
                 definitions : [ "definitions" , null ],
-                editor      : [ "editor"      , null ]
+                buffer      : [ "buffer"      , null ]
         };
 
         D.FIXARGS = function(args) {
@@ -19,7 +19,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         };
 
         D.CONSTRUCT = function() {
-                this.defaultHandler = this.makeHandler(this.editor.COMMANDS["self_insert_command"], "self_insert_command");
+                this.defaultHandler = this.makeHandler(this.buffer.COMMANDS["self_insert_command"], "self_insert_command");
                 this.currentPrefix = null;
                 this.currentKeys = [];
         };
@@ -65,7 +65,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                         modifiers.push("C");
                 if (ev.altKey)
                         modifiers.push("M");
-                if (ev.shiftKey && ev.charCode && /^[a-zA-Z0-9]$/.test(key))
+                if (ev.shiftKey && (ev.charCode && /^[a-zA-Z0-9]$/.test(key) || ev.keyCode))
                         modifiers.push("S");
                 modifiers.sort();
                 modifiers = modifiers.join("-");
@@ -87,7 +87,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                         }, this);
                 } else {
                         if (typeof func == "string")
-                                func = this.editor.COMMANDS[func];
+                                func = this.buffer.COMMANDS[func];
                         key = key[0].trim();
                         var dfn = this.definitions;
                         if (key.indexOf(" ") >= 0) {
@@ -112,7 +112,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         };
 
         P.makeHandler = function(func, cmd, args) {
-                return this.editor.makeInteractiveHandler(func, cmd, args);
+                return this.buffer.makeInteractiveHandler(func, cmd, args);
         };
 
         P.handleKeyEvent = function(ev) {
@@ -129,7 +129,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 }
                 if (this.currentPrefix && !def) {
                         this.currentPrefix = null;
-                        this.editor.signalError(this.currentKeys.join(" ") + " is undefined");
+                        this.buffer.signalError(this.currentKeys.join(" ") + " is undefined");
                         this.currentKeys = [];
                         return true;
                 }
