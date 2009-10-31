@@ -55,8 +55,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.col = 0;
                 this.makeContinuationNofollow(this.readToken);
                 this.timerUpdate = null;
-                this.currentUpdate = null;
-                this.stoppedUpdates = [];
         };
 
         P.reset = function() {
@@ -68,12 +66,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
 
         P.stopUpdate = function() {
                 clearTimeout(this.timerUpdate);
-                if (this.currentUpdate != null) {
-                        this.stoppedUpdates.push(this.currentUpdate);
-                }
                 this.timerUpdate = null;
-                this.currentUpdate = null;
-                this.showProgress(null);
+                // this.showProgress(null);
         };
 
         P.showProgress = function(line) {
@@ -88,54 +82,30 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         };
 
         P.update = function(line) {
-                // console.log("starting on line %d", line);
                 this.stopUpdate();
                 var cont = this.continuations, n;
-                var doit = function() {
+                var doit = function(timeout) {
                         var func;
-                        n = 15;
+                        n = 10;
                         while (line < cont.length) {
                                 while (line >= 0 && !(func = cont[line]))
                                         --line;
-                                if (line < 0) {
-                                        // console.log("Something's fishy: couldn't find any previous continuation");
-                                        this.currentUpdate = null;
-                                        return this.stopUpdate();
-                                }
-                                func();
-                                this.stoppedUpdates.remove(line);
-
-                                var nextCont = cont[line + 1];
-                                var canStop = !nextCont || (nextCont.multiline == func.multiline);
-                                if (canStop &&
-                                    this.buffer.lastColoredLine != line &&
-                                    cont.length == this.length() &&
-                                    (line >= this.length() || this.buffer.code[line].length > 0) &&
-                                    cont.grep(function(c) { return c == null }).length == 0) {
-                                        // console.log("Stopping on %s", line < this.length() ? this.buffer.code[line] : "EOF");
-                                        // console.log("Continuations: %d, length: %d", cont.length, this.length());
+                                if (line < 0)
                                         break;
-                                }
-
+                                func();
                                 ++line;
                                 --n;
-                                if (n == 0 && line < cont.length) {
+                                if (n == 0) {
                                         // DEBUG
                                         // this.buffer.whenActiveFrame("centerOnLine", line);
-                                        this.currentUpdate = line;
-                                        this.timerUpdate = setTimeout(doit, 50);
-                                        this.showProgress(line);
+                                        this.timerUpdate = setTimeout(doit, timeout || 50);
+                                        // this.showProgress(line);
                                         return;
                                 }
                         }
-                        this.currentUpdate = null;
                         this.stopUpdate();
-                        if (this.stoppedUpdates.length > 0) {
-                                this.stoppedUpdates.sort();
-                                this.update(this.stoppedUpdates.shift());
-                        }
                 }.$(this);
-                doit();
+                doit(500);
         };
 
         P.makeContinuation = function(cont) {
@@ -161,21 +131,13 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         };
 
         P.quickInsertLine = function(row) {
-                var a = this.continuations;
-                if (a.length >= row) {
-                        if (row < a.length)
-                                a[row] = null; // invalidate next continuation
-                        a.splice(row, 0, null);
-                }
+                // invalidate next continuations
+                this.continuations.splice(row, this.continuations.length + 1);
         };
 
         P.quickDeleteLine = function(row) {
-                var a = this.continuations;
-                if (a.length > row) {
-                        a.splice(row, 1);
-                        if (row < a.length)
-                                a[row] = null; // invalidate next continuation
-                }
+                // invalidate next continuations
+                this.continuations.splice(row, this.continuations.length + 1);
         };
 
         P.quickUpdate = function(offset, delta) {
