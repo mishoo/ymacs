@@ -22,6 +22,18 @@ Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
 parseInt undefined window document alert prototype constructor".qw();
 
+        function isLetter(ch) {
+                return ch.toLowerCase() != ch.toUpperCase();
+        };
+
+        function isNameStart(ch) {
+                return ch && (isLetter(ch) || /^[_$]$/.test(ch));
+        };
+
+        function isNameChar(ch) {
+                return ch && (isLetter(ch) || /^[0-9_$]$/.test(ch));
+        };
+
         function JS_PARSER(KEYWORDS, KEYWORDS_TYPE, KEYWORDS_CONST, KEYWORDS_BUILTIN, stream, tok) {
 
                 var $cont = [],
@@ -29,18 +41,6 @@ parseInt undefined window document alert prototype constructor".qw();
 
                 function foundToken(c1, c2, type) {
                         tok.onToken(stream.line, c1, c2, type);
-                };
-
-                function isLetter(ch) {
-                        return ch.toLowerCase() != ch.toUpperCase();
-                };
-
-                function isNameStart(ch) {
-                        return ch && (isLetter(ch) || /^[_$]$/.test(ch));
-                };
-
-                function isNameChar(ch) {
-                        return ch && (isLetter(ch) || /^[0-9_$]$/.test(ch));
                 };
 
                 function readName() {
@@ -56,22 +56,6 @@ parseInt undefined window document alert prototype constructor".qw();
                         return ch && { line: stream.line, c1: col, c2: stream.col, id: name };
                 };
 
-                function readString(end, type) {
-                        var ch, esc = false, start = stream.col;
-                        while (!stream.eol()) {
-                                ch = stream.peek();
-                                if (ch === end && !esc) {
-                                        $cont.pop();
-                                        foundToken(start, stream.col, type);
-                                        foundToken(stream.col, ++stream.col, type + "-stopper");
-                                        return;
-                                }
-                                esc = !esc && ch === "\\";
-                                stream.nextCol();
-                        }
-                        foundToken(start, stream.col, type);
-                };
-
                 function readComment(type, end) {
                         var line = stream.lineText(), pos = line.indexOf(end);
                         if (pos >= 0) {
@@ -85,10 +69,25 @@ parseInt undefined window document alert prototype constructor".qw();
                         }
                 };
 
+                function readString(end, type) {
+                        var ch, esc = false, start = stream.col;
+                        while (!stream.eol()) {
+                                ch = stream.peek();
+                                if (ch === end && !esc) {
+                                        $cont.pop();
+                                        foundToken(start, stream.col, type);
+                                        foundToken(stream.col, ++stream.col, type + "-stopper");
+                                        return true;
+                                }
+                                esc = !esc && ch === "\\";
+                                stream.nextCol();
+                        }
+                        foundToken(start, stream.col, type);
+                };
+
                 function readLiteralRegexp() {
-                        readString("/", "regexp");
-                        var m = stream.lookingAt(/^[gmsiy]+/);
-                        if (m)
+                        var m;
+                        if (readString("/", "regexp") && (m = stream.lookingAt(/^[gmsiy]+/)))
                                 foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
                 };
 
@@ -113,8 +112,7 @@ parseInt undefined window document alert prototype constructor".qw();
                                 foundToken(stream.col, stream.col += m[0].length, "number");
                         }
                         else if (isNameStart(ch) && (name = readName())) {
-                                var type =
-                                        name.id in KEYWORDS ? "keyword"
+                                var type = name.id in KEYWORDS ? "keyword"
                                         : name.id in KEYWORDS_TYPE ? "type"
                                         : name.id in KEYWORDS_CONST ? "constant"
                                         : name.id in KEYWORDS_BUILTIN ? "builtin"

@@ -571,7 +571,7 @@ Ymacs_Buffer.newCommands((function(){
 
         // <XXX>
         // this should be moved some level up if it proves to be more
-        // generably useful
+        // generally useful
         function modalTextarea(title, text, cont) {
                 var dlg = this.createDialog({ title   : title,
                                               quitBtn : "destroy",
