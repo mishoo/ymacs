@@ -1,12 +1,8 @@
-DEFINE_CLASS("Ymacs_Tokenizer_JS", Ymacs_Tokenizer, function(D, P){
+// @require ymacs-tokenizer.js
 
-        P.MLC_STARTER = "/*";
-        P.MLC_STOPPER = "*/";
-        P.COMMENT = "//";
+(function(){
 
-        // reserved names
-
-        P.KEYWORDS = "abstract break case catch class const \
+        var KEYWORDS = "abstract break case catch class const \
 continue debugger default delete do else \
 enum export extends final finally for \
 function goto if implements import in \
@@ -14,64 +10,158 @@ instanceof interface native new package \
 private protected public return static \
 super switch synchronized throw \
 throws transient try typeof var void let \
-yield volatile while with".trim().split(/\s+/).toHash(true);
+yield volatile while with".qw();
 
-        P.KEYWORDS_TYPE = "boolean byte char double float int long short void \
-Array Date Function Math Number Object RegExp String".trim().split(/\s+/).toHash(true);
+        var KEYWORDS_TYPE = "boolean byte char double float int long short void \
+Array Date Function Math Number Object RegExp String".qw();
 
-        P.KEYWORDS_CONST = "false null undefined Infinity NaN true arguments this".trim().split(/\s+/).toHash(true);
+        var KEYWORDS_CONST = "false null undefined Infinity NaN true arguments this".qw();
 
-        P.KEYWORDS_BUILTIN = "Infinity NaN \
+        var KEYWORDS_BUILTIN = "Infinity NaN \
 Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-parseInt undefined window document alert prototype constructor".trim().split(/\s+/).toHash(true);
+parseInt undefined window document alert prototype constructor".qw();
 
-        P.readLiteralRegexp = function() {
-                var ret = this.readString("/", "regexp"),
-                    m = ret && this.lookingAt(/^[gmsiy]+/);
-                if (m)
-                        this.onToken(this.col, this.col += m[0].length, "regexp-modifier");
-                return ret;
-        };
+        function JS_PARSER(KEYWORDS, KEYWORDS_TYPE, KEYWORDS_CONST, KEYWORDS_BUILTIN, stream, tok) {
 
-        P.readMore = function() {
-                // literal regexp
-                if (this.peek() == "/") {
-                        var pos = this.buffer._rowColToPosition(this.line, this.col), str = this.buffer._bufferSubstring(0, pos);
-                        if (/[\[({,;+\-*=?&:][\x20\t\n\xa0]*$/.test(str)) {
-                                this.onToken(this.col, ++this.col, "regexp-starter");
-                                return this.readLiteralRegexp();
+                var $cont = [],
+                    PARSER = { next: next, copy: copy };
+
+                function foundToken(c1, c2, type) {
+                        tok.onToken(stream.line, c1, c2, type);
+                };
+
+                function isLetter(ch) {
+                        return ch.toLowerCase() != ch.toUpperCase();
+                };
+
+                function isNameStart(ch) {
+                        return ch && (isLetter(ch) || /^[_$]$/.test(ch));
+                };
+
+                function isNameChar(ch) {
+                        return ch && (isLetter(ch) || /^[0-9_$]$/.test(ch));
+                };
+
+                function readName() {
+                        var col = stream.col, ch = stream.get(),
+                            name = ch;
+                        while (!stream.eol()) {
+                                ch = stream.peek();
+                                if (!isNameChar(ch))
+                                        break;
+                                name += ch;
+                                stream.nextCol();
                         }
-                }
-                return D.BASE.readMore.apply(this, arguments);
+                        return ch && { line: stream.line, c1: col, c2: stream.col, id: name };
+                };
+
+                function readString(end, type) {
+                        var ch, esc = false, start = stream.col;
+                        while (!stream.eol()) {
+                                ch = stream.peek();
+                                if (ch === end && !esc) {
+                                        $cont.pop();
+                                        foundToken(start, stream.col, type);
+                                        foundToken(stream.col, ++stream.col, type + "-stopper");
+                                        return;
+                                }
+                                esc = !esc && ch === "\\";
+                                stream.nextCol();
+                        }
+                        foundToken(start, stream.col, type);
+                };
+
+                function readComment(type, end) {
+                        var line = stream.lineText(), pos = line.indexOf(end);
+                        if (pos >= 0) {
+                                $cont.pop();
+                                foundToken(stream.col, pos, type);
+                                foundToken(pos, pos += end.length, type + "-stopper");
+                                stream.col = pos;
+                        } else {
+                                foundToken(stream.col, line.length, type);
+                                stream.col = line.length;
+                        }
+                };
+
+                function readLiteralRegexp() {
+                        readString("/", "regexp");
+                        var m = stream.lookingAt(/^[gmsiy]+/);
+                        if (m)
+                                foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
+                };
+
+                function next() {
+                        stream.checkStop();
+                        if ($cont.length > 0)
+                                return $cont.peek()();
+                        var ch = stream.peek(), m, name;
+                        if (stream.lookingAt("/*")) {
+                                foundToken(stream.col, stream.col += 2, "mcomment-starter");
+                                $cont.push(readComment.$C("mcomment", "*/"));
+                        }
+                        else if (stream.lookingAt("//")) {
+                                foundToken(stream.col, stream.col += 2, "comment-starter");
+                                foundToken(stream.col, stream.col = stream.lineLength(), "comment");
+                        }
+                        else if (ch === '"' || ch === "'") {
+                                foundToken(stream.col, ++stream.col, "string-starter");
+                                $cont.push(readString.$C(ch, "string"));
+                        }
+                        else if ((m = stream.lookingAt(/^0x[0-9a-f]+|^[0-9]*\.?[0-9]+/))) {
+                                foundToken(stream.col, stream.col += m[0].length, "number");
+                        }
+                        else if (isNameStart(ch) && (name = readName())) {
+                                var type =
+                                        name.id in KEYWORDS ? "keyword"
+                                        : name.id in KEYWORDS_TYPE ? "type"
+                                        : name.id in KEYWORDS_CONST ? "constant"
+                                        : name.id in KEYWORDS_BUILTIN ? "builtin"
+                                        : null;
+                                foundToken(name.c1, name.c2, type);
+                        }
+                        else if (ch === "/" && /[\[({,;+\-*=?&!:][\x20\t\n\xa0]*$/.test(stream.textBefore())) {
+                                foundToken(stream.col, ++stream.col, "regexp-starter");
+                                $cont.push(readLiteralRegexp);
+                        }
+                        else {
+                                foundToken(stream.col, ++stream.col, null);
+                        }
+                };
+
+                function copy() {
+                        var _cont = $cont.slice(0);
+                        return function() {
+                                $cont = _cont.slice(0);
+                                return PARSER;
+                        };
+                };
+
+                return PARSER;
+
         };
 
-});
+        Ymacs_Tokenizer.define("js", JS_PARSER.$C(
+                KEYWORDS.toHash(true),
+                KEYWORDS_TYPE.toHash(true),
+                KEYWORDS_CONST.toHash(true),
+                KEYWORDS_BUILTIN.toHash(true)
+        ));
 
-// the JS_DynarchLIB tokenizer recognizes and highlights some
-// constructs that are widely used in DL.  DynarchLIB class names are
-// also recognized, so long as they are actually loaded (i.e. DlWidget
-// is highlighted as type only if window.DlWidget exists).  Not sure
-// this was a good idea.
-DEFINE_CLASS("Ymacs_Tokenizer_JS_DynarchLIB", Ymacs_Tokenizer_JS, function(D, P){
+        /* -----[ DynarchLIB ]----- */
 
-        P.KEYWORDS_BUILTIN = Object.makeCopy(P.KEYWORDS_BUILTIN);
-        Object.merge(P.KEYWORDS_BUILTIN, "DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
+        var DL_KEYWORDS_BUILTIN = KEYWORDS_BUILTIN.concat("\
+DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
 DEFAULT_ARGS DEFAULT_EVENTS \
 FIXARGS CONSTRUCT BEFORE_BASE FINISH_OBJECT_DEF \
-D P $".split(/\s+/).toHash(true));
+D P $".qw());
 
-        P.readIdentifier = function() {
-                var m;
-                // DynarchLIB class name
-                if ((m = this.lookingAt(/^Dl[a-zA-Z0-9$_]+/))) {
-                        var id = m[0];
-                        if (window[id]) {
-                                this.onToken(this.col, this.col += id.length, "type");
-                                return true;
-                        }
-                }
-                return D.BASE.readIdentifier.apply(this, arguments);
-        };
+        Ymacs_Tokenizer.define("js-dynarchlib", JS_PARSER.$C(
+                KEYWORDS.toHash(true),
+                KEYWORDS_TYPE.toHash(true),
+                KEYWORDS_CONST.toHash(true),
+                DL_KEYWORDS_BUILTIN.toHash(true)
+        ));
 
-});
+})();

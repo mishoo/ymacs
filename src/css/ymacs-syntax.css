@@ -13,7 +13,7 @@
 .Ymacs_Frame .regexp { color: #e4f; font-style: normal;  }
 .Ymacs_Frame .regexp-starter,
 .Ymacs_Frame .regexp-stopper,
-.Ymacs_Frame .regexp-modifier { color: #f4c; font-weight: bold; }
+.Ymacs_Frame .regexp-modifier { color: #a56500; font-weight: bold; }
 
 .Ymacs_Frame .keyword   { color: rgb(0, 255, 255);  font-weight: bold; }
 .Ymacs_Frame .comment,
@@ -23,7 +23,7 @@
 .Ymacs_Frame .mcomment-stopper { color: #999; }
 .Ymacs_Frame .number { color: yellow; }
 .Ymacs_Frame .operator { color: #fff; }
-.Ymacs_Frame .error { color: #ff0; background-color: #c00; font-weight: bold; }
+.Ymacs_Frame .error { color: #ff0; background-color: #a00; font-weight: bold; }
 
 /* XML mode */
 .Ymacs_Frame .xml-open-tag,
@@ -32,6 +32,9 @@
 .Ymacs_Frame .xml-entity-starter,
 .Ymacs_Frame .xml-entity-stopper { color: #f4c; }
 .Ymacs_Frame .xml-entity { color: #e4f; font-style: normal;  }
-.Ymacs_Frame .xml-shorttag-slash { color: #f51; }
+.Ymacs_Frame .xml-closetag-slash { color: #f51; }
 .Ymacs_Frame .xml-open-bracket,
 .Ymacs_Frame .xml-close-bracket { color: #a56500; }
+.Ymacs_Frame .xml-cdata { color: #bbb; }
+.Ymacs_Frame .xml-cdata-starter,
+.Ymacs_Frame .xml-cdata-stopper { color: #888; }

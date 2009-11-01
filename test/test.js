@@ -33,17 +33,24 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 // code: lorem
         });
-        editor.setTokenizer(new Ymacs_Tokenizer_XML({ buffer: editor }));
+        editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "js-dynarchlib" }));
+//         editor.setCode("\
+// <html>\n\
+//   <head>\n\
+//     <title>Ymacs -- Open Source Source Code Editor. :-p</title>\n\
+//   </head>\n\
+//   <body style=\"margin: 1em auto; width: 80%\"\n\
+//         id=\"foo\">\n\
+//     <h1 class=\"PageTitle\">Cool, isn't it?</h1>\n\
+//   </body>\n\
+// </html>\
+// ");
+
         editor.setCode("\
-<html>\n\
-  <head>\n\
-    <title>Ymacs -- Open Source Source Code Editor. :-p</title>\n\
-  </head>\n\
-  <body style=\"margin: 1em auto; width: 80%\"\n\
-        id=\"foo\">\n\
-    <h1 class=\"PageTitle\">Cool, isn't it?</h1>\n\
-  </body>\n\
-</html>\
+function () {\n\
+    alert(\"crap\");\n\
+    return this[\"mak\"];\n\
+}\n\
 ");
 
         var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ editor ] });
@@ -56,14 +63,3 @@ try {
 }
 
 DynarchDomUtils.trash($("x-loading"));
-
-
-
-(function() {
-
-        window.prs = new Ymacs_Tokenizer_JS({ buffer: editor });
-        prs.addEventListener("onFoundToken", function(line, start, stop, what) {
-                console.log("%o(%o:%o) : %s", line, start, stop, what);
-        });
-
-})();
