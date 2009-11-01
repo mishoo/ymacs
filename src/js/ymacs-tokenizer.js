@@ -68,6 +68,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                 this.line = -1;
                 this.col = 0;
                 this.nextReader = this.readToken;
+                this.v = {};
                 this.timerUpdate = null;
                 this.makeContinuationNofollow(this.nextReader);
         };
@@ -126,11 +127,13 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         P.makeContinuation = function(cont) {
                 var line = ++this.line,
                     col  = this.col = 0,
-                    args = Array.$(arguments, 1),
-                    reader = this.nextReader;
+                    vars = Object.makeCopy(this.v),
+                    reader = this.nextReader,
+                    args = Array.$(arguments, 1);
                 return this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
+                        this.v = vars;
                         this.nextReader = reader;
                         return cont.apply(this, args) && this.line == line && this.nextReader();
                 }.$(this);
@@ -139,10 +142,12 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
         P.makeContinuationNofollow = function(cont) {
                 var line = ++this.line,
                     col = this.col = 0,
+                    vars = Object.makeCopy(this.v),
                     args = Array.$(arguments, 1);
                 return this.continuations[line] = function() {
                         this.line = line;
                         this.col = col;
+                        this.v = vars;
                         return cont.apply(this, args);
                 }.$(this);
         };
@@ -233,7 +238,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", Ymacs_String_Stream, function(D, P){
                         : id in this.KEYWORDS_BUILTIN ? "builtin"
                         : defaultType;
                 this.onToken(start, this.col, type);
-                return true;
+                return id;
         };
 
         P.isIdentifierStart = function(ch) {

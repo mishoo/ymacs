@@ -1,5 +1,3 @@
-// @require ymacs-tokenizer-javascript.js
-
 DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
 
         P.IDENTIFIER_START = Object.makeCopy(P.IDENTIFIER_START);
@@ -52,7 +50,7 @@ DEFINE_CLASS("Ymacs_Tokenizer_XML", Ymacs_Tokenizer, function(D, P){
         };
 
         P.readEndTag = function() {
-                this.readIdentifier("xml-close-tag");
+                var id = this.readIdentifier("xml-close-tag");
                 if (this.peek() == ">") {
                         this.onToken(this.col, ++this.col, "xml-close-bracket");
                 }

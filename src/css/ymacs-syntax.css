@@ -26,8 +26,8 @@
 .Ymacs_Frame .error { color: #ff0; background-color: #c00; font-weight: bold; }
 
 /* XML mode */
-.Ymacs_Frame .xml-open-tag { color: rgb(0, 255, 255); font-weight: bold; }
-.Ymacs_Frame .xml-close-tag { color: rgb(0, 255, 255); }
+.Ymacs_Frame .xml-open-tag,
+.Ymacs_Frame .xml-close-tag { color: rgb(0, 255, 255); font-weight: bold; }
 .Ymacs_Frame .xml-attribute { color: rgb(106, 176, 222); }
 .Ymacs_Frame .xml-entity-starter,
 .Ymacs_Frame .xml-entity-stopper { color: #f4c; }

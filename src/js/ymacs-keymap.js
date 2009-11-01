@@ -197,7 +197,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-S-w"                                   : "copy_for_operating_system",
                 "C-S-w"                                   : "kill_for_operating_system",
 
-                // my stuff, sorry if these have different meaning from the standard Emacs keys
+                // my stuff, sorry if these have different meanings in the standard Emacs keys
                 "M-C-d"                                   : "delete_region_or_line",
                 "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
 
