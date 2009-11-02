@@ -584,7 +584,7 @@ Ymacs_Buffer.newCommands({
                                         this.cmd("goto_char", p1 + ctx.search.length);
                                 } else {
                                         ctx.forward = true;
-                                        ctx.lastSearch = ctx.point;
+                                        ctx.lastSearch = ctx.point + ctx.length;
                                         repeat.call(this);
                                         return;
                                 }
