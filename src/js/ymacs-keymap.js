@@ -187,6 +187,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-/ && C-x u && C-_ && C-z"              : "undo",
                 "INSERT"                                  : "overwrite_mode",
                 "M-s"                                     : "center_line",
+                "M-/"                                     : "dabbrev_expand",
                 "C-s"                                     : "isearch_forward",
                 "C-r"                                     : "isearch_backward",
                 "M-C-s"                                   : "isearch_forward_regexp",
@@ -201,6 +202,8 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-d"                                   : "delete_region_or_line",
                 "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
                 "C-c /"                                   : "close_last_xml_tag",
+                "S-BACKSPACE"                             : "backward_delete_whitespace",
+                "S-DELETE"                                : "delete_whitespace",
 
                 // DEBUG
                 "C-x =": function() {

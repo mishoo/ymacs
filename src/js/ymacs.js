@@ -43,11 +43,18 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 /* -----[ main content ]----- */
                 if (this.buffers.length == 0)
                         this.createBuffer();
+                var frameLayout = this.frameLayout = new DlLayout({});
+
+                // var frame = this.createFrame({ buffer: this.buffers[0] });
+                // frameLayout.packWidget(frame, { pos: "top", fill: "50%" });
+                // frameLayout.packWidget(new DlResizeBar({ widget: frame, horiz: true }), { pos: "top" });
+
                 var frame = this.createFrame({ buffer: this.buffers[0] });
+                frameLayout.packWidget(frame, { pos: "top", fill: "*" });
 
                 this.packWidget(this.minibuffer_frame, { pos: "bottom" });
                 this.packWidget(this.modeline, { pos: "bottom" });
-                this.packWidget(frame, { pos: "top", fill: "*" });
+                this.packWidget(frameLayout, { pos: "top", fill: "*" });
         };
 
         P.pushToKillRing = function(text, prepend) {

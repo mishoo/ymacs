@@ -18,7 +18,7 @@ Ymacs_Buffer.newCommands({
                 if (!/^(forward|backward)_line$/.test(this.previousCommand)) {
                         this.setq("line_movement_requested_col", rc.col);
                 }
-                var ret = this.cmd("goto_char", 
+                var ret = this.cmd("goto_char",
                         this._rowColToPosition(rc.row + x,
                                                Math.max(rc.col,
                                                         this.getq("line_movement_requested_col")))); // starting to look like Lisp, eh?
@@ -546,6 +546,65 @@ Ymacs_Buffer.newCommands({
                         var indent = Math.floor((this.getq("fill_column") - line.length) / 2);
                         this.cmd("insert", " ".x(indent));
                 });
+        },
+
+        dabbrev_expand: function() {
+                if (this.previousCommand != "dabbrev_expand")
+                        this.setq("dabbrev_context", null);
+                var ctx = this.getq("dabbrev_context");
+                if (!ctx) {
+                        ctx = this.setq("dabbrev_context", {});
+                        var p1 = this.cmd("save_excursion", function(){
+                                this.cmd("backward_word");
+                                return this.point();
+                        });
+                        if (p1 == this.point())
+                                return this.signalError("Nothing to expand");
+                        ctx.search = this.cmd("buffer_substring", p1, this.point());
+                        ctx.point = p1;
+                        ctx.length = this.point() - p1;
+                        ctx.lastSearch = p1;
+                        ctx.lastExpansion = null;
+                        ctx.forward = false;
+                        ctx.buffer = this;
+                }
+                var expansion;
+
+                // in the following buffer, *this* is ctx.buffer, not
+                // necessarily the currently active buffer.
+                ctx.buffer.cmd("save_excursion", function repeat(){
+                        var word = this.syntax.word_ng;
+                        var p1, p2;
+                        this.cmd("goto_char", ctx.lastSearch);
+                        if (!ctx.forward) {
+                                if (this.cmd("search_backward", ctx.search)
+                                    && !word.test(this.charAt(-1))) {
+                                        p1 = this.point();
+                                        ctx.lastSearch = p1;
+                                        this.cmd("goto_char", p1 + ctx.search.length);
+                                } else {
+                                        ctx.forward = true;
+                                        ctx.lastSearch = ctx.point;
+                                        repeat.call(this);
+                                        return;
+                                }
+                        } else {
+                                if (this.cmd("search_forward", ctx.search) &&
+                                    !word.test(this.charAt(-ctx.search.length - 1))) {
+                                        ctx.lastSearch = this.point();
+                                        p1 = this.point() - ctx.search.length;
+                                }
+                        }
+                        if (p1 != null) {
+                                this.cmd("forward_word");
+                                p2 = this.point();
+                                expansion = this.cmd("buffer_substring", p1, p2);
+                        }
+                });
+                if (expansion) {
+                        this._replaceText(ctx.point, ctx.point + ctx.length, expansion);
+                        ctx.length = expansion.length;
+                }
         },
 
         delete_region_or_line: function() {
