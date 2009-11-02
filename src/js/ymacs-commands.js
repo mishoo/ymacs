@@ -4,7 +4,7 @@ Ymacs_Buffer.newCommands({
 
         forward_char: function(x) {
                 if (x == null) x = 1;
-                return this._repositionCaret(this.point() + x);
+                return this.cmd("goto_char", this.point() + x);
         },
 
         backward_char: function(x) {
@@ -18,7 +18,7 @@ Ymacs_Buffer.newCommands({
                 if (!/^(forward|backward)_line$/.test(this.previousCommand)) {
                         this.setq("line_movement_requested_col", rc.col);
                 }
-                var ret = this._repositionCaret(
+                var ret = this.cmd("goto_char", 
                         this._rowColToPosition(rc.row + x,
                                                Math.max(rc.col,
                                                         this.getq("line_movement_requested_col")))); // starting to look like Lisp, eh?
@@ -43,13 +43,13 @@ Ymacs_Buffer.newCommands({
         },
 
         beginning_of_line: function() {
-                return this._repositionCaret(this._rowColToPosition(this._rowcol.row, 0));
+                return this.cmd("goto_char", this._rowColToPosition(this._rowcol.row, 0));
         },
 
         back_to_indentation: function() {
                 var rc = this._rowcol, line = this.code[rc.row], m = /\S/.exec(line);
                 if (m)
-                        return this._repositionCaret(this._rowColToPosition(rc.row, m.index));
+                        return this.cmd("goto_char", this._rowColToPosition(rc.row, m.index));
         },
 
         beginning_of_indentation_or_line: function() {
@@ -58,15 +58,15 @@ Ymacs_Buffer.newCommands({
 
         end_of_line: function() {
                 var rc = this._rowcol;
-                return this._repositionCaret(this._rowColToPosition(rc.row, this.code[rc.row].length));
+                return this.cmd("goto_char", this._rowColToPosition(rc.row, this.code[rc.row].length));
         },
 
         beginning_of_buffer: function() {
-                return this._repositionCaret(0);
+                return this.cmd("goto_char", 0);
         },
 
         end_of_buffer: function() {
-                return this._repositionCaret(this.getCodeSize());
+                return this.cmd("goto_char", this.getCodeSize());
         },
 
         backward_delete_char: function() {
@@ -190,7 +190,7 @@ Ymacs_Buffer.newCommands({
                 }
                 var pos = code.indexOf(str, point);
                 if (pos >= 0) {
-                        this._repositionCaret(pos + str.length);
+                        this.cmd("goto_char", pos + str.length);
                         return true;
                 }
         },
@@ -205,7 +205,7 @@ Ymacs_Buffer.newCommands({
                 if (pos == point)
                         pos = code.lastIndexOf(str, point - 1);
                 if (pos >= 0 && pos != point) {
-                        this._repositionCaret(pos);
+                        this.cmd("goto_char", pos);
                         return true;
                 }
         },
@@ -216,7 +216,7 @@ Ymacs_Buffer.newCommands({
                 var pos = rx.lastIndex = this.point();
                 var ret = this.matchData = rx.exec(code);
                 if (ret && rx.lastIndex != pos) {
-                        this._repositionCaret(rx.lastIndex);
+                        this.cmd("goto_char", rx.lastIndex);
                         return true;
                 }
         },
@@ -226,7 +226,7 @@ Ymacs_Buffer.newCommands({
                 var pos = this.point();
                 var index = this.lastIndexOfRegexp(this.getCode(), rx, pos)[1];
                 if (index != null && index != pos) {
-                        this._repositionCaret(index);
+                        this.cmd("goto_char", index);
                         return true;
                 }
         },
@@ -335,8 +335,12 @@ Ymacs_Buffer.newCommands({
                 return this._repositionCaret(pos);
         },
 
-        insert: function(text) {
-                return this._insertText(text);
+        insert: function() {
+                return this._insertText(Array.$(arguments).join(""));
+        },
+
+        buffer_substring: function(start, end) {
+                return this._bufferSubstring(start, end);
         },
 
         kill_line: function(x, wholeLine) {
@@ -555,12 +559,32 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
-        bind_variables: function() {
-                return this.withVariables.apply(this, arguments);
+        // http://mihai.bazon.net/blog/close-last-xml-tag-emacs
+        close_last_xml_tag: function() {
+                var tag, quote;
+                this.cmd("save_excursion", function() {
+                        var skip = 1;
+                        while (skip != 0 && this.cmd("search_backward_regexp", /<\x2f?([a-zA-Z0-9:_-]+)/g)) {
+                                tag = this.cmd("match_string", 1);
+                                if (this.cmd("looking_at", /<\x2f/g)) {
+                                        ++skip;
+                                }
+                                else if (!this.cmd("looking_at", /<[^\x2f][^>]*?\x2f>/g)) {
+                                        --skip;
+                                }
+                        }
+                        if (skip != 0)
+                                tag = null;
+                });
+                if (tag) {
+                        this.cmd("insert", "</", tag, ">");
+                } else {
+                        this.signalError("Couldn't find a tag to close");
+                }
         },
 
-        buffer_substring: function(start, end) {
-                return this._bufferSubstring(start, end);
+        bind_variables: function() {
+                return this.withVariables.apply(this, arguments);
         }
 
 });
