@@ -62,6 +62,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.markers = [];
                 this.__savingExcursion = 0;
                 this.__preventUpdates = 0;
+                this.__dirtyLines = {};
                 this.__preventUndo = 0;
                 this.__undoQueue = [];
                 this.__redoQueue = [];
@@ -362,6 +363,20 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 });
         };
 
+        P.preventUpdates = function() {
+                ++this.__preventUpdates;
+        };
+
+        P.resumeUpdates = function() {
+                if (--this.__preventUpdates == 0) {
+                        this.redrawDirtyLines();
+                }
+        };
+
+        P.redrawDirtyLines = function() {
+                alert("implement buffer.redrawDirtyLines");
+        };
+
         /* -----[ not-so-public API ]----- */
 
         // BEGIN: undo queue
@@ -463,7 +478,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 // *** UNDO RECORDING
                 if (this.__preventUndo == 0)
                         this._recordChange(1, pos, text.length);
-                var rc = this._positionToRowCol(pos);
+                var rc = pos == this.point() ? this._rowcol : this._positionToRowCol(pos);
                 var lines = text.split(/\n/), i = rc.row, rest = this.code[i].substr(rc.col);
                 if (lines.length > 1) {
                         this._replaceLine(i, this.code[i].substr(0, rc.col) + lines.shift());
@@ -601,19 +616,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
-        P._saveExcursion = function(cont, preventUpdates) {
+        P._saveExcursion = function(cont) {
                 var tmp = this.createMarker(this.point());
                 ++this.__savingExcursion;
-                if (preventUpdates)
-                        ++this.__preventUpdates;
                 var ret;
                 try {
                         return cont.call(this, tmp.getPosition());
                 } finally {
                         --this.__savingExcursion;
-                        if (preventUpdates)
-                                if (--this.__preventUpdates == 0)
-                                        this.callHooks("onResetCode");
                         this.caretMarker.swap(tmp, false, true);
                         tmp.destroy();
                 }
@@ -642,12 +652,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._on_tokenizerFoundToken = function(row, c1, c2, what) {
-                if (this.__preventUpdates == 0) {
-                        if (what) {
-                                this._textProperties.addLineProps(row, c1, c2, "css", what);
-                        } else {
-                                this._textProperties.removeLineProps(row, c1, c2, "css");
-                        }
+                if (what) {
+                        this._textProperties.addLineProps(row, c1, c2, "css", what);
+                } else {
+                        this._textProperties.removeLineProps(row, c1, c2, "css");
                 }
         };
 

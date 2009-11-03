@@ -141,16 +141,7 @@ Ymacs_Buffer.newCommands({
         },
 
         newline: function() {
-                var rc = this._rowcol,
-                    line = this.code[rc.row],
-                    rest = line.substr(rc.col);
-                line = line.substr(0, rc.col);
-                this._replaceLine(rc.row, line);
-                this._insertLine(rc.row + 1, rest);
-                // *** UNDO RECORDING
-                if (!this.__preventUndo)
-                        this._recordChange(1, this.point(), 1);
-                this.caretMarker.updateMarkers(+1);
+                this.cmd("insert", "\n");
         },
 
         indent_line: function() {
@@ -511,7 +502,7 @@ Ymacs_Buffer.newCommands({
                                 if (!this.cmd("forward_line"))
                                         break;
                         }
-                }, true);
+                });
         },
 
         match_string: function(n) {

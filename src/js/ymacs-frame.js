@@ -27,7 +27,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onResetCode     : this._on_bufferResetCode.$(this),
                         onOverwriteMode : this._on_bufferOverwriteMode.$(this)
                 };
-                this._dirty = {};
                 tmp = this._moreBufferEvents = Object.makeCopy(tmp);
                 tmp.onMessage = this._on_bufferMessage.$(this);
                 var buffer = this.buffer;
@@ -157,25 +156,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         /* -----[ event handlers ]----- */
 
-        P._do_bufferLineChange = function() {
-                for (var row in this._dirty) {
-                        var div = this.getLineDivElement(row);
-                        if (div)
-                                div.innerHTML = this._getLineHTML(row);
+        P._on_bufferLineChange = function(row) {
+                var div = this.getLineDivElement(row);
+                if (div) {
+                        div.innerHTML = this._getLineHTML(row);
                 }
-                this._dirty = {};
-        };
-
-        P._on_bufferLineChange = function(row, highlight) {
-                // clearTimeout(this._lineChangeTimer);
-                // this._dirty[row] = true;
-                // this._lineChangeTimer = this._do_bufferLineChange.delayed(0, this);
-
-
-                        var div = this.getLineDivElement(row);
-                        if (div)
-                                div.innerHTML = this._getLineHTML(row);
-
         };
 
         P._on_bufferInsertLine = function(row) {
