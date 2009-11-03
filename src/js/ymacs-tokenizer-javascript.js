@@ -119,7 +119,7 @@ parseInt undefined window document alert prototype constructor".qw();
                                         : null;
                                 foundToken(name.c1, name.c2, type);
                         }
-                        else if (ch === "/" && /[\[({,;+\-*=?&!:][\x20\t\n\xa0]*$/.test(stream.textBefore())) {
+                        else if (ch === "/" && /[\[({,;+\-*=?&!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/.test(stream.textBefore())) {
                                 foundToken(stream.col, ++stream.col, "regexp-starter");
                                 $cont.push(readLiteralRegexp);
                         }

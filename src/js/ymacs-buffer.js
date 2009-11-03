@@ -82,7 +82,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
                         // XXX: this shouldn't be needed
-                        if (this.inInteractiveCommand == 0 && this.__savingExcursion == 0)
+                        if (this.inInteractiveCommand == 0 && this.__preventUpdates == 0)
                                 this.callHooks("onPointChange", this._rowcol, this.point());
                 });
                 this.syntax = {
@@ -371,7 +371,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.resumeUpdates = function() {
-                if (--this.__preventUpdates == 0) {
+                if ((this.__preventUpdates = Math.max(this.__preventUpdates - 1, 0)) == 0) {
                         this.redrawDirtyLines();
                 }
         };

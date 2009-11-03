@@ -138,6 +138,13 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 this.quickUpdate(0);
         };
 
+        P.showProgress = function(p) {
+                if (p != null) {
+                        p = Math.round(p / this.stream.length() * 100) + "%";
+                }
+                this.buffer.whenYmacs("updateProgress", "Syntax highlighting", p);
+        };
+
         P._do_quickUpdate = function(row) {
                 var s = this.stream, p, a = this.parsers, n;
                 s.line = row - 1;
@@ -148,32 +155,35 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 clearTimeout(this.timerUpdate);
                 var first = true;
                 var doit = function() {
-                        n = first ? 2 : 10;
+                        this.buffer.preventUpdates();
+                        n = first ? 2 : 20;
+                        this.showProgress(this.stream.line);
                         while (true) {
                                 try {
-                                        this.buffer.preventUpdates();
                                         while (true) p.next();
                                 }
                                 catch(ex) {
-                                        this.buffer.resumeUpdates();
                                         if (ex === s.EOL) {
                                                 a[s.line] = p.copy();
                                                 s.nextLine();
                                                 if  (--n == 0) {
                                                         // this.buffer.whenActiveFrame("centerOnLine", s.line);
+                                                        this.buffer.resumeUpdates();
                                                         this.timerUpdate = setTimeout(doit, first ? 500 : 50);
                                                         first = false;
                                                         return;
                                                 }
                                         }
                                         else if (ex === s.EOF) {
+                                                this.buffer.resumeUpdates();
                                                 if (p.on_EOF)
                                                         p.on_EOF();
-                                                return;
+                                                break;
                                         }
                                         else throw ex;
                                 }
                         }
+                        this.showProgress();
                 }.$(this);
                 doit();
         };
