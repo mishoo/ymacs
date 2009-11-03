@@ -148,16 +148,12 @@ Ymacs_Buffer.newCommands({
                 this.cmd("insert", "    ");
         },
 
-        insert_text: function(txt) {
-                return this._insertText(txt);
-        },
-
         make_marker: function(pos) {
                 return this.createMarker(pos);
         },
 
         looking_at: function(rx) {
-                rx.global = true;
+                //X rx.global = true;
                 var pos = rx.lastIndex = this.point();
                 var ret = this.matchData = rx.exec(this.getCode());
                 // console.log(ret, ret && ret.index);
@@ -165,7 +161,7 @@ Ymacs_Buffer.newCommands({
         },
 
         looking_back: function(rx, bound) {
-                rx.global = true;
+                //X rx.global = true;
                 if (bound < 0)
                         bound += this.point();
                 var pos = this.point();
@@ -202,7 +198,7 @@ Ymacs_Buffer.newCommands({
         },
 
         search_forward_regexp: function(rx) {
-                rx.global = true;
+                //X rx.global = true;
                 var code = this.getCode();
                 var pos = rx.lastIndex = this.point();
                 var ret = this.matchData = rx.exec(code);
@@ -213,7 +209,7 @@ Ymacs_Buffer.newCommands({
         },
 
         search_backward_regexp: function(rx) {
-                rx.global = true;
+                //X rx.global = true;
                 var pos = this.point();
                 var index = this.lastIndexOfRegexp(this.getCode(), rx, pos)[1];
                 if (index != null && index != pos) {
@@ -686,7 +682,8 @@ Ymacs_Buffer.newCommands((function(){
                 yank_from_operating_system: function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
                                 this.cmd("set_mark_command");
-                                this.cmd("insert", entry.getValue());
+                                var code = entry.getValue().replace(/\t/g, "        ");
+                                this.cmd("insert", code);
                                 this.cmd.delayed(20, this, "recenter_top_bottom");
                         });
                 },

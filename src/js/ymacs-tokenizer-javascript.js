@@ -57,7 +57,7 @@ parseInt undefined window document alert prototype constructor".qw();
                 };
 
                 function readComment(type, end) {
-                        var line = stream.lineText(), pos = line.indexOf(end);
+                        var line = stream.lineText(), pos = line.indexOf(end, stream.col);
                         if (pos >= 0) {
                                 $cont.pop();
                                 foundToken(stream.col, pos, type);
