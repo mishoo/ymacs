@@ -111,6 +111,24 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         args.type = LANGUAGES[args.type.toLowerCase()];
         };
 
+        D.CONSTRUCT = function() {
+                var smallestOffset = null;
+                var timer = null;
+                this.quickUpdate = function(offset) {
+                        if (smallestOffset != null) {
+                                smallestOffset = Math.min(offset, smallestOffset);
+                        } else {
+                                smallestOffset = offset;
+                        }
+                        clearTimeout(timer);
+                        timer = function(){
+                                var row = this.buffer._positionToRowCol(smallestOffset).row;
+                                smallestOffset = null;
+                                this._do_quickUpdate(row);
+                        }.delayed(1, this);
+                };
+        };
+
         P.reset = function() {
                 this.stream = new Ymacs_String_Stream({ buffer: this.buffer });
                 this.theParser = new this.type(this.stream, this);
@@ -120,7 +138,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 this.quickUpdate(0);
         };
 
-        P.quickUpdate = function(row) {
+        P._do_quickUpdate = function(row) {
                 var s = this.stream, p, a = this.parsers, n;
                 s.line = row - 1;
                 while (!(p = a[s.line]))

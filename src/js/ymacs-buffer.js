@@ -622,8 +622,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this.markers.map("editorChange", offset, delta, min || 0);
                 }
                 if (this.tokenizer) {
-                        var row = this._positionToRowCol(Math.min(offset, offset + delta)).row;
-                        this.tokenizer.quickUpdate(row);
+                        this.tokenizer.quickUpdate(Math.min(offset, offset + delta));
                 }
         };
 
