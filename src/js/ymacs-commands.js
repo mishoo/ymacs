@@ -555,7 +555,7 @@ Ymacs_Buffer.newCommands({
                         ctx.point = p1;
                         ctx.length = this.point() - p1;
                         ctx.lastSearch = p1;
-                        ctx.lastExpansion = null;
+                        ctx.encountered = {};
                         ctx.forward = false;
                         ctx.buffer = this;
                 }
@@ -604,14 +604,14 @@ Ymacs_Buffer.newCommands({
                                 // console.log("%s at %d, next from %d", ctx.search, p1, ctx.lastSearch);
                                 this.cmd("forward_word");
                                 expansion = this.cmd("buffer_substring", p1, this.point());
-                                if (expansion == ctx.lastExpansion)
+                                if (expansion in ctx.encountered)
                                         repeat.call(this);
                         }
                 });
                 if (expansion) {
                         this._replaceText(ctx.point, ctx.point + ctx.length, expansion);
                         ctx.length = expansion.length;
-                        ctx.lastExpansion = expansion;
+                        ctx.encountered[expansion] = true;
                 }
         },
 
