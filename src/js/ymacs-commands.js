@@ -570,15 +570,24 @@ Ymacs_Buffer.newCommands({
                 }
                 var expansion;
 
-                // in the following buffer, *this* is ctx.buffer, not
-                // necessarily the currently active buffer.
+                // in the following excursion, *this* is ctx.buffer,
+                // not necessarily the currently active buffer.  It's
+                // purpose is to determine the next expansion and
+                // setup the context so that the next invocation would
+                // continue.
                 ctx.buffer.cmd("save_excursion", function repeat(){
                         var word = this.syntax.word_ng;
-                        var p1, p2;
+                        var p1;
+                        var found = false;
                         this.cmd("goto_char", ctx.lastSearch);
+                        // console.log("last at: %d", ctx.lastSearch);
                         if (!ctx.forward) {
-                                if (this.cmd("search_backward", ctx.search)
-                                    && !word.test(this.charAt(-1))) {
+                                while (this.cmd("search_backward", ctx.search))
+                                        if (!word.test(this.charAt(-1))) {
+                                                found = true;
+                                                break;
+                                        }
+                                if (found) {
                                         p1 = this.point();
                                         ctx.lastSearch = p1;
                                         this.cmd("goto_char", p1 + ctx.search.length);
@@ -589,21 +598,29 @@ Ymacs_Buffer.newCommands({
                                         return;
                                 }
                         } else {
-                                if (this.cmd("search_forward", ctx.search) &&
-                                    !word.test(this.charAt(-ctx.search.length - 1))) {
+                                while (this.cmd("search_forward", ctx.search))
+                                        if (!word.test(this.charAt(-ctx.search.length - 1))) {
+                                                found = true;
+                                                break;
+                                        }
+                                if (found) {
                                         ctx.lastSearch = this.point();
                                         p1 = this.point() - ctx.search.length;
-                                }
+                                } else
+                                        this.signalError("No more completions");
                         }
                         if (p1 != null) {
+                                // console.log("%s at %d, next from %d", ctx.search, p1, ctx.lastSearch);
                                 this.cmd("forward_word");
-                                p2 = this.point();
-                                expansion = this.cmd("buffer_substring", p1, p2);
+                                expansion = this.cmd("buffer_substring", p1, this.point());
+                                if (expansion == ctx.lastExpansion)
+                                        repeat.call(this);
                         }
                 });
                 if (expansion) {
                         this._replaceText(ctx.point, ctx.point + ctx.length, expansion);
                         ctx.length = expansion.length;
+                        ctx.lastExpansion = expansion;
                 }
         },
 

@@ -167,9 +167,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_bufferLineChange = function(row, highlight) {
-                clearTimeout(this._lineChangeTimer);
-                this._dirty[row] = true;
-                this._lineChangeTimer = this._do_bufferLineChange.delayed(0, this);
+                // clearTimeout(this._lineChangeTimer);
+                // this._dirty[row] = true;
+                // this._lineChangeTimer = this._do_bufferLineChange.delayed(0, this);
+
+
+                        var div = this.getLineDivElement(row);
+                        if (div)
+                                div.innerHTML = this._getLineHTML(row);
+
         };
 
         P._on_bufferInsertLine = function(row) {
