@@ -33,7 +33,7 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 // code: lorem
         });
-        editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "xml" }));
+        editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "js-dynarchlib" }));
 
 //         editor.setCode("\
 // document.CheckThisOut\n\

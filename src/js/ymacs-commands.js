@@ -494,7 +494,7 @@ Ymacs_Buffer.newCommands({
                                 var line = this.code[this._rowcol.row],
                                 m = /\s+$/.exec(line);
                                 if (m)
-                                        this._deleteText(this.point() + m.index, this.point() + line.length);
+                                        this._deleteText(this.point() + m.index, this.point() + m.index + m[0].length);
                                 if (!this.cmd("forward_line"))
                                         break;
                         }

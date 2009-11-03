@@ -213,12 +213,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.charAtRowCol = function(row, col) {
-                var a = this.code[row];
-                if (!a)
+                var n = this.code.length;
+                if (row >= n--)
                         return null;
-                if (col == a.length)
-                        return row == this.code.length - 1 ? a[col] : "\n";
-                return a[col];
+                var line = this.code[row];
+                if (col == line.length)
+                        return row == n && line.charAt(col) || "\n";
+                return line.charAt(col);
         };
 
         P.charAt = function(point) {
