@@ -160,7 +160,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 var div = this.getLineDivElement(row);
                 if (div) {
                         div.innerHTML = this._getLineHTML(row);
-                        console.log("redrawing %d", row);
                 }
         };
 
