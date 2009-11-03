@@ -24,6 +24,8 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
 
         // removes n properties at position row
         P.deleteLine = function(row, n) {
+                if (n == null)
+                        n = 1;
                 this.props.splice(row, n);
         };
 

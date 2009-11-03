@@ -133,9 +133,11 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         n = first ? 2 : 10;
                         while (true) {
                                 try {
+                                        this.buffer.preventUpdates();
                                         while (true) p.next();
                                 }
                                 catch(ex) {
+                                        this.buffer.resumeUpdates();
                                         if (ex === s.EOL) {
                                                 a[s.line] = p.copy();
                                                 s.nextLine();

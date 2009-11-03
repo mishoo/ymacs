@@ -62,7 +62,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.markers = [];
                 this.__savingExcursion = 0;
                 this.__preventUpdates = 0;
-                this.__dirtyLines = {};
+                this.__dirtyLines = [];
                 this.__preventUndo = 0;
                 this.__undoQueue = [];
                 this.__redoQueue = [];
@@ -253,9 +253,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 }
                         }
                         ++this.inInteractiveCommand;
+                        this.preventUpdates();
                         try {
                                 return func.apply(this, arguments);
                         } finally {
+                                this.resumeUpdates();
                                 --this.inInteractiveCommand;
                                 this.previousCommand = cmd;
                                 this.sameCommandCount++;
@@ -374,7 +376,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.redrawDirtyLines = function() {
-                alert("implement buffer.redrawDirtyLines");
+                this.__dirtyLines.foreach(function(draw, row){
+                        if (draw)
+                                this.callHooks("onLineChange", row);
+                }, this);
+                this.__dirtyLines = [];
         };
 
         /* -----[ not-so-public API ]----- */
@@ -448,6 +454,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.code[row] = text;
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onLineChange", row);
+                } else {
+                        this.__dirtyLines[row] = true;
                 }
         };
 
@@ -456,9 +464,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._textProperties.deleteLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickDeleteLine(row);
-                if (this.__preventUpdates == 0) {
-                        this.callHooks("onDeleteLine", row);
-                }
+                if (this.__preventUpdates != 0)
+                        this.__dirtyLines.splice(row, 1);
+                this.callHooks("onDeleteLine", row);
         };
 
         P._insertLine = function(row, text) {
@@ -467,6 +475,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 if (this.tokenizer)
                         this.tokenizer.quickInsertLine(row);
                 if (this.__preventUpdates == 0) {
+                        this.callHooks("onInsertLine", row, true);
+                } else {
+                        this.__dirtyLines.splice(row, 0, true);
                         this.callHooks("onInsertLine", row);
                 }
         };
@@ -661,7 +672,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._on_textPropertiesChange = function(row) {
                 this.lastColoredLine = row;
-                this.callHooks("onLineChange", row);
+                if (this.__preventUpdates == 0) {
+                        this.callHooks("onLineChange", row);
+                } else {
+                        this.__dirtyLines[row] = true;
+                }
         };
 
         P.formatLineHTML = function(row) {

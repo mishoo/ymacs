@@ -160,11 +160,16 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 var div = this.getLineDivElement(row);
                 if (div) {
                         div.innerHTML = this._getLineHTML(row);
+                        console.log("redrawing %d", row);
                 }
         };
 
-        P._on_bufferInsertLine = function(row) {
-                var div = DOM.createFromHtml(this._getLineHTML(row).htmlEmbed("div", "line"));
+        P._on_bufferInsertLine = function(row, drawIt) {
+                var div;
+                if (drawIt)
+                        div = DOM.createFromHtml(this._getLineHTML(row).htmlEmbed("div", "line"));
+                else
+                        div = DOM.createElement("div", null, { className: "line" });
                 this.getContentElement().insertBefore(div, this.getLineDivElement(row));
         };
 
