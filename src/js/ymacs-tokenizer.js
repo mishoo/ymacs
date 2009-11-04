@@ -35,8 +35,14 @@ DEFINE_CLASS("Ymacs_String_Stream", null, function(D, P){
                 return ch;
         };
 
-        P.lineText = function() {
-                return this.buffer.code[this.line];
+        P.lineText = function(row) {
+                if (row == null)
+                        row = this.line;
+                return this.buffer.code[row];
+        };
+
+        P.lineIndentation = function(row) {
+                return /^\s*/.exec(this.lineText(row))[0].length;
         };
 
         P.lookingAt = function(what) {
@@ -51,6 +57,19 @@ DEFINE_CLASS("Ymacs_String_Stream", null, function(D, P){
         P.textBefore = function() {
                 var pos = this.buffer._rowColToPosition(this.line, this.col);
                 return this.buffer.getCode().substr(0, pos);
+        };
+
+        P.textAfter = function() {
+                var pos = this.buffer._rowColToPosition(this.line, this.col);
+                return this.buffer.getCode().substr(pos);
+        };
+
+        P.substring = function(start, end) {
+                return this.buffer.getCode().substring(start, end);
+        };
+
+        P.substr = function(start, end) {
+                return this.buffer.getCode().substr(start, end);
         };
 
         P.eol = function() {
@@ -127,6 +146,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                 this._do_quickUpdate(row);
                         }.delayed(1, this);
                 };
+                this._stopQuickUpdate = function() {
+                        clearTimeout(timer);
+                        clearTimeout(this.timerUpdate);
+                };
                 this.reset();
         };
 
@@ -201,6 +224,51 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
         P.onToken = function(line, c1, c2, type) {
                 this.callHooks("onFoundToken", line, c1, c2, type);
+        };
+
+        P.getParserForLine = function(row) {
+                this._stopQuickUpdate();
+                var s = this.stream, p, a = this.parsers, n;
+                var currentLine = s.line;
+                s.line = row - 1;
+                while (!(p = a[s.line]))
+                        s.prevLine();
+                s.nextLine();
+                p = p();
+                try {
+                        this.buffer.preventUpdates();
+                        while (true) {
+                                if (s.line == row) {
+                                        return p;
+                                }
+                                try {
+                                        while (true) p.next();
+                                } catch(ex) {
+                                        if (ex === s.EOL) {
+                                                a[s.line] = p.copy();
+                                                s.nextLine();
+                                        }
+                                        else if (ex === s.EOF) {
+                                                break;
+                                        }
+                                        else {
+                                                throw ex;
+                                        }
+                                }
+                        }
+                } finally {
+                        this.buffer.resumeUpdates();
+                        if (currentLine < s.length()) {
+                                // resume lazy tokenizer if it was interrupted
+                                this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.max(row, currentLine));
+                        }
+                }
+        };
+
+        P.getIndentation = function(row) {
+                var p = this.getParserForLine(row);
+                if (p)
+                        return p.indentation();
         };
 
 });

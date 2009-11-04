@@ -2,9 +2,13 @@
 
 Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
-        var $tags = [],
-            $cont = [],
-            PARSER = { next: next, copy: copy, on_EOF: on_EOF };
+        var $tags       = [],
+            $cont       = [],
+            $inTag      = null,
+            $inComment  = null,
+            PARSER      = { next: next, copy: copy, indentation: indentation };
+
+        var INDENT_LEVEL = 2;
 
         function foundToken(c1, c2, type) {
                 tok.onToken(stream.line, c1, c2, type);
@@ -51,16 +55,18 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 foundToken(start, stream.col, "string");
         };
 
-        function readTag(tag) {
+        function readTag() {
                 var ch = stream.peek(), name;
                 if (stream.lookingAt(/^\x2f>/)) {
                         $cont.pop();
+                        $inTag = null;
                         foundToken(stream.col, ++stream.col, "xml-closetag-slash");
                         foundToken(stream.col, ++stream.col, "xml-close-bracket");
                 }
                 else if (ch === ">") {
                         $cont.pop();
-                        $tags.push(tag);
+                        $tags.push($inTag);
+                        $inTag = null;
                         foundToken(stream.col, ++stream.col, "xml-close-bracket");
                 }
                 else if (isNameStart(ch) && (name = readName())) {
@@ -78,6 +84,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 if (pos >= 0) {
                         $cont.pop();
                         foundToken(stream.col, pos, type);
+                        $inComment = null;
                         foundToken(pos, pos += end.length, type + "-stopper");
                         stream.col = pos;
                 } else {
@@ -107,10 +114,12 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 var ch = stream.peek(), m;
                 if (stream.lookingAt("<![CDATA[")) {
                         foundToken(stream.col, stream.col += 9, "xml-cdata-starter");
+                        $inComment = { line: stream.line, c1: stream.col };
                         $cont.push(readComment.$C("xml-cdata", "]]>"));
                 }
                 else if (stream.lookingAt("<!--")) {
                         foundToken(stream.col, stream.col += 4, "mcomment-starter");
+                        $inComment = { line: stream.line, c1: stream.col };
                         $cont.push(readComment.$C("mcomment", "-->"));
                 }
                 else if (stream.lookingAt(/^<\x2f/) && isNameStart(stream.peek(+2))) {
@@ -126,7 +135,8 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                         foundToken(stream.col, ++stream.col, "xml-open-bracket");
                         var tag = readName();
                         foundToken(tag.c1, tag.c2, "xml-open-tag");
-                        $cont.push(readTag.$C(tag));
+                        $inTag = tag;
+                        $cont.push(readTag);
                 }
                 else if ((m = stream.lookingAt(/^&.*?;/))) {
                         foundToken(stream.col, ++stream.col, "xml-entity-starter");
@@ -143,20 +153,33 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
         function copy() {
                 var _tags = $tags.slice(0),
-                    _cont = $cont.slice(0);
+                    _cont = $cont.slice(0),
+                    _inTag = $inTag,
+                    _inComment = $inComment;
                 return function() {
                         $cont = _cont.slice(0);
                         $tags = _tags.slice(0);
+                        $inTag = _inTag;
+                        $inComment = _inComment;
                         return PARSER;
                 };
         };
 
-        // this isn't working too well...  It does highlight the unclosed tags, but when we fix them, it doesn't re-color.
-        function on_EOF() {
-                // // unclosed tags?
-                // $tags.foreach(function(tag){
-                //         tok.onToken(tag.line, tag.c1, tag.c2, "error");
-                // });
+        function indentation() {
+                var indent, lastTag;
+                if ($inComment) {
+                        indent = stream.lineIndentation($inComment.line) + INDENT_LEVEL;
+                }
+                else if ($inTag) {
+                        indent = $inTag.c1 + $inTag.id.length + 1;
+                }
+                else if ((lastTag = $tags.peek())) {
+                        indent = stream.lineIndentation(lastTag.line) + INDENT_LEVEL;
+                        // if current line begins with a closing tag, back one level
+                        if (/^\s*<\x2f/.test(stream.lineText()))
+                                indent -= INDENT_LEVEL;
+                }
+                return indent;
         };
 
         return PARSER;

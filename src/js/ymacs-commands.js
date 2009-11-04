@@ -145,6 +145,25 @@ Ymacs_Buffer.newCommands({
         },
 
         indent_line: function() {
+                if (this.tokenizer) {
+                        var indent = this.tokenizer.getIndentation(this._rowcol.row);
+                        if (indent != null) {
+                                var pos = this.cmd("save_excursion", function(){
+                                        this.cmd("back_to_indentation");
+                                        if (this._rowcol.col != indent) {
+                                                this.cmd("beginning_of_line");
+                                                while (/^[ \t\xa0]$/.test(this.charAt()))
+                                                        this.cmd("delete_char");
+                                                this.cmd("insert", " ".x(indent));
+                                        }
+                                        return this.point();
+                                });
+                                // when point is before the indentation, go there.
+                                if (this.point() < pos)
+                                        this.cmd("goto_char", pos);
+                                return;
+                        }
+                }
                 this.cmd("insert", "    ");
         },
 
