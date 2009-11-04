@@ -222,8 +222,8 @@ parseInt undefined window document alert prototype constructor".qw();
                         // now.
 
                         if (row > 0) {
-                                var prevLine = stream.lineText(row - 1);
-                                if (/\)\s*$/.test(prevLine)) {
+                                var before = stream.textBefore();
+                                if (/\)\s*$/.test(before)) {
                                         // Ends in a paren, could be an if, while or for which demands smart
                                         // indentation on the current line, let's check it out.
 
@@ -231,8 +231,11 @@ parseInt undefined window document alert prototype constructor".qw();
                                         // the opening one, which suits us greatly.
                                         p = $passedParens.peek();
                                         var stmtLine = stream.lineText(p.line);
-                                        if (/^\s*(if|for|while)/.test(stmtLine))
+                                        if (/^\s*(if|for|while)\W/.test(stmtLine))
                                                 indent += INDENT_LEVEL;
+                                }
+                                else if (/\Welse\s*$/.test(before)) {
+                                        indent += INDENT_LEVEL;
                                 }
                         }
 

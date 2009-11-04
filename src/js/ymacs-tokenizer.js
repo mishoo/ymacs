@@ -56,13 +56,15 @@ DEFINE_CLASS("Ymacs_String_Stream", null, function(D, P){
                 }
         };
 
-        P.textBefore = function() {
-                var pos = this.buffer._rowColToPosition(this.line, this.col);
+        P.textBefore = function(pos) {
+                if (pos == null)
+                        pos = this.buffer._rowColToPosition(this.line, this.col);
                 return this.buffer.getCode().substr(0, pos);
         };
 
-        P.textAfter = function() {
-                var pos = this.buffer._rowColToPosition(this.line, this.col);
+        P.textAfter = function(pos) {
+                if (pos == null)
+                        pos = this.buffer._rowColToPosition(this.line, this.col);
                 return this.buffer.getCode().substr(pos);
         };
 
