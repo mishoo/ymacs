@@ -2,6 +2,8 @@
 
 DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
+        D.DEFAULT_EVENTS = [ "onPointChange" ];
+
         D.DEFAULT_ARGS = {
                 highlightCurrentLine : [ "highlightCurrentLine" , true ],
                 buffer               : [ "buffer"               , null ],
@@ -138,6 +140,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         DOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
                         this.__hoverLine = rc.row;
                 }
+                this.callHooks("onPointChange", rc.row, rc.col);
         };
 
         P._getLineHTML = function(row) {

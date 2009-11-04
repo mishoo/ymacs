@@ -11,6 +11,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         ];
 
         D.DEFAULT_ARGS = {
+                name      : [ "name"      , "*scratch*" ],
                 _code     : [ "code"      , null ],
                 ymacs     : [ "ymacs"     , null ],
                 tokenizer : [ "tokenizer" , null ]
@@ -82,8 +83,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
                         // XXX: this shouldn't be needed
-                        if (this.inInteractiveCommand == 0 && this.__preventUpdates == 0)
+                        if (this.inInteractiveCommand == 0 && this.__preventUpdates == 0) {
                                 this.callHooks("onPointChange", this._rowcol, this.point());
+                        }
                 });
                 this.syntax = {
                         word_ng       : { test: TEST_UNICODE_WORD_CHAR },

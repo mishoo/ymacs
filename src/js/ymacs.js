@@ -55,6 +55,12 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.packWidget(this.minibuffer_frame, { pos: "bottom" });
                 this.packWidget(this.modeline, { pos: "bottom" });
                 this.packWidget(frameLayout, { pos: "top", fill: "*" });
+
+                this.__activeFrameEvents = {
+                        onPointChange: this._on_activeFramePointChange.$(this)
+                };
+
+                this.setActiveFrame(frame);
         };
 
         P.pushToKillRing = function(text, prepend) {
@@ -98,12 +104,34 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 var frame = new Ymacs_Frame(args);
                 if (!args.hidden)
                         this.frames.push(frame);
+                frame.addEventListener("onDestroy", function(frame) {
+                        this.frames.remove(frame);
+                }.$(this, frame));
                 return frame;
         };
 
         P.focus = function() {
                 D.BASE.focus.apply(this, arguments);
                 this.frames.peek().focus();
+        };
+
+        P.setActiveFrame = function(frame) {
+                var old = this.getActiveFrame();
+                if (old)
+                        old.removeEventListener(this.__activeFrameEvents);
+                this.frames.remove(frame);
+                this.frames.push(frame);
+                this.updateModelineWithTimer();
+                frame.addEventListener(this.__activeFrameEvents);
+        };
+
+        P.getActiveFrame = function() {
+                return this.frames.peek();
+        };
+
+        P.getActiveBuffer = function() {
+                var frame = this.getActiveFrame();
+                return frame ? frame.buffer : this.buffers.peek();
         };
 
         P.updateProgress = function(name, val) {
@@ -115,15 +143,25 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         };
 
         P.updateModeline = function() {
-                var ml = String.buffer("--Ymacs--");
-                var pr = [];
-                for (var i in this.progress) {
-                        pr.push(i + ": " + this.progress[i]);
+                if (this.modeline) {
+                        var buffer = this.getActiveBuffer();
+                        var rc = buffer._rowcol;
+                        var ml = String.buffer("-U:---  ", buffer.name, " (", rc.row + 1, ",", rc.col, ") ");
+                        var pr = [];
+                        for (var i in this.progress) {
+                                pr.push(i + ": " + this.progress[i]);
+                        }
+                        if (pr.length > 0) {
+                                ml("[", pr.join(", "), "]");
+                        }
+                        this.modeline.setContent(ml.get().htmlEscape());
                 }
-                if (pr.length > 0) {
-                        ml("(", pr.join(", "), ")");
-                }
-                this.modeline.setContent(ml.get().htmlEscape());
+        };
+
+        /* -----[ listeners ]----- */
+
+        P._on_activeFramePointChange = function() {
+                this.updateModeline();
         };
 
 });

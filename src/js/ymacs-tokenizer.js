@@ -127,6 +127,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                 this._do_quickUpdate(row);
                         }.delayed(1, this);
                 };
+                this.reset();
         };
 
         P.reset = function() {
@@ -153,11 +154,13 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 s.nextLine();
                 p = p();
                 clearTimeout(this.timerUpdate);
+                var iteration = 0;
                 var first = true;
                 var doit = function() {
                         this.buffer.preventUpdates();
                         n = first ? 2 : 20;
-                        this.showProgress(this.stream.line);
+                        if (++iteration > 10)
+                                this.showProgress(this.stream.line);
                         while (true) {
                                 try {
                                         while (true) p.next();

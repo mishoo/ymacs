@@ -33,7 +33,6 @@ try {
                 // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
                 // code: lorem
         });
-        editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "js-dynarchlib" }));
 
 //         editor.setCode("\
 // document.CheckThisOut\n\
@@ -66,6 +65,9 @@ try {
         dlg.setSize({ x: 800, y: 600 });
         dlg.show(true);
         dlg.maximize(true);
+
+        editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "xml" }));
+
 } catch(ex) {
         console.log(ex);
 }
