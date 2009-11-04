@@ -654,7 +654,7 @@ Ymacs_Buffer.newCommands({
 
 /* -----[ commands to help using the system clipboard ]----- */
 
-Ymacs_Buffer.newCommands((function(){
+(function(){
 
         // <XXX>
         // this should be moved some level up if it proves to be more
@@ -677,7 +677,7 @@ Ymacs_Buffer.newCommands((function(){
         };
         // </XXX>
 
-        return {
+        Ymacs_Buffer.newCommands({
 
                 yank_from_operating_system: function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
@@ -702,6 +702,6 @@ Ymacs_Buffer.newCommands((function(){
                         });
                 }
 
-        };
+        });
 
-})());
+})();
