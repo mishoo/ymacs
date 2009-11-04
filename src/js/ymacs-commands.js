@@ -32,14 +32,20 @@ Ymacs_Buffer.newCommands({
                 return this.cmd("forward_line", -x);
         },
 
-        forward_whitespace: function() {
-                if (this.cmd("search_forward_regexp", /[^\s]/g))
+        forward_whitespace: function(noLine) {
+                var re = noLine ? /[^\x20\t\xA0]/g : /[^\s]/g;
+                if (this.cmd("search_forward_regexp", re)) {
                         this.cmd("backward_char");
+                        return true;
+                }
         },
 
-        backward_whitespace: function() {
-                if (this.cmd("search_backward_regexp", /[^\s]/g))
+        backward_whitespace: function(noLine) {
+                var re = noLine ? /[^\x20\t\xA0]/g : /[^\s]/g;
+                if (this.cmd("search_backward_regexp", re)) {
                         this.cmd("forward_char");
+                        return true;
+                }
         },
 
         beginning_of_line: function() {
@@ -69,6 +75,14 @@ Ymacs_Buffer.newCommands({
                 return this.cmd("goto_char", this.getCodeSize());
         },
 
+        eob_p: function() {
+                return this.point() == this.getCodeSize();
+        },
+
+        bob_p: function() {
+                return this.point() == 0;
+        },
+
         backward_delete_char: function() {
                 var pos = this.point();
                 if (pos > 0) {
@@ -96,22 +110,20 @@ Ymacs_Buffer.newCommands({
                         this.cmd("backward_delete_char");
         },
 
-        delete_whitespace: function() {
-                var ret = false;
-                while (/^\s$/.test(this.charAt())) {
-                        ret = true;
-                        this.cmd("delete_char");
+        delete_whitespace: function(noLine) {
+                var p = this.point();
+                if (this.cmd("forward_whitespace", noLine)) {
+                        this._deleteText(p, this.point());
+                        return true;
                 }
-                return ret;
         },
 
-        backward_delete_whitespace: function() {
-                var ret = false;
-                while (/^\s$/.test(this.charAt(-1))) {
-                        ret = true;
-                        this.cmd("backward_delete_char");
+        backward_delete_whitespace: function(noLine) {
+                var p = this.point();
+                if (this.cmd("backward_whitespace", noLine)) {
+                        this._deleteText(this.point(), p);
+                        return true;
                 }
-                return ret;
         },
 
         overwrite_mode: function() {
@@ -459,35 +471,88 @@ Ymacs_Buffer.newCommands({
                                 this.cmd("forward_paragraph");
                         var eop = this.createMarker(this.point() - 1);
                         this.cmd("backward_paragraph");
-                        this.cmd("forward_char");
+                        if (this.point() > 0)
+                                this.cmd("forward_char");
+
+                        // identify the prefix to use for each line
+                        var prefix = "", del = false;
+                        if (this.cmd("looking_at", /\s*([-]|[0-9]+\.|\(?[a-z][\).])?\s+/ig)) {
+                                prefix = " ".x(this.matchData[0].length);
+                                del = /\s*[#>;]*\s*/g;
+                        }
+                        else if (this.cmd("looking_at", /\s*[#>;*]+\s*/g)) {
+                                prefix = this.matchData[0];
+                                del = /\s*[#>;]*\s*/g;
+                        }
 
                         // remove newlines first
-                        // console.time("newlines");
                         while (true) {
                                 this.cmd("end_of_line");
                                 this.cmd("backward_delete_whitespace");
                                 if (this.point() >= eop.getPosition())
                                         break;
                                 this._replaceText(this.point(), this.point() + 1, " ");
+                                if (del && this.cmd("looking_at", del)) {
+                                        this._deleteText(this.point(), this.point() + this.matchData[0].length);
+                                }
                         }
-                        // console.timeEnd("newlines");
 
                         this.cmd("beginning_of_line");
 
                         // main operation
-                        // console.time("filling");
                         while (this.point() < eop.getPosition()) {
-                                this.cmd("forward_word");
+                                var p = this.point();
+                                if (!this.cmd("search_forward_regexp", /\s/g))
+                                        break;
+                                if (this.point() > eop.getPosition()) {
+                                        this.cmd("goto_char", eop);
+                                }
                                 if (this._rowcol.col > this.getq("fill_column")) {
-                                        this.cmd("backward_word");
+                                        this.cmd("goto_char", p);
                                         this.cmd("backward_delete_whitespace");
                                         this.cmd("newline");
+                                        this.cmd("insert", prefix);
                                 }
                         }
-                        // console.timeEnd("filling");
 
                         eop.destroy();
                 });
+        },
+
+        // this looks at the style of the current paragraph and starts
+        // a similar one, i.e. using same indentation level and prefix
+        // (list-like prefixes are incremented)
+        start_next_paragraph: function() {
+                this.cmd("backward_paragraph");
+                if (this.point() > 0)
+                        this.cmd("forward_char");
+
+                // identify the prefix to use for each line
+                var prefix = "";
+                if (this.cmd("looking_at", /\s*[#>;*-]+\s*/g)) {
+                        prefix = this.matchData[0];
+                }
+                else if (this.cmd("looking_at", /(\s*)([0-9]+)(\.\s+)/g)) {
+                        prefix = this.matchData[1] +
+                                (parseInt(this.matchData[2], 10) + 1) +
+                                this.matchData[3];
+                }
+                else if (this.cmd("looking_at", /(\s*\(?)([a-z])([\.\)]\s+)/ig)) {
+                        prefix = this.matchData[1] +
+                                String.fromCharCode(this.matchData[2].charCodeAt(0) + 1) +
+                                this.matchData[3];
+                }
+
+                this.cmd("forward_paragraph");
+                if (this.cmd("eob_p"))
+                        this.cmd("newline");
+
+                this.cmd("insert", "\n", prefix);
+
+                if (!this.cmd("looking_at", /\n\n/g)) {
+                        this.cmd("newline");
+                        this.cmd("backward_char");
+                };
         },
 
         scroll_down: function() {

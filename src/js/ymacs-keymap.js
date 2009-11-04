@@ -202,6 +202,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-d"                                   : "delete_region_or_line",
                 "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
                 "C-c /"                                   : "close_last_xml_tag",
+                "M-ENTER"                                 : "start_next_paragraph",
                 "S-BACKSPACE"                             : "backward_delete_whitespace",
                 "S-DELETE"                                : "delete_whitespace",
 

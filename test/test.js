@@ -66,7 +66,15 @@ try {
         dlg.show(true);
         dlg.maximize(true);
 
-        editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "xml" }));
+        editor.setCode("I've been spending some time on the issue that xdg-open can't be used properly when not using KDE/GNOME/XFCE. And I've found the issue:\n\
+\n\
+xdg-open doesn't find one of the above three and tries to use an internal function which does not work for me, as it for example gets the mimetype application/octet-stream, though it is x-directory/normal or inode/directory.\n\
+\n\
+So I've thought about letting sawfish add a WINDOW_MANAGER property to the root window. If gnome-int is loaded it would be set to sawfish-gnome, if kde- int is loaded to sawfish-kde else to sawfish. (a similar thing is done by XFCE)\n\
+\n\
+Next setup xdg-open to use gnome-open when sawfish is beeing run standalone. (if you want to use xfce-open or kfmclient, simply the DE= value)");
+
+        // editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "xml" }));
 
 } catch(ex) {
         console.log(ex);
