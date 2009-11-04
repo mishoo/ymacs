@@ -156,6 +156,11 @@ Ymacs_Buffer.newCommands({
                 this.cmd("insert", "\n");
         },
 
+        newline_and_indent: function() {
+                this.cmd("newline");
+                this.cmd("indent_line");
+        },
+
         indent_line: function() {
                 if (this.tokenizer) {
                         var indent = this.tokenizer.getIndentation(this._rowcol.row);

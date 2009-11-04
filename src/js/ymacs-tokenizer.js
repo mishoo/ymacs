@@ -1,3 +1,5 @@
+// @require ymacs-buffer.js
+
 DEFINE_CLASS("Ymacs_String_Stream", null, function(D, P){
 
         D.DEFAULT_ARGS = {
@@ -267,7 +269,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
         P.getIndentation = function(row) {
                 var p = this.getParserForLine(row);
-                if (p)
+                if (p && p.indentation instanceof Function)
                         return p.indentation();
         };
 

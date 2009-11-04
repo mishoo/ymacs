@@ -1,5 +1,7 @@
 // @require ymacs-tokenizer.js
 
+/* -----[ This defines the tokenizer ]----- */
+
 (function(){
 
         var KEYWORDS = "abstract break case catch class const \
@@ -22,6 +24,10 @@ Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
 parseInt undefined window document alert prototype constructor".qw();
 
+        var INDENT_LEVEL = 8;
+
+        var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
+
         function isLetter(ch) {
                 return ch.toLowerCase() != ch.toUpperCase();
         };
@@ -34,10 +40,47 @@ parseInt undefined window document alert prototype constructor".qw();
                 return ch && (isLetter(ch) || /^[0-9_$]$/.test(ch));
         };
 
+        var OPEN_PAREN = {
+                "(" : ")",
+                "{" : "}",
+                "[" : "]"
+        };
+
+        var CLOSE_PAREN = {
+                ")" : "(",
+                "}" : "{",
+                "]" : "["
+        };
+
+        function isOpenParen(ch) {
+                return OPEN_PAREN[ch];
+        };
+
+        function isCloseParen(ch) {
+                return CLOSE_PAREN[ch];
+        };
+
         function JS_PARSER(KEYWORDS, KEYWORDS_TYPE, KEYWORDS_CONST, KEYWORDS_BUILTIN, stream, tok) {
 
                 var $cont = [],
-                    PARSER = { next: next, copy: copy };
+                    $parens = [],
+                    $passedParens = [],
+                    $inComment = null,
+                    PARSER = { next: next, copy: copy, indentation: indentation };
+
+                function copy() {
+                        var _cont = $cont.slice(0),
+                            _inComment = $inComment,
+                            _parens = $parens.slice(0),
+                            _passedParens = $passedParens.slice(0);
+                        return function() {
+                                $cont = _cont.slice(0);
+                                $inComment = _inComment;
+                                $parens = _parens.slice(0);
+                                $passedParens = _passedParens.slice(0);
+                                return PARSER;
+                        };
+                };
 
                 function foundToken(c1, c2, type) {
                         tok.onToken(stream.line, c1, c2, type);
@@ -60,6 +103,7 @@ parseInt undefined window document alert prototype constructor".qw();
                         var line = stream.lineText(), pos = line.indexOf(end, stream.col);
                         if (pos >= 0) {
                                 $cont.pop();
+                                $inComment = null;
                                 foundToken(stream.col, pos, type);
                                 foundToken(pos, pos += end.length, type + "-stopper");
                                 stream.col = pos;
@@ -95,8 +139,9 @@ parseInt undefined window document alert prototype constructor".qw();
                         stream.checkStop();
                         if ($cont.length > 0)
                                 return $cont.peek()();
-                        var ch = stream.peek(), m, name;
+                        var ch = stream.peek(), m, tmp;
                         if (stream.lookingAt("/*")) {
+                                $inComment = { line: stream.line, c1: stream.col };
                                 foundToken(stream.col, stream.col += 2, "mcomment-starter");
                                 $cont.push(readComment.$C("mcomment", "*/"));
                         }
@@ -111,15 +156,29 @@ parseInt undefined window document alert prototype constructor".qw();
                         else if ((m = stream.lookingAt(/^0x[0-9a-f]+|^[0-9]*\.?[0-9]+/))) {
                                 foundToken(stream.col, stream.col += m[0].length, "number");
                         }
-                        else if (isNameStart(ch) && (name = readName())) {
-                                var type = name.id in KEYWORDS ? "keyword"
-                                        : name.id in KEYWORDS_TYPE ? "type"
-                                        : name.id in KEYWORDS_CONST ? "constant"
-                                        : name.id in KEYWORDS_BUILTIN ? "builtin"
+                        else if (isNameStart(ch) && (tmp = readName())) {
+                                var type = tmp.id in KEYWORDS ? "keyword"
+                                        : tmp.id in KEYWORDS_TYPE ? "type"
+                                        : tmp.id in KEYWORDS_CONST ? "constant"
+                                        : tmp.id in KEYWORDS_BUILTIN ? "builtin"
                                         : null;
-                                foundToken(name.c1, name.c2, type);
+                                foundToken(tmp.c1, tmp.c2, type);
                         }
-                        else if (ch === "/" && /[\[({,;+\-*=?&!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/.test(stream.textBefore())) {
+                        else if ((tmp = isOpenParen(ch))) {
+                                $parens.push({ line: stream.line, col: stream.col, type: ch });
+                                foundToken(stream.col, ++stream.col, "open-paren");
+                        }
+                        else if ((tmp = isCloseParen(ch))) {
+                                var p = $parens.pop();
+                                if (!p || p.type != tmp) {
+                                        foundToken(stream.col, ++stream.col, "error");
+                                } else {
+                                        p.closed = { line: stream.line, col: stream.col };
+                                        $passedParens.push(p);
+                                        foundToken(stream.col, ++stream.col, "close-paren");
+                                }
+                        }
+                        else if (ch === "/" && ALLOW_REGEXP_AFTER.test(stream.textBefore())) {
                                 foundToken(stream.col, ++stream.col, "regexp-starter");
                                 $cont.push(readLiteralRegexp);
                         }
@@ -128,12 +187,60 @@ parseInt undefined window document alert prototype constructor".qw();
                         }
                 };
 
-                function copy() {
-                        var _cont = $cont.slice(0);
-                        return function() {
-                                $cont = _cont.slice(0);
-                                return PARSER;
-                        };
+                function indentation() {
+                        var row = stream.line;
+                        var currentLine = stream.lineText();
+                        var indent = 0;
+                        var p = $parens.peek();
+                        if (p) {
+                                // check if the current line closes the paren
+                                var re = new RegExp("^\\s*\\" + OPEN_PAREN[p.type]);
+                                var thisLineCloses = re.test(currentLine);
+
+                                // Check if there is text after the opening paren.  If so, indent to that column.
+                                var line = stream.lineText(p.line);
+                                re = /\S/g;
+                                re.lastIndex = p.col + 1;
+                                var m = re.exec(line);
+                                if (m) {
+                                        // but if this line closes the paren, better use the column of the open paren
+                                        indent = thisLineCloses ? p.col : m.index;
+                                }
+                                else {
+                                        // Otherwise we should indent to one level more than the indentation of the line
+                                        // containing the opening paren.
+                                        indent = stream.lineIndentation(p.line) + INDENT_LEVEL;
+
+                                        // but if this line closes the paren, then back one level
+                                        if (thisLineCloses)
+                                                indent -= INDENT_LEVEL;
+                                }
+                        }
+
+                        // Some more adjustments for continued statements.  Since we don't really have a
+                        // rigorous parser, we have to rely on other regexps here, which sucks but will do for
+                        // now.
+
+                        if (row > 0) {
+                                var prevLine = stream.lineText(row - 1);
+                                if (/\)\s*$/.test(prevLine)) {
+                                        // Ends in a paren, could be an if, while or for which demands smart
+                                        // indentation on the current line, let's check it out.
+
+                                        // Note that the passedParen saved for that close paren is actually
+                                        // the opening one, which suits us greatly.
+                                        p = $passedParens.peek();
+                                        var stmtLine = stream.lineText(p.line);
+                                        if (/^\s*(if|for|while)/.test(stmtLine))
+                                                indent += INDENT_LEVEL;
+                                }
+                        }
+
+                        // switch labels use half the indent level, which is my favorite
+                        if (/^\s*(case|default)\W/.test(currentLine))
+                                indent -= INDENT_LEVEL / 2;
+
+                        return indent;
                 };
 
                 return PARSER;
@@ -163,3 +270,39 @@ D P $".qw());
         ));
 
 })();
+
+/* -----[ Keymap for C-like language mode ]----- */
+
+DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
+
+        D.KEYS = {
+                "ENTER"                : "newline_and_indent",
+                "} && ) && ] && :"     : "insert_and_indent"
+        };
+
+        D.CONSTRUCT = function() {
+                this.defineKeys(D.KEYS);
+        };
+
+});
+
+/* -----[ Mode entry point ]----- */
+
+Ymacs_Buffer.newCommands({
+
+        javascript_mode: function() {
+                this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js" }));
+                this.keymap.push(new Ymacs_Keymap_CLanguages({ buffer: this }));
+        },
+
+        javascript_dynarchlib_mode: function() {
+                this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js-dynarchlib" }));
+                this.keymap.push(new Ymacs_Keymap_CLanguages({ buffer: this }));
+        },
+
+        insert_and_indent: function() {
+                this.cmd("self_insert_command");
+                this.cmd("indent_line");
+        }
+
+});

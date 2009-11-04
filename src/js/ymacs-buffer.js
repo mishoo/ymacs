@@ -630,7 +630,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._saveExcursion = function(cont) {
-                var tmp = this.createMarker(this.point(), true);
+                var tmp = this.createMarker(this.point());
                 ++this.__savingExcursion;
                 var ret;
                 try {
