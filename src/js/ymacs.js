@@ -161,7 +161,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         /* -----[ listeners ]----- */
 
         P._on_activeFramePointChange = function() {
-                this.updateModeline();
+                this.updateModelineWithTimer();
         };
 
 });

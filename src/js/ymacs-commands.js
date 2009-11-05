@@ -19,9 +19,9 @@ Ymacs_Buffer.newCommands({
                         this.setq("line_movement_requested_col", rc.col);
                 }
                 var ret = this.cmd("goto_char",
-                        this._rowColToPosition(rc.row + x,
-                                               Math.max(rc.col,
-                                                        this.getq("line_movement_requested_col")))); // starting to look like Lisp, eh?
+                                   this._rowColToPosition(rc.row + x,
+                                                          Math.max(rc.col,
+                                                                   this.getq("line_movement_requested_col")))); // starting to look like Lisp, eh?
                 if (!ret)
                         this.setq("line_movement_requested_col", rc.col);
                 return ret;
@@ -297,24 +297,6 @@ Ymacs_Buffer.newCommands({
                 this.cmd("backward_char");
                 if (this.syntax.word_ng.test(this.charAt()))
                         this.cmd("forward_word");
-
-                // // save next word position
-                // var wp1 = this.cmd("save_excursion", function(){
-                //         this.cmd("forward_word");
-                //         var p1 = this.point();
-                //         this.cmd("backward_word");
-                //         return [ p1, this.point() ];
-                // });
-
-                // // save previous word position
-                // var wp2 = this.cmd("save_excursion", function(){
-                //         this.cmd("backward_word");
-                //         var p1 = this.point();
-                //         this.cmd("forward_word");
-                //         return [ p1, this.point() ];
-                // });
-
-                // this.cmd("goto_char", this._swapAreas(wp1.concat(wp2)));
 
                 var a = [];
                 this.cmd("forward_word"); a.push(this.point());

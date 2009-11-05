@@ -295,17 +295,20 @@ Ymacs_Buffer.newCommands({
 
         javascript_mode: function() {
                 this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js" }));
-                this.keymap.push(new Ymacs_Keymap_CLanguages({ buffer: this }));
+                this.pushKeymap(new Ymacs_Keymap_CLanguages({ buffer: this }));
         },
 
         javascript_dynarchlib_mode: function() {
                 this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js-dynarchlib" }));
-                this.keymap.push(new Ymacs_Keymap_CLanguages({ buffer: this }));
+                this.pushKeymap(new Ymacs_Keymap_CLanguages({ buffer: this }));
         },
 
         insert_and_indent: function() {
-                this.cmd("self_insert_command");
-                this.cmd("indent_line");
+                var ret;
+                if ((ret = this.cmd("self_insert_command"))) {
+                        this.cmd("indent_line");
+                        return ret;
+                }
         }
 
 });
