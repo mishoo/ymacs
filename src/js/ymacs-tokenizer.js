@@ -269,6 +269,12 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 }
         };
 
+        P.getLastParser = function() {
+                var p = this.parsers.peek();
+                if (p)
+                        return p();
+        };
+
         P.getIndentation = function(row) {
                 var p = this.getParserForLine(row);
                 if (p && p.indentation instanceof Function)

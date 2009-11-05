@@ -69,7 +69,7 @@ function () {\n\
         dlg.maximize(true);
 
         // editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "js-dynarchlib" }));
-        editor.cmd("javascript_dynarchlib_mode");
+        editor.cmd("javascript_dl_mode");
 
 } catch(ex) {
         console.log(ex);

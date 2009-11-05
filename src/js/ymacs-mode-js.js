@@ -66,7 +66,12 @@ parseInt undefined window document alert prototype constructor".qw();
                     $parens = [],
                     $passedParens = [],
                     $inComment = null,
-                    PARSER = { next: next, copy: copy, indentation: indentation };
+                    PARSER = {
+                            next        : next,
+                            copy        : copy,
+                            indentation : indentation,
+                            parens      : function() { return $passedParens; }
+                    };
 
                 function copy() {
                         var _cont = $cont.slice(0),
@@ -288,7 +293,7 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
         };
 
         D.CONSTRUCT = function() {
-                this.defaultHandler = null;
+                this.defaultHandler = null; // use next keyboard in buffer.keymap
                 this.defineKeys(D.KEYS);
         };
 
@@ -296,16 +301,29 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
 /* -----[ Mode entry point ]----- */
 
+Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
+        var tok = this.tokenizer;
+        var keymap = new Ymacs_Keymap_CLanguages({ buffer: this });
+        this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
+        this.pushKeymap(keymap);
+        var events = {
+                afterInteractiveCommand: function() {
+                        var p = this.tokenizer.getLastParser(), rc = this._rowcol;
+                        
+                }.clearingTimeout(500)
+        };
+        this.addEventListener(events);
+        return function() {
+                this.setTokenizer(tok);
+                this.popKeymap(keymap);
+                this.removeEventListener(events);
+        };
+});
+
 Ymacs_Buffer.newCommands({
 
-        javascript_mode: function() {
-                this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js" }));
-                this.pushKeymap(new Ymacs_Keymap_CLanguages({ buffer: this }));
-        },
-
-        javascript_dynarchlib_mode: function() {
-                this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js-dynarchlib" }));
-                this.pushKeymap(new Ymacs_Keymap_CLanguages({ buffer: this }));
+        javascript_dl_mode: function() {
+                return this.cmd("javascript_mode", true);
         },
 
         c_electric_block: function() {

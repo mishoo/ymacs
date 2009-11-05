@@ -7,7 +7,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "onPointChange",
                 "onResetCode",
                 "onMessage",
-                "onOverwriteMode"
+                "onOverwriteMode",
+                "beforeInteractiveCommand",
+                "afterInteractiveCommand"
         ];
 
         D.DEFAULT_ARGS = {
@@ -51,6 +53,26 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         D.newCommands = P.newCommands = function(cmds) {
                 Object.merge(this.COMMANDS, cmds);
+        };
+
+        D.newMode = P.newMode = function(name, activate) {
+                var modevar = "*" + name + "*";
+                this.COMMANDS[name] = function() {
+                        var on = !this.getq(modevar);
+                        this.setq(modevar, on);
+                        if (this.__deactivateCurrentMode) {
+                                this.__deactivateCurrentMode();
+                                this.__deactivateCurrentMode = null;
+                        }
+                        if (on) {
+                                var off = activate.apply(this, arguments);
+                                this.__deactivateCurrentMode = function() {
+                                        off.call(this);
+                                        this.setq(modevar, false);
+                                };
+                        }
+                        return true;
+                };
         };
 
         D.FIXARGS = function(args) {
@@ -195,6 +217,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.tokenizer = tok;
                 if (tok) {
                         tok.addEventListener(this._tokenizerEvents);
+                } else {
+                        this._textProperties.reset();
+                        this.callHooks("onResetCode", this.code);
                 }
         };
 
@@ -258,10 +283,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         ++this.inInteractiveCommand;
                         this.preventUpdates();
                         try {
+                                this.callHooks("beforeInteractiveCommand");
                                 return func.apply(this, arguments);
                         } finally {
                                 this.resumeUpdates();
                                 --this.inInteractiveCommand;
+                                this.callHooks("afterInteractiveCommand");
                                 this.previousCommand = cmd;
                                 this.sameCommandCount++;
                                 this.ensureCaretVisible();
