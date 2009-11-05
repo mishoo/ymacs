@@ -24,6 +24,7 @@
 .Ymacs_Frame .number { color: yellow; }
 .Ymacs_Frame .operator { color: #fff; }
 .Ymacs_Frame .error { color: #ff0; background-color: #a00; font-weight: bold; }
+/* .Ymacs_Frame .trailing-whitespace { text-decoration: underline; color: #777; } */
 
 /* XML mode */
 .Ymacs_Frame .xml-open-tag,

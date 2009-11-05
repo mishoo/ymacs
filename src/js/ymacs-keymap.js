@@ -134,7 +134,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                         return true;
                 }
                 this.currentPrefix = def;
-                if (!def)
+                if (!def && this.defaultHandler instanceof Function)
                         def = this.defaultHandler();
                 return def;
         };

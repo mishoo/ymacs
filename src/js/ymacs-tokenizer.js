@@ -159,7 +159,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
 
         P.reset = function() {
                 this.stream = new Ymacs_String_Stream({ buffer: this.buffer });
-                this.theParser = new this.type(this.stream, this);
+                this.theParser = this.type(this.stream, this);
                 this.parsers = [];
                 this.parsers[-1] = this.theParser.copy();
                 this.timerUpdate = null;
@@ -219,11 +219,11 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.quickInsertLine = function(row) {
-                this.parsers.splice(row, this.parsers.length + 1);
+                this.parsers.splice(row - 1, this.parsers.length + 1);
         };
 
         P.quickDeleteLine = function(row) {
-                this.parsers.splice(row, this.parsers.length + 1);
+                this.parsers.splice(row - 1, this.parsers.length + 1);
         };
 
         P.onToken = function(line, c1, c2, type) {

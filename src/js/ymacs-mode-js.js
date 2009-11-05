@@ -182,6 +182,9 @@ parseInt undefined window document alert prototype constructor".qw();
                                 foundToken(stream.col, ++stream.col, "regexp-starter");
                                 $cont.push(readLiteralRegexp);
                         }
+                        else if ((m = stream.lookingAt(/^\s+$/))) {
+                                foundToken(stream.col, stream.col += m[0].length, "trailing-whitespace");
+                        }
                         else {
                                 foundToken(stream.col, ++stream.col, null);
                         }
@@ -280,10 +283,12 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "ENTER"                : "newline_and_indent",
-                "} && ) && ] && :"     : "insert_and_indent"
+                "} && ) && ] && :"     : "insert_and_indent",
+                "{"                    : "c_electric_block"
         };
 
         D.CONSTRUCT = function() {
+                this.defaultHandler = null;
                 this.defineKeys(D.KEYS);
         };
 
@@ -301,6 +306,14 @@ Ymacs_Buffer.newCommands({
         javascript_dynarchlib_mode: function() {
                 this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js-dynarchlib" }));
                 this.pushKeymap(new Ymacs_Keymap_CLanguages({ buffer: this }));
+        },
+
+        c_electric_block: function() {
+                this.cmd("indent_line");
+                this.cmd("insert", "{\n\n}");
+                this.cmd("indent_line");
+                this.cmd("backward_line", 1);
+                this.cmd("indent_line");
         },
 
         insert_and_indent: function() {

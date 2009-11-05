@@ -55,8 +55,10 @@ try {
 
         editor.setCode("\
 function () {\n\
-    alert(\"crap\");\n\
-    return this[\"mak\"];\n\
+        alert(\"crap\");\n\
+        while (foo) {\n\
+        }\n\
+        return this[\"mak\"];\n\
 }\n\
 ");
 

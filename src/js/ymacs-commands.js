@@ -157,6 +157,7 @@ Ymacs_Buffer.newCommands({
         },
 
         newline_and_indent: function() {
+                // this.cmd("backward_delete_whitespace", true);
                 this.cmd("newline");
                 this.cmd("indent_line");
         },
