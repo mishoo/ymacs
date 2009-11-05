@@ -40,6 +40,10 @@
   color: #fff;
 }
 
+.Ymacs_Overlay { position: absolute; width: 100%; opacity: 0.5; }
+.Ymacs_Overlay .match-paren { background: #fff; opacity: 0.4; }
+.Ymacs_Overlay .foo { background: #ff0; opacity: 0.7; }
+
 .Ymacs_Message_Popup {
   background-color: wheat;
   padding: 10px;

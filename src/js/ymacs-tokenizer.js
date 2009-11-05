@@ -219,10 +219,12 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.quickInsertLine = function(row) {
+                // console.log("splicing at %d for insert line", row - 1);
                 this.parsers.splice(row - 1, this.parsers.length + 1);
         };
 
         P.quickDeleteLine = function(row) {
+                // console.log("splicing at %d for delete line", row - 1);
                 this.parsers.splice(row - 1, this.parsers.length + 1);
         };
 
@@ -270,9 +272,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.getLastParser = function() {
-                var p = this.parsers.peek();
-                if (p)
-                        return p();
+                return this.parsers.peek();
         };
 
         P.getIndentation = function(row) {

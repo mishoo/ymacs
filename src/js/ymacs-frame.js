@@ -27,7 +27,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onDeleteLine    : this._on_bufferDeleteLine.$(this),
                         onPointChange   : this._on_bufferPointChange.$(this),
                         onResetCode     : this._on_bufferResetCode.$(this),
-                        onOverwriteMode : this._on_bufferOverwriteMode.$(this)
+                        onOverwriteMode : this._on_bufferOverwriteMode.$(this),
+                        onOverlayChange : this._on_bufferOverlayChange.$(this),
+                        onOverlayDelete : this._on_bufferOverlayDelete.$(this)
                 };
                 tmp = this._moreBufferEvents = Object.makeCopy(tmp);
                 tmp.onMessage = this._on_bufferMessage.$(this);
@@ -153,6 +155,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }, this).join(""));
         };
 
+        P.coordinates = function(row, col) {
+                var caret = this.getCaretElement(), w = caret.offsetWidth, h = caret.offsetHeight;
+                return { x: col * w, y: row * h, cw: w, ch: h };
+        };
+
         P.heightInLines = function() {
                 return Math.floor(this.getElement().clientHeight / this.getCaretElement().offsetHeight);
         };
@@ -201,6 +208,44 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 });
                 popup.hide(2000);
         };
+
+        P.getOverlayId = function(name) {
+                return this.id + "-ovl-" + name;
+        };
+
+        P.getOverlayHTML = function(name, props) {
+                var p1 = this.coordinates(props.line1, props.col1);
+                var p2 = this.coordinates(props.line2 - 1, props.col2);
+                var str = String.buffer(
+                        "<div id='", this.getOverlayId(name), "' class='Ymacs_Overlay ", name,
+                        "' style='top:", p1.y, "px'>"
+                );
+                if (props.line1 == props.line2) {
+                        str("<div class='", name, "' style='margin-left:", p1.x,
+                            "px; width:", p2.x - p1.x, "px;'>&nbsp;</div>");
+                } else {
+                        str("<div class='", name, "' style='margin-left:", p1.x, "px;'>&nbsp;</div>");
+                        // str(("<div class='" + name + "'>&nbsp;</div>").x(props.line2 - props.line1 - 1));
+                        str("<div class='", name, "' style='height:", p2.y - p1.y, "px'></div>");
+                        str("<div class='", name, "' style='width:", p2.x, "px;'>&nbsp;</div>");
+                }
+                str("</div>");
+                return str.get();
+        };
+
+        P._on_bufferOverlayChange = function(name, props, isNew) {
+                if (!isNew) {
+                        DOM.trash($(this.getOverlayId(name)));
+                }
+                var div = DOM.createFromHtml(this.getOverlayHTML(name, props));
+                this.getElement().appendChild(div);
+        };
+
+        P._on_bufferOverlayDelete = function(name, props, isNew) {
+                DOM.trash($(this.getOverlayId(name)));
+        };
+
+        /* -----[ self events ]----- */
 
         P._on_destroy = function() {
                 this.setBuffer(null);

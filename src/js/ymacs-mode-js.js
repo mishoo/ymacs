@@ -69,22 +69,24 @@ parseInt undefined window document alert prototype constructor".qw();
                     PARSER = {
                             next        : next,
                             copy        : copy,
-                            indentation : indentation,
-                            parens      : function() { return $passedParens; }
+                            indentation : indentation
                     };
 
                 function copy() {
-                        var _cont = $cont.slice(0),
-                            _inComment = $inComment,
-                            _parens = $parens.slice(0),
-                            _passedParens = $passedParens.slice(0);
-                        return function() {
-                                $cont = _cont.slice(0);
-                                $inComment = _inComment;
-                                $parens = _parens.slice(0);
-                                $passedParens = _passedParens.slice(0);
+                        var context = restore.context = {
+                                cont         : $cont.slice(0),
+                                inComment    : $inComment,
+                                parens       : $parens.slice(0),
+                                passedParens : $passedParens.slice(0)
+                        };
+                        function restore() {
+                                $cont          = context.cont.slice(0);
+                                $inComment     = context.inComment;
+                                $parens        = context.parens.slice(0);
+                                $passedParens  = context.passedParens.slice(0);
                                 return PARSER;
                         };
+                        return restore;
                 };
 
                 function foundToken(c1, c2, type) {
@@ -175,6 +177,7 @@ parseInt undefined window document alert prototype constructor".qw();
                         }
                         else if ((tmp = isCloseParen(ch))) {
                                 var p = $parens.pop();
+                                // console.log("%d,%d / parens: %o, popped: %o", stream.line, stream.col, $parens, p);
                                 if (!p || p.type != tmp) {
                                         foundToken(stream.col, ++stream.col, "error");
                                 } else {
@@ -306,13 +309,40 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         var keymap = new Ymacs_Keymap_CLanguages({ buffer: this });
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
         this.pushKeymap(keymap);
+
+        var clearOvl = function() {
+                this.deleteOverlay("match-paren");
+        }.clearingTimeout(1000, this);
+
         var events = {
+                beforeInteractiveCommand: function() {
+                        this.deleteOverlay("match-paren");
+                },
                 afterInteractiveCommand: function() {
                         var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-                        
-                }.clearingTimeout(500)
+                        if (p) {
+                                var parens = p.context.passedParens;
+                                parens.foreach(function(p){
+                                        var match = p.closed;
+                                        if (p.line == rc.row && p.col == rc.col) {
+                                                this.setOverlay("match-paren", {
+                                                        line1: p.line, line2: match.line,
+                                                        col1: p.col, col2: match.col + 1
+                                                });
+                                                clearOvl();
+                                        } else if (match.line == rc.row && match.col == rc.col - 1) {
+                                                this.setOverlay("match-paren", {
+                                                        line1: p.line, line2: match.line,
+                                                        col1: p.col, col2: match.col + 1
+                                                });
+                                                clearOvl();
+                                        }
+                                }, this);
+                        }
+                }.clearingTimeout(250)
         };
         this.addEventListener(events);
+
         return function() {
                 this.setTokenizer(tok);
                 this.popKeymap(keymap);

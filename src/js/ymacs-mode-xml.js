@@ -185,3 +185,14 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         return PARSER;
 
 });
+
+
+Ymacs_Buffer.newMode("xml_mode", function(){
+
+        var tok = this.tokenizer;
+        this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
+        return function() {
+                this.setTokenizer(tok);
+        };
+
+});

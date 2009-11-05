@@ -8,6 +8,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "onResetCode",
                 "onMessage",
                 "onOverwriteMode",
+                "onOverlayChange",
+                "onOverlayDelete",
                 "beforeInteractiveCommand",
                 "afterInteractiveCommand"
         ];
@@ -90,6 +92,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__undoQueue = [];
                 this.__redoQueue = [];
                 this.__undoInProgress = 0;
+                this.__overlays = {};
                 this.caretMarker = this.createMarker(0, false, "point");
                 this.markMarker = this.createMarker(0, true, "mark");
                 this.matchData = [];
@@ -100,7 +103,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         case_fold_search            : true,
                         line_movement_requested_col : 0,
                         fill_column                 : 78,
-                        tab_width                   : 8
+                        tab_width                   : 8,
+                        indent_level                : 8
                 };
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
@@ -199,6 +203,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__size = code.length;
                 this.__undoQueue = [];
                 this.__redoQueue = [];
+                this.__overlays = {};
                 this.markers = [ this.caretMarker, this.markMarker ]; // resetting the code invalidates markers
                 this.code = code.split(/\n/);
                 this._textProperties.reset();
@@ -411,6 +416,28 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this.callHooks("onLineChange", row);
                 }, this);
                 this.__dirtyLines = [];
+        };
+
+        P.getOverlays = function() {
+                return this.__overlays;
+        };
+
+        P.getOverlay = function(name) {
+                return this.__overlays[name];
+        };
+
+        P.setOverlay = function(name, props) {
+                var ov = this.__overlays[name], isNew = !ov;
+                if (isNew)
+                        ov = this.__overlays[name] = props;
+                else
+                        Object.merge(ov, props);
+                this.callHooks("onOverlayChange", name, ov, isNew);
+        };
+
+        P.deleteOverlay = function(name) {
+                delete this.__overlays[name];
+                this.callHooks("onOverlayDelete", name);
         };
 
         /* -----[ not-so-public API ]----- */
