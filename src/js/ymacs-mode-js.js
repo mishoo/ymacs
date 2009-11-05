@@ -292,7 +292,8 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
         D.KEYS = {
                 "ENTER"                : "newline_and_indent",
                 "} && ) && ] && :"     : "insert_and_indent",
-                "{"                    : "c_electric_block"
+                "{"                    : "c_electric_block",
+                "C-c C-c"              : "goto_match_paren"
         };
 
         D.CONSTRUCT = function() {
@@ -316,7 +317,7 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
 
         var events = {
                 beforeInteractiveCommand: function() {
-                        this.deleteOverlay("match-paren");
+                        clearOvl.doItNow();
                 },
                 afterInteractiveCommand: function() {
                         var p = this.tokenizer.getLastParser(), rc = this._rowcol;
@@ -369,6 +370,21 @@ Ymacs_Buffer.newCommands({
                 if ((ret = this.cmd("self_insert_command"))) {
                         this.cmd("indent_line");
                         return ret;
+                }
+        },
+
+        goto_match_paren: function() {
+                var p = this.tokenizer.getLastParser(), rc = this._rowcol;
+                if (p) {
+                        var parens = p.context.passedParens;
+                        parens.foreach(function(p){
+                                var match = p.closed;
+                                if (p.line == rc.row && p.col == rc.col) {
+                                        this.cmd("goto_char", this._rowColToPosition(match.line, match.col + 1));
+                                } else if (match.line == rc.row && match.col == rc.col - 1) {
+                                        this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
+                                }
+                        }, this);
                 }
         }
 
