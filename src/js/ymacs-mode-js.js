@@ -26,7 +26,7 @@ parseInt undefined window document alert prototype constructor".qw();
 
         var INDENT_LEVEL = 8;
 
-        var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
+        var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
 
         function isLetter(ch) {
                 return ch.toLowerCase() != ch.toUpperCase();
@@ -290,10 +290,12 @@ D P $".qw());
 DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
-                "ENTER"                : "newline_and_indent",
-                "} && ) && ] && :"     : "insert_and_indent",
-                "{"                    : "c_electric_block",
-                "C-c C-c"              : "goto_match_paren"
+                "ENTER"                                    : "newline_and_indent",
+                "} && ) && ] && : && ; && { && ( && ["     : "c_insert_and_indent",
+                // "{"                                     : "c_electric_block",
+                "C-c C-c"                                  : "c_goto_matching_paren",
+                "C-M-q"                                    : "c_indent_sexp",
+                "C-M-\\"                                   : "c_indent_region"
         };
 
         D.CONSTRUCT = function() {
@@ -365,7 +367,7 @@ Ymacs_Buffer.newCommands({
                 this.cmd("indent_line");
         },
 
-        insert_and_indent: function() {
+        c_insert_and_indent: function() {
                 var ret;
                 if ((ret = this.cmd("self_insert_command"))) {
                         this.cmd("indent_line");
@@ -373,19 +375,53 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
-        goto_match_paren: function() {
+        c_matching_paren: function() {
                 var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                 if (p) {
                         var parens = p.context.passedParens;
-                        parens.foreach(function(p){
+                        return parens.foreach(function(p){
                                 var match = p.closed;
                                 if (p.line == rc.row && p.col == rc.col) {
-                                        this.cmd("goto_char", this._rowColToPosition(match.line, match.col + 1));
+                                        $RETURN( this._rowColToPosition(match.line, match.col + 1) );
                                 } else if (match.line == rc.row && match.col == rc.col - 1) {
-                                        this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
+                                        $RETURN( this._rowColToPosition(p.line, p.col) );
                                 }
                         }, this);
                 }
+        },
+
+        c_indent_sexp: function() {
+                var pos = this.cmd("c_matching_paren");
+                if (pos) {
+                        this.cmd("c_indent_region", this.caretMarker.getPosition(), pos);
+                } else {
+                        this.signalError("Balanced expression not found");
+                }
+        },
+
+        c_indent_region: function(begin, end) {
+                if (begin == null)
+                        begin = this.caretMarker.getPosition();
+                if (end == null)
+                        end = this.markMarker.getPosition();
+                var a = [ begin, end ];
+                a.sort();
+                begin = a[0]; end = a[1];
+                end = this.createMarker(end);
+                this.cmd("save_excursion", function() {
+                        this.cmd("goto_char", begin);
+                        while (this.point() < end.getPosition()) {
+                                this.cmd("beginning_of_line");
+                                this.cmd("indent_line");
+                                this.cmd("forward_line");
+                        };
+                });
+        },
+
+        c_goto_matching_paren: function() {
+                var pos = this.cmd("c_matching_paren");
+                if (pos)
+                        return this.cmd("goto_char", pos);
         }
 
 });
