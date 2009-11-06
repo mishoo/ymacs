@@ -41,28 +41,30 @@ try {
 // docomentaţie\n\
 // ");
 
-//                 editor.setCode("\
-// <html>\n\
-//   <head>\n\
-//     <title>Ymacs -- Open Source Source Code Editor. :-p</title>\n\
-//   </head>\n\
-//   <body style=\"margin: 1em auto; width: 80%\"\n\
-//         id=\"foo\">\n\
-//     <h1 class=\"PageTitle\">Cool, isn't it?</h1>\n\
-//   </body>\n\
-// </html>\
-// ");
-
         editor.setCode("\
 function () {\n\
-        alert(\"crap\");\n\
+        alert(\"moo\");\n\
         while (foo) {\n\
         }\n\
         return this[\"mak\"];\n\
 }\n\
 ");
 
-        var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ editor ] });
+        var xml = new Ymacs_Buffer({ });
+        xml.setCode("\
+<html>\n\
+  <head>\n\
+    <title>Ymacs -- Open Source Source Code Editor. :-p</title>\n\
+  </head>\n\
+  <body style=\"margin: 1em auto; width: 80%\"\n\
+        id=\"foo\">\n\
+    <h1 class=\"PageTitle\">Cool, isn't it?</h1>\n\
+  </body>\n\
+</html>\
+");
+
+
+        var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ editor, xml ] });
         dlg._focusedWidget = ymacs;
         dlg.setSize({ x: 800, y: 600 });
         dlg.show(true);
@@ -70,6 +72,7 @@ function () {\n\
 
         // editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "js-dynarchlib" }));
         editor.cmd("javascript_dl_mode");
+        xml.cmd("xml_mode");
 
 } catch(ex) {
         console.log(ex);

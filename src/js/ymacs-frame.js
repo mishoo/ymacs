@@ -113,7 +113,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 // this._redrawBuffer();
         };
 
-        P.removeSplit = function() {
+        P.deleteOtherFrames = function() {
                 this.ymacs.keepOnlyFrame(this);
         };
 
@@ -301,14 +301,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_focus = function() {
-                this.ymacs.activeFrame = this;
+                this.ymacs.setActiveFrame(this, true);
                 this.buffer.activeFrame = this;
                 this.buffer.addEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 
         P._on_blur = function() {
                 this.buffer.activeFrame = null;
-                this.ymacs.activeFrame = null;
                 this.buffer.removeEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 

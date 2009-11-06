@@ -690,9 +690,11 @@ Ymacs_Buffer.newCommands({
         },
 
         delete_other_frames: function() {
-                this.whenActiveFrame(function(frame){
-                        this.whenYmacs("keepOnlyFrame", frame);
-                });
+                this.whenActiveFrame("deleteOtherFrames");
+        },
+
+        other_frame: function() {
+                this.whenYmacs("focusOtherFrame");
         },
 
         delete_region_or_line: function() {

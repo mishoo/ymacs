@@ -99,7 +99,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 Object.merge(args, { ymacs: this });
                 var frame = new Ymacs_Frame(args);
                 if (!args.hidden)
-                        this.frames.push(frame);
+                        this.frames.unshift(frame);
                 frame.addEventListener("onDestroy", function(frame) {
                         this.frames.remove(frame);
                 }.$(this, frame));
@@ -113,7 +113,10 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.topCont.appendWidget(frame);
                 this.topCont.__doLayout();
                 this.setActiveFrame(frame);
-                frame.focus();
+        };
+
+        P.focusOtherFrame = function() {
+                this.setActiveFrame(this.frames[0]);
         };
 
         P.focus = function() {
@@ -121,7 +124,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.frames.peek().focus();
         };
 
-        P.setActiveFrame = function(frame) {
+        P.setActiveFrame = function(frame, nofocus) {
                 var old = this.getActiveFrame();
                 if (old)
                         old.removeEventListener(this.__activeFrameEvents);
@@ -129,6 +132,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.frames.push(frame);
                 this.updateModelineWithTimer();
                 frame.addEventListener(this.__activeFrameEvents);
+                if (!nofocus)
+                        frame.focus();
         };
 
         P.getActiveFrame = function() {

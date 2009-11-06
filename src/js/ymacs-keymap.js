@@ -193,10 +193,11 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-s"                                   : "isearch_forward_regexp",
                 "M-C-r"                                   : "isearch_backward_regexp",
 
-                // frame splitting
-                "C-x 1": "delete_other_frames",
-                "C-x 2": "split_frame_vertically",
-                "C-x 3": "split_frame_horizontally",
+                // frames
+                "C-x 1"                                   : "delete_other_frames",
+                "C-x 2"                                   : "split_frame_vertically",
+                "C-x 3"                                   : "split_frame_horizontally",
+                "C-x o"                                   : "other_frame",
 
                 // necessary evil
                 "C-S-y"                                   : "yank_from_operating_system",
