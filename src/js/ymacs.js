@@ -57,6 +57,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 };
 
                 this.setActiveFrame(frame);
+                frame._redrawCaret();
         };
 
         P.pushToKillRing = function(text, prepend) {

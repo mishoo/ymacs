@@ -91,13 +91,18 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.setBuffer = function(buffer) {
                 if (this.buffer) {
+                        if (this.caretMarker) {
+                                this.caretMarker.destroy();
+                                this.caretMarker = null;
+                        }
                         this.buffer.removeEventListener(this._moreBufferEvents);
                 }
                 this.buffer = buffer;
                 if (buffer) {
                         buffer.addEventListener(this._bufferEvents);
+                        this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition());
                         this._redrawBuffer();
-                        this._redrawCaret();
+                        this._redrawCaret(true);
                 }
         };
 
@@ -173,7 +178,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 DOM.condClass(this.getCaretElement(), this.BLINKING =! this.BLINKING, "Ymacs-caret-blink");
         };
 
-        P._redrawCaret = function() {
+        P._redrawCaret = function(force) {
+                if (!force && this.ymacs.getActiveFrame() !== this)
+                        return;
                 var rc = this.buffer._rowcol, caret = this.getCaretElement(), w = caret.offsetWidth, h = caret.offsetHeight;
                 caret.style.left = (w * rc.col) + "px";
                 caret.style.top = (h * rc.row) + "px";
@@ -300,10 +307,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_focus = function() {
                 this.ymacs.setActiveFrame(this, true);
+                this.buffer.cmd("goto_char", this.caretMarker.getPosition());
                 this.buffer.addEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 
         P._on_blur = function() {
+                this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
                 this.buffer.removeEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 
