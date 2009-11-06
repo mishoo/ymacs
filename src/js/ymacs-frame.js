@@ -103,6 +103,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition());
                         this._redrawBuffer();
                         this._redrawCaret(true);
+                        this.ensureCaretVisible();
                 }
         };
 
