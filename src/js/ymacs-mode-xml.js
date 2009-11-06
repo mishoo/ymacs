@@ -186,13 +186,37 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
 });
 
+DEFINE_CLASS("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
+
+        D.KEYS = {
+                "C-c /" : "xml_close_tag"
+        };
+
+        D.CONSTRUCT = function() {
+                this.defaultHandler = null; // use next keyboard in buffer.keymap
+                this.defineKeys(D.KEYS);
+        };
+
+});
 
 Ymacs_Buffer.newMode("xml_mode", function(){
 
         var tok = this.tokenizer;
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
+        var keymap = new Ymacs_Keymap_XML({ buffer: this });
+        this.pushKeymap(keymap);
         return function() {
                 this.setTokenizer(tok);
+                this.popKeymap(keymap);
         };
+
+});
+
+Ymacs_Buffer.newCommands({
+
+        xml_close_tag: function() {
+                this.cmd("close_last_xml_tag");
+                this.cmd("indent_line");
+        }
 
 });

@@ -507,6 +507,8 @@ Ymacs_Buffer.newCommands({
                         }
 
                         eop.destroy();
+
+                        this.cmd("recenter_top_bottom");
                 });
         },
 

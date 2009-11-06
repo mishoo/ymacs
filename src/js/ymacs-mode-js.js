@@ -420,8 +420,11 @@ Ymacs_Buffer.newCommands({
 
         c_goto_matching_paren: function() {
                 var pos = this.cmd("c_matching_paren");
-                if (pos)
-                        return this.cmd("goto_char", pos);
+                if (pos) {
+                        this.cmd("goto_char", pos);
+                        this.cmd("recenter_top_bottom");
+                        return true;
+                }
         }
 
 });
