@@ -364,7 +364,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P.createDialog = function(args) {
                 if (!args.parent)
-                        args.parent = this.activeFrame && this.activeFrame.getParentDialog();
+                        args.parent = this.getActiveFrame() && this.getActiveFrame().getParentDialog();
                 var dlg = new DlDialog(args);
                 this.whenActiveFrame(function(frame){
                         dlg.addEventListener("onDestroy", frame.focus.clearingTimeout(0, frame));
@@ -372,13 +372,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return dlg;
         };
 
-        P.focus = function() {
-                if (this.activeFrame)
-                        this.activeFrame.focus();
-        };
-
         P.getActiveFrame = function() {
-                return this.activeFrame;
+                return this.whenYmacs("getActiveFrame");
         };
 
         // This function receives a string and a continuation.  If
@@ -406,10 +401,17 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        // XXX: this is way too ugly.
         P.whenActiveFrame = function() {
-                var a = Array.$(arguments);
-                a.unshift("activeFrame");
-                return this.when.apply(this, a);
+                var fr = this.getActiveFrame(); // miserable hack
+                if (fr.buffer === this) {
+                        this.activeFrame = fr;
+                        var a = Array.$(arguments);
+                        a.unshift("activeFrame");
+                        return this.when.apply(this, a);
+                } else {
+                        this.activeFrame = null;
+                }
         };
 
         P.whenYmacs = function() {

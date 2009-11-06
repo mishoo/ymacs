@@ -193,6 +193,10 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-s"                                   : "isearch_forward_regexp",
                 "M-C-r"                                   : "isearch_backward_regexp",
 
+                // buffers
+                "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
+                "C-x C-ARROW_LEFT && C-x ARROW_LEFT && C-S-TAB" : "previous_buffer",
+
                 // frames
                 "C-x 1"                                   : "delete_other_frames",
                 "C-x 2"                                   : "split_frame_vertically",

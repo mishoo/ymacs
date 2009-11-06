@@ -85,6 +85,26 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 }
         };
 
+        P.switchToNextBuffer = function() {
+                var fr = this.getActiveFrame();
+                fr.setBuffer(this.getNextBuffer(fr.buffer));
+        };
+
+        P.switchToPreviousBuffer = function() {
+                var fr = this.getActiveFrame();
+                fr.setBuffer(this.getPrevBuffer(fr.buffer));
+        };
+
+        P.getNextBuffer = function(buf) {
+                var a = this.buffers;
+                return a[a.rotateIndex(a.find(buf) + 1)];
+        };
+
+        P.getPrevBuffer = function(buf) {
+                var a = this.buffers;
+                return a[a.rotateIndex(a.find(buf) - 1)];
+        };
+
         P.createBuffer = function(args) {
                 if (!args) args = {};
                 Object.merge(args, { ymacs: this });

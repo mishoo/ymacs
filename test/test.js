@@ -28,18 +28,7 @@ Nullam vitae tellus enim, id suscipit nisl. Mauris elementum scelerisque lacus a
 
 try {
         var dlg = new DlDialog({ title: "Ymacs", resizable: true, quitBtn: "destroy" });
-        var editor = window.editor = new Ymacs_Buffer({
-                // code: info
-                // code: "(defun f() (bar))\n(lambda (a b c) (list a b c))\n"
-                // code: lorem
-        });
-
-//         editor.setCode("\
-// document.CheckThisOut\n\
-// document.YmacsRocks\n\
-// document.IKnowThat\n\
-// docomentaţie\n\
-// ");
+        var editor = new Ymacs_Buffer({ name: "test.js" });
 
         editor.setCode("\
 function () {\n\
@@ -50,7 +39,7 @@ function () {\n\
 }\n\
 ");
 
-        var xml = new Ymacs_Buffer({ });
+        var xml = new Ymacs_Buffer({ name: "index.html" });
         xml.setCode("\
 <html>\n\
   <head>\n\

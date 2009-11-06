@@ -92,8 +92,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P.setBuffer = function(buffer) {
                 if (this.buffer) {
                         this.buffer.removeEventListener(this._moreBufferEvents);
-                        if (this.buffer.activeFrame == this)
-                                this.buffer.activeFrame = null;
                 }
                 this.buffer = buffer;
                 if (buffer) {
@@ -302,12 +300,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_focus = function() {
                 this.ymacs.setActiveFrame(this, true);
-                this.buffer.activeFrame = this;
                 this.buffer.addEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 
         P._on_blur = function() {
-                this.buffer.activeFrame = null;
                 this.buffer.removeEventListener("onMessage", this._moreBufferEvents.onMessage);
         };
 

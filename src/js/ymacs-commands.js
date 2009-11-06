@@ -697,6 +697,14 @@ Ymacs_Buffer.newCommands({
                 this.whenYmacs("focusOtherFrame");
         },
 
+        next_buffer: function() {
+                this.whenYmacs("switchToNextBuffer");
+        },
+
+        previous_buffer: function() {
+                this.whenYmacs("switchToPreviousBuffer");
+        },
+
         delete_region_or_line: function() {
                 // right now this just deletes the line, since there's
                 // no notion of transient region
