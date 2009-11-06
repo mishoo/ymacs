@@ -40,21 +40,17 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 /* -----[ mode line ]----- */
                 this.modeline = new DlContainer({ className: "Ymacs_Modeline" });
                 this.modeline.setContent("--Ymacs--");
+
                 /* -----[ main content ]----- */
                 if (this.buffers.length == 0)
                         this.createBuffer();
-                var frameLayout = this.frameLayout = new DlLayout({});
 
-                // var frame = this.createFrame({ buffer: this.buffers[0] });
-                // frameLayout.packWidget(frame, { pos: "top", fill: "50%" });
-                // frameLayout.packWidget(new DlResizeBar({ widget: frame, horiz: true }), { pos: "top" });
-
-                var frame = this.createFrame({ buffer: this.buffers[0] });
-                frameLayout.packWidget(frame, { pos: "top", fill: "*" });
+                var topCont = this.topCont = new DlContainer({});
+                var frame = this.createFrame({ parent: topCont, buffer: this.buffers[0] });
 
                 this.packWidget(this.minibuffer_frame, { pos: "bottom" });
                 this.packWidget(this.modeline, { pos: "bottom" });
-                this.packWidget(frameLayout, { pos: "top", fill: "*" });
+                this.packWidget(topCont, { pos: "top", fill: "*" });
 
                 this.__activeFrameEvents = {
                         onPointChange: this._on_activeFramePointChange.$(this)
@@ -108,6 +104,16 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                         this.frames.remove(frame);
                 }.$(this, frame));
                 return frame;
+        };
+
+        P.keepOnlyFrame = function(frame) {
+                frame.parent.removeWidget(frame);
+                this.frames.remove(frame);
+                this.topCont.destroyChildWidgets();
+                this.topCont.appendWidget(frame);
+                this.topCont.__doLayout();
+                this.setActiveFrame(frame);
+                frame.focus();
         };
 
         P.focus = function() {

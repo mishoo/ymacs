@@ -681,6 +681,20 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
+        split_frame_vertically: function() {
+                this.whenActiveFrame("vsplit");
+        },
+
+        split_frame_horizontally: function() {
+                this.whenActiveFrame("hsplit");
+        },
+
+        delete_other_frames: function() {
+                this.whenActiveFrame(function(frame){
+                        this.whenYmacs("keepOnlyFrame", frame);
+                });
+        },
+
         delete_region_or_line: function() {
                 // right now this just deletes the line, since there's
                 // no notion of transient region

@@ -113,6 +113,54 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 // this._redrawBuffer();
         };
 
+        P.removeSplit = function() {
+                this.ymacs.keepOnlyFrame(this);
+        };
+
+        P.vsplit = function() {
+                var cont = this.parent;
+
+                // we need a new container for this frame (c1) and one for the sister frame (c2)
+                var c1 = new DlContainer({});
+                var c2 = new DlContainer({});
+                c1.appendWidget(this);
+
+                // clone the frame
+                var fr = this.ymacs.createFrame({ parent: c2, buffer: this.buffer });
+
+                // now create a layout, pack c1 and c2 and a resize bar
+                var layout = new DlLayout({ parent: cont });
+                layout.packWidget(c1, { pos: "top", fill: "50%" });
+                var rb = new DlResizeBar({ widget: c1, horiz: true });
+                layout.packWidget(rb, { pos: "top" });
+                layout.packWidget(c2, { pos: "top", fill: "*" });
+
+                // update dimensions
+                cont.__doLayout();
+        };
+
+        P.hsplit = function() {
+                var cont = this.parent;
+
+                // we need a new container for this frame (c1) and one for the sister frame (c2)
+                var c1 = new DlContainer({});
+                var c2 = new DlContainer({});
+                c1.appendWidget(this);
+
+                // clone the frame
+                var fr = this.ymacs.createFrame({ parent: c2, buffer: this.buffer });
+
+                // now create a layout, pack c1 and c2 and a resize bar
+                var layout = new DlLayout({ parent: cont });
+                layout.packWidget(c1, { pos: "left", fill: "50%" });
+                var rb = new DlResizeBar({ widget: c1 });
+                layout.packWidget(rb, { pos: "left" });
+                layout.packWidget(c2, { pos: "left", fill: "*" });
+
+                // update dimensions
+                cont.__doLayout();
+        };
+
         P.__restartBlinking = function() {
                 DOM.delClass(this.getCaretElement(), "Ymacs-caret-blink");
                 this.__stopBlinking();
