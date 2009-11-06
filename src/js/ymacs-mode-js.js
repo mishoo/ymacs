@@ -293,7 +293,7 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
                 "ENTER"                                    : "newline_and_indent",
                 "} && ) && ] && : && ; && { && ( && ["     : "c_insert_and_indent",
                 // "{"                                     : "c_electric_block",
-                "C-c C-c"                                  : "c_goto_matching_paren",
+                "C-c \\"                                   : "c_goto_matching_paren",
                 "C-M-q"                                    : "c_indent_sexp",
                 "C-M-\\"                                   : "c_indent_region"
         };
@@ -411,8 +411,8 @@ Ymacs_Buffer.newCommands({
                 this.cmd("save_excursion", function() {
                         this.cmd("goto_char", begin);
                         while (this.point() < end.getPosition()) {
-                                this.cmd("beginning_of_line");
                                 this.cmd("indent_line");
+                                this.cmd("beginning_of_line");
                                 this.cmd("forward_line");
                         };
                 });

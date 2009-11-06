@@ -201,9 +201,8 @@ Ymacs_Buffer.newCommands({
                 //X rx.global = true;
                 if (bound < 0)
                         bound += this.point();
-                var pos = this.point();
-                var index = this.lastIndexOfRegexp(this.getCode(), rx, pos, bound)[0];
-                return pos == index;
+                var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point(), bound);
+                return m && m.after == this.point();
         },
 
         search_forward: function(str) {
@@ -247,10 +246,9 @@ Ymacs_Buffer.newCommands({
 
         search_backward_regexp: function(rx) {
                 //X rx.global = true;
-                var pos = this.point();
-                var index = this.lastIndexOfRegexp(this.getCode(), rx, pos)[1];
-                if (index != null && index != pos) {
-                        this.cmd("goto_char", index);
+                var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point());
+                if (m && m.index != this.point()) {
+                        this.cmd("goto_char", m.index);
                         return true;
                 }
         },
