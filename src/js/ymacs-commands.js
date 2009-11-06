@@ -451,7 +451,7 @@ Ymacs_Buffer.newCommands({
                 this.cmd("_apply_operation_on_word", String.prototype.toUpperCase);
         },
 
-        fill_paragraph: function() {
+        fill_paragraph: function(noPrefix) {
                 this.cmd("save_excursion", function(){
                         if (!this.cmd("looking_at", this.syntax.paragraph_sep))
                                 this.cmd("forward_paragraph");
@@ -464,11 +464,16 @@ Ymacs_Buffer.newCommands({
                         var prefix = "", del = false;
                         if (this.cmd("looking_at", /\s*([-]|[0-9]+\.|\(?[a-z][\).])?\s+/ig)) {
                                 prefix = " ".x(this.matchData[0].length);
-                                del = /\s*[#>;]*\s*/g;
+                                del = /\s*[#>;\s]*\s*/g;
                         }
-                        else if (this.cmd("looking_at", /\s*[#>;*]+\s*/g)) {
+                        else if (this.cmd("looking_at", /\s*[#>;*\s]+\s*/g)) {
                                 prefix = this.matchData[0];
-                                del = /\s*[#>;]*\s*/g;
+                                del = /\s*[#>;\s]*\s*/g;
+                        }
+
+                        if (noPrefix) {
+                                this._deleteText(this.point(), this.point() + this.matchData[0].length);
+                                prefix = "";
                         }
 
                         // remove newlines first
@@ -505,6 +510,10 @@ Ymacs_Buffer.newCommands({
                 });
         },
 
+        fill_paragraph_no_prefix: function() {
+                return this.cmd("fill_paragraph", true);
+        },
+
         // this looks at the style of the current paragraph and starts
         // a similar one, i.e. using same indentation level and prefix
         // (list-like prefixes are incremented)
@@ -515,10 +524,7 @@ Ymacs_Buffer.newCommands({
 
                 // identify the prefix to use for each line
                 var prefix = "";
-                if (this.cmd("looking_at", /\s*[#>;*-]+\s*/g)) {
-                        prefix = this.matchData[0];
-                }
-                else if (this.cmd("looking_at", /(\s*)([0-9]+)(\.\s+)/g)) {
+                if (this.cmd("looking_at", /(\s*)([0-9]+)(\.\s+)/g)) {
                         prefix = this.matchData[1] +
                                 (parseInt(this.matchData[2], 10) + 1) +
                                 this.matchData[3];
@@ -528,7 +534,10 @@ Ymacs_Buffer.newCommands({
                                 String.fromCharCode(this.matchData[2].charCodeAt(0) + 1) +
                                 this.matchData[3];
                 }
-
+                else if (this.cmd("looking_at", /\s*[#>;*\s-]+\s*/g)) {
+                        prefix = this.matchData[0];
+                }
+                
                 this.cmd("forward_paragraph");
                 if (this.cmd("eob_p"))
                         this.cmd("newline");

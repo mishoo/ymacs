@@ -28,9 +28,9 @@ Nullam vitae tellus enim, id suscipit nisl. Mauris elementum scelerisque lacus a
 
 try {
         var dlg = new DlDialog({ title: "Ymacs", resizable: true, quitBtn: "destroy" });
-        var editor = new Ymacs_Buffer({ name: "test.js" });
+        var javascript = new Ymacs_Buffer({ name: "test.js" });
 
-        editor.setCode("\
+        javascript.setCode("\
 function () {\n\
         alert(\"moo\");\n\
         while (foo) {\n\
@@ -52,16 +52,18 @@ function () {\n\
 </html>\
 ");
 
+        var txt = new Ymacs_Buffer({ name: "lorem.txt" });
+        txt.setCode(lorem);
 
-        var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ editor, xml ] });
+        javascript.cmd("javascript_dl_mode");
+        xml.cmd("xml_mode");
+
+
+        var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ javascript, xml, txt ] });
         dlg._focusedWidget = ymacs;
         dlg.setSize({ x: 800, y: 600 });
         dlg.show(true);
         dlg.maximize(true);
-
-        // editor.setTokenizer(new Ymacs_Tokenizer({ buffer: editor, type: "js-dynarchlib" }));
-        editor.cmd("javascript_dl_mode");
-        xml.cmd("xml_mode");
 
 } catch(ex) {
         console.log(ex);
