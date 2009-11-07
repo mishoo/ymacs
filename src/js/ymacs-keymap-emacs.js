@@ -57,10 +57,10 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 
         var TMPL_INFO = String.template(
                 "<table>",
-                "<tr><td style='text-align: right'>Char:</td><td> $ch </td></tr>",
-                "<tr><td style='text-align: right'>Char code:</td><td> $code / 0x$codeHex </td></tr>",
-                "<tr><td style='text-align: right'>Position:</td><td> $point </td></tr>",
-                "<tr><td style='text-align: right'>Buffer size:</td><td> $sizeKB </td></tr>",
+                "<tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> $ch </tt></td></tr>",
+                "<tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> $code / 0x$codeHex </td></tr>",
+                "<tr><td style='text-align: right; font-weight: bold'>Position:</td><td> $point </td></tr>",
+                "<tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> $sizeKB </td></tr>",
                 "</table>"
         );
 
@@ -158,10 +158,17 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 
                 // others
                 "C-x =": function() {
+                        var ch = this.charAt(), chname = ch;
+                        if (ch == " ")
+                                chname = "<SPACE>";
+                        else if (ch == "\n")
+                                chname = "<NEWLINE>";
+                        else if (ch == "-")
+                                chname = "<DASH>";
                         this.signalInfo(TMPL_INFO({
-                                ch      : this.charAt(),
-                                code    : this.charAt().charCodeAt(0),
-                                codeHex : this.charAt().charCodeAt().hex(),
+                                ch      : chname.htmlEscape(),
+                                code    : ch.charCodeAt(0),
+                                codeHex : ch.charCodeAt().hex(),
                                 point   : this.point(),
                                 size    : this.getCodeSize(),
                                 sizeKB  : this.getCodeSize().formatBytes(2)
