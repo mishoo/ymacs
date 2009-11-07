@@ -343,12 +343,13 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         var keymap = new Ymacs_Keymap_CLanguages({ buffer: this });
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
         this.pushKeymap(keymap);
-        var syntax = Object.makeCopy(this.syntax);
 
-        this.syntax.start_string = /[\x22\x27]/g;
-        this.syntax.skip_string = /(\x22(\\.|[^\x22\\])*\x22|\x27(\\.|[^\x27\\])*\x27)/g;
-        this.syntax.start_comment = /\x2f\x2f|\2xf\*/g;
-        this.syntax.skip_comment = /\x2f\*[^*]*\*+([^\x2f*][^*]*\*+)*\x2f|\x2f\x2f[^\n]*/g;
+        var changed_vars = this.setq({
+                syntax_start_string  : /[\x22\x27]/g,
+                syntax_skip_string   : /(\x22(\\.|[^\x22\\])*\x22|\x27(\\.|[^\x27\\])*\x27)/g,
+                syntax_start_comment : /\x2f\x2f|\2xf\*/g,
+                syntax_skip_comment  : /\x2f\*[^*]*\*+([^\x2f*][^*]*\*+)*\x2f|\x2f\x2f[^\n]*/g
+        });
 
         var clearOvl = function() {
                 this.deleteOverlay("match-paren");
@@ -384,11 +385,13 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         this.addEventListener(events);
 
         return function() {
+                clearOvl.doItNow();
+                this.removeEventListener(events);
                 this.setTokenizer(tok);
                 this.popKeymap(keymap);
-                this.syntax = syntax;
-                this.removeEventListener(events);
+                this.setq(changed_vars);
         };
+
 });
 
 Ymacs_Buffer.newCommands({

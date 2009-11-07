@@ -273,7 +273,7 @@ Ymacs_Buffer.newCommands({
         },
 
         forward_word: function() {
-                var word = this.syntax.word_ng, end = false;
+                var word = this.getq("syntax_word"), end = false;
                 while (!end && !word.test(this.charAt()))
                         if (!this.cmd("forward_char"))
                                 end = true;
@@ -283,7 +283,7 @@ Ymacs_Buffer.newCommands({
         },
 
         backward_word: function() {
-                var word = this.syntax.word_ng, end = false;
+                var word = this.getq("syntax_word"), end = false;
                 while (!end && !word.test(this.charAt(-1)))
                         if (!this.cmd("backward_char"))
                                 end = true;
@@ -294,7 +294,7 @@ Ymacs_Buffer.newCommands({
 
         forward_paragraph: function() {
                 this.cmd("forward_whitespace");
-                if (this.cmd("search_forward_regexp", this.syntax.paragraph_sep))
+                if (this.cmd("search_forward_regexp", this.getq("syntax_paragraph_sep")))
                         this.cmd("goto_char", this.cmd("match_beginning") + 1);
                 else
                         this.cmd("end_of_buffer");
@@ -302,7 +302,7 @@ Ymacs_Buffer.newCommands({
 
         backward_paragraph: function() {
                 this.cmd("backward_whitespace");
-                if (this.cmd("search_backward_regexp", this.syntax.paragraph_sep))
+                if (this.cmd("search_backward_regexp", this.getq("syntax_paragraph_sep")))
                         this.cmd("goto_char", this.cmd("match_end") - 1);
                 else
                         this.cmd("beginning_of_buffer");
@@ -313,7 +313,7 @@ Ymacs_Buffer.newCommands({
                 // weird things happen; better skip it, just
                 // like Emacs does.
                 this.cmd("backward_char");
-                if (this.syntax.word_ng.test(this.charAt()))
+                if (this.getq("syntax_word").test(this.charAt()))
                         this.cmd("forward_word");
 
                 var a = [];
@@ -356,7 +356,7 @@ Ymacs_Buffer.newCommands({
 
         _apply_operation_on_word: function (op) {
                 var pos = this.point();
-                if (this.syntax.word_ng.test(this.charAt())) {
+                if (this.getq("syntax_word").test(this.charAt())) {
                         var pos2 = this.cmd("save_excursion", function(){
                                 this.cmd("forward_word");
                                 return this.point();
@@ -477,7 +477,7 @@ Ymacs_Buffer.newCommands({
 
         fill_paragraph: function(noPrefix) {
                 this.cmd("save_excursion", function(){
-                        if (!this.cmd("looking_at", this.syntax.paragraph_sep))
+                        if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
                                 this.cmd("forward_paragraph");
                         var eop = this.createMarker(this.point() - 1);
                         this.cmd("backward_paragraph");
@@ -645,11 +645,14 @@ Ymacs_Buffer.newCommands({
         dabbrev_expand: function() {
                 if (this.previousCommand != "dabbrev_expand")
                         this.setq("dabbrev_context", null);
+
                 var ctx = this.getq("dabbrev_context");
                 if (!ctx) {
                         ctx = this.setq("dabbrev_context", {});
                         var p1 = this.cmd("save_excursion", function(){
-                                this.cmd("backward_word");
+                                this.cmd("bind_variables", {
+                                        syntax_word: this.getq("syntax_word_dabbrev")
+                                }, "backward_word");
                                 return this.point();
                         });
                         if (p1 == this.point())
@@ -670,7 +673,7 @@ Ymacs_Buffer.newCommands({
                 // setup the context so that the next invocation would
                 // continue.
                 ctx.buffer.cmd("save_excursion", function repeat(){
-                        var word = this.syntax.word_ng;
+                        var word = this.getq("syntax_word_dabbrev");
                         var p1;
                         var found = false;
                         this.cmd("goto_char", ctx.lastSearch);
@@ -705,7 +708,9 @@ Ymacs_Buffer.newCommands({
                         }
                         if (p1 != null) {
                                 // console.log("%s at %d, next from %d", ctx.search, p1, ctx.lastSearch);
-                                this.cmd("forward_word");
+                                this.cmd("bind_variables", {
+                                        syntax_word: this.getq("syntax_word_dabbrev")
+                                }, "forward_word");
                                 expansion = this.cmd("buffer_substring", p1, this.point());
                                 if (expansion in ctx.encountered)
                                         repeat.call(this);
@@ -737,10 +742,10 @@ Ymacs_Buffer.newCommands({
                                 if (closed == 0)
                                         return true;
                         }
-                        else if (this.cmd("looking_at", this.syntax.skip_string)) {
+                        else if (this.cmd("looking_at", this.getq("syntax_skip_string"))) {
                                 this.cmd("goto_char", this.matchData.after);
                         }
-                        else if (this.cmd("looking_at", this.syntax.skip_comment)) {
+                        else if (this.cmd("looking_at", this.getq("syntax_skip_comment"))) {
                                 this.cmd("goto_char", this.matchData.after);
                         }
                         else this.cmd("forward_char");
@@ -760,10 +765,10 @@ Ymacs_Buffer.newCommands({
                                 if (closed == 0)
                                         return true;
                         }
-                        else if (this.cmd("looking_back", this.syntax.skip_string)) {
+                        else if (this.cmd("looking_back", this.getq("syntax_skip_string"))) {
                                 this.cmd("goto_char", this.matchData.index);
                         }
-                        else if (this.cmd("looking_back", this.syntax.skip_comment)) {
+                        else if (this.cmd("looking_back", this.getq("syntax_skip_comment"))) {
                                 this.cmd("goto_char", this.matchData.index);
                         }
                         else this.cmd("backward_char");

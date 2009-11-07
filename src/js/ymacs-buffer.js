@@ -34,6 +34,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        function TEST_DABBREV_WORD_CHAR(c) {
+                if (c) {
+                        var code = c.charCodeAt(0);
+                        return (code >= 48 && code <= 57) || c == "_" || c.toUpperCase() != c.toLowerCase();
+                }
+        };
+
         P.lastIndexOfRegexp = function(str, re, caret, bound) {
                 str = str.substring(0, caret);
                 re = Ymacs_Regexp.search_backward(re);
@@ -82,44 +89,52 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         D.CONSTRUCT = function() {
                 this.COMMANDS = Object.makeCopy(D.COMMANDS);
-                this.markers = [];
+
                 this.__savingExcursion = 0;
                 this.__preventUpdates = 0;
-                this.__dirtyLines = [];
                 this.__preventUndo = 0;
+                this.__undoInProgress = 0;
+                this.__inInteractiveCommand = 0;
+                this.__dirtyLines = [];
                 this.__undoQueue = [];
                 this.__redoQueue = [];
-                this.__undoInProgress = 0;
                 this.__overlays = {};
+
+                this.markers = [];
                 this.caretMarker = this.createMarker(0, false, "point");
                 this.markMarker = this.createMarker(0, true, "mark");
                 this.matchData = [];
                 this.previousCommand = null;
                 this.currentCommand = null;
-                this.inInteractiveCommand = 0;
+
                 this.variables = {
                         case_fold_search            : true,
                         line_movement_requested_col : 0,
                         fill_column                 : 78,
                         tab_width                   : 8,
-                        indent_level                : 8
+                        indent_level                : 8,
+
+                        // syntax variables
+                        syntax_word                 : { test: TEST_UNICODE_WORD_CHAR },
+                        syntax_word_dabbrev         : { test: TEST_DABBREV_WORD_CHAR },
+                        syntax_paragraph_sep        : /\n\s*\n/g
                 };
+
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
                         // XXX: this shouldn't be needed
-                        if (this.inInteractiveCommand == 0 && this.__preventUpdates == 0) {
+                        if (this.__inInteractiveCommand == 0 && this.__preventUpdates == 0) {
                                 this.callHooks("onPointChange", this._rowcol, this.point());
                         }
                 });
-                this.syntax = {
-                        word_ng       : { test: TEST_UNICODE_WORD_CHAR },
-                        paragraph_sep : /\n\s*\n/g
-                };
+
                 this._tokenizerEvents = {
                         "onFoundToken": this._on_tokenizerFoundToken.$(this)
                 };
+
                 this._textProperties = new Ymacs_Text_Properties({});
                 this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
+
                 this.keymap = [];
                 this._keymap_isearch = new Ymacs_Keymap_ISearch({ buffer: this });
                 this.pushKeymap(this.makeDefaultKeymap());
@@ -145,7 +160,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this.variables[i] = vars[i];
                 }
                 try {
-                        return cont.apply(this, Array.$(arguments, 2));
+                        if (cont instanceof Function)
+                                return cont.apply(this, Array.$(arguments, 2));
+                        else
+                                return this.cmdApply(cont, Array.$(arguments, 2));
                 } finally {
                         for (i in saved)
                                 this.variables[i] = saved[i];
@@ -295,7 +313,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                         this._placeUndoBoundary();
                                 }
                         }
-                        ++this.inInteractiveCommand;
+                        ++this.__inInteractiveCommand;
                         this.preventUpdates();
                         try {
                                 this.callHooks("beforeInteractiveCommand");
@@ -304,7 +322,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 if (!/_mark$/.test(this.currentCommand))
                                         this.clearTransientMark();
                                 this.resumeUpdates();
-                                --this.inInteractiveCommand;
+                                --this.__inInteractiveCommand;
                                 this.callHooks("afterInteractiveCommand");
                                 this.previousCommand = cmd;
                                 this.sameCommandCount++;
