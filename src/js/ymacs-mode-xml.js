@@ -8,7 +8,9 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             $inComment  = null,
             PARSER      = { next: next, copy: copy, indentation: indentation };
 
-        var INDENT_LEVEL = 2;
+        function INDENT_LEVEL() {
+                return stream.buffer.getq("indent_level");
+        };
 
         function foundToken(c1, c2, type) {
                 tok.onToken(stream.line, c1, c2, type);
@@ -168,16 +170,16 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         function indentation() {
                 var indent, lastTag;
                 if ($inComment) {
-                        indent = stream.lineIndentation($inComment.line) + INDENT_LEVEL;
+                        indent = stream.lineIndentation($inComment.line) + INDENT_LEVEL();
                 }
                 else if ($inTag) {
                         indent = $inTag.c1 + $inTag.id.length + 1;
                 }
                 else if ((lastTag = $tags.peek())) {
-                        indent = stream.lineIndentation(lastTag.line) + INDENT_LEVEL;
+                        indent = stream.lineIndentation(lastTag.line) + INDENT_LEVEL();
                         // if current line begins with a closing tag, back one level
                         if (/^\s*<\x2f/.test(stream.lineText()))
-                                indent -= INDENT_LEVEL;
+                                indent -= INDENT_LEVEL();
                 }
                 return indent;
         };
@@ -205,9 +207,11 @@ Ymacs_Buffer.newMode("xml_mode", function(){
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
         var keymap = new Ymacs_Keymap_XML({ buffer: this });
         this.pushKeymap(keymap);
+        var changed_vars = this.setq({ indent_level: 2 });
         return function() {
                 this.setTokenizer(tok);
                 this.popKeymap(keymap);
+                this.setq(changed_vars);
         };
 
 });

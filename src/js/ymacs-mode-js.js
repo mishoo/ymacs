@@ -24,8 +24,6 @@ Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
 parseInt undefined window document alert prototype constructor".qw();
 
-        var INDENT_LEVEL = 8;
-
         var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
 
         function isLetter(ch) {
@@ -66,22 +64,29 @@ parseInt undefined window document alert prototype constructor".qw();
                     $parens = [],
                     $passedParens = [],
                     $inComment = null,
+                    $inString = null,
                     PARSER = {
                             next        : next,
                             copy        : copy,
                             indentation : indentation
                     };
 
+                function INDENT_LEVEL() {
+                        return stream.buffer.getq("indent_level");
+                };
+
                 function copy() {
                         var context = restore.context = {
                                 cont         : $cont.slice(0),
                                 inComment    : $inComment,
+                                inString     : $inString,
                                 parens       : $parens.slice(0),
                                 passedParens : $passedParens.slice(0)
                         };
                         function restore() {
                                 $cont          = context.cont.slice(0);
                                 $inComment     = context.inComment;
+                                $inString      = context.inString;
                                 $parens        = context.parens.slice(0);
                                 $passedParens  = context.passedParens.slice(0);
                                 return PARSER;
@@ -106,16 +111,20 @@ parseInt undefined window document alert prototype constructor".qw();
                         return ch && { line: stream.line, c1: col, c2: stream.col, id: name };
                 };
 
-                function readComment(type, end) {
-                        var line = stream.lineText(), pos = line.indexOf(end, stream.col);
+                function readComment() {
+                        var line = stream.lineText(), pos = line.indexOf("*/", stream.col);
+                        var m = /^\s*\*+/.exec(line.substr(stream.col));
+                        if (m) {
+                                foundToken(stream.col, stream.col += m[0].length, "mcomment-starter");
+                        }
                         if (pos >= 0) {
                                 $cont.pop();
                                 $inComment = null;
-                                foundToken(stream.col, pos, type);
-                                foundToken(pos, pos += end.length, type + "-stopper");
+                                foundToken(stream.col, pos, "mcomment");
+                                foundToken(pos, pos += 2, "mcomment-stopper");
                                 stream.col = pos;
                         } else {
-                                foundToken(stream.col, line.length, type);
+                                foundToken(stream.col, line.length, "mcomment");
                                 stream.col = line.length;
                         }
                 };
@@ -126,6 +135,7 @@ parseInt undefined window document alert prototype constructor".qw();
                                 ch = stream.peek();
                                 if (ch === end && !esc) {
                                         $cont.pop();
+                                        $inString = null;
                                         foundToken(start, stream.col, type);
                                         foundToken(stream.col, ++stream.col, type + "-stopper");
                                         return true;
@@ -150,13 +160,14 @@ parseInt undefined window document alert prototype constructor".qw();
                         if (stream.lookingAt("/*")) {
                                 $inComment = { line: stream.line, c1: stream.col };
                                 foundToken(stream.col, stream.col += 2, "mcomment-starter");
-                                $cont.push(readComment.$C("mcomment", "*/"));
+                                $cont.push(readComment);
                         }
                         else if (stream.lookingAt("//")) {
                                 foundToken(stream.col, stream.col += 2, "comment-starter");
                                 foundToken(stream.col, stream.col = stream.lineLength(), "comment");
                         }
                         else if (ch === '"' || ch === "'") {
+                                $inString = { line: stream.line, c1: stream.col };
                                 foundToken(stream.col, ++stream.col, "string-starter");
                                 $cont.push(readString.$C(ch, "string"));
                         }
@@ -199,9 +210,29 @@ parseInt undefined window document alert prototype constructor".qw();
                 };
 
                 function indentation() {
+
+                        // no indentation for continued strings
+                        if ($inString)
+                                return 0;
+
                         var row = stream.line;
                         var currentLine = stream.lineText();
                         var indent = 0;
+
+                        if ($inComment) {
+                                var commentStartLine = stream.lineText($inComment.line);
+                                indent = $inComment.c1 + 1;
+                                if (!/^\s*\*/.test(currentLine)) {
+                                        // align with the first non-whitespace and non-asterisk character in the comment
+                                        var re = /[^\s*]/g;
+                                        re.lastIndex = $inComment.c1 + 1;
+                                        var m = re.exec(commentStartLine);
+                                        if (m)
+                                                indent = m.index;
+                                }
+                                return indent;
+                        }
+
                         var p = $parens.peek();
                         if (p) {
                                 // check if the current line closes the paren
@@ -220,11 +251,11 @@ parseInt undefined window document alert prototype constructor".qw();
                                 else {
                                         // Otherwise we should indent to one level more than the indentation of the line
                                         // containing the opening paren.
-                                        indent = stream.lineIndentation(p.line) + INDENT_LEVEL;
+                                        indent = stream.lineIndentation(p.line) + INDENT_LEVEL();
 
                                         // but if this line closes the paren, then back one level
                                         if (thisLineCloses)
-                                                indent -= INDENT_LEVEL;
+                                                indent -= INDENT_LEVEL();
                                 }
                         }
 
@@ -243,16 +274,16 @@ parseInt undefined window document alert prototype constructor".qw();
                                         p = $passedParens.peek();
                                         var stmtLine = stream.lineText(p.line);
                                         if (/^\s*(if|for|while)\W/.test(stmtLine))
-                                                indent += INDENT_LEVEL;
+                                                indent += INDENT_LEVEL();
                                 }
                                 else if (/\Welse\s*$/.test(before)) {
-                                        indent += INDENT_LEVEL;
+                                        indent += INDENT_LEVEL();
                                 }
                         }
 
                         // switch labels use half the indent level, which is my favorite
                         if (/^\s*(case|default)\W/.test(currentLine))
-                                indent -= INDENT_LEVEL / 2;
+                                indent -= INDENT_LEVEL() / 2;
 
                         return indent;
                 };
@@ -290,12 +321,12 @@ D P $".qw());
 DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
-                "ENTER"                                    : "newline_and_indent",
-                "} && ) && ] && : && ; && { && ( && ["     : "c_insert_and_indent",
-                // "{"                                     : "c_electric_block",
-                "C-c \\"                                   : "c_goto_matching_paren",
-                "C-M-q"                                    : "c_indent_sexp",
-                "C-M-\\"                                   : "c_indent_region"
+                "ENTER"                                     : "newline_and_indent",
+                "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent",
+                // "{"                                      : "c_electric_block",
+                "C-c \\"                                    : "c_goto_matching_paren",
+                "C-M-q"                                     : "c_indent_sexp",
+                "C-M-\\"                                    : "c_indent_region"
         };
 
         D.CONSTRUCT = function() {

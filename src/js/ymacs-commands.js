@@ -757,6 +757,14 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
+        kill_sexp: function() {
+                this._killingAction(this.point(),
+                                    this.cmd("save_excursion", function() {
+                                            this.cmd("forward_sexp");
+                                            return this.point();
+                                    }));
+        },
+
         /* -----[ frames and buffers ]----- */
 
         split_frame_vertically: function() {

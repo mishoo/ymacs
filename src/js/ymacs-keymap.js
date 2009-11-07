@@ -171,6 +171,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-d"                                     : "kill_word",
                 "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
                 "C-k"                                     : "kill_line",
+                "M-C-k"                                   : "kill_sexp",
                 "C-y"                                     : "yank",
                 "M-y"                                     : "yank_pop",
                 "C-SPACE"                                 : "set_mark_command",

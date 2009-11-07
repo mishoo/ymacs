@@ -157,7 +157,19 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.setVariable = function(key, val) {
-                return this.variables[key] = val;
+                if (typeof key == "string") {
+                        return this.variables[key] = val;
+                } else {
+                        var changed = {};
+                        for (var i in key) {
+                                changed[i] = this.variables[i];
+                                if (key[i] === undefined)
+                                        delete this.variables[i];
+                                else
+                                        this.variables[i] = key[i];
+                        }
+                        return changed;
+                }
         };
 
         P.setq = P.setVariable;
