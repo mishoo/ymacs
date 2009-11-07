@@ -100,7 +100,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }
                 this.buffer = buffer;
                 if (buffer) {
-                        buffer.addEventListener(this._bufferEvents);
+                        buffer.addEventListener(this.focusInside() ? this._moreBufferEvents : this._bufferEvents);
                         this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition());
                         this._redrawBuffer();
                         this._redrawCaret(true);
