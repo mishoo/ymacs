@@ -190,19 +190,29 @@ Ymacs_Buffer.newCommands({
         },
 
         looking_at: function(rx) {
-                //X rx.global = true;
                 var pos = rx.lastIndex = this.point();
                 var ret = this.matchData = rx.exec(this.getCode());
+                if (ret)
+                        ret.after = rx.lastIndex;
                 // console.log(ret, ret && ret.index);
                 return ret && ret.index == pos;
         },
 
-        looking_back: function(rx, bound) {
-                //X rx.global = true;
-                if (bound < 0)
-                        bound += this.point();
-                var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point(), bound);
+        looking_back: function(rx) {
+                var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point());
                 return m && m.after == this.point();
+
+                /* Crap, the following is slower and buggy.  We really
+                 * can't do any better without better RegExp support
+                 * from the browser.
+                 */
+                // rx = Ymacs_Regexp.looking_back(rx);
+                // var m = rx.exec(this.getCode().substring(0, this.point()));
+                // if (m) {
+                //         this.matchData = m;
+                //         m.after = this.point();
+                //         return true;
+                // }
         },
 
         search_forward: function(str) {
@@ -234,18 +244,17 @@ Ymacs_Buffer.newCommands({
         },
 
         search_forward_regexp: function(rx) {
-                //X rx.global = true;
                 var code = this.getCode();
                 var pos = rx.lastIndex = this.point();
                 var ret = this.matchData = rx.exec(code);
                 if (ret && rx.lastIndex != pos) {
+                        ret.after = rx.lastIndex;
                         this.cmd("goto_char", rx.lastIndex);
                         return true;
                 }
         },
 
         search_backward_regexp: function(rx) {
-                //X rx.global = true;
                 var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point());
                 if (m && m.index != this.point()) {
                         this.cmd("goto_char", m.index);
@@ -335,6 +344,38 @@ Ymacs_Buffer.newCommands({
                 this._killingAction(pos, pos2, true);
         },
 
+        _apply_operation_on_word: function (op) {
+                var pos = this.point();
+                if (this.syntax.word_ng.test(this.charAt())) {
+                        var pos2 = this.cmd("save_excursion", function(){
+                                this.cmd("forward_word");
+                                return this.point();
+                        });
+                        var word = op.call(this._bufferSubstring(pos, pos2));
+                        this._deleteText(pos, pos2);
+                        this._insertText(word);
+                } else {
+                        this.cmd("forward_word");
+                        this.cmd("backward_word");
+                        if (pos != this.point())
+                                this.cmd(this.currentCommand);
+                }
+        },
+
+        capitalize_word: function() {
+                this.cmd("_apply_operation_on_word", function() {
+                        return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
+                });
+        },
+
+        downcase_word: function() {
+                this.cmd("_apply_operation_on_word", String.prototype.toLowerCase);
+        },
+
+        upcase_word: function() {
+                this.cmd("_apply_operation_on_word", String.prototype.toUpperCase);
+        },
+
         goto_char: function(pos) {
                 return this._repositionCaret(pos);
         },
@@ -419,37 +460,7 @@ Ymacs_Buffer.newCommands({
                 this._centerOnCaret();
         },
 
-        _apply_operation_on_word: function (op) {
-                var pos = this.point();
-                if (this.syntax.word_ng.test(this.charAt())) {
-                        var pos2 = this.cmd("save_excursion", function(){
-                                this.cmd("forward_word");
-                                return this.point();
-                        });
-                        var word = op.call(this._bufferSubstring(pos, pos2));
-                        this._deleteText(pos, pos2);
-                        this._insertText(word);
-                } else {
-                        this.cmd("forward_word");
-                        this.cmd("backward_word");
-                        if (pos != this.point())
-                                this.cmd(this.currentCommand);
-                }
-        },
-
-        capitalize_word: function() {
-                this.cmd("_apply_operation_on_word", function() {
-                        return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
-                });
-        },
-
-        downcase_word: function() {
-                this.cmd("_apply_operation_on_word", String.prototype.toLowerCase);
-        },
-
-        upcase_word: function() {
-                this.cmd("_apply_operation_on_word", String.prototype.toUpperCase);
-        },
+        /* -----[ paragraphs ]----- */
 
         fill_paragraph: function(noPrefix) {
                 this.cmd("save_excursion", function(){
@@ -539,7 +550,7 @@ Ymacs_Buffer.newCommands({
                 else if (this.cmd("looking_at", /\s*[#>;*\s-]+\s*/g)) {
                         prefix = this.matchData[0];
                 }
-                
+
                 this.cmd("forward_paragraph");
                 if (this.cmd("eob_p"))
                         this.cmd("newline");
@@ -615,6 +626,8 @@ Ymacs_Buffer.newCommands({
                         this.cmd("insert", " ".x(indent));
                 });
         },
+
+        /* -----[ dabbrev ]----- */
 
         dabbrev_expand: function() {
                 if (this.previousCommand != "dabbrev_expand")
@@ -692,6 +705,60 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
+        /* -----[ sexp-based movement ]----- */
+
+        // these two are awfully slow if they have to search a big
+        // text; backward_sexp is triple-awfully slow even if it has
+        // to search small text at the end of a big buffer.
+
+        forward_sexp: function() {
+                var closed = 0;
+                while (!this.cmd("eob_p")) {
+                        if (this.cmd("looking_at", /[\[\{\(]/g)) {
+                                ++closed;
+                                this.cmd("forward_char");
+                        }
+                        else if (this.cmd("looking_at", /[\]\}\)]/g)) {
+                                --closed;
+                                this.cmd("forward_char");
+                                if (closed == 0)
+                                        return true;
+                        }
+                        else if (this.cmd("looking_at", this.syntax.skip_string)) {
+                                this.cmd("goto_char", this.matchData.after);
+                        }
+                        else if (this.cmd("looking_at", this.syntax.skip_comment)) {
+                                this.cmd("goto_char", this.matchData.after);
+                        }
+                        else this.cmd("forward_char");
+                }
+        },
+
+        backward_sexp: function() {
+                var closed = 0;
+                while (!this.cmd("bob_p")) {
+                        if (this.cmd("looking_back", /[\]\}\)]/g)) {
+                                ++closed;
+                                this.cmd("backward_char");
+                        }
+                        else if (this.cmd("looking_back", /[\[\{\(]/g)) {
+                                --closed;
+                                this.cmd("backward_char");
+                                if (closed == 0)
+                                        return true;
+                        }
+                        else if (this.cmd("looking_back", this.syntax.skip_string)) {
+                                this.cmd("goto_char", this.matchData.index);
+                        }
+                        else if (this.cmd("looking_back", this.syntax.skip_comment)) {
+                                this.cmd("goto_char", this.matchData.index);
+                        }
+                        else this.cmd("backward_char");
+                }
+        },
+
+        /* -----[ frames and buffers ]----- */
+
         split_frame_vertically: function() {
                 this.whenActiveFrame("vsplit");
         },
@@ -715,6 +782,8 @@ Ymacs_Buffer.newCommands({
         previous_buffer: function() {
                 this.whenYmacs("switchToPreviousBuffer");
         },
+
+        /* -----[ other ]----- */
 
         delete_region_or_line: function() {
                 // right now this just deletes the line, since there's

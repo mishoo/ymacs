@@ -1,6 +1,6 @@
 // @require ymacs-buffer.js
 
-DEFINE_CLASS("Ymacs_String_Stream", null, function(D, P){
+DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
 
         D.DEFAULT_ARGS = {
                 buffer : [ "buffer" , null ],
@@ -160,7 +160,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.reset = function() {
-                this.stream = new Ymacs_String_Stream({ buffer: this.buffer });
+                this.stream = new Ymacs_Stream({ buffer: this.buffer });
                 this.theParser = this.type(this.stream, this);
                 this.parsers = [];
                 this.parsers[-1] = this.theParser.copy();

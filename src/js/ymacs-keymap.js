@@ -159,6 +159,8 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-ARROW_DOWN"                            : "forward_paragraph",
                 "C-ARROW_UP"                              : "backward_paragraph",
                 "C-l"                                     : "recenter_top_bottom",
+                "C-M-f && C-M-n"                          : "forward_sexp",
+                "C-M-b && C-M-p"                          : "backward_sexp",
                 "PAGE_UP && M-v"                          : "scroll_up",
                 "PAGE_DOWN && C-v"                        : "scroll_down",
 

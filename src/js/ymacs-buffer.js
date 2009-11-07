@@ -34,24 +34,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
-        var RE_CACHE = {};
-
         P.lastIndexOfRegexp = function(str, re, caret, bound) {
                 str = str.substring(0, caret);
-                var cached = RE_CACHE[re];
-                if (!cached) {
-                        cached = re.toString();
-                        cached = "([^]*)" + cached.substr(1);
-                        var pos = cached.lastIndexOf("/"), flags = "";
-                        if (pos >= 0) {
-                                flags = cached.substr(pos + 1).replace(/g/g, "");
-                        }
-                        flags += "g";
-                        cached = cached.substring(0, pos);
-                        cached = RE_CACHE[re] = new RegExp(cached, flags);
-                }
-                cached.lastIndex = bound;
-                var m = cached.exec(str);
+                re = Ymacs_Regexp.search_backward(re);
+                re.lastIndex = bound;
+                var m = re.exec(str);
                 if (m) {
                         var a = Array.$(m, 1);
                         a.index = m.index + m[1].length;
@@ -61,23 +48,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         return a;
                 }
         };
-
-        // P.lastIndexOfRegexp = function(str, re, caret, bound) {
-        //         if (bound == null || bound < 0)
-        //                 bound = 0;
-        //         var m, pos = 0, index = null;
-        //         re.lastIndex = bound;
-        //         re.global = true;
-        //         this.matchData = null;
-        //         while ((m = re.exec(str))) {
-        //                 if (re.lastIndex > caret)
-        //                         break;
-        //                 this.matchData = m;
-        //                 pos = re.lastIndex;
-        //                 index = m.index;
-        //         }
-        //         return [ pos, index ];
-        // };
 
         D.COMMANDS = {};
 
