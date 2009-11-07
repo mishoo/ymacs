@@ -66,10 +66,10 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 // movement
-                "ARROW_UP && C-p"                         : "backward_line",
-                "ARROW_DOWN && C-n"                       : "forward_line",
-                "ARROW_LEFT && C-b"                       : "backward_char",
-                "ARROW_RIGHT && C-f"                      : "forward_char",
+                "ARROW_UP     && C-p"                     : "backward_line",
+                "ARROW_DOWN   && C-n"                     : "forward_line",
+                "ARROW_LEFT   && C-b"                     : "backward_char",
+                "ARROW_RIGHT  && C-f"                     : "forward_char",
                 "HOME"                                    : "beginning_of_indentation_or_line",
                 "END && C-e"                              : "end_of_line",
                 "C-a"                                     : "beginning_of_line",
@@ -84,6 +84,21 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-M-b && C-M-p"                          : "backward_sexp",
                 "PAGE_UP && M-v"                          : "scroll_up",
                 "PAGE_DOWN && C-v"                        : "scroll_down",
+
+                // transient mark
+                "S-ARROW_UP       && S-C-p"               : "backward_line_mark",
+                "S-ARROW_DOWN     && S-C-n"               : "forward_line_mark",
+                "S-ARROW_LEFT     && S-C-b"               : "backward_char_mark",
+                "S-ARROW_RIGHT    && S-C-f"               : "forward_char_mark",
+                "S-C-ARROW_RIGHT  && S-M-f"               : "forward_word_mark",
+                "S-C-ARROW_LEFT   && S-M-b"               : "backward_word_mark",
+                "S-C-ARROW_DOWN"                          : "forward_paragraph_mark",
+                "S-C-ARROW_UP"                            : "backward_paragraph_mark",
+                "S-HOME"                                  : "beginning_of_indentation_or_line_mark",
+                "S-C-a"                                   : "beginning_of_line_mark",
+                "S-END"                                   : "end_of_line_mark",
+                "S-C-HOME"                                : "beginning_of_buffer_mark",
+                "S-C-END"                                 : "end_of_buffer_mark",
 
                 // basic editing
                 "BACKSPACE"                               : "backward_delete_char",
@@ -117,18 +132,6 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-s"                                   : "isearch_forward_regexp",
                 "M-C-r"                                   : "isearch_backward_regexp",
 
-                // others
-                "C-x =": function() {
-                        this.signalError(TMPL_INFO({
-                                ch      : this.charAt(),
-                                code    : this.charAt().charCodeAt(0),
-                                codeHex : this.charAt().charCodeAt().hex(),
-                                point   : this.point(),
-                                size    : this.getCodeSize(),
-                                sizeKB  : this.getCodeSize().formatBytes(2)
-                        }), true);
-                },
-
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
                 "C-x C-ARROW_LEFT && C-x ARROW_LEFT && C-S-TAB" : "previous_buffer",
@@ -151,7 +154,19 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "S-BACKSPACE"                             : "backward_delete_whitespace",
                 "S-DELETE"                                : "delete_whitespace",
                 "M-ENTER"                                 : "start_next_paragraph",
-                "M-S-q"                                   : "fill_paragraph_no_prefix"
+                "M-S-q"                                   : "fill_paragraph_no_prefix",
+
+                // others
+                "C-x =": function() {
+                        this.signalInfo(TMPL_INFO({
+                                ch      : this.charAt(),
+                                code    : this.charAt().charCodeAt(0),
+                                codeHex : this.charAt().charCodeAt().hex(),
+                                point   : this.point(),
+                                size    : this.getCodeSize(),
+                                sizeKB  : this.getCodeSize().formatBytes(2)
+                        }), true);
+                }
         };
 
         D.CONSTRUCT = function() {

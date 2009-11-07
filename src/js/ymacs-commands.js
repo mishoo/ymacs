@@ -84,45 +84,53 @@ Ymacs_Buffer.newCommands({
         },
 
         backward_delete_char: function() {
-                var pos = this.point();
-                if (pos > 0) {
-                        var rc = this._rowcol, line = this.code[rc.row], ch;
-                        if (rc.col > 0) {
-                                ch = line.charAt(rc.col - 1);
-                                line = line.substr(0, rc.col - 1) + line.substr(rc.col);
-                                this._replaceLine(rc.row, line);
-                        } else {
-                                ch = "\n";
-                                // merge with the previous line
-                                line = this.code[rc.row - 1] + line;
-                                this._replaceLine(rc.row - 1, line);
-                                this._deleteLine(rc.row);
+                if (!this.deleteTransientRegion()) {
+                        var pos = this.point();
+                        if (pos > 0) {
+                                var rc = this._rowcol, line = this.code[rc.row], ch;
+                                if (rc.col > 0) {
+                                        ch = line.charAt(rc.col - 1);
+                                        line = line.substr(0, rc.col - 1) + line.substr(rc.col);
+                                        this._replaceLine(rc.row, line);
+                                } else {
+                                        ch = "\n";
+                                        // merge with the previous line
+                                        line = this.code[rc.row - 1] + line;
+                                        this._replaceLine(rc.row - 1, line);
+                                        this._deleteLine(rc.row);
+                                }
+                                // *** UNDO RECORDING
+                                if (!this.__preventUndo)
+                                        this._recordChange(2, pos - 1, 1, ch);
+                                this._updateMarkers(pos, -1);
                         }
-                        // *** UNDO RECORDING
-                        if (!this.__preventUndo)
-                                this._recordChange(2, pos - 1, 1, ch);
-                        this._updateMarkers(pos, -1);
                 }
         },
 
         delete_char: function() {
-                if (this.cmd("forward_char"))
-                        this.cmd("backward_delete_char");
+                if (!this.deleteTransientRegion()) {
+                        if (this.cmd("forward_char"))
+                                this.cmd("backward_delete_char");
+                }
         },
 
         delete_whitespace: function(noLine) {
-                var p = this.point();
-                if (this.cmd("forward_whitespace", noLine)) {
-                        this._deleteText(p, this.point());
-                        return true;
+                if (!this.deleteTransientRegion()) {
+                        var p = this.point();
+                        if (this.cmd("forward_whitespace", noLine)) {
+                                this._deleteText(p, this.point());
+                                return true;
+                        }
                 }
         },
 
         backward_delete_whitespace: function(noLine) {
-                var p = this.point();
-                if (this.cmd("backward_whitespace", noLine)) {
-                        this._deleteText(this.point(), p);
-                        return true;
+                if (!this.deleteTransientRegion()) {
+                        var p = this.point();
+                        if (this.cmd("backward_whitespace", noLine)) {
+                                this._deleteText(this.point(), p);
+                                return true;
+                        }
                 }
         },
 
@@ -131,6 +139,7 @@ Ymacs_Buffer.newCommands({
         },
 
         self_insert_command: function(ev) {
+                this.deleteTransientRegion();
                 if (!ev)
                         ev = this.interactiveEvent;
                 var ch = String.fromCharCode(ev.charCode),
@@ -153,6 +162,7 @@ Ymacs_Buffer.newCommands({
         },
 
         newline: function() {
+                this.deleteTransientRegion();
                 this.cmd("insert", "\n");
         },
 
@@ -453,7 +463,10 @@ Ymacs_Buffer.newCommands({
 
         exchange_point_and_mark: function() {
                 this.caretMarker.swap(this.markMarker);
-                this.cmd("recenter_top_bottom");
+                if (this.previousCommand == "exchange_point_and_mark") {
+                        // it seems nice to activate the transient mark now
+                        this.ensureTransientMark(true);
+                }
         },
 
         recenter_top_bottom: function() {
@@ -794,13 +807,13 @@ Ymacs_Buffer.newCommands({
         /* -----[ other ]----- */
 
         delete_region_or_line: function() {
-                // right now this just deletes the line, since there's
-                // no notion of transient region
-                this.cmd("beginning_of_line");
-                var pos = this.point();
-                if (this.cmd("forward_line") || this.cmd("end_of_line")) {
-                        this._deleteText(pos, this.point());
-                        return true;
+                if (!this.deleteTransientRegion()) {
+                        this.cmd("beginning_of_line");
+                        var pos = this.point();
+                        if (this.cmd("forward_line") || this.cmd("end_of_line")) {
+                                this._deleteText(pos, this.point());
+                                return true;
+                        }
                 }
         },
 
@@ -885,5 +898,38 @@ Ymacs_Buffer.newCommands({
                 }
 
         });
+
+})();
+
+/* -----[ transient mark commands are quite similar to one another, so let's define them automagically ]----- */
+
+(function(){
+
+        function define_transient_mark_cmd(cmd) {
+                Ymacs_Buffer.COMMANDS[cmd + "_mark"] = function() {
+                        this.ensureTransientMark();
+                        this.cmdApply(cmd, arguments);
+                        this.ensureTransientMark();
+                };
+        };
+
+        [
+                "forward_char",
+                "forward_word",
+                "forward_line",
+                "forward_paragraph",
+                "forward_sexp",
+                "beginning_of_line",
+                "beginning_of_indentation_or_line",
+                "beginning_of_buffer",
+                "backward_char",
+                "backward_word",
+                "backward_line",
+                "backward_paragraph",
+                "backward_sexp",
+                "end_of_line",
+                "end_of_buffer"
+
+        ].foreach(define_transient_mark_cmd);
 
 })();

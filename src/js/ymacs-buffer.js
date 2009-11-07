@@ -301,6 +301,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this.callHooks("beforeInteractiveCommand");
                                 return func.apply(this, arguments);
                         } finally {
+                                if (!/_mark$/.test(this.currentCommand))
+                                        this.clearTransientMark();
                                 this.resumeUpdates();
                                 --this.inInteractiveCommand;
                                 this.callHooks("afterInteractiveCommand");
@@ -334,8 +336,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.cmd = function(cmd) {
-                var ret = this.COMMANDS[cmd].apply(this, Array.$(arguments, 1));
-                return ret;
+                return this.COMMANDS[cmd].apply(this, Array.$(arguments, 1));
+        };
+
+        P.cmdApply = function(cmd, args) {
+                return this.COMMANDS[cmd].apply(this, args);
         };
 
         P.cmdRepeat = function(times) {
@@ -439,17 +444,61 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.setOverlay = function(name, props) {
-                var ov = this.__overlays[name], isNew = !ov;
+                var ov = this.__overlays[name], isNew = !ov, tmp;
                 if (isNew)
                         ov = this.__overlays[name] = props;
                 else
                         Object.merge(ov, props);
+                // normalize line/col
+                if (ov.line2 < ov.line1) {
+                        tmp = ov.line2; ov.line2 = ov.line1; ov.line1 = tmp;
+                        tmp = ov.col2; ov.col2 = ov.col1; ov.col1 = tmp;
+                }
+                else if (ov.line2 == ov.line1 && ov.col2 < ov.col1) {
+                        tmp = ov.col2; ov.col2 = ov.col1; ov.col1 = tmp;
+                }
                 this.callHooks("onOverlayChange", name, ov, isNew);
         };
 
         P.deleteOverlay = function(name) {
                 delete this.__overlays[name];
                 this.callHooks("onOverlayDelete", name);
+        };
+
+        P.ensureTransientMark = function(atMark) {
+                var rc = this._rowcol, tm;
+                if (!this.transientMarker) {
+                        var pos = atMark ? this.markMarker.getPosition() : this.point();
+                        this.transientMarker = this.createMarker(pos);
+                        if (!atMark) {
+                                this.markMarker.setPosition(this.point());
+                                tm = rc;
+                        }
+                }
+                if (!tm)
+                        tm = this._positionToRowCol(this.transientMarker.getPosition());
+                this.setOverlay("selection", {
+                        line1 : tm.row,
+                        col1  : tm.col,
+                        line2 : rc.row,
+                        col2  : rc.col
+                });
+        };
+
+        P.clearTransientMark = function() {
+                if (this.transientMarker) {
+                        this.transientMarker.destroy();
+                        this.transientMarker = null;
+                        this.deleteOverlay("selection");
+                }
+        };
+
+        P.deleteTransientRegion = function() {
+                if (this.transientMarker) {
+                        this._deleteText(this.caretMarker, this.transientMarker);
+                        this.clearTransientMark();
+                        return true;
+                }
         };
 
         /* -----[ not-so-public API ]----- */
