@@ -58,6 +58,8 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 else if (ev.charCode) {
                         if (ev.charCode == 32)
                                 key = "SPACE";
+                        else if (ev.charCode == 45)
+                                key = "DASH";
                         else
                                 key = String.fromCharCode(ev.charCode).toLowerCase();
                 }
@@ -137,97 +139,6 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 if (!def && this.defaultHandler instanceof Function)
                         def = this.defaultHandler();
                 return def;
-        };
-
-});
-
-DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
-
-        D.KEYS = {
-                // movement
-                "ARROW_UP && C-p"                         : "backward_line",
-                "ARROW_DOWN && C-n"                       : "forward_line",
-                "ARROW_LEFT && C-b"                       : "backward_char",
-                "ARROW_RIGHT && C-f"                      : "forward_char",
-                "HOME"                                    : "beginning_of_indentation_or_line",
-                "END && C-e"                              : "end_of_line",
-                "C-a"                                     : "beginning_of_line",
-                "C-HOME && M-<"                           : "beginning_of_buffer",
-                "C-END && M->"                            : "end_of_buffer",
-                "C-ARROW_RIGHT && M-f"                    : "forward_word",
-                "C-ARROW_LEFT && M-b"                     : "backward_word",
-                "C-ARROW_DOWN"                            : "forward_paragraph",
-                "C-ARROW_UP"                              : "backward_paragraph",
-                "C-l"                                     : "recenter_top_bottom",
-                "C-M-f && C-M-n"                          : "forward_sexp",
-                "C-M-b && C-M-p"                          : "backward_sexp",
-                "PAGE_UP && M-v"                          : "scroll_up",
-                "PAGE_DOWN && C-v"                        : "scroll_down",
-
-                // basic editing
-                "BACKSPACE"                               : "backward_delete_char",
-                "DELETE && C-d"                           : "delete_char",
-                "ENTER && C-m"                            : "newline",
-                "M-d"                                     : "kill_word",
-                "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
-                "C-k"                                     : "kill_line",
-                "M-C-k"                                   : "kill_sexp",
-                "C-y"                                     : "yank",
-                "M-y"                                     : "yank_pop",
-                "C-SPACE"                                 : "set_mark_command",
-                "C-x C-x"                                 : "exchange_point_and_mark",
-                "C-w"                                     : "kill_region",
-                "M-t"                                     : "transpose_words",
-                "C-t"                                     : "transpose_chars",
-                "C-x C-t"                                 : "transpose_lines",
-                "M-w"                                     : "copy_region_as_kill",
-                "M-c"                                     : "capitalize_word",
-                "M-u"                                     : "upcase_word",
-                "M-l"                                     : "downcase_word",
-                "F11"                                     : "nuke_trailing_whitespace",
-                "TAB"                                     : "indent_line",
-                "M-q"                                     : "fill_paragraph",
-                "C-/ && C-x u && C-_ && C-z"              : "undo",
-                "INSERT"                                  : "overwrite_mode",
-                "M-s"                                     : "center_line",
-                "M-/"                                     : "dabbrev_expand",
-                "C-s"                                     : "isearch_forward",
-                "C-r"                                     : "isearch_backward",
-                "M-C-s"                                   : "isearch_forward_regexp",
-                "M-C-r"                                   : "isearch_backward_regexp",
-
-                // buffers
-                "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
-                "C-x C-ARROW_LEFT && C-x ARROW_LEFT && C-S-TAB" : "previous_buffer",
-
-                // frames
-                "C-x 1"                                   : "delete_other_frames",
-                "C-x 2"                                   : "split_frame_vertically",
-                "C-x 3"                                   : "split_frame_horizontally",
-                "C-x o"                                   : "other_frame",
-
-                // necessary evil
-                "C-S-y"                                   : "yank_from_operating_system",
-                "M-S-w"                                   : "copy_for_operating_system",
-                "C-S-w"                                   : "kill_for_operating_system",
-
-                // my stuff, sorry if these have different meanings in the standard Emacs keys
-                "M-C-d"                                   : "delete_region_or_line",
-                "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
-                "C-c /"                                   : "close_last_xml_tag",
-                "S-BACKSPACE"                             : "backward_delete_whitespace",
-                "S-DELETE"                                : "delete_whitespace",
-                "M-ENTER"                                 : "start_next_paragraph",
-                "M-S-q"                                   : "fill_paragraph_no_prefix",
-
-                // DEBUG
-                "C-x =": function() {
-                        alert(this.point());
-                }
-        };
-
-        D.CONSTRUCT = function() {
-                this.defineKeys(D.KEYS);
         };
 
 });

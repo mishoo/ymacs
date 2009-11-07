@@ -22,14 +22,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         D.CONSTRUCT = function() {
                 this.__blinkCaret = this.__blinkCaret.$(this);
                 var tmp = this._bufferEvents = {
-                        onLineChange    : this._on_bufferLineChange.$(this),
-                        onInsertLine    : this._on_bufferInsertLine.$(this),
-                        onDeleteLine    : this._on_bufferDeleteLine.$(this),
-                        onPointChange   : this._on_bufferPointChange.$(this),
-                        onResetCode     : this._on_bufferResetCode.$(this),
-                        onOverwriteMode : this._on_bufferOverwriteMode.$(this),
-                        onOverlayChange : this._on_bufferOverlayChange.$(this),
-                        onOverlayDelete : this._on_bufferOverlayDelete.$(this)
+                        onLineChange             : this._on_bufferLineChange.$(this),
+                        onInsertLine             : this._on_bufferInsertLine.$(this),
+                        onDeleteLine             : this._on_bufferDeleteLine.$(this),
+                        onPointChange            : this._on_bufferPointChange.$(this),
+                        onResetCode              : this._on_bufferResetCode.$(this),
+                        onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
+                        onOverlayChange          : this._on_bufferOverlayChange.$(this),
+                        onOverlayDelete          : this._on_bufferOverlayDelete.$(this),
+                        beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this)
                 };
                 tmp = this._moreBufferEvents = Object.makeCopy(tmp);
                 tmp.onMessage = this._on_bufferMessage.$(this);
@@ -252,15 +253,19 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.condClass(om, "Ymacs-overwrite-mode");
         };
 
-        P._on_bufferMessage = function(type, text) {
+        P._on_bufferMessage = function(type, text, html) {
                 var popup = Ymacs_Message_Popup.get(0);
                 popup.popup({
-                        content : text.htmlEscape(),
+                        content : html ? text : text.htmlEscape(),
                         widget  : this,
                         anchor  : this.getElement(),
-                        align   : { prefer: "CC" }
+                        align   : { prefer: "CC", fallX1: "CC", fallX2: "CC", fallY1: "CC", fallY2: "CC" }
                 });
-                popup.hide(2000);
+                popup.hide(5000);
+        };
+
+        P._on_bufferBeforeInteractiveCommand = function() {
+                Ymacs_Message_Popup.clearAll();
         };
 
         P.getOverlayId = function(name) {

@@ -190,12 +190,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return new Ymacs_Keymap_Emacs({ buffer: this });
         };
 
-        P.signalError = function(text) {
-                this.callHooks("onMessage", "error", text);
+        P.signalError = function(text, html) {
+                this.callHooks("onMessage", "error", text, html);
         };
 
-        P.signalInfo = function(text) {
-                this.callHooks("onMessage", "info", text);
+        P.signalInfo = function(text, html) {
+                this.callHooks("onMessage", "info", text, html);
         };
 
         P.createMarker = function(pos, before, name) {
