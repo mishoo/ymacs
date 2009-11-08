@@ -86,6 +86,20 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 }
         };
 
+        P.getBuffer = function(buf) {
+                if (!(buf instanceof Ymacs_Buffer)) {
+                        buf = this.buffers.grep_first(function(b){
+                                return b.name == buf;
+                        });
+                }
+                return buf;
+        };
+
+        P.switchToBuffer = function(buf) {
+                var fr = this.getActiveFrame();
+                fr.setBuffer(buf);
+        };
+
         P.switchToNextBuffer = function() {
                 var fr = this.getActiveFrame();
                 fr.setBuffer(this.getNextBuffer(fr.buffer));

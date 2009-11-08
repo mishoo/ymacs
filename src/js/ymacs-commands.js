@@ -463,10 +463,6 @@ Ymacs_Buffer.newCommands({
 
         exchange_point_and_mark: function() {
                 this.caretMarker.swap(this.markMarker);
-                if (this.previousCommand == "exchange_point_and_mark") {
-                        // it seems nice to activate the transient mark now
-                        this.ensureTransientMark(true);
-                }
         },
 
         recenter_top_bottom: function() {

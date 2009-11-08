@@ -64,8 +64,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         D.newMode = P.newMode = function(name, activate) {
                 var modevar = "*" + name + "*";
-                this.COMMANDS[name] = function() {
+                this.COMMANDS[name] = function(force) {
                         var on = !this.getq(modevar);
+                        if (!on && force)
+                                return true;
                         this.setq(modevar, on);
                         if (this.__deactivateCurrentMode) {
                                 this.__deactivateCurrentMode();
@@ -483,15 +485,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.callHooks("onOverlayDelete", name);
         };
 
-        P.ensureTransientMark = function(atMark) {
+        P.ensureTransientMark = function() {
                 var rc = this._rowcol, tm;
                 if (!this.transientMarker) {
-                        var pos = atMark ? this.markMarker.getPosition() : this.point();
-                        this.transientMarker = this.createMarker(pos);
-                        if (!atMark) {
-                                this.markMarker.setPosition(this.point());
-                                tm = rc;
-                        }
+                        this.transientMarker = this.createMarker(this.point());
+                        this.markMarker.setPosition(this.point());
+                        tm = rc;
                 }
                 if (!tm)
                         tm = this._positionToRowCol(this.transientMarker.getPosition());

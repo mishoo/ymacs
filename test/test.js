@@ -31,11 +31,24 @@ try {
         var javascript = new Ymacs_Buffer({ name: "test.js" });
 
         javascript.setCode("\
+/* Note that there are a few buffers already loaded.\n\
+   You can switch through them using C-TAB or C-S-TAB.\n\
+   You can also split frames using C-x 2 or C-x 3, or\n\
+   revert to a single frame (the active one) with C-x 1.\n\
+ */\n\
+\n\
 function () {\n\
         alert(\"moo\");\n\
         while (foo) {\n\
         }\n\
-        return this[\"mak\"];\n\
+\n\
+/**\n\
+* press TAB on these lines to fix indentation,\n\
+* or move the caret to the first “{” character and press C-M-q\n\
+*/\n\
+        return function(){\n\
+    alert(this.foo);\n\
+}.$(this);\n\
 }\n\
 ");
 
@@ -58,8 +71,68 @@ function () {\n\
         javascript.cmd("javascript_dl_mode");
         xml.cmd("xml_mode");
 
+        var keys = new Ymacs_Buffer({ name: "keybindings.txt" });
+        keys.setCode(info);
 
-        var ymacs = window.ymacs = new Ymacs({ parent: dlg, buffers: [ javascript, xml, txt ] });
+        var layout = new DlLayout({ parent: dlg });
+
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, txt, keys ] });
+
+        var menu = new DlHMenu({});
+        menu.setStyle({ marginLeft: 0, marginRight: 0 });
+
+        var item = new DlMenuItem({ parent: menu, label: "Load it's own code!".makeLabel() });
+
+        var files = [
+                "ymacs-buffer.js",
+                "ymacs-commands.js",
+                "ymacs-frame.js",
+                "ymacs.js",
+                "ymacs-keymap-emacs.js",
+                "ymacs-keymap-isearch.js",
+                "ymacs-keymap.js",
+                "ymacs-marker.js",
+                "ymacs-mode-js.js",
+                "ymacs-mode-xml.js",
+                "ymacs-regexp.js",
+                "ymacs-textprop.js",
+                "ymacs-tokenizer.js"
+        ];
+        var submenu = new DlVMenu({});
+        item.setMenu(submenu);
+        files.foreach(function(file){
+                var item = new DlMenuItem({ label: file, parent: submenu });
+                item.addEventListener("onSelect", function(){
+                        var request = new DlRPC({ url: "ymacs/js/" + file });
+                        request.call({
+                                callback: function(data){
+                                        var code = data.text;
+                                        var buf = ymacs.getBuffer(file) || ymacs.createBuffer({ name: file });
+                                        buf.setCode(code);
+                                        buf.cmd("javascript_dl_mode", true);
+                                        ymacs.switchToBuffer(buf);
+                                }
+                        });
+                });
+        });
+
+        var item = new DlMenuItem({ parent: menu, label: "Set indentation level".makeLabel() });
+        item.addEventListener("onSelect", function() {
+                var buf = ymacs.getActiveBuffer(), newIndent;
+                newIndent = prompt("Indentation level for the current buffer: ", buf.getq("indent_level"));
+                if (newIndent != null)
+                        newIndent = parseInt(newIndent, 10);
+                if (newIndent != null && !isNaN(newIndent)) {
+                        buf.setq("indent_level", newIndent);
+                        buf.signalInfo("Done setting indentation level to " + newIndent);
+                }
+        });
+
+        menu.addFiller();
+
+        layout.packWidget(menu, { pos: "top" });
+        layout.packWidget(ymacs, { pos: "bottom", fill: "*" });
+
         dlg._focusedWidget = ymacs;
         dlg.setSize({ x: 800, y: 600 });
         dlg.show(true);
