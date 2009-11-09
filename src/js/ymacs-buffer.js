@@ -44,7 +44,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P.lastIndexOfRegexp = function(str, re, caret, bound) {
                 str = str.substring(0, caret);
                 re = Ymacs_Regexp.search_backward(re);
-                re.lastIndex = bound;
+                re.lastIndex = bound || 0;
                 var m = re.exec(str);
                 if (m) {
                         var a = Array.$(m, 1);

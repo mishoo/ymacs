@@ -41,8 +41,8 @@
 }
 
 .Ymacs_Overlay { position: absolute; width: 100%; opacity: 0.5; }
-.Ymacs_Overlay .match-paren { background: #88f; opacity: 0.4; }
-.Ymacs_Overlay .selection { background: #ff8; opacity: 0.8; }
+.Ymacs_Overlay .match-paren { background: #8f8; opacity: 0.4; }
+.Ymacs_Overlay .selection { background: #fff; opacity: 0.7; }
 
 .Ymacs_Message_Popup {
   background-color: wheat;

@@ -142,12 +142,14 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         };
 
         P.keepOnlyFrame = function(frame) {
-                frame.parent.removeWidget(frame);
-                this.frames.remove(frame);
-                this.topCont.destroyChildWidgets();
-                this.topCont.appendWidget(frame);
-                this.topCont.__doLayout();
-                this.setActiveFrame(frame);
+                if (this.frames.length > 1) {
+                        frame.parent.removeWidget(frame);
+                        this.frames.remove(frame);
+                        this.topCont.destroyChildWidgets();
+                        this.topCont.appendWidget(frame);
+                        this.topCont.__doLayout();
+                        this.setActiveFrame(frame);
+                }
         };
 
         P.focusOtherFrame = function() {

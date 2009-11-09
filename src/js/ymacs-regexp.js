@@ -32,9 +32,10 @@ window.Ymacs_Regexp = (function(){
                         if (!cached) {
                                 rx = getPatternAndFlags(key);
                                 rx.flags = rx.flags.replace(/g/g, "") + "g"; // make sure it's global
-                                cached = new RegExp("([^]*)" + rx.pattern, rx.flags);
+                                cached = new RegExp("([^]*)(" + rx.pattern + ")", rx.flags);
                                 SEARCH_BACKWARD[key] = cached;
                         }
+                        cached.lastIndex = 0;
                         return cached;
                 }
 
