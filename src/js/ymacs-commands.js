@@ -721,12 +721,20 @@ Ymacs_Buffer.newCommands({
 
         /* -----[ sexp-based movement ]----- */
 
-        // these two are awfully slow if they have to search a big
-        // text; backward_sexp is triple-awfully slow even if it has
-        // to search small text at the end of a big buffer.
+        // XXX: these two are awfully slow if they have to search a
+        // big text; backward_sexp is triple-awfully slow even if it
+        // has to search small text at the end of a big buffer.
+        //
+        // We should implement them on top of a simpler string stream,
+        // rather than using full buffer commands, and we should
+        // probably think about something else than regexps.  Maybe we
+        // should use the full mode parser (for modes), but then it
+        // won't work until the text finished parsing... :-(  IDEAS?
 
         forward_sexp: function() {
-                var closed = 0;
+                var closed = 0,
+                    skip_string = this.getq("syntax_skip_string"),
+                    skip_comment = this.getq("syntax_skip_comment");
                 while (!this.cmd("eob_p")) {
                         if (this.cmd("looking_at", /[\[\{\(]/g)) {
                                 ++closed;
@@ -738,10 +746,10 @@ Ymacs_Buffer.newCommands({
                                 if (closed == 0)
                                         return true;
                         }
-                        else if (this.cmd("looking_at", this.getq("syntax_skip_string"))) {
+                        else if (skip_string && this.cmd("looking_at", skip_string)) {
                                 this.cmd("goto_char", this.matchData.after);
                         }
-                        else if (this.cmd("looking_at", this.getq("syntax_skip_comment"))) {
+                        else if (skip_comment && this.cmd("looking_at", skip_comment)) {
                                 this.cmd("goto_char", this.matchData.after);
                         }
                         else this.cmd("forward_char");
@@ -749,7 +757,9 @@ Ymacs_Buffer.newCommands({
         },
 
         backward_sexp: function() {
-                var closed = 0;
+                var closed = 0,
+                    skip_string = this.getq("syntax_skip_string"),
+                    skip_comment = this.getq("syntax_skip_comment");
                 while (!this.cmd("bob_p")) {
                         if (this.cmd("looking_back", /[\]\}\)]/g)) {
                                 ++closed;
@@ -761,10 +771,10 @@ Ymacs_Buffer.newCommands({
                                 if (closed == 0)
                                         return true;
                         }
-                        else if (this.cmd("looking_back", this.getq("syntax_skip_string"))) {
+                        else if (skip_string && this.cmd("looking_back", skip_string)) {
                                 this.cmd("goto_char", this.matchData.index);
                         }
-                        else if (this.cmd("looking_back", this.getq("syntax_skip_comment"))) {
+                        else if (skip_comment && this.cmd("looking_back", skip_comment)) {
                                 this.cmd("goto_char", this.matchData.index);
                         }
                         else this.cmd("backward_char");
