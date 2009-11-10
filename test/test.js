@@ -103,7 +103,7 @@ function () {\n\
         files.foreach(function(file){
                 var item = new DlMenuItem({ label: file, parent: submenu });
                 item.addEventListener("onSelect", function(){
-                        var request = new DlRPC({ url: "ymacs/js/" + file });
+                        var request = new DlRPC({ url: "/ymacs/js/" + file });
                         request.call({
                                 callback: function(data){
                                         var code = data.text;
