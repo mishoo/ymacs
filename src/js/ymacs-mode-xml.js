@@ -1,3 +1,8 @@
+// This file is part of Ymacs, an extensible source code editor
+// (c) Mihai Bazon 2009 <mihai.bazon@gmail.com>
+// Distributed under a BSD-style license.
+// http://www.ymacs.org/
+
 // @require ymacs-tokenizer.js
 
 Ymacs_Tokenizer.define("xml", function(stream, tok) {
