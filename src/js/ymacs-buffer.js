@@ -47,7 +47,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 re.lastIndex = bound || 0;
                 var m = re.exec(str);
                 if (m) {
-                        var a = Array.$(m, 1);
+                        var a = Array.$(m, 2);
                         a.index = m.index + m[1].length;
                         a.after = m.index + m[0].length;
                         a[0] = str.substring(a.index, a.after);
