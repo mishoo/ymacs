@@ -520,6 +520,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 if (this.transientMarker) {
                         this._deleteText(this.caretMarker, this.transientMarker);
                         this.clearTransientMark();
+                        this._placeUndoBoundary();
                         return true;
                 }
         };

@@ -127,6 +127,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-l"                                     : "downcase_word",
                 "F11"                                     : "nuke_trailing_whitespace",
                 "TAB"                                     : "indent_line",
+                "C-M-\\"                                  : "indent_region",
                 "M-q"                                     : "fill_paragraph",
                 "C-/ && C-x u && C-_ && C-z"              : "undo",
                 "INSERT"                                  : "overwrite_mode",

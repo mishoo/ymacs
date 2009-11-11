@@ -200,6 +200,38 @@ Ymacs_Buffer.newCommands({
                 this.cmd("insert", "    ");
         },
 
+        indent_region: function(begin, end) {
+                if (begin == null)
+                        begin = this.caretMarker.getPosition();
+                if (end == null)
+                        end = this.markMarker.getPosition();
+                var a = [ begin, end ];
+                a.sort();
+                begin = a[0]; end = a[1];
+                end = this.createMarker(end);
+
+                // this.cmd("goto_char", begin);
+                // var timer = setInterval(function(){
+                //         this.cmd("indent_line");
+                //         this.cmd("beginning_of_line");
+                //         if (!this.cmd("forward_line"))
+                //                 clearInterval(timer);
+                //         this.cmd("recenter_top_bottom");
+                //         if (this.point() >= end.getPosition())
+                //                 clearInterval(timer);
+                // }.$(this), 0);
+
+                this.cmd("save_excursion", function() {
+                        this.cmd("goto_char", begin);
+                        while (this.point() < end.getPosition()) {
+                                this.cmd("indent_line");
+                                this.cmd("beginning_of_line");
+                                if (!this.cmd("forward_line"))
+                                        break;
+                        };
+                });
+        },
+
         make_marker: function(pos) {
                 return this.createMarker(pos);
         },

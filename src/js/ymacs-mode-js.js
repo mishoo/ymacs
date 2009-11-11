@@ -330,8 +330,7 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
                 "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent",
                 // "{"                                      : "c_electric_block",
                 "C-c \\"                                    : "c_goto_matching_paren",
-                "C-M-q"                                     : "c_indent_sexp",
-                "C-M-\\"                                    : "c_indent_region"
+                "C-M-q"                                     : "c_indent_sexp"
         };
 
         D.CONSTRUCT = function() {
@@ -439,29 +438,10 @@ Ymacs_Buffer.newCommands({
         c_indent_sexp: function() {
                 var pos = this.cmd("c_matching_paren");
                 if (pos) {
-                        this.cmd("c_indent_region", this.caretMarker.getPosition(), pos);
+                        this.cmd("indent_region", this.caretMarker.getPosition(), pos);
                 } else {
                         this.signalError("Balanced expression not found");
                 }
-        },
-
-        c_indent_region: function(begin, end) {
-                if (begin == null)
-                        begin = this.caretMarker.getPosition();
-                if (end == null)
-                        end = this.markMarker.getPosition();
-                var a = [ begin, end ];
-                a.sort();
-                begin = a[0]; end = a[1];
-                end = this.createMarker(end);
-                this.cmd("save_excursion", function() {
-                        this.cmd("goto_char", begin);
-                        while (this.point() < end.getPosition()) {
-                                this.cmd("indent_line");
-                                this.cmd("beginning_of_line");
-                                this.cmd("forward_line");
-                        };
-                });
         },
 
         c_goto_matching_paren: function() {
