@@ -101,7 +101,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__preventUpdates = 0;
                 this.__preventUndo = 0;
                 this.__undoInProgress = 0;
-                this.__inInteractiveCommand = 0;
                 this.__dirtyLines = [];
                 this.__undoQueue = [];
                 this.__redoQueue = [];
@@ -130,7 +129,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
                         // XXX: this shouldn't be needed
-                        if (this.__inInteractiveCommand == 0 && this.__preventUpdates == 0) {
+                        if (this.__preventUpdates == 0) {
                                 this.callHooks("onPointChange", this._rowcol, this.point());
                         }
                 });
@@ -320,7 +319,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                         this._placeUndoBoundary();
                                 }
                         }
-                        ++this.__inInteractiveCommand;
                         this.preventUpdates();
                         try {
                                 this.callHooks("beforeInteractiveCommand");
@@ -329,7 +327,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 if (!/_mark$/.test(this.currentCommand))
                                         this.clearTransientMark();
                                 this.resumeUpdates();
-                                --this.__inInteractiveCommand;
                                 this.callHooks("afterInteractiveCommand");
                                 this.previousCommand = cmd;
                                 this.sameCommandCount++;
@@ -361,10 +358,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.cmd = function(cmd) {
+                if (!/_mark$/.test(this.currentCommand))
+                        this.clearTransientMark();
                 return this.COMMANDS[cmd].apply(this, Array.$(arguments, 1));
         };
 
         P.cmdApply = function(cmd, args) {
+                if (!/_mark$/.test(this.currentCommand))
+                        this.clearTransientMark();
                 return this.COMMANDS[cmd].apply(this, args);
         };
 
