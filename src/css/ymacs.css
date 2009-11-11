@@ -4,15 +4,16 @@
   background-color: #224;
   color: wheat;
   font-family: monospace;
-  white-space: pre;
   font-size: 14px;
-  /* line-height: 17px; */
+  white-space: pre;
 }
 
 .Ymacs-caret {
   position: absolute;
   opacity: 0.5;
   background-color: #aaa;
+  margin: 0;
+  padding: 0;
 }
 
 .Ymacs_Minibuffer .Ymacs-caret { visibility: hidden; }
@@ -22,8 +23,6 @@
   opacity: 1;
   background-color: #f51;
   color: #324;
-  margin: 0;
-  border: 0;
 }
 
 .Ymacs_Frame-focus .Ymacs-caret-blink {

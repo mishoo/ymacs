@@ -190,6 +190,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         return;
                 var rc = this.buffer._rowcol, caret = this.getCaretElement(), w = caret.offsetWidth, h = caret.offsetHeight;
                 caret.style.left = (w * rc.col) + "px";
+                // caret.style.left = rc.col + "ex";
                 caret.style.top = (h * rc.row) + "px";
                 this.__restartBlinking();
                 var ch = this.buffer.charAtRowCol(rc.row, rc.col);
