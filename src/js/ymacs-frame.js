@@ -44,17 +44,19 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.buffer = null;
                 if (buffer)
                         this.setBuffer(buffer);
-                this.addEventListener("onResize", this.centerOnCaret);
         };
 
         P.initDOM = function() {
                 D.BASE.initDOM.apply(this, arguments);
                 this.getElement().innerHTML = "<div class='content'></div>";
                 this.addEventListener({
-                        onDestroy   : this._on_destroy.$(this),
-                        onFocus     : this._on_focus.$(this),
-                        onBlur      : this._on_blur.$(this),
-                        onMouseDown : this._on_mouseDown.$(this)
+                        onDestroy   : this._on_destroy,
+                        onFocus     : this._on_focus,
+                        onBlur      : this._on_blur,
+                        onMouseDown : this._on_mouseDown,
+                        // onKeyDown   : this._on_keyPress,
+                        onKeyPress  : this._on_keyPress,
+                        onResize    : this.centerOnCaret
                 });
         };
 
@@ -369,10 +371,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.buffer._repositionCaret(this.buffer._rowColToPosition(row, col));
         };
 
-        P._handle_focusKeys = function(ev) {
+        P._on_keyPress = function(ev) {
                 if (this.buffer._handleKeyEvent(ev))
                         DlException.stopEventBubbling();
-                return D.BASE._handle_focusKeys.apply(this, arguments);
         };
 
 });
