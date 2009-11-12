@@ -209,13 +209,17 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         DOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
                         this.__hoverLine = rc.row;
                 }
+
+                // redraw the line where the caret was previously, so that it disappears from there
                 if (this.__prevCaretLine != null) {
-                        // redraw the line where the caret was previously, so that it disappears from there
                         this._on_bufferLineChange(this.__prevCaretLine);
                 }
-                this.__prevCaretLine = rc.row;
-                // redraw current line
-                this._on_bufferLineChange(rc.row);
+
+                // redraw current line if it's different
+                if (this.__prevCaretLine != rc.row) {
+                        this.__prevCaretLine = rc.row;
+                        this._on_bufferLineChange(rc.row);
+                }
 
                 if (isActive)
                         this.__restartBlinking();
