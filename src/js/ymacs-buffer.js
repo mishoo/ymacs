@@ -269,12 +269,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P.getCodeSize = function() {
                 if (this.__size)
                         return this.__size;
-                var size = 0;
-                this.code.foreach(function(line){
-                        size += line.length + 1;
-                });
-                if (size > 0)
-                        size--;
+                var i = this.code.length, size = i > 0 ? -1 : 0;
+                while (--i >= 0)
+                        size += this.code[i].length + 1;
                 return this.__size = size;
         };
 
