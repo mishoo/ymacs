@@ -205,9 +205,7 @@ Ymacs_Buffer.newCommands({
                         begin = this.caretMarker.getPosition();
                 if (end == null)
                         end = this.markMarker.getPosition();
-                var a = [ begin, end ];
-                a.sort();
-                begin = a[0]; end = a[1];
+                if (end < begin) { var tmp = begin; begin = end; end = tmp; }
                 end = this.createMarker(end);
 
                 // this.cmd("goto_char", begin);
