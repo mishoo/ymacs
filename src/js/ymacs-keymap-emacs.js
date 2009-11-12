@@ -14,7 +14,7 @@
 // or Visual Studio -- but I'm not familiar with any of them.
 // Contributions welcome.
 
-// A keymap inherits from Ymacs_Keymap_Emacs and should call in its
+// A keymap inherits from Ymacs_Keymap and should call in its
 // constructor this.defineKeys for a hash like the one below.
 // Aditionally, for specific keymaps (such as those defined by modes)
 // they should set this.defaultHandler = null, so that keys that
