@@ -9,24 +9,16 @@
 }
 
 .Ymacs-caret {
-  position: absolute;
   opacity: 0.5;
   background-color: #aaa;
   margin: 0;
   padding: 0;
 }
 
-.Ymacs_Minibuffer .Ymacs-caret { visibility: hidden; }
-
 .Ymacs_Frame-focus .Ymacs-caret {
-  visibility: visible !important;
   opacity: 1;
   background-color: #f51;
   color: #324;
-}
-
-.Ymacs_Frame-focus .Ymacs-caret-blink {
-  visibility: hidden !important;
 }
 
 .Ymacs_Frame-focus .Ymacs-current-line {

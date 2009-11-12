@@ -26,6 +26,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         D.CONSTRUCT = function() {
                 this.__blinkCaret = this.__blinkCaret.$(this);
+                this.__caretId = Dynarch.ID();
                 var tmp = this._bufferEvents = {
                         onLineChange             : this._on_bufferLineChange.$(this),
                         onInsertLine             : this._on_bufferInsertLine.$(this),
@@ -48,7 +49,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.initDOM = function() {
                 D.BASE.initDOM.apply(this, arguments);
-                this.getElement().innerHTML = "<div class='content'></div><div class='Ymacs-caret'>&nbsp;</div>";
+                this.getElement().innerHTML = "<div class='content'></div>";
                 this.addEventListener({
                         onDestroy   : this._on_destroy.$(this),
                         onFocus     : this._on_focus.$(this),
@@ -62,7 +63,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.getCaretElement = function() {
-                return this.getElement().childNodes[1];
+                return document.getElementById(this.__caretId);
         };
 
         P.getLineDivElement = function(row) {
@@ -71,17 +72,20 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.ensureCaretVisible = function() {
                 this._redrawCaret();
-                var caret = this.getCaretElement(), div = this.getElement();
+
+                var caret = this.getCaretElement(), div = this.getElement(), line = this.getLineDivElement(this.buffer._rowcol.row);
+
                 // vertical
-                var diff = caret.offsetTop + caret.offsetHeight - (div.scrollTop + div.clientHeight);
+                var diff = line.offsetTop + line.offsetHeight - (div.scrollTop + div.clientHeight);
                 if (diff > 0) {
                         div.scrollTop += diff;
                 } else {
-                        diff = caret.offsetTop - div.scrollTop;
+                        diff = line.offsetTop - div.scrollTop;
                         if (diff < 0) {
                                 div.scrollTop += diff;
                         }
                 }
+
                 // horizontal
                 diff = caret.offsetLeft + caret.offsetWidth - (div.scrollLeft + div.clientWidth);
                 // if (caret.offsetLeft + caret.offsetWidth < div.clientWidth)
@@ -109,7 +113,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition());
                         this._redrawBuffer();
                         this._redrawCaret(true);
-                        this.ensureCaretVisible();
+                        // this.ensureCaretVisible();
                 }
         };
 
@@ -172,42 +176,64 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.__restartBlinking = function() {
-                DOM.delClass(this.getCaretElement(), "Ymacs-caret-blink");
                 this.__stopBlinking();
                 this.__caretTimer = setInterval(this.__blinkCaret, BLINK_TIMEOUT);
         };
 
         P.__stopBlinking = function() {
                 clearInterval(this.__caretTimer);
+                this.__showCaret();
         };
 
         P.__blinkCaret = function() {
-                DOM.condClass(this.getCaretElement(), this.BLINKING =! this.BLINKING, "Ymacs-caret-blink");
+                DOM.condClass(this.getCaretElement(), this.BLINKING = ! this.BLINKING, "Ymacs-caret");
+        };
+
+        P.__showCaret = function() {
+                DOM.addClass(this.getCaretElement(), "Ymacs-caret");
         };
 
         P._redrawCaret = function(force) {
-                if (!force && this.ymacs.getActiveFrame() !== this)
+                var isActive = this.ymacs.getActiveFrame() === this;
+                if (!force && !isActive)
                         return;
-                var rc = this.buffer._rowcol, caret = this.getCaretElement(), w = caret.offsetWidth, h = caret.offsetHeight;
-                caret.style.left = (w * rc.col) + "px";
-                // caret.style.left = rc.col + "ex";
-                caret.style.top = (h * rc.row) + "px";
-                this.__restartBlinking();
-                var ch = this.buffer.charAtRowCol(rc.row, rc.col);
-                if (ch == "\n" || !ch)
-                        ch = "&nbsp;";
-                this.getCaretElement().innerHTML = ch;
+
+                if (isActive)
+                        this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
+
+                var rc = this.buffer._rowcol;
+
                 if (this.highlightCurrentLine) {
                         if (this.__hoverLine != null)
                                 DOM.delClass(this.getLineDivElement(this.__hoverLine), "Ymacs-current-line");
                         DOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
                         this.__hoverLine = rc.row;
                 }
+                if (this.__prevCaretLine != null) {
+                        // redraw the line where the caret was previously, so that it disappears from there
+                        this._on_bufferLineChange(this.__prevCaretLine);
+                }
+                this.__prevCaretLine = rc.row;
+                // redraw current line
+                this._on_bufferLineChange(rc.row);
+
+                if (isActive)
+                        this.__restartBlinking();
+
                 this.callHooks("onPointChange", rc.row, rc.col);
         };
 
         P._getLineHTML = function(row) {
-                return this.buffer.formatLineHTML(row);
+                var html = this.buffer.formatLineHTML(row, this.caretMarker);
+                // taking advantage of the fact that a literal > entered by the user will never appear in
+                // the generated HTML, since special HTMl characters are escaped.
+                var pos = html.indexOf("Ymacs-caret'>");
+                if (pos >= 0) {
+                        html = html.substr(0, pos + 12)
+                                + " id='" + this.__caretId + "'"
+                                + html.substr(pos + 12);
+                }
+                return html;
         };
 
         P._redrawBuffer = function() {
@@ -321,11 +347,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.ymacs.setActiveFrame(this, true);
                 this.buffer.cmd("goto_char", this.caretMarker.getPosition());
                 this.buffer.addEventListener("onMessage", this._moreBufferEvents.onMessage);
+                this.__restartBlinking();
         };
 
         P._on_blur = function() {
                 this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
                 this.buffer.removeEventListener("onMessage", this._moreBufferEvents.onMessage);
+                this.__stopBlinking();
         };
 
         P._on_mouseDown = function(ev) {
@@ -334,7 +362,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                     sz = DOM.getOuterSize(this.getCaretElement()),
                     row = Math.floor(pos.y / sz.y),
                     col = Math.floor(pos.x / sz.x);
-                // console.log("pos: %o, sz: %o, row: %o, col: %o", pos, sz, row, col);
                 this.buffer._repositionCaret(this.buffer._rowColToPosition(row, col));
         };
 

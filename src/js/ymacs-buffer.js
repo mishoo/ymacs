@@ -138,7 +138,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         "onFoundToken": this._on_tokenizerFoundToken.$(this)
                 };
 
-                this._textProperties = new Ymacs_Text_Properties({});
+                this._textProperties = new Ymacs_Text_Properties({ buffer: this });
                 this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
 
                 this.keymap = [];
@@ -496,7 +496,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         tm = rc;
                 }
                 if (!tm)
-                        tm = this._positionToRowCol(this.transientMarker.getPosition());
+                        tm = this.transientMarker.getRowCol();
                 this.setOverlay("selection", {
                         line1 : tm.row,
                         col1  : tm.col,
@@ -817,8 +817,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
-        P.formatLineHTML = function(row) {
-                return this._textProperties.getLineHTML(row, this.code[row]);
+        P.formatLineHTML = function(row, caret) {
+                var rc = this._rowcol;
+                if (caret instanceof Ymacs_Marker)
+                        rc = caret.getRowCol();
+                caret = row == rc.row ? rc.col : null;
+                return this._textProperties.getLineHTML(row, this.code[row], caret);
         };
 
 });

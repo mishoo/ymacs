@@ -7,6 +7,10 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
 
         D.DEFAULT_EVENTS = [ "onChange" ];
 
+        D.DEFAULT_ARGS = {
+                buffer: [ "buffer", null ]
+        };
+
         D.CONSTRUCT = P.reset = function() {
                 this.props = [];
         };
@@ -68,24 +72,44 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
                 return changed;
         };
 
-        // this uses the "css" text property to intercalate <span
-        // class="$css"> ... </span> tags in the given text.  "css"
-        // properties are added as the tokenizer parses the code and
-        // sends onFoundToken events.
+        // this uses the "css" text property to intercalate <span class="$css"> ... </span> tags in the given text.
+        // "css" properties are added as the tokenizer parses the code and sends onFoundToken events.
         //
-        // XXX: this function will be called a lot of times; seems
-        // complicated for what it does. Figure out if it can be
+        // XXX: this function will be called a lot of times; seems complicated for what it does. Figure out if it can be
         // optimized.
-        P.getLineHTML = function(row, text) {
+        //
+        // Update: the mess got bigger once I decided to embed the caret in the text, rather than have it absolutely
+        // positioned (which seems to be the only practical way to position the cursor at the correct location).  It is
+        // ESSENTIAL that the start tag of the element that defines the caret ends with "Ymacs-caret'>", so that the
+        // frame widget can find it.
+        P.getLineHTML = function(row, text, caret) {
                 var p = this.props[row];
-                if (text == "")
-                        return "<br/>";
-                if (!p || p.length == 0)
-                        return text.htmlEscape();
+                if (caret === null) {
+                        if (text == "")
+                                return "<br/>";
+                        if (!p || p.length == 0) {
+                                return text.htmlEscape();
+                        }
+                } else {
+                        if (text == "")
+                                return "<span class='Ymacs-caret'>&nbsp;</span>";
+                        if (!p || p.length == 0) {
+                                if (caret === text.length)
+                                        return text.htmlEscape() + "<span class='Ymacs-caret'>&nbsp;</span>";
+                                return text.substr(0, caret).htmlEscape() +
+                                        "<span class='Ymacs-caret'>" +
+                                        text.charAt(caret).htmlEscape() +
+                                        "</span>" +
+                                        text.substr(caret + 1).htmlEscape();
+                        }
+                }
                 var i = 0, n = text.length, last = null, o, ret = "", ch;
                 while (i < n) {
                         o = p[i];
                         o = o && o.css;
+                        if (i === caret) {
+                                o = o ? o + " Ymacs-caret" : "Ymacs-caret";
+                        }
                         if (o && o != last) {
                                 if (last)
                                         ret += "</span>";
@@ -109,6 +133,10 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
                 }
                 if (last)
                         ret += "</span>";
+                if (i === caret) {
+                        // caret is at EOL
+                        ret += "<span class='Ymacs-caret'>&nbsp;</span>";
+                }
                 return ret;
         };
 

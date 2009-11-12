@@ -20,6 +20,7 @@ DEFINE_CLASS("Ymacs_Marker", null, function(D, P){
 
         D.CONSTRUCT = function() {
                 this.editor.markers.push(this);
+                this.rowcol = null;
                 this.onChange = [];
         };
 
@@ -33,6 +34,7 @@ DEFINE_CLASS("Ymacs_Marker", null, function(D, P){
                 if (this.before)
                         --p;
                 if (diff != 0 && pos <= p) {
+                        this.rowcol = null;
                         this.position += diff;
                         if (this.position < min)
                                 this.position = min;
@@ -51,6 +53,7 @@ DEFINE_CLASS("Ymacs_Marker", null, function(D, P){
 
         P.setPosition = function(pos, noHooks, force) {
                 if (force || this.position != pos) {
+                        this.rowcol = null;
                         this.position = pos;
                         if (!noHooks)
                                 this.callHooks(this.onChange, this.position);
@@ -58,7 +61,7 @@ DEFINE_CLASS("Ymacs_Marker", null, function(D, P){
         };
 
         P.getRowCol = function() {
-                return this.editor._positionToRowCol(this.position);
+                return this.rowcol || (this.rowcol = this.editor._positionToRowCol(this.position));
         };
 
         P.updateMarkers = function(delta) {
