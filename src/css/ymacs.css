@@ -1,8 +1,6 @@
-@import url("ymacs-syntax.css");
+@import url("ymacs-dark.css");
 
 .Ymacs_Frame {
-  background-color: #224;
-  color: wheat;
   white-space: pre;
   font-family: "Lucida Sans Typewriter",monospace;
   /* font-size: 14px; */
@@ -10,30 +8,21 @@
 
 .Ymacs-caret {
   opacity: 0.5;
-  background-color: #aaa;
   margin: 0;
   padding: 0;
 }
 
 .Ymacs_Frame-focus .Ymacs-caret {
   opacity: 1;
-  background-color: #f51;
-  color: #324;
-}
-
-.Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #234353;
 }
 
 .Ymacs-overwrite-mode .Ymacs-caret {
   -moz-border-radius: 15px;
-  background-color: #97f;
-  color: #fff;
 }
 
 .Ymacs_Overlay { position: absolute; width: 100%; opacity: 0.5; }
-.Ymacs_Overlay .match-paren { background: #8f8; opacity: 0.4; }
-.Ymacs_Overlay .selection { background: #fff; opacity: 0.7; }
+.Ymacs_Overlay .match-paren { opacity: 0.4; }
+.Ymacs_Overlay .selection { opacity: 0.7; }
 
 .Ymacs_Message_Popup {
   background-color: wheat;
@@ -42,10 +31,6 @@
 
 .Ymacs_Modeline {
   white-space: pre;
-  background-color: #cbe;
-  color: #000;
-  border-top: 1px solid #fff;
-  border-bottom: 1px solid #000;
   padding-bottom: 1px;
 }
 
