@@ -3,9 +3,9 @@
 .Ymacs_Frame {
   background-color: #224;
   color: wheat;
-  font-family: "Lucida Sans Typewriter",monospace;
-  font-size: 14px;
   white-space: pre;
+  font-family: "Lucida Sans Typewriter",monospace;
+  /* font-size: 14px; */
 }
 
 .Ymacs-caret {
@@ -41,14 +41,14 @@
 }
 
 .Ymacs_Modeline {
-  font-family: "Lucida Sans Typewriter",monospace;
   white-space: pre;
-  line-height: 17px;
   background-color: #cbe;
   color: #000;
   border-top: 1px solid #fff;
   border-bottom: 1px solid #000;
+  padding-bottom: 1px;
 }
+
 .Ymacs_Modeline:after {
   content: "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
 }

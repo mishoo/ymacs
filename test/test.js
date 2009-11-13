@@ -130,11 +130,73 @@ function () {\n\
 
         menu.addFiller();
 
+        /* -----[ font ]----- */
+
+        var item = new DlMenuItem({ parent: menu, label: "Font family".makeLabel() });
+        var submenu = new DlVMenu({});
+        item.setMenu(submenu);
+
+        item = new DlMenuItem({ parent: submenu, label: "Default from ymacs.css" });
+        item.addEventListener("onSelect", function(){
+                ymacs.getActiveFrame().setStyle({ fontFamily: "" });
+        });
+
+        submenu.addSeparator();
+
+        [
+                "Lucida Sans Typewriter",
+                "Andale Mono",
+                "Courier New",
+                "Arial",
+                "Verdana",
+                "Tahoma",
+                "Georgia",
+                "Times New Roman"
+        ].foreach(function(font){
+                item = new DlMenuItem({ parent: submenu, label: "<span style='font-family:" + font + "'>" + font + "</span>" });
+                item.addEventListener("onSelect", function(){
+                        ymacs.getActiveFrame().setStyle({ fontFamily: font });
+                });
+        });
+
+        /* -----[ font size ]----- */
+
+        var item = new DlMenuItem({ parent: menu, label: "Font size".makeLabel() });
+        var submenu = new DlVMenu({});
+        item.setMenu(submenu);
+
+        item = new DlMenuItem({ parent: submenu, label: "Default from ymacs.css" });
+        item.addEventListener("onSelect", function(){
+                ymacs.getActiveFrame().setStyle({ fontSize: "" });
+        });
+
+        submenu.addSeparator();
+
+        [
+                "11px",
+                "12px",
+                "14px",
+                "16px",
+                "18px",
+                "20px",
+                "22px",
+                "24px"
+        ].foreach(function(font){
+                item = new DlMenuItem({ parent: submenu, label: "<span style='font-size:" + font + "'>" + font + "</span>" });
+                item.addEventListener("onSelect", function(){
+                        ymacs.getActiveFrame().setStyle({ fontSize: font });
+                });
+        });
+
         layout.packWidget(menu, { pos: "top" });
         layout.packWidget(ymacs, { pos: "bottom", fill: "*" });
 
         dlg._focusedWidget = ymacs;
         dlg.setSize({ x: 800, y: 600 });
+
+        // show two frames initially
+        // ymacs.getActiveFrame().hsplit();
+
         dlg.show(true);
         dlg.maximize(true);
 

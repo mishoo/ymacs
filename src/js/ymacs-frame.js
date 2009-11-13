@@ -177,6 +177,54 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 cont.__doLayout();
         };
 
+        function insertInText(div, col, el) {
+                // this is for empty lines
+                if (/^br$/i.test(div.firstChild.tagName)) {
+                        div.insertBefore(el, div.firstChild);
+                        return el;
+                }
+                var len = 0, OUT = {};
+                function walk(div) {
+                        for (var i = div.firstChild; i; i = i.nextSibling) {
+                                if (i.nodeType == 3 /* TEXT */) {
+                                        var clen = i.length;
+                                        if (len + clen > col) {
+                                                var pos = col - len; // here we should insert it, relative to the current node
+                                                var next = i.splitText(pos);
+                                                div.insertBefore(el, next);
+                                                throw OUT;
+                                        }
+                                        else if (len + clen == col) {
+                                                // this case is simpler; it could have been treated
+                                                // above, but let's optimize a bit since there's no need
+                                                // to split the text.
+                                                div.insertBefore(el, i.nextSibling);
+                                                throw OUT;
+                                        }
+                                        len += clen;
+                                }
+                                else if (i.nodeType == 1 /* ELEMENT */) {
+                                        walk(i); // recurse
+                                }
+                        }
+                };
+                try {
+                        walk(div);
+                }
+                catch(ex) {
+                        if (ex === OUT)
+                                return el;
+                        throw ex;
+                }
+        };
+
+        P.setMarkerAtPos = function(row, col) {
+                if (!row.tagName) // accept an element as well
+                        row = this.getLineDivElement(row);
+                if (row)
+                        return insertInText(row, col, DOM.createElement("span"));
+        };
+
         P.__restartBlinking = function() {
                 this.__stopBlinking();
                 this.__caretTimer = setInterval(this.__blinkCaret, BLINK_TIMEOUT);
@@ -249,8 +297,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.coordinates = function(row, col) {
-                var caret = this.getCaretElement(), w = caret.offsetWidth, h = caret.offsetHeight;
-                return { x: col * w, y: row * h, cw: w, ch: h };
+                var div = this.getLineDivElement(row);
+                var span = this.setMarkerAtPos(div, col);
+                var ret = { x: span.offsetLeft, y: div.offsetTop, h: div.offsetHeight };
+                DOM.trash(span);
+                return ret;
         };
 
         P.heightInLines = function() {
@@ -312,7 +363,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.getOverlayHTML = function(name, props) {
                 var p1 = this.coordinates(props.line1, props.col1);
-                var p2 = this.coordinates(props.line2 - 1, props.col2);
+                var p2 = this.coordinates(props.line2, props.col2);
                 var str = String.buffer(
                         "<div id='", this.getOverlayId(name), "' class='Ymacs_Overlay ", name,
                         "' style='top:", p1.y, "px'>"
@@ -323,7 +374,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 } else {
                         str("<div class='", name, "' style='margin-left:", p1.x, "px;'>&nbsp;</div>");
                         if (props.line2 - props.line1 > 1)
-                                str("<div class='", name, "' style='height:", p2.y - p1.y, "px'></div>");
+                                str("<div class='", name, "' style='height:", p2.y - p1.y - p2.h, "px'></div>");
                         str("<div class='", name, "' style='width:", p2.x, "px;'>&nbsp;</div>");
                 }
                 str("</div>");
