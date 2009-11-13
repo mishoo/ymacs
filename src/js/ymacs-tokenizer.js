@@ -212,6 +212,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                                 }
                                         }
                                         else if (ex === s.EOF) {
+                                                a[s.line] = p.copy();
                                                 this.buffer.resumeUpdates();
                                                 if (p.on_EOF)
                                                         p.on_EOF();
