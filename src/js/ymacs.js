@@ -211,6 +211,11 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 }
         };
 
+        P.setColorTheme = function(themeId) {
+                this.delClass(/Ymacs-Theme-[^\s]*/g);
+                this.addClass("Ymacs-Theme-" + themeId);
+        };
+
         /* -----[ listeners ]----- */
 
         P._on_activeFramePointChange = function() {

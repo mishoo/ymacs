@@ -1,3 +1,15 @@
+/*
+
+  Note that this file is just an example.  It should not be treated as
+  part of Ymacs itself.  Ymacs is just an editing platform and as such
+  it has no menus, no toolbar etc.  These can be easily added using
+  other DynarchLIB widgets, as this file demonstrates.
+
+  If a collection of useful menus/toolbars will emerge, a new compound
+  widget will be defined.
+
+*/
+
 var desktop = new DlDesktop({});
 desktop.fullScreen();
 
@@ -76,7 +88,7 @@ function () {\n\
 
         var layout = new DlLayout({ parent: dlg });
 
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, txt, keys ] });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, txt, keys ], className: "Ymacs-Theme-dark" });
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
@@ -130,6 +142,22 @@ function () {\n\
 
         menu.addFiller();
 
+        /* -----[ color theme ]----- */
+
+        var item = new DlMenuItem({ parent: menu, label: "Color theme".makeLabel() });
+        var submenu = new DlVMenu({});
+        item.setMenu(submenu);
+
+        [
+                "dark|Dark background",
+                "light|Light background"
+
+        ].foreach(function(theme){
+                theme = theme.split(/\|/);
+                var item = new DlMenuItem({ parent: submenu, label: theme[1] });
+                item.addEventListener("onSelect", ymacs.setColorTheme.$(ymacs, theme[0]));
+        });
+
         /* -----[ font ]----- */
 
         var item = new DlMenuItem({ parent: menu, label: "Font family".makeLabel() });
@@ -152,6 +180,7 @@ function () {\n\
                 "Tahoma",
                 "Georgia",
                 "Times New Roman"
+
         ].foreach(function(font){
                 item = new DlMenuItem({ parent: submenu, label: "<span style='font-family:" + font + "'>" + font + "</span>" });
                 item.addEventListener("onSelect", function(){
@@ -181,6 +210,7 @@ function () {\n\
                 "20px",
                 "22px",
                 "24px"
+
         ].foreach(function(font){
                 item = new DlMenuItem({ parent: submenu, label: "<span style='font-size:" + font + "'>" + font + "</span>" });
                 item.addEventListener("onSelect", function(){
