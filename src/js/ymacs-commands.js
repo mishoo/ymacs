@@ -197,7 +197,7 @@ Ymacs_Buffer.newCommands({
                                 return;
                         }
                 }
-                this.cmd("insert", "    ");
+                this.cmd("insert", " ".x(this.getq("indent_line")));
         },
 
         indent_region: function(begin, end) {

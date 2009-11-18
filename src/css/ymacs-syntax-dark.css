@@ -39,3 +39,6 @@
 .Ymacs-Theme-dark .Ymacs_Frame .xml-cdata { color: #bbb; }
 .Ymacs-Theme-dark .Ymacs_Frame .xml-cdata-starter,
 .Ymacs-Theme-dark .Ymacs_Frame .xml-cdata-stopper { color: #888; }
+
+/* Lisp mode */
+.Ymacs-Theme-dark .Ymacs_Frame .lisp-keyword { color: #8f8; font-weight: bold; }

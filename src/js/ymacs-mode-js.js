@@ -193,7 +193,6 @@ parseInt undefined window document alert prototype constructor".qw();
                         }
                         else if ((tmp = isCloseParen(ch))) {
                                 var p = $parens.pop();
-                                // console.log("%d,%d / parens: %o, popped: %o", stream.line, stream.col, $parens, p);
                                 if (!p || p.type != tmp) {
                                         foundToken(stream.col, ++stream.col, "error");
                                 } else {

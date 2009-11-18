@@ -83,12 +83,16 @@ function () {\n\
         javascript.cmd("javascript_dl_mode");
         xml.cmd("xml_mode");
 
+        var lisp = new Ymacs_Buffer({ name: "test.lisp" });
+        lisp.setCode("(defun foo ())\n");
+        lisp.cmd("lisp_mode");
+
         var keys = new Ymacs_Buffer({ name: "keybindings.txt" });
         keys.setCode(info);
 
         var layout = new DlLayout({ parent: dlg });
 
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, txt, keys ], className: "Ymacs-Theme-dark" });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ lisp, javascript, xml, txt, keys ], className: "Ymacs-Theme-dark" });
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
@@ -115,7 +119,7 @@ function () {\n\
         files.foreach(function(file){
                 var item = new DlMenuItem({ label: file, parent: submenu });
                 item.addEventListener("onSelect", function(){
-                        var request = new DlRPC({ url: "/ymacs/js/" + file });
+                        var request = new DlRPC({ url: "/ymacs/js/" + file + "?killCache=" + new Date().getTime() });
                         request.call({
                                 callback: function(data){
                                         var code = data.text;

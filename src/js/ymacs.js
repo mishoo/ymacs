@@ -5,6 +5,8 @@
 
 DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
+        D.DEFAULT_EVENTS = [ "onBufferSwitch" ];
+
         D.DEFAULT_ARGS = {
                 buffers : [ "buffers" , null ],
                 frames  : [ "frames"  , null ],
@@ -103,16 +105,17 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         P.switchToBuffer = function(buf) {
                 var fr = this.getActiveFrame();
                 fr.setBuffer(buf);
+                this.callHooks("onBufferSwitch", buf);
         };
 
         P.switchToNextBuffer = function() {
                 var fr = this.getActiveFrame();
-                fr.setBuffer(this.getNextBuffer(fr.buffer));
+                this.switchToBuffer(this.getNextBuffer(fr.buffer));
         };
 
         P.switchToPreviousBuffer = function() {
                 var fr = this.getActiveFrame();
-                fr.setBuffer(this.getPrevBuffer(fr.buffer));
+                this.switchToBuffer(this.getPrevBuffer(fr.buffer));
         };
 
         P.getNextBuffer = function(buf) {
