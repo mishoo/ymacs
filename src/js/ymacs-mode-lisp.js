@@ -150,7 +150,7 @@ Ymacs_Tokenizer.define("lisp", function(stream, tok){
                 if ((tmp = stream.lookingAt(/^#\\(Space|Newline|.)/i))) {
                         foundToken(stream.col, stream.col += tmp[0].length, "constant");
                 }
-                else if (stream.lookingAt(/^#\x27./)) {
+                else if (stream.lookingAt(/^#\x27[^(]/)) {
                         stream.col += 2;
                         tmp = readName();
                         foundToken(tmp.c1, tmp.c2, "function-name");
