@@ -84,8 +84,8 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         P.defineKey = function(key, func, args) {
                 var cmd = func;
                 if (func instanceof Array) {
-                        func = func[0];
                         args = func.slice(1);
+                        func = func[0];
                 }
                 key = key.split(/\s*&&\s*/);
                 if (key.length > 1) {
