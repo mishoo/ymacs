@@ -7,7 +7,9 @@
 
 (function(){
 
-        var SPECIAL_FORMS = "defun lambda let load-time-value quote macrolet \
+        var SPECIAL_FORMS = "defmacro defun defclass defmethod defgeneric defpackage in-package defreadtable in-readtable \
+when cond \
+lambda let load-time-value quote macrolet \
 progn prog1 prog2 progv go flet the \
 if throw eval-when multiple-value-prog1 unwind-protect let* \
 labels function symbol-macrolet block tagbody catch locally \
@@ -27,6 +29,21 @@ return-from setq multiple-value-call".qw().toHash(true);
                 ")" : "(",
                 "}" : "{",
                 "]" : "["
+        };
+
+        var FORM_ARGS = {
+                "if"         : "3+",
+                "when"       : "1*",
+                "unless"     : "1*",
+                "defun"      : "2*",
+                "defgeneric" : "2*",
+                "defmethod"  : "2*",
+                "defclass"   : "2*",
+                "defmacro"   : "2*",
+                "progn"      : "0*",
+                "prog1"      : "0*",
+                "prog2"      : "0*",
+                "let"        : "1*"
         };
 
         function isOpenParen(ch) {
@@ -55,7 +72,8 @@ return-from setq multiple-value-call".qw().toHash(true);
                     $quote         = null,
                     $parens        = [],
                     $passedParens  = [],
-                    $lastToken     = null,
+                    $backList      = [],
+                    $list          = [],
                     PARSER         = { next: next, copy: copy, indentation: indentation };
 
                 function copy() {
@@ -66,7 +84,8 @@ return-from setq multiple-value-call".qw().toHash(true);
                                 inComment    : $inComment,
                                 parens       : $parens.slice(0),
                                 passedParens : $passedParens.slice(0),
-                                lastToken    : $lastToken
+                                backList     : $backList.slice(0),
+                                list         : $list.slice(0)
                         };
                         function restore() {
                                 $cont          = context.cont.slice(0);
@@ -75,22 +94,21 @@ return-from setq multiple-value-call".qw().toHash(true);
                                 $inComment     = context.inComment;
                                 $parens        = context.parens.slice(0);
                                 $passedParens  = context.passedParens.slice(0);
-                                $lastToken     = context.lastToken;
+                                $backList      = context.backList.slice(0),
+                                $list          = context.list.slice(0);
                                 return PARSER;
                         };
                         return restore;
                 };
 
                 function foundToken(c1, c2, type) {
-                        if (type) {
-                                $lastToken = {
-                                        c1: c1,
-                                        c2: c2,
-                                        id: stream.lineText().substring(c1, c2),
-                                        t: type
-                                };
-                        }
                         tok.onToken(stream.line, c1, c2, type);
+                };
+
+                function newArg(what) {
+                        if (what == null)
+                                what = { c1: stream.col };
+                        $list.push(what);
                 };
 
                 function INDENT_LEVEL() { return stream.buffer.getq("indent_level"); };
@@ -143,15 +161,27 @@ return-from setq multiple-value-call".qw().toHash(true);
                         }
                 };
 
+                function isForm(form) {
+                        var f = $list && $list.length > 0 && $list[0].id;
+                        if (f) {
+                                f = f.toLowerCase();
+                                if (form == null)
+                                        return f;
+                                return f == form;
+                        }
+                };
+
                 function next() {
                         stream.checkStop();
                         if ($cont.length > 0)
                                 return $cont.peek()();
                         var ch = stream.peek(), tmp;
-                            if ((tmp = stream.lookingAt(/^#\\(Space|Newline|.)/i))) {
-                                    foundToken(stream.col, stream.col += tmp[0].length, "constant");
-                            }
+                        if ((tmp = stream.lookingAt(/^#\\(Space|Newline|.)/i))) {
+                                newArg();
+                                foundToken(stream.col, stream.col += tmp[0].length, "constant");
+                        }
                         else if (stream.lookingAt(/^#\x27[^(]/)) {
+                                newArg();
                                 stream.col += 2;
                                 tmp = readName();
                                 foundToken(tmp.c1, tmp.c2, "function-name");
@@ -166,14 +196,19 @@ return-from setq multiple-value-call".qw().toHash(true);
                                 foundToken(stream.col, stream.col = stream.lineLength(), "comment");
                         }
                         else if (ch === '"') {
+                                newArg();
                                 $inString = { line: stream.line, c1: stream.col };
                                 foundToken(stream.col, ++stream.col, "string-starter");
                                 $cont.push(readString.$C(ch, "string"));
                         }
                         else if ((tmp = stream.lookingAt(/^[+-]?(#x[0-9a-f]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*)(\x2f(#x[0-9a-f]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*))?/))) { // Dude, WTF...
+                                newArg();
                                 foundToken(stream.col, stream.col += tmp[0].length, "number");
                         }
                         else if ((tmp = isOpenParen(ch))) {
+                                newArg();
+                                $backList.push($list);
+                                $list = [];
                                 $parens.push({ line: stream.line, col: stream.col, type: ch });
                                 foundToken(stream.col, ++stream.col, "open-paren");
                         }
@@ -184,6 +219,7 @@ return-from setq multiple-value-call".qw().toHash(true);
                                 } else {
                                         p.closed = { line: stream.line, col: stream.col };
                                         $passedParens.push(p);
+                                        $list = $backList.pop();
                                         foundToken(stream.col, ++stream.col, "close-paren");
                                 }
                         }
@@ -195,9 +231,15 @@ return-from setq multiple-value-call".qw().toHash(true);
                                         : null;
                                 if (!type) {
                                         // perhaps function name?
-                                        if ($lastToken && $lastToken.id.toLowerCase() == "defun")
+                                        if (isForm("defun") && $list.length == 1) {
                                                 type = "function-name";
+                                        }
+                                        // there are a lot of macros starting with "with-", so let's highlight this
+                                        else if (/^with-/i.test(tmp.id)) {
+                                                type = "builtin";
+                                        }
                                 }
+                                newArg(tmp);
                                 foundToken(tmp.c1, tmp.c2, type);
                         }
                         else {
@@ -215,14 +257,45 @@ return-from setq multiple-value-call".qw().toHash(true);
 
                         var p = $parens.peek();
                         if (p) {
-                                // check if the current line closes the paren
-                                var re = new RegExp("^\\s*\\" + OPEN_PAREN[p.type]);
-                                var thisLineCloses = re.test(currentLine);
-
                                 var line = stream.lineText(p.line);
                                 indent = p.col + 1;
+                                var nextNonSpace;
                                 if (isConstituentStart(line.charAt(indent))) {
                                         indent = p.col + INDENT_LEVEL();
+                                        var re = /\s\S/g;
+                                        re.lastIndex = p.col;
+                                        nextNonSpace = re.exec(line);
+                                        if (nextNonSpace) {
+                                                nextNonSpace = nextNonSpace.index + 1;
+                                        }
+                                }
+                                if ($list && $list.length) {
+                                        // console.log($list);
+                                        var currentForm = isForm();
+                                        if (currentForm) {
+                                                currentForm = currentForm.replace(/\*$/, "");
+                                                var formArgs = FORM_ARGS[currentForm];
+                                                if (!formArgs && /^with/.test(currentForm)) {
+                                                        // "with" macros usually take one argument, then &body
+                                                        formArgs = "1*";
+                                                }
+                                                if (!formArgs) {
+                                                        formArgs = "1+"; // kind of sucky now
+                                                }
+                                                if (formArgs) {
+                                                        var n = parseInt(formArgs, 10);
+                                                        var hasRest = /\+$/.test(formArgs);
+                                                        var hasBody =/\*$/.test(formArgs);
+                                                        // console.log("Expecting %d arguments, got %d already (rest=%o, body=%o)", n, $list.length - 1, hasRest, hasBody);
+                                                        if ($list.length - 1 < n || hasRest) {
+                                                                // still in the arguments
+                                                                if (nextNonSpace)
+                                                                        indent = nextNonSpace;
+                                                                else
+                                                                        indent += INDENT_LEVEL();
+                                                        }
+                                                }
+                                        }
                                 }
                         }
 

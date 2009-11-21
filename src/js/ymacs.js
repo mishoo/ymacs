@@ -202,7 +202,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 if (this.modeline) {
                         var buffer = this.getActiveBuffer();
                         var rc = buffer._rowcol;
-                        var ml = String.buffer("-U:---  <b>", buffer.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
+                        var ml = String.buffer("-- <b>", buffer.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
                         var pr = [];
                         for (var i in this.progress) {
                                 pr.push(i + ": " + this.progress[i]);
