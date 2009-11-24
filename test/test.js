@@ -197,6 +197,8 @@ function () {\n\
                 });
         });
 
+        // ymacs.getActiveFrame().setStyle({ fontFamily: "Arial", fontSize: "18px" });
+
         /* -----[ font size ]----- */
 
         var item = new DlMenuItem({ parent: menu, label: "Font size".makeLabel() });

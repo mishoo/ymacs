@@ -7,6 +7,10 @@
 
 DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
+        var DBL_CLICK_SPEED = 300;
+
+        var EX = DlException.stopEventBubbling;
+
         D.DEFAULT_EVENTS = [ "onPointChange" ];
 
         D.DEFAULT_ARGS = {
@@ -58,6 +62,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onKeyPress  : this._on_keyPress,
                         onResize    : this.centerOnCaret
                 });
+                this._dragSelectCaptures = {
+                        onMouseOver  : EX,
+                        onMouseOut   : EX,
+                        onMouseEnter : EX,
+                        onMouseLeave : EX,
+                        onMouseMove  : _dragSelect_onMouseMove.$(this),
+                        onMouseUp    : _dragSelect_onMouseUp.$(this)
+                };
         };
 
         P.getContentElement = function() {
@@ -296,6 +308,38 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }, this).join(""));
         };
 
+        P.coordinatesToRowCol = function(x, y) {
+                function findLine(r1, r2) {
+                        if (r1 == r2)
+                                return r1;
+                        var row = Math.floor((r1 + r2) / 2),
+                            div = self.getLineDivElement(row),
+                            y1  = div.offsetTop,
+                            y2  = y1 + div.offsetHeight - 1;
+                        if (y2 < y)
+                                return findLine(row + 1, r2);
+                        if (y < y1)
+                                return findLine(r1, row - 1);
+                        return row;
+                };
+                function findCol(c1, c2) {
+                        if (c1 == c2)
+                                return c1;
+                        var col = Math.floor((c1 + c2) / 2);
+                        var p1 = self.coordinates(row, col),
+                            p2 = self.coordinates(row, col + 1);
+                        if (p2.x < x)
+                                return findCol(col + 1, c2);
+                        if (x < p1.x)
+                                return findCol(c1, col - 1);
+                        return col;
+                };
+                var self = this,
+                    row = findLine(0, this.buffer.code.length - 1),
+                    col = findCol(0, this.buffer.code[row].length);
+                return { row: row, col: col };
+        };
+
         P.coordinates = function(row, col) {
                 var div = this.getLineDivElement(row);
                 var span = this.setMarkerAtPos(div, col);
@@ -413,18 +457,57 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.__stopBlinking();
         };
 
+        var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
+        function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
+
         P._on_mouseDown = function(ev) {
+                clearTimeout(CLICK_COUNT_TIMER);
+                CLICK_COUNT++;
+                CLICK_COUNT_TIMER = CLEAR_CLICK_COUNT.delayed(DBL_CLICK_SPEED);
+
                 this.__restartBlinking();
                 var pos = ev.computePos(this.getContentElement()),
-                    sz = DOM.getOuterSize(this.getCaretElement()),
-                    row = Math.floor(pos.y / sz.y),
-                    col = Math.floor(pos.x / sz.x);
-                this.buffer._repositionCaret(this.buffer._rowColToPosition(row, col));
+                    rc = this.coordinatesToRowCol(pos.x, pos.y),
+                    buf = this.buffer;
+
+                buf.clearTransientMark();
+                buf.cmd("goto_char", buf._rowColToPosition(rc.row, rc.col));
+                if (CLICK_COUNT == 1) {
+                        buf.currentCommand = "mouse_mark"; // which sucks, but does the job.
+                        buf.ensureTransientMark();
+                        DlEvent.captureGlobals(this._dragSelectCaptures);
+                }
+                else if (CLICK_COUNT == 2) {
+                        buf.cmd("backward_word");
+                        buf.cmd("forward_word_mark");
+                }
+                else if (CLICK_COUNT == 3) {
+                        buf.cmd("beginning_of_line");
+                        buf.cmd("end_of_line_mark");
+                }
+                else if (CLICK_COUNT == 4) {
+                        buf.cmd("backward_paragraph");
+                        buf.cmd("forward_whitespace");
+                        buf.cmd("forward_paragraph_mark");
+                }
+
+                EX();
+        };
+
+        function _dragSelect_onMouseMove(ev) {
+                var pos = ev.computePos(this.getContentElement()),
+                    rc = this.coordinatesToRowCol(pos.x, pos.y);
+                this.buffer.cmd("goto_char", this.buffer._rowColToPosition(rc.row, rc.col));
+                this.buffer.ensureTransientMark();
+        };
+
+        function _dragSelect_onMouseUp(ev) {
+                DlEvent.releaseGlobals(this._dragSelectCaptures);
         };
 
         P._on_keyPress = function(ev) {
                 if (this.buffer._handleKeyEvent(ev))
-                        DlException.stopEventBubbling();
+                        EX();
         };
 
 });
