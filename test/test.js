@@ -93,6 +93,20 @@ function () {\n\
         lisp.cmd("lisp_mode");
 
         var markdown = new Ymacs_Buffer({ name: "markdown.txt" });
+        markdown.setCode("\
+# Markdown sytnax\n\
+\n\
+For now there is only basic syntax highlighting, but note\n\
+that paragraph filling commands (M-q, M-S-q) are good enough\n\
+to make editing Markdown a snap.  For example, add a > character\n\
+at the start of this paragraph, then press M-q.  It will \"quote\"\n\
+all the text in the paragraph.  Press M-S-q to clear the prefix.\n\
+\n\
+Type \"1. \" at the start of the paragraph, then press M-q and it\n\
+will format a list item.  If you press M-ENTER within it it will start\n\
+the next list item.  Generally, M-ENTER starts a paragraph \"similar\"\n\
+to the current one.\n\
+");
         markdown.cmd("markdown_mode");
 
         var keys = new Ymacs_Buffer({ name: "keybindings.txt" });
@@ -100,7 +114,7 @@ function () {\n\
 
         var layout = new DlLayout({ parent: dlg });
 
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ markdown, javascript, xml, lisp, txt, keys ], className: "Ymacs-Theme-dark" });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ], className: "Ymacs-Theme-dark" });
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
