@@ -17,7 +17,7 @@
 
 .Ymacs-Theme-dark .Ymacs_Frame .keyword   { color: rgb(0, 255, 255);  font-weight: bold; }
 .Ymacs-Theme-dark .Ymacs_Frame .comment,
-.Ymacs-Theme-dark .Ymacs_Frame .mcomment { color: rgb(255, 96, 96); font-style: normal; }
+.Ymacs-Theme-dark .Ymacs_Frame .mcomment { color: #ff4500; font-style: normal; }
 .Ymacs-Theme-dark .Ymacs_Frame .comment-starter,
 .Ymacs-Theme-dark .Ymacs_Frame .mcomment-starter,
 .Ymacs-Theme-dark .Ymacs_Frame .mcomment-stopper { color: #999; }

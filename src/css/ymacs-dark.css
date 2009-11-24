@@ -1,7 +1,7 @@
 @import url("ymacs-syntax-dark.css");
 
 .Ymacs-Theme-dark .Ymacs_Frame {
-  background-color: #224;
+  background-color: #223;
   color: wheat;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .Ymacs-Theme-dark .Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #234353;
+  background-color: #334353;
 }
 
 .Ymacs-Theme-dark .Ymacs-overwrite-mode .Ymacs-caret {

@@ -81,10 +81,15 @@ function () {\n\
         txt.setCode(lorem);
 
         javascript.cmd("javascript_dl_mode");
+        javascript.setq("indent_level", 4);
         xml.cmd("xml_mode");
 
         var lisp = new Ymacs_Buffer({ name: "test.lisp" });
-        lisp.setCode("(defun foo ())\n");
+        lisp.setCode(";; Some basic Common-Lisp highlighting and indentation\n\
+;; Parens are auto-inserted\n\
+;; And you can close all remaining parens with C-c ] or C-c C-]\n\
+\n\
+(defun foo ())\n");
         lisp.cmd("lisp_mode");
 
         var keys = new Ymacs_Buffer({ name: "keybindings.txt" });
@@ -92,7 +97,7 @@ function () {\n\
 
         var layout = new DlLayout({ parent: dlg });
 
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ lisp, javascript, xml, txt, keys ], className: "Ymacs-Theme-dark" });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, txt, keys ], className: "Ymacs-Theme-dark" });
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });

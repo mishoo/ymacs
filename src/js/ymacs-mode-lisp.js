@@ -7,6 +7,46 @@
 
 (function(){
 
+        Ymacs_Buffer.newCommands({
+
+                lisp_open_paren: function(what) {
+                        if (what == null)
+                                what = "(";
+                        what += isOpenParen(what);
+                        this.cmd("insert", what);
+                        this.cmd("backward_char");
+                },
+
+                lisp_close_paren: function(what) {
+                        var re = new RegExp("\\s*\\" + what, "ig");
+                        if (this.cmd("looking_at", re))
+                                this._deleteText(this.point(), this.matchData.after);
+                        this.cmd("insert", what);
+                },
+
+                lisp_close_all_parens: function() {
+                        var p = this.tokenizer.getParserForLine(this._rowcol.row);
+                        if (p) {
+                                // this kind of sucks, we need to rewind the stream to that location..
+                                var s = this.tokenizer.stream;
+                                s.line = this._rowcol.row;
+                                s.col = 0;
+                                try {
+                                        while (s.col < this._rowcol.col)
+                                                p.next();
+                                } catch(ex) {}
+                                p = p.copy().context.parens; // these are still-to-close
+                                p.r_foreach(function(p){
+                                        this.cmd("lisp_close_paren", isOpenParen(p.type));
+                                }, this);
+                        }
+                }
+
+        });
+
+        // XXX: much of the parser is actually copied from ymacs-mode-js.js.  I should somehow unify
+        // the duplicate code.
+
         var SPECIAL_FORMS = "defmacro defun defclass defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond \
 lambda let load-time-value quote macrolet \
@@ -176,7 +216,7 @@ return-from setq multiple-value-call".qw().toHash(true);
                         if ($cont.length > 0)
                                 return $cont.peek()();
                         var ch = stream.peek(), tmp;
-                        if ((tmp = stream.lookingAt(/^#\\(Space|Newline|.)/i))) {
+                        if ((tmp = stream.lookingAt(/^#\\(Space|Newline|.?)/i))) {
                                 newArg();
                                 foundToken(stream.col, stream.col += tmp[0].length, "constant");
                         }
@@ -303,43 +343,6 @@ return-from setq multiple-value-call".qw().toHash(true);
                 };
 
                 return PARSER;
-        });
-
-        Ymacs_Buffer.newCommands({
-
-                lisp_open_paren: function(what) {
-                        if (what == null)
-                                what = "(";
-                        what += isOpenParen(what);
-                        this.cmd("insert", what);
-                        this.cmd("backward_char");
-                },
-
-                lisp_close_paren: function(what) {
-                        var re = new RegExp("\\s*\\" + what, "ig");
-                        if (this.cmd("looking_at", re))
-                                this._deleteText(this.point(), this.matchData.after);
-                        this.cmd("insert", what);
-                },
-
-                lisp_close_all_parens: function() {
-                        var p = this.tokenizer.getParserForLine(this._rowcol.row);
-                        if (p) {
-                                // this kind of sucks, we need to rewind the stream to that location..
-                                var s = this.tokenizer.stream;
-                                s.line = this._rowcol.row;
-                                s.col = 0;
-                                try {
-                                        while (s.col < this._rowcol.col)
-                                                p.next();
-                                } catch(ex) {}
-                                p = p.copy().context.parens; // these are still-to-close
-                                p.r_foreach(function(p){
-                                        this.cmd("lisp_close_paren", isOpenParen(p.type));
-                                }, this);
-                        }
-                }
-
         });
 
 })();
