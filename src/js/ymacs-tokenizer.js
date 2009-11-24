@@ -94,8 +94,10 @@ DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
                 return this.buffer.code.length;
         };
 
-        P.lineLength = function() {
-                return this.buffer.code[this.line].length;
+        P.lineLength = function(line) {
+                if (line == null)
+                        line = this.line;
+                return this.buffer.code[line].length;
         };
 
         P.save = function() {

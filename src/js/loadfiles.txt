@@ -12,3 +12,4 @@ ymacs-tokenizer.js
 ymacs-mode-js.js
 ymacs-mode-lisp.js
 ymacs-mode-xml.js
+ymacs-mode-markdown.js

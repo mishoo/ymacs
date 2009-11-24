@@ -42,3 +42,15 @@
 
 /* Lisp mode */
 .Ymacs-Theme-dark .Ymacs_Frame .lisp-keyword { color: #8f8; font-weight: bold; }
+
+/* Markdown mode */
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading1 { color: #8df; font-weight: bold; font-size: 200%; font-family: "Lucida Grande","Trebuchet MS",Verdana,Tahoma,sans-serif;; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading2 { color: #8df; font-weight: bold; font-size: 170%; font-family: "Lucida Grande","Trebuchet MS",Verdana,Tahoma,sans-serif;; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading3 { color: #8df; font-weight: bold; font-size: 150%; font-family: "Lucida Grande","Trebuchet MS",Verdana,Tahoma,sans-serif;; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading4 { color: #8df; font-weight: bold; font-size: 130%; font-family: "Lucida Grande","Trebuchet MS",Verdana,Tahoma,sans-serif;; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading5 { color: #8df; font-weight: bold; font-size: 110%; font-family: "Lucida Grande","Trebuchet MS",Verdana,Tahoma,sans-serif;; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading6 { color: #8df; font-weight: bold; font-size: 100%; font-family: "Lucida Grande","Trebuchet MS",Verdana,Tahoma,sans-serif;; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote1 { color: #8f8; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote2 { color: #88f; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote3 { color: #f8f; }
+.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote { color: #aaa; }

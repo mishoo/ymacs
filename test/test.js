@@ -92,12 +92,15 @@ function () {\n\
 (defun foo ())\n");
         lisp.cmd("lisp_mode");
 
+        var markdown = new Ymacs_Buffer({ name: "markdown.txt" });
+        markdown.cmd("markdown_mode");
+
         var keys = new Ymacs_Buffer({ name: "keybindings.txt" });
         keys.setCode(info);
 
         var layout = new DlLayout({ parent: dlg });
 
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, txt, keys ], className: "Ymacs-Theme-dark" });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ markdown, javascript, xml, lisp, txt, keys ], className: "Ymacs-Theme-dark" });
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
@@ -115,6 +118,8 @@ function () {\n\
                 "ymacs-marker.js",
                 "ymacs-mode-js.js",
                 "ymacs-mode-xml.js",
+                "ymacs-mode-lisp.js",
+                "ymacs-mode-markdown.js",
                 "ymacs-regexp.js",
                 "ymacs-textprop.js",
                 "ymacs-tokenizer.js"

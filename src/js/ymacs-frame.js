@@ -417,12 +417,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 );
                 if (props.line1 == props.line2) {
                         str("<div class='", name, "' style='margin-left:", p1.x,
-                            "px; width:", p2.x - p1.x, "px;'>&nbsp;</div>");
+                            "px; width:", p2.x - p1.x, "px;height:", p2.h, "px;'>&nbsp;</div>");
                 } else {
-                        str("<div class='", name, "' style='margin-left:", p1.x, "px;'>&nbsp;</div>");
+                        str("<div class='", name, "' style='margin-left:", p1.x, "px;height:", p1.h, "px;'>&nbsp;</div>");
                         if (props.line2 - props.line1 > 1)
-                                str("<div class='", name, "' style='height:", p2.y - p1.y - p2.h, "px'></div>");
-                        str("<div class='", name, "' style='width:", p2.x, "px;'>&nbsp;</div>");
+                                str("<div class='", name, "' style='height:", p2.y - p1.y - p1.h, "px'></div>");
+                        str("<div class='", name, "' style='width:", p2.x, "px;height:", p2.h, "px;'>&nbsp;</div>");
                 }
                 str("</div>");
                 return str.get();
