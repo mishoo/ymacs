@@ -124,7 +124,7 @@ function () {\n\
         files.foreach(function(file){
                 var item = new DlMenuItem({ label: file, parent: submenu });
                 item.addEventListener("onSelect", function(){
-                        var request = new DlRPC({ url: "/ymacs/js/" + file + "?killCache=" + new Date().getTime() });
+                        var request = new DlRPC({ url: YMACS_SRC_PATH + file + "?killCache=" + new Date().getTime() });
                         request.call({
                                 callback: function(data){
                                         var code = data.text;
