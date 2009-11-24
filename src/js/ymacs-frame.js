@@ -425,16 +425,22 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 return str.get();
         };
 
+        P.getOverlaysCount = function() {
+                return this.getElement().childNodes.length - 1; // XXX: subtract the div.content; we need to revisit this if we add new elements.
+        };
+
         P._on_bufferOverlayChange = function(name, props, isNew) {
                 if (!isNew) {
                         DOM.trash($(this.getOverlayId(name)));
                 }
                 var div = DOM.createFromHtml(this.getOverlayHTML(name, props));
                 this.getElement().appendChild(div);
+                this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         };
 
         P._on_bufferOverlayDelete = function(name, props, isNew) {
                 DOM.trash($(this.getOverlayId(name)));
+                this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         };
 
         /* -----[ self events ]----- */
@@ -488,6 +494,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 else if (CLICK_COUNT == 4) {
                         buf.cmd("backward_paragraph");
                         buf.cmd("forward_whitespace");
+                        buf.cmd("beginning_of_line");
                         buf.cmd("forward_paragraph_mark");
                 }
 
