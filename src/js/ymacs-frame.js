@@ -406,6 +406,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.getOverlayHTML = function(name, props) {
+                if (props.line1 == props.line2 && props.col1 == props.col2)
+                        // empty overlay, don't display
+                        return null;
                 var p1 = this.coordinates(props.line1, props.col1);
                 var p2 = this.coordinates(props.line2, props.col2);
                 var str = String.buffer(
@@ -433,9 +436,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 if (!isNew) {
                         DOM.trash($(this.getOverlayId(name)));
                 }
-                var div = DOM.createFromHtml(this.getOverlayHTML(name, props));
-                this.getElement().appendChild(div);
-                this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+                var div = this.getOverlayHTML(name, props);
+                if (div) {
+                        div = DOM.createFromHtml(div);
+                        this.getElement().appendChild(div);
+                        this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+                }
         };
 
         P._on_bufferOverlayDelete = function(name, props, isNew) {
@@ -506,6 +512,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                     rc = this.coordinatesToRowCol(pos.x, pos.y);
                 this.buffer.cmd("goto_char", this.buffer._rowColToPosition(rc.row, rc.col));
                 this.buffer.ensureTransientMark();
+                this.ensureCaretVisible();
         };
 
         function _dragSelect_onMouseUp(ev) {
