@@ -321,6 +321,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this.callHooks("beforeInteractiveCommand");
                                 return func.apply(this, arguments);
                         } finally {
+                                // XXX
+                                //
+                                // "Testing the command name against _mark is a disgusting hack. :-P"
+                                //      (quotemstr on irc.freenode.org/#emacs, 2009-11-24 20:37 EEST)
+                                //
+                                // ... and yes it is.
                                 if (!/_mark$/.test(this.currentCommand))
                                         this.clearTransientMark();
                                 this.resumeUpdates();
