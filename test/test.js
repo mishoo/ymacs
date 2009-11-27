@@ -119,7 +119,7 @@ to the current one.\n\
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
 
-        var item = new DlMenuItem({ parent: menu, label: "Load it's own code!".makeLabel() });
+        var item = new DlMenuItem({ parent: menu, label: "Load its own code!".makeLabel() });
 
         var files = [
                 "ymacs-buffer.js",
