@@ -334,7 +334,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this.callHooks("afterInteractiveCommand");
                                 this.previousCommand = cmd;
                                 this.sameCommandCount++;
-                                this.ensureCaretVisible();
+                                this.whenActiveFrame("ensureCaretVisible");
                         }
                 }.$A(this, args);
         };
@@ -355,10 +355,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         mb.setCode(text);
                         mb.cmd("end_of_buffer");
                 });
-        };
-
-        P.ensureCaretVisible = function() {
-                this.whenActiveFrame("ensureCaretVisible");
         };
 
         P.cmd = function(cmd) {
@@ -607,16 +603,23 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._deleteLine = function(row) {
                 this.code.splice(row, 1);
+                row--; // it might seem weird, but the actual row that
+                       // we're operating on is row - 1, because of
+                       // the algorithms implemented in _deleteText
+                       // and _insertText (*1)
                 this._textProperties.deleteLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickDeleteLine(row);
-                if (this.__preventUpdates != 0)
-                        this.__dirtyLines.splice(row, 1);
+                if (this.__preventUpdates != 0) {
+                        this.__dirtyLines.splice(row, 1, true);
+                        // console.log("Dirty: %o", this.__dirtyLines);
+                }
                 this.callHooks("onDeleteLine", row);
         };
 
         P._insertLine = function(row, text) {
                 this.code.splice(row, 0, text);
+                row--; // see (*1) above
                 this._textProperties.insertLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickInsertLine(row);

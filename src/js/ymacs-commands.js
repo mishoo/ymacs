@@ -172,7 +172,7 @@ Ymacs_Buffer.newCommands({
         },
 
         newline_and_indent: function() {
-                // this.cmd("backward_delete_whitespace", true);
+                this.cmd("backward_delete_whitespace", true);
                 this.cmd("newline");
                 this.cmd("indent_line");
         },
@@ -628,9 +628,11 @@ Ymacs_Buffer.newCommands({
                         this.cmd("goto_char", 0);
                         while (this._rowcol.row < this.code.length) {
                                 var line = this.code[this._rowcol.row],
-                                m = /\s+$/.exec(line);
-                                if (m)
-                                        this._deleteText(this.point() + m.index, this.point() + m.index + m[0].length);
+                                    m = /\s+$/.exec(line);
+                                if (m) {
+                                        this.cmd("beginning_of_line");
+                                        this._deleteText(this.point() + m.index, this.point() + line.length);
+                                }
                                 if (!this.cmd("forward_line"))
                                         break;
                         }
