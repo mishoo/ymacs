@@ -112,6 +112,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.matchData = [];
                 this.previousCommand = null;
                 this.currentCommand = null;
+                this.currentKeys = [];
 
                 this.variables = {
                         case_fold_search            : true,
@@ -789,14 +790,39 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.interactiveEvent = ev;
                 var lcwk = this._lastCommandWasKill;
 
+                var key = Ymacs_Keymap.unparseKey(ev);
+                var cc = this.currentKeys;
+                cc.push(key);
+                var foundPrefix = false;
+
                 this.keymap.r_foreach(function(km){
-                        handled = km.handleKeyEvent(ev);
+                        var h = km.getHandler();
+                        if (h instanceof Function) {
+                                h();
+                                handled = true;
+                        }
+                        else if (h) {
+                                handled = foundPrefix = true;
+                        }
+                        else if (km.defaultHandler && cc.length == 1) {
+                                handled = km.defaultHandler();
+                        }
                         if (handled)
                                 $BREAK();
                 });
 
-                if (this._lastCommandWasKill == lcwk && typeof handled != "object") // selecting a prefix keymap shouldn't clear the killRing
+                if (!foundPrefix) {
+                        if (!handled && cc.length > 1) {
+                                this.signalError(cc.join(" ").bold() + " is undefined", true);
+                                handled = true;
+                        }
+                        cc.splice(0, cc.length);
+                }
+
+                if (this._lastCommandWasKill == lcwk && typeof handled != "object") {
+                        // selecting a prefix keymap shouldn't clear the killRing
                         this._lastCommandWasKill = 0;
+                }
 
                 this.interactiveEvent = null;
                 return handled;
