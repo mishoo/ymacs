@@ -145,10 +145,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 var smallest = null;
                 var timer = null;
                 this.quickUpdate = function(offset) {
-
-                        // DEBUG
-                        // console.log("quickUpdate at %d (%d,%d)", offset, this.buffer._positionToRowCol(offset).row, this.buffer._positionToRowCol(offset).col);
-
                         var row = this.buffer._positionToRowCol(offset).row;
                         this.parsers.splice(row - 1, this.parsers.length + 1);
 
@@ -164,10 +160,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         }.delayed(1, this);
                 };
                 this._stopQuickUpdate = function() {
-
-                        // DEBUG
-                        // console.log("_stopQuickUpdate");
-
                         clearTimeout(timer);
                         clearTimeout(this.timerUpdate);
                 };
@@ -191,10 +183,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P._do_quickUpdate = function(row) {
-
-                // DEBUG
-                // console.log("_do_quickUpdate at row %d", row);
-
                 this._stopQuickUpdate();
                 var s = this.stream, p, a = this.parsers, n;
                 s.line = row - 1;
@@ -241,19 +229,11 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         };
 
         P.quickInsertLine = function(row) {
-
-                // DEBUG
-                // console.log("quickInsertLine at row %d", row - 1);
-
-                this.parsers.splice(row - 1, this.parsers.length + 1);
+                this.parsers.splice(row, this.parsers.length + 1);
         };
 
         P.quickDeleteLine = function(row) {
-
-                // DEBUG
-                // console.log("quickDeleteLine at row %d", row - 1);
-
-                this.parsers.splice(row - 1, this.parsers.length + 1);
+                this.parsers.splice(row, this.parsers.length + 1);
         };
 
         P.onToken = function(line, c1, c2, type) {
@@ -294,7 +274,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         this.buffer.resumeUpdates();
                         if (currentLine < s.length()) {
                                 // resume lazy tokenizer if it was interrupted
-                                this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.max(row, currentLine));
+                                this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.min(row, currentLine));
                         }
                 }
         };
