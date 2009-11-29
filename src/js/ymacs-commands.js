@@ -177,23 +177,26 @@ Ymacs_Buffer.newCommands({
                 this.cmd("indent_line");
         },
 
-        indent_line: function() {
+        indent_line: function(noEmpty) {
                 if (this.tokenizer) {
                         var indent = this.tokenizer.getIndentation(this._rowcol.row);
                         if (indent != null) {
-                                var pos = this.cmd("save_excursion", function(){
-                                        this.cmd("back_to_indentation");
-                                        if (this._rowcol.col != indent) {
-                                                this.cmd("beginning_of_line");
-                                                while (/^[ \t\xa0]$/.test(this.charAt()))
-                                                        this.cmd("delete_char");
-                                                this.cmd("insert", " ".x(indent));
-                                        }
-                                        return this.point();
-                                });
-                                // when point is before the indentation, go there.
-                                if (this.point() < pos)
-                                        this.cmd("goto_char", pos);
+                                if (!noEmpty || /\S/.test(this.getLine())) {
+                                        var pos = this.cmd("save_excursion", function(){
+                                                this.cmd("back_to_indentation");
+                                                if (this._rowcol.col != indent) {
+                                                        this.cmd("beginning_of_line");
+                                                        this.cmd("delete_whitespace", true);
+                                                        // while (/^[ \t\xa0]$/.test(this.charAt()))
+                                                        //         this.cmd("delete_char");
+                                                        this.cmd("insert", " ".x(indent));
+                                                }
+                                                return this.point();
+                                        });
+                                        // when point is before the indentation, go there.
+                                        if (this.point() < pos)
+                                                this.cmd("goto_char", pos);
+                                }
                                 return;
                         }
                 }
@@ -222,7 +225,7 @@ Ymacs_Buffer.newCommands({
                 this.cmd("save_excursion", function() {
                         this.cmd("goto_char", begin);
                         while (this.point() < end.getPosition()) {
-                                this.cmd("indent_line");
+                                this.cmd("indent_line", true);
                                 this.cmd("beginning_of_line");
                                 if (!this.cmd("forward_line"))
                                         break;
@@ -754,76 +757,6 @@ Ymacs_Buffer.newCommands({
                         ctx.length = expansion.length;
                         ctx.encountered[expansion] = true;
                 }
-        },
-
-        /* -----[ sexp-based movement ]----- */
-
-        // XXX: these two are awfully slow if they have to search a
-        // big text; backward_sexp is triple-awfully slow even if it
-        // has to search small text at the end of a big buffer.
-        //
-        // We should implement them on top of a simpler string stream,
-        // rather than using full buffer commands, and we should
-        // probably think about something else than regexps.  Maybe we
-        // should use the full mode parser (for modes), but then it
-        // won't work until the text finished parsing... :-(  IDEAS?
-
-        forward_sexp: function() {
-                var closed = 0,
-                    skip_string = this.getq("syntax_skip_string"),
-                    skip_comment = this.getq("syntax_skip_comment");
-                while (!this.cmd("eob_p")) {
-                        if (this.cmd("looking_at", /[\[\{\(]/g)) {
-                                ++closed;
-                                this.cmd("forward_char");
-                        }
-                        else if (this.cmd("looking_at", /[\]\}\)]/g)) {
-                                --closed;
-                                this.cmd("forward_char");
-                                if (closed == 0)
-                                        return true;
-                        }
-                        else if (skip_string && this.cmd("looking_at", skip_string)) {
-                                this.cmd("goto_char", this.matchData.after);
-                        }
-                        else if (skip_comment && this.cmd("looking_at", skip_comment)) {
-                                this.cmd("goto_char", this.matchData.after);
-                        }
-                        else this.cmd("forward_char");
-                }
-        },
-
-        backward_sexp: function() {
-                var closed = 0,
-                    skip_string = this.getq("syntax_skip_string"),
-                    skip_comment = this.getq("syntax_skip_comment");
-                while (!this.cmd("bob_p")) {
-                        if (this.cmd("looking_back", /[\]\}\)]/g)) {
-                                ++closed;
-                                this.cmd("backward_char");
-                        }
-                        else if (this.cmd("looking_back", /[\[\{\(]/g)) {
-                                --closed;
-                                this.cmd("backward_char");
-                                if (closed == 0)
-                                        return true;
-                        }
-                        else if (skip_string && this.cmd("looking_back", skip_string)) {
-                                this.cmd("goto_char", this.matchData.index);
-                        }
-                        else if (skip_comment && this.cmd("looking_back", skip_comment)) {
-                                this.cmd("goto_char", this.matchData.index);
-                        }
-                        else this.cmd("backward_char");
-                }
-        },
-
-        kill_sexp: function() {
-                this._killingAction(this.point(),
-                                    this.cmd("save_excursion", function() {
-                                            this.cmd("forward_sexp");
-                                            return this.point();
-                                    }));
         },
 
         /* -----[ frames and buffers ]----- */

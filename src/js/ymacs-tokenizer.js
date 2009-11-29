@@ -272,11 +272,23 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                         }
                 } finally {
                         this.buffer.resumeUpdates();
-                        if (currentLine < s.length()) {
-                                // resume lazy tokenizer if it was interrupted
-                                this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.min(row, currentLine));
-                        }
+                        // if (currentLine < s.length()) {
+                        //         // resume lazy tokenizer if it was interrupted
+                        //         this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.min(row, currentLine));
+                        // }
+                        if (s.line < s.length())
+                                this.timerUpdate = this._do_quickUpdate.delayed(50, this, s.line);
                 }
+        };
+
+        P.reparseAll = function() {
+                this.parsers.splice(0, this.parsers.length);
+                return this.finishParsing();
+        };
+
+        P.finishParsing = function() {
+                this.getParserForLine(this.stream.length());
+                return this.getLastParser();
         };
 
         P.getLastParser = function() {

@@ -85,8 +85,6 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-ARROW_DOWN"                            : "forward_paragraph",
                 "C-ARROW_UP"                              : "backward_paragraph",
                 "C-l"                                     : "recenter_top_bottom",
-                "C-M-f && C-M-n"                          : "forward_sexp",
-                "C-M-b && C-M-p"                          : "backward_sexp",
                 "PAGE_UP && M-v"                          : "scroll_up",
                 "PAGE_DOWN && C-v"                        : "scroll_down",
 
@@ -112,7 +110,6 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-d"                                     : "kill_word",
                 "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
                 "C-k"                                     : "kill_line",
-                "M-C-k"                                   : "kill_sexp",
                 "C-y"                                     : "yank",
                 "M-y"                                     : "yank_pop",
                 "C-SPACE"                                 : "set_mark_command",

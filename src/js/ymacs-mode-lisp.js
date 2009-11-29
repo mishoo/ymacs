@@ -257,7 +257,7 @@ return-from setq multiple-value-call".qw().toHash(true);
                                 if (!p || p.type != tmp) {
                                         foundToken(stream.col, ++stream.col, "error");
                                 } else {
-                                        p.closed = { line: stream.line, col: stream.col };
+                                        p.closed = { line: stream.line, col: stream.col, opened: p };
                                         $passedParens.push(p);
                                         $list = $backList.pop();
                                         foundToken(stream.col, ++stream.col, "close-paren");
@@ -372,46 +372,14 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         });
         var keymap = new Ymacs_Keymap_LispMode({ buffer: this });
         this.pushKeymap(keymap);
-
-        var clearOvl = function() {
-                this.deleteOverlay("match-paren");
-        }.clearingTimeout(1000, this);
-
-        var events = {
-                beforeInteractiveCommand: function() {
-                        clearOvl.doItNow();
-                },
-                afterInteractiveCommand: function() {
-                        var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-                        if (p) {
-                                var parens = p.context.passedParens;
-                                parens.foreach(function(p){
-                                        var match = p.closed;
-                                        if (p.line == rc.row && p.col == rc.col) {
-                                                this.setOverlay("match-paren", {
-                                                        line1: p.line, line2: match.line,
-                                                        col1: p.col, col2: match.col + 1
-                                                });
-                                                clearOvl();
-                                        } else if (match.line == rc.row && match.col == rc.col - 1) {
-                                                this.setOverlay("match-paren", {
-                                                        line1: p.line, line2: match.line,
-                                                        col1: p.col, col2: match.col + 1
-                                                });
-                                                clearOvl();
-                                        }
-                                }, this);
-                        }
-                }.clearingTimeout(150)
-        };
-        this.addEventListener(events);
+        var was_paren_match = this.cmd("paren_match_mode", true);
 
         return function() {
-                clearOvl.doItNow();
-                this.removeEventListener(events);
                 this.setTokenizer(tok);
                 this.setq(changed_vars);
                 this.popKeymap(keymap);
+                if (!was_paren_match)
+                        this.cmd("paren_match_mode", false);
         };
 
 });

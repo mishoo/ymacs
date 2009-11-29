@@ -151,10 +151,37 @@ parseInt undefined window document alert prototype constructor".qw();
                         foundToken(start, stream.col, type);
                 };
 
+                // function readLiteralRegexp() {
+                //         var m;
+                //         if (readString("/", "regexp") && (m = stream.lookingAt(/^[gmsiy]+/)))
+                //                 foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
+                // };
+
                 function readLiteralRegexp() {
-                        var m;
-                        if (readString("/", "regexp") && (m = stream.lookingAt(/^[gmsiy]+/)))
-                                foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
+                        var ch, esc = false, inset = 0, start = stream.col;
+                        while (!stream.eol()) {
+                                ch = stream.peek();
+                                if (isOpenParen(ch) && !esc && !inset)
+                                        inset++;
+                                if (isCloseParen(ch) && !esc) {
+                                        inset--;
+                                        if (inset < 0)
+                                                inset = 0;
+                                }
+                                if (ch === "/" && !esc && !inset) {
+                                        $cont.pop();
+                                        $inString = null;
+                                        foundToken(start, stream.col, "regexp");
+                                        foundToken(stream.col, ++stream.col, "regexp-stopper");
+                                        var m = stream.lookingAt(/^[gmsiy]+/);
+                                        if (m)
+                                                foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
+                                        return true;
+                                }
+                                esc = !esc && ch === "\\";
+                                stream.nextCol();
+                        }
+                        foundToken(start, stream.col, "regexp");
                 };
 
                 function next() {
@@ -196,7 +223,8 @@ parseInt undefined window document alert prototype constructor".qw();
                                 if (!p || p.type != tmp) {
                                         foundToken(stream.col, ++stream.col, "error");
                                 } else {
-                                        p.closed = { line: stream.line, col: stream.col };
+                                        // circular reference; poor browsers will leak.  mwuhahahaha
+                                        p.closed = { line: stream.line, col: stream.col, opened: p };
                                         $passedParens.push(p);
                                         foundToken(stream.col, ++stream.col, "close-paren");
                                 }
@@ -326,10 +354,8 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "ENTER"                                     : "newline_and_indent",
-                "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent",
-                // "{"                                      : "c_electric_block",
-                "C-c \\"                                    : "c_goto_matching_paren",
-                "C-M-q"                                     : "c_indent_sexp"
+                "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent"
+                // "{"                                      : "c_electric_block"
         };
 
         D.CONSTRUCT = function() {
@@ -346,53 +372,13 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         var keymap = new Ymacs_Keymap_CLanguages({ buffer: this });
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
         this.pushKeymap(keymap);
-
-        var changed_vars = this.setq({
-                syntax_start_string  : /[\x22\x27]/g,
-                syntax_skip_string   : /(\x22(\\.|[^\x22\\])*\x22|\x27(\\.|[^\x27\\])*\x27)/g,
-                syntax_start_comment : /\x2f\x2f|\2xf\*/g,
-                syntax_skip_comment  : /\x2f\*[^*]*\*+([^\x2f*][^*]*\*+)*\x2f|\x2f\x2f[^\n]*/g
-        });
-
-        var clearOvl = function() {
-                this.deleteOverlay("match-paren");
-        }.clearingTimeout(1000, this);
-
-        var events = {
-                beforeInteractiveCommand: function() {
-                        clearOvl.doItNow();
-                },
-                afterInteractiveCommand: function() {
-                        var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-                        if (p) {
-                                var parens = p.context.passedParens;
-                                parens.foreach(function(p){
-                                        var match = p.closed;
-                                        if (p.line == rc.row && p.col == rc.col) {
-                                                this.setOverlay("match-paren", {
-                                                        line1: p.line, line2: match.line,
-                                                        col1: p.col, col2: match.col + 1
-                                                });
-                                                clearOvl();
-                                        } else if (match.line == rc.row && match.col == rc.col - 1) {
-                                                this.setOverlay("match-paren", {
-                                                        line1: p.line, line2: match.line,
-                                                        col1: p.col, col2: match.col + 1
-                                                });
-                                                clearOvl();
-                                        }
-                                }, this);
-                        }
-                }.clearingTimeout(250)
-        };
-        this.addEventListener(events);
+        var was_paren_match = this.cmd("paren_match_mode", true);
 
         return function() {
-                clearOvl.doItNow();
-                this.removeEventListener(events);
                 this.setTokenizer(tok);
                 this.popKeymap(keymap);
-                this.setq(changed_vars);
+                if (!was_paren_match)
+                        this.cmd("paren_match_mode", false);
         };
 
 });
@@ -416,39 +402,6 @@ Ymacs_Buffer.newCommands({
                 if ((ret = this.cmd("self_insert_command"))) {
                         this.cmd("indent_line");
                         return ret;
-                }
-        },
-
-        c_matching_paren: function() {
-                var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-                if (p) {
-                        var parens = p.context.passedParens;
-                        return parens.foreach(function(p){
-                                var match = p.closed;
-                                if (p.line == rc.row && p.col == rc.col) {
-                                        $RETURN( this._rowColToPosition(match.line, match.col + 1) );
-                                } else if (match.line == rc.row && match.col == rc.col - 1) {
-                                        $RETURN( this._rowColToPosition(p.line, p.col) );
-                                }
-                        }, this);
-                }
-        },
-
-        c_indent_sexp: function() {
-                var pos = this.cmd("c_matching_paren");
-                if (pos) {
-                        this.cmd("indent_region", this.caretMarker.getPosition(), pos);
-                } else {
-                        this.signalError("Balanced expression not found");
-                }
-        },
-
-        c_goto_matching_paren: function() {
-                var pos = this.cmd("c_matching_paren");
-                if (pos) {
-                        this.cmd("goto_char", pos);
-                        this.cmd("recenter_top_bottom");
-                        return true;
                 }
         }
 

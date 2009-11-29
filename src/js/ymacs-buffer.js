@@ -70,22 +70,28 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         D.newMode = P.newMode = function(name, activate) {
                 var modevar = "*" + name + "*";
                 this.COMMANDS[name] = function(force) {
-                        var on = !this.getq(modevar);
-                        if (!on && force)
-                                return true;
-                        this.setq(modevar, on);
-                        if (this.__deactivateCurrentMode) {
-                                this.__deactivateCurrentMode();
-                                this.__deactivateCurrentMode = null;
+                        var status = this.getq(modevar);
+                        if (status) {
+                                // currently active
+                                if (force !== true) {
+                                        // deactivate
+                                        if (status instanceof Function) {
+                                                // clean-up
+                                                status.call(this);
+                                        }
+                                        this.setq(modevar, null);
+                                }
                         }
-                        if (on) {
-                                var off = activate.apply(this, arguments);
-                                this.__deactivateCurrentMode = function() {
-                                        off.call(this);
-                                        this.setq(modevar, false);
-                                };
+                        else {
+                                // inactive
+                                if (force !== false) {
+                                        var off = activate.apply(this, arguments);
+                                        if (!(off instanceof Function))
+                                                off = true;
+                                        this.setq(modevar, off);
+                                }
                         }
-                        return true;
+                        return status;
                 };
         };
 
@@ -274,6 +280,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 while (--i >= 0)
                         size += this.code[i].length + 1;
                 return this.__size = size;
+        };
+
+        P.getLine = function(row) {
+                if (row == null)
+                        row = this._rowcol.row;
+                return this.code[row];
         };
 
         P.charAtRowCol = function(row, col) {

@@ -51,7 +51,8 @@ try {
 \n\
 function () {\n\
         alert(\"moo\");\n\
-        while (foo) {\n\
+        while (/[/]/.test(str)) {\n\
+    // an unescaped slash can appear in a character set in regexps\n\
         }\n\
 \n\
 /**\n\
@@ -125,18 +126,19 @@ to the current one.\n\
                 "ymacs-buffer.js",
                 "ymacs-commands.js",
                 "ymacs-frame.js",
-                "ymacs.js",
                 "ymacs-keymap-emacs.js",
                 "ymacs-keymap-isearch.js",
                 "ymacs-keymap.js",
                 "ymacs-marker.js",
+                "ymacs-tokenizer.js",
+                "ymacs-mode-paren-match.js",
                 "ymacs-mode-js.js",
                 "ymacs-mode-xml.js",
                 "ymacs-mode-lisp.js",
                 "ymacs-mode-markdown.js",
                 "ymacs-regexp.js",
                 "ymacs-textprop.js",
-                "ymacs-tokenizer.js"
+                "ymacs.js"
         ];
         var submenu = new DlVMenu({});
         item.setMenu(submenu);
