@@ -700,6 +700,7 @@ Ymacs_Buffer.newCommands({
                         ctx.encountered = {};
                         ctx.forward = false;
                         ctx.buffer = this;
+                        ctx.startBuffer = this;
                 }
                 var expansion;
 
@@ -739,8 +740,20 @@ Ymacs_Buffer.newCommands({
                                 if (found) {
                                         ctx.lastSearch = this.point();
                                         p1 = this.point() - ctx.search.length;
-                                } else
-                                        this.signalError("No more completions");
+                                } else {
+                                        ctx.buffer = this.whenYmacs("getNextBuffer", this);
+                                        if (ctx.buffer === ctx.startBuffer) {
+                                                expansion = ctx.search;
+                                                ctx.startBuffer.signalError("No more completions");
+                                                ctx.lastSearch = ctx.point + ctx.length;
+                                                ctx.startBuffer.setq("dabbrev_context", null);
+                                                return;
+                                        } else {
+                                                ctx.lastSearch = 0;
+                                                ctx.buffer.cmd("save_excursion", repeat);
+                                                return;
+                                        }
+                                }
                         }
                         if (p1 != null) {
                                 // console.log("%s at %d, next from %d", ctx.search, p1, ctx.lastSearch);
@@ -752,7 +765,7 @@ Ymacs_Buffer.newCommands({
                                         repeat.call(this);
                         }
                 });
-                if (expansion) {
+                if (expansion != null) {
                         this._replaceText(ctx.point, ctx.point + ctx.length, expansion);
                         ctx.length = expansion.length;
                         ctx.encountered[expansion] = true;
