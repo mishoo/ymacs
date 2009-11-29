@@ -465,6 +465,15 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        P.getRegion = function(begin, end) {
+                if (begin == null) begin = this.caretMarker;
+                if (end == null) end = this.markMarker;
+                begin = MRK(begin);
+                end = MRK(end);
+                if (end < begin) { var tmp = begin; begin = end; end = tmp; }
+                return { begin: begin, end: end };
+        };
+
         P.redrawDirtyLines = function() {
                 this.__dirtyLines.foreach(function(draw, row){
                         if (draw)

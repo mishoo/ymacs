@@ -5,6 +5,7 @@ ymacs-textprop.js
 ymacs-buffer.js
 ymacs-marker.js
 ymacs-commands.js
+ymacs-commands-utils.js
 ymacs-keymap.js
 ymacs-keymap-emacs.js
 ymacs-keymap-isearch.js

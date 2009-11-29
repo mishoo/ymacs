@@ -158,6 +158,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "S-DELETE"                                : "delete_whitespace",
                 "M-ENTER"                                 : "start_next_paragraph",
                 "M-S-q"                                   : "fill_paragraph_no_prefix",
+                "C-M-S-|"                                 : "cperl_lineup",
 
                 // others
                 "C-x =": function() {

@@ -194,7 +194,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 var first = true;
                 var doit = function() {
                         this.buffer.preventUpdates();
-                        n = first ? 2 : 20;
+                        n = first ? 3 : 20;
                         if (++iteration > 10)
                                 this.showProgress(this.stream.line);
                         while (true) {
