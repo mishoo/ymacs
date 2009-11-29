@@ -13,7 +13,8 @@ DEFINE_CLASS("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "C-M-q"          : "indent_sexp",
                 "C-M-f && C-M-n" : "forward_sexp",
                 "C-M-b && C-M-p" : "backward_sexp",
-                "M-C-k"          : "kill_sexp"
+                "M-C-k"          : "kill_sexp",
+                "M-C-t"          : "transpose_sexps"
         };
 
         D.CONSTRUCT = function() {
@@ -110,6 +111,15 @@ DEFINE_CLASS("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         return this.point();
                                 })
                         );
+                },
+
+                transpose_sexps: function() {
+                        var a = [];
+                        this.cmd("forward_sexp"); a.push(this.point());
+                        this.cmd("backward_sexp"); a.push(this.point());
+                        this.cmd("backward_sexp"); a.push(this.point());
+                        this.cmd("forward_sexp"); a.push(this.point());
+                        this.cmd("goto_char", this._swapAreas(a));
                 }
 
         });
