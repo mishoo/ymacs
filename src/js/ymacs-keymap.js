@@ -72,9 +72,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                         modifiers.push("C");
                 if (ev.altKey)
                         modifiers.push("M");
-                // if (ev.shiftKey && (ev.charCode && /^[a-zA-Z0-9]$/.test(key) || ev.keyCode))
-                //         modifiers.push("S");
-                if (ev.shiftKey)
+                if (ev.shiftKey && (ev.charCode && /^[a-zA-Z0-9]$/.test(key) || ev.keyCode))
                         modifiers.push("S");
                 modifiers.sort();
                 modifiers = modifiers.join("-");

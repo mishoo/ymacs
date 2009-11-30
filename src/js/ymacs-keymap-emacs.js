@@ -110,7 +110,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-d"                                     : "kill_word",
                 "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
                 "C-k"                                     : "kill_line",
-                "C-y"                                     : "yank",
+                "C-y && S-INSERT"                         : "yank",
                 "M-y"                                     : "yank_pop",
                 "C-SPACE"                                 : "set_mark_command",
                 "C-x C-x"                                 : "exchange_point_and_mark",
@@ -158,7 +158,7 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "S-DELETE"                                : "delete_whitespace",
                 "M-ENTER"                                 : "start_next_paragraph",
                 "M-S-q"                                   : "fill_paragraph_no_prefix",
-                "C-M-S-|"                                 : "cperl_lineup",
+                "C-M-|"                                   : "cperl_lineup",
 
                 // others
                 "C-x =": function() {
