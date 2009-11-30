@@ -245,7 +245,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__undoQueue = [];
                 this.__redoQueue = [];
                 this.__overlays = {};
-                this.markers = [ this.caretMarker, this.markMarker ]; // resetting the code invalidates markers
+                this.markers.map("setPosition", 0, true, true);
                 this.code = code.split(/\n/);
                 this._textProperties.reset();
                 if (this.tokenizer) {
@@ -360,6 +360,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P.getMinibuffer = function() {
                 return this.whenYmacs(function(ymacs) { return ymacs.minibuffer; });
+        };
+
+        P.getMinibufferFrame = function() {
+                return this.whenYmacs(function(ymacs) { return ymacs.minibuffer_frame; });
         };
 
         P.setMinibuffer = function(text) {

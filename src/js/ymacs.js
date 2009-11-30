@@ -37,11 +37,13 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
                 /* -----[ minibuffer ]----- */
                 this.minibuffer = this.createBuffer({ hidden: true });
+                this.minibuffer.cmd("minibuffer_mode");
                 this.minibuffer_frame = this.createFrame({
-                        buffer: this.minibuffer,
-                        hidden: true,
-                        highlightCurrentLine: false,
-                        className: "Ymacs_Minibuffer"
+                        isMinibuffer         : true,
+                        buffer               : this.minibuffer,
+                        hidden               : true,
+                        highlightCurrentLine : false,
+                        className            : "Ymacs_Minibuffer"
                 });
 
                 /* -----[ mode line ]----- */
@@ -199,8 +201,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         };
 
         P.updateModeline = function() {
-                if (this.modeline) {
-                        var buffer = this.getActiveBuffer();
+                var buffer = this.getActiveBuffer();
+                if (this.modeline && buffer !== this.minibuffer) {
                         var rc = buffer._rowcol;
                         var ml = String.buffer("-- <b>", buffer.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
                         var pr = [];

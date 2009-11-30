@@ -63,6 +63,16 @@ function () {\n\
     alert(this.foo);\n\
 }.$(this);\n\
 }\n\
+\n\
+b = ymacs.getActiveBuffer();\n\
+b.keymap[0].defineKeys({\n\
+    'C-i': function(){\n\
+        this.cmd('minibuffer_prompt', 'Test prompt: ');\n\
+    },\n\
+    'C-p': function(){\n\
+        this.signalInfo(this.cmd('minibuffer_contents'));\n\
+    }\n\
+});\n\
 ");
 
         var xml = new Ymacs_Buffer({ name: "index.html" });

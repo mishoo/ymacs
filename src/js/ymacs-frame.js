@@ -17,6 +17,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 highlightCurrentLine : [ "highlightCurrentLine" , true ],
                 buffer               : [ "buffer"               , null ],
                 ymacs                : [ "ymacs"                , null ],
+                isMinibuffer         : [ "isMinibuffer"         , false ],
 
                 // override in DlContainer
                 _scrollBars          : [ "scroll"               , true ],
@@ -73,6 +74,26 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 };
         };
 
+        P.focus = function(exitAllowed) {
+                D.BASE.focus.call(this);
+                if (exitAllowed) {
+                        this.removeEventListener("onBlur", this.__exitFocusHandler);
+                        this.addEventListener("onBlur", this.__exitFocusHandler = function(){
+                                if (exitAllowed.call(this.buffer)) {
+                                        this.removeEventListener("onBlur", this.__exitFocusHandler);
+                                } else {
+                                        this.focus.delayed(2, this, null);
+                                }
+                        });
+                }
+        };
+
+        P.blur = function(force) {
+                if (force)
+                        this.removeEventListener("onBlur", this.__exitFocusHandler);
+                D.BASE.blur.call(this);
+        };
+
         P.getContentElement = function() {
                 return this.getElement().firstChild;
         };
@@ -116,7 +137,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.setBuffer = function(buffer) {
                 if (this.buffer) {
-                        if (this.caretMarker) {
+                        if (this.caretMarker && !this.isMinibuffer) {
                                 this.caretMarker.destroy();
                                 this.caretMarker = null;
                         }
@@ -129,7 +150,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         if (this.focusInside()) {
                                 buffer.addEventListener(this._moreBufferEvents);
                         }
-                        this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition());
+                        if (this.isMinibuffer) {
+                                this.caretMarker = buffer.caretMarker;
+                        } else {
+                                this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition());
+                        }
                         this._redrawBuffer();
                         this._redrawCaret(true);
                         // this.ensureCaretVisible();
@@ -272,7 +297,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 if (!force && !isActive)
                         return;
 
-                if (isActive)
+                if (isActive && !this.isMinibuffer)
                         this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
 
                 var rc = this.buffer._rowcol;
@@ -470,13 +495,17 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_focus = function() {
                 this.ymacs.setActiveFrame(this, true);
-                this.buffer.cmd("goto_char", this.caretMarker.getPosition());
+                if (!this.isMinibuffer) {
+                        this.buffer.cmd("goto_char", this.caretMarker.getPosition());
+                }
                 this.buffer.addEventListener(this._moreBufferEvents);
                 this.__restartBlinking();
         };
 
         P._on_blur = function() {
-                this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
+                if (!this.isMinibuffer) {
+                        this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
+                }
                 this.buffer.removeEventListener(this._moreBufferEvents);
                 this.__stopBlinking();
         };
