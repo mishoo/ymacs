@@ -41,6 +41,16 @@ Ymacs_Buffer.newCommands({
 
         find_common_prefix: function(strings) {
                 return strings.common_prefix();
+        },
+
+        eval_region: function() {
+                var r = this.cmd("get_region");
+                var code = this.cmd("buffer_substring", r.begin, r.end);
+                try {
+                        eval(code);
+                } catch(ex) {
+                        this.signalError(ex.name + ": " + ex.message);
+                }
         }
 
 });

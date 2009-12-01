@@ -142,9 +142,10 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                 var text = this.cmd("minibuffer_contents");
                                 mb.setCode("");
                                 this.cmd("other_frame");
-                                if (cont)
-                                        // cont.call(this.getActiveFrame().buffer);
-                                        cont.call(this, text);
+                                (function(text){
+                                        if (cont)
+                                                cont.call(this, text);
+                                }).delayed(1, this, text);
                         });
                         DlPopup.clearAllPopups();
                 }
