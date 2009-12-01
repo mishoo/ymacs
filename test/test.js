@@ -64,6 +64,8 @@ function () {\n\
 }.$(this);\n\
 }\n\
 \n\
+// select the following few lines and try M-x eval_region\n\
+// then the C-i and C-p commands should work\n\
 b = ymacs.getActiveBuffer();\n\
 b.keymap[0].defineKeys({\n\
     'C-i': function(){\n\
