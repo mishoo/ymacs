@@ -392,7 +392,7 @@ Ymacs_Buffer.newCommands({
                 this._killingAction(pos, pos2, true);
         },
 
-        _apply_operation_on_word: function (op) {
+        _apply_operation_on_word: function (op, cc) {
                 var pos = this.point();
                 if (this.getq("syntax_word").test(this.charAt())) {
                         var pos2 = this.cmd("save_excursion", function(){
@@ -406,22 +406,22 @@ Ymacs_Buffer.newCommands({
                         this.cmd("forward_word");
                         this.cmd("backward_word");
                         if (pos != this.point())
-                                this.cmd(this.currentCommand);
+                                this.cmd(cc);
                 }
         },
 
         capitalize_word: function() {
                 this.cmd("_apply_operation_on_word", function() {
                         return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
-                });
+                }, "capitalize_word");
         },
 
         downcase_word: function() {
-                this.cmd("_apply_operation_on_word", String.prototype.toLowerCase);
+                this.cmd("_apply_operation_on_word", String.prototype.toLowerCase, "downcase_word");
         },
 
         upcase_word: function() {
-                this.cmd("_apply_operation_on_word", String.prototype.toUpperCase);
+                this.cmd("_apply_operation_on_word", String.prototype.toUpperCase, "upcase_word");
         },
 
         goto_char: function(pos) {
@@ -450,6 +450,10 @@ Ymacs_Buffer.newCommands({
 
         save_excursion: function() {
                 return this._saveExcursion.apply(this, arguments);
+        },
+
+        prevent_undo: function() {
+                return this._disableUndo.apply(this, arguments);
         },
 
         point: function() {

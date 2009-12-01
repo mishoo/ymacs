@@ -175,8 +175,12 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 var old = this.getActiveFrame();
                 if (old)
                         old.removeEventListener(this.__activeFrameEvents);
-                this.frames.remove(frame);
-                this.frames.push(frame);
+                if (!frame.isMinibuffer) {
+                        this.frames.remove(frame);
+                        this.frames.push(frame);
+                } else {
+                        this.frames.unshift(this.frames.pop());
+                }
                 this.updateModelineWithTimer();
                 frame.addEventListener(this.__activeFrameEvents);
                 if (!nofocus)

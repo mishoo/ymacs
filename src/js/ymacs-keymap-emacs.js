@@ -177,6 +177,15 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                                 size    : this.getCodeSize(),
                                 sizeKB  : this.getCodeSize().formatBytes(2)
                         }), true);
+                },
+
+                // XXX: ONLY TESTING FOR NOW
+                "M-x": function() {
+                        // can we do this? :-)
+                        this.cmd("minibuffer_prompt", "M-x ");
+                        this.cmd("minibuffer_read_command", function(cmd) {
+                                this.cmd(cmd);
+                        });
                 }
         };
 

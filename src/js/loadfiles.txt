@@ -10,6 +10,7 @@ ymacs-interactive.js
 ymacs-keymap.js
 ymacs-keymap-emacs.js
 ymacs-keymap-isearch.js
+ymacs-minibuffer.js
 ymacs-tokenizer.js
 ymacs-mode-paren-match.js
 ymacs-mode-js.js

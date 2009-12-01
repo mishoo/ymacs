@@ -37,6 +37,10 @@ Ymacs_Buffer.newCommands({
                                 this.cmd("insert", " ".x(max - l[1]));
                         }, this);
                 });
+        },
+
+        find_common_prefix: function(strings) {
+                return strings.common_prefix();
         }
 
 });

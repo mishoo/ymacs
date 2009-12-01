@@ -26,7 +26,6 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         D.CONSTRUCT = function() {
                 this.defaultHandler = this.makeHandler(this.buffer.COMMANDS["self_insert_command"], "self_insert_command");
                 this.currentPrefix = null;
-                this.currentKeys = this.buffer.currentKeys;
         };
 
         P.parseKey = function(str) {
@@ -123,8 +122,6 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         };
 
         P.getHandler = function(keys) {
-                if (keys == null)
-                        keys = this.currentKeys;
                 var handler = null, def = this.definitions;
                 keys.foreach(function(key){
                         var tmp = handler ? handler[key] : def[key];

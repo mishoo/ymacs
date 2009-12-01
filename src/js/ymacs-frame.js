@@ -76,7 +76,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.focus = function(exitAllowed) {
                 D.BASE.focus.call(this);
-                if (exitAllowed) {
+                if (exitAllowed instanceof Function) {
                         this.removeEventListener("onBlur", this.__exitFocusHandler);
                         this.addEventListener("onBlur", this.__exitFocusHandler = function(){
                                 if (exitAllowed.call(this.buffer)) {
@@ -269,7 +269,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.__restartBlinking = function() {
                 this.__stopBlinking();
-                this.__caretTimer = setInterval(this.__blinkCaret, BLINK_TIMEOUT);
+                if (this.focusInside()) {
+                        this.__caretTimer = setInterval(this.__blinkCaret, BLINK_TIMEOUT);
+                }
         };
 
         P.__stopBlinking = function() {
@@ -423,11 +425,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_bufferMessage = function(type, text, html) {
+                var anchor = this.isMinibuffer ? this.ymacs : this;
                 var popup = Ymacs_Message_Popup.get(0);
                 popup.popup({
                         content : html ? text : text.htmlEscape(),
-                        widget  : this,
-                        anchor  : this.getElement(),
+                        widget  : anchor,
+                        anchor  : anchor.getElement(),
                         align   : { prefer: "CC", fallX1: "CC", fallX2: "CC", fallY1: "CC", fallY2: "CC" }
                 });
                 popup.hide(5000);
@@ -494,6 +497,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_focus = function() {
+                // console.log("FOCUS for %s", this.buffer.name);
                 this.ymacs.setActiveFrame(this, true);
                 if (!this.isMinibuffer) {
                         this.buffer.cmd("goto_char", this.caretMarker.getPosition());
@@ -503,6 +507,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_blur = function() {
+                // console.log("BLUR for %s", this.buffer.name);
                 if (!this.isMinibuffer) {
                         this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
                 }

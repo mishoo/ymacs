@@ -805,11 +805,20 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 ++this.__savingExcursion;
                 var ret;
                 try {
-                        return cont.call(this, tmp.getPosition());
+                        return cont.call(this);
                 } finally {
                         --this.__savingExcursion;
                         this.caretMarker.swap(tmp, false, true);
                         tmp.destroy();
+                }
+        };
+
+        P._disableUndo = function(cont) {
+                ++this.__preventUndo;
+                try {
+                        return cont.call(this);
+                } finally {
+                        --this.__preventUndo;
                 }
         };
 
@@ -824,7 +833,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 var foundPrefix = false;
 
                 this.keymap.r_foreach(function(km){
-                        var h = km.getHandler();
+                        var h = km.getHandler(cc);
                         if (h instanceof Function) {
                                 h();
                                 handled = true;
