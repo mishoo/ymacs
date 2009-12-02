@@ -183,7 +183,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                         // can we do this? :-)
                         this.cmd("minibuffer_prompt", "M-x ");
                         this.cmd("minibuffer_read_command", function(cmd) {
-                                this.cmd(cmd);
+                                this.callInteractively(cmd);
                         });
                 }
         };
