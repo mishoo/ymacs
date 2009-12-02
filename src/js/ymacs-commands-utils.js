@@ -39,13 +39,11 @@ Ymacs_Buffer.newCommands({
                 });
         },
 
-        find_common_prefix: function(strings) {
-                return strings.common_prefix();
-        },
-
         eval_region: function() {
-                var r = this.cmd("get_region");
-                var code = this.cmd("buffer_substring", r.begin, r.end);
+                var r = this.cmd("get_region"),
+                    code = this.cmd("buffer_substring", r.begin, r.end),
+                    buffer = this;
+                code = "(function(){" + code + "}).call(buffer)";
                 try {
                         eval(code);
                 } catch(ex) {
