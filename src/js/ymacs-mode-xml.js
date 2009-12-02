@@ -193,15 +193,10 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
 });
 
-DEFINE_CLASS("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
+DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "C-c /" : "xml_close_tag"
-        };
-
-        D.CONSTRUCT = function() {
-                this.defaultHandler = null; // use next keyboard in buffer.keymap
-                this.defineKeys(D.KEYS);
         };
 
 });
@@ -210,7 +205,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
         var tok = this.tokenizer;
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
-        var keymap = new Ymacs_Keymap_XML({ buffer: this });
+        var keymap = Ymacs_Keymap_XML();
         this.pushKeymap(keymap);
         var changed_vars = this.setq({ indent_level: 2 });
         return function() {

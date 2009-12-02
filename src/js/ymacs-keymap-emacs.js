@@ -14,19 +14,16 @@
 // or Visual Studio -- but I'm not familiar with any of them.
 // Contributions welcome.
 
-// A keymap inherits from Ymacs_Keymap and should call in its
-// constructor this.defineKeys for a hash like the one below.
-// Aditionally, for specific keymaps (such as those defined by modes)
-// they should set this.defaultHandler = null, so that keys that
-// aren't found in the current keymap will be searched in earlier
-// defined ones.  Or, to take whatever action they consider necessary
-// -- for example the Isearch keymap will, by default, print the
-// entered character in the minibuffer and trigger a search action.
-// Isearch mode is almost completely defined in a keymap -- with the
-// minor note that isearch_forward and isearch_backward are assigned
-// below to key combinations; once pressed, they will push the Isearch
-// keymap onto the buffer's keymap stack, and it will be used until
-// isearch is ended.
+// A keymap inherits from Ymacs_Keymap and should define its bindings
+// in D.KEYS.  They can also define a defaultHandler property to take
+// whatever action they consider necessary -- for example the Isearch
+// keymap will, by default, print the entered character in the
+// minibuffer and trigger a search action.  Isearch mode is almost
+// completely defined in a keymap -- with the minor note that
+// isearch_forward and isearch_backward are assigned below to key
+// combinations; once pressed, they will push the Isearch keymap onto
+// the buffer's keymap stack, and it will be used until isearch is
+// ended.
 
 /* KEY DEFINITIONS.  A key is generally defined in standard Emacs
    notation, with the following notes:
@@ -58,7 +55,7 @@
 
 */
 
-DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
+DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 
         var TMPL_INFO = String.template(
                 "<table>",
@@ -191,8 +188,6 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 }
         };
 
-        D.CONSTRUCT = function() {
-                this.defineKeys(D.KEYS);
-        };
+        P.defaultHandler = [ "self_insert_command" ];
 
 });

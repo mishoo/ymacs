@@ -350,17 +350,12 @@ D P $".qw());
 
 /* -----[ Keymap for C-like language mode ]----- */
 
-DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
+DEFINE_SINGLETON("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "ENTER"                                     : "newline_and_indent",
                 "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent"
                 // "{"                                      : "c_electric_block"
-        };
-
-        D.CONSTRUCT = function() {
-                this.defaultHandler = null; // use next keyboard in buffer.keymap
-                this.defineKeys(D.KEYS);
         };
 
 });
@@ -369,7 +364,7 @@ DEFINE_CLASS("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
 Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         var tok = this.tokenizer;
-        var keymap = new Ymacs_Keymap_CLanguages({ buffer: this });
+        var keymap = Ymacs_Keymap_CLanguages();
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
         this.pushKeymap(keymap);
         var was_paren_match = this.cmd("paren_match_mode", true);

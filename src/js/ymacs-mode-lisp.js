@@ -347,18 +347,13 @@ return-from setq multiple-value-call".qw().toHash(true);
 
 })();
 
-DEFINE_CLASS("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
+DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "ENTER"            : "newline_and_indent",
                 "("                : [ "lisp_open_paren", "(" ],
                 ")"                : [ "lisp_close_paren", ")" ],
                 "C-c ] && C-c C-]" : "lisp_close_all_parens"
-        };
-
-        D.CONSTRUCT = function() {
-                this.defaultHandler = null; // use next keyboard in buffer.keymap
-                this.defineKeys(D.KEYS);
         };
 
 });
@@ -370,7 +365,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         var changed_vars = this.setq({
                 indent_level: 2
         });
-        var keymap = new Ymacs_Keymap_LispMode({ buffer: this });
+        var keymap = Ymacs_Keymap_LispMode();
         this.pushKeymap(keymap);
         var was_paren_match = this.cmd("paren_match_mode", true);
 

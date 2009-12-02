@@ -11,7 +11,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         var changed_vars = this.setq({
                 minibuffer_end_marker: marker
         });
-        var keymap = new Ymacs_Keymap_Minibuffer({ buffer: this });
+        var keymap = Ymacs_Keymap_Minibuffer();
         this.pushKeymap(keymap);
         return function() {
                 this.setq(changed_vars);
@@ -237,7 +237,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 }
         };
 
-        DEFINE_CLASS("Ymacs_Keymap_Minibuffer", Ymacs_Keymap, function(D, P){
+        DEFINE_SINGLETON("Ymacs_Keymap_Minibuffer", Ymacs_Keymap, function(D, P){
 
                 D.KEYS = {
                         "C-g"         : "minibuffer_keyboard_quit",
@@ -249,13 +249,10 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         "ESCAPE"      : handle_escape
                 };
 
-                D.CONSTRUCT = function() {
-                        this.defaultHandler = function() {
-                                DlPopup.clearAllPopups();
-                                return false; // say it's not handled though
-                        };
-                        this.defineKeys(D.KEYS);
-                };
+                P.defaultHandler = [ function() {
+                        DlPopup.clearAllPopups();
+                        return false; // say it's not handled though
+                } ];
 
         });
 

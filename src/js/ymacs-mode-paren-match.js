@@ -6,7 +6,7 @@
 // @require ymacs-buffer.js
 // @require ymacs-tokenizer.js
 
-DEFINE_CLASS("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
+DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
         D.KEYS = {
                 "C-c \\"         : "goto_matching_paren",
@@ -15,11 +15,6 @@ DEFINE_CLASS("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "C-M-b && C-M-p" : "backward_sexp",
                 "M-C-k"          : "kill_sexp",
                 "M-C-t"          : "transpose_sexps"
-        };
-
-        D.CONSTRUCT = function() {
-                this.defaultHandler = null; // use next keyboard in buffer.keymap
-                this.defineKeys(D.KEYS);
         };
 
         /* -----[ new commands ]----- */
@@ -128,7 +123,7 @@ DEFINE_CLASS("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
 Ymacs_Buffer.newMode("paren_match_mode", function(){
 
-        var keymap = new Ymacs_Keymap_ParenMatch({ buffer: this });
+        var keymap = Ymacs_Keymap_ParenMatch();
         this.pushKeymap(keymap);
 
         var clearOvl = function() {

@@ -61,7 +61,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
-        D.COMMANDS = {};
+        D.COMMANDS = P.COMMANDS = {};
 
         D.newCommands = P.newCommands = function(cmds) {
                 Object.merge(this.COMMANDS, cmds);
@@ -101,8 +101,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         D.CONSTRUCT = function() {
-                this.COMMANDS = Object.makeCopy(D.COMMANDS);
-
                 this.__savingExcursion = 0;
                 this.__preventUpdates = 0;
                 this.__preventUndo = 0;
@@ -149,7 +147,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
 
                 this.keymap = [];
-                this._keymap_isearch = new Ymacs_Keymap_ISearch({ buffer: this });
+                this._keymap_isearch = Ymacs_Keymap_ISearch();
                 this.pushKeymap(this.makeDefaultKeymap());
                 this.setCode(this._code);
                 this._lastCommandWasKill = 0;
@@ -218,7 +216,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.makeDefaultKeymap = function() {
-                return new Ymacs_Keymap_Emacs({ buffer: this });
+                return Ymacs_Keymap_Emacs();
         };
 
         P.signalError = function(text, html) {
@@ -310,45 +308,48 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return this.charAtRowCol(rc.row, rc.col);
         };
 
-        P.makeInteractiveHandler = function(func, cmd, args) {
-                return function() {
-                        this.currentCommand = cmd;
-                        // the amount of brain twisting to get
-                        // this right is incredible. :-(  I give up.
+        P.callInteractively = function(func, args) {
+                var cmd = null;
+                if (!(func instanceof Function)) {
+                        cmd = func;
+                        func = this.COMMANDS[func];
+                }
+                this.currentCommand = cmd;
+                // the amount of brain twisting to get
+                // this right is incredible. :-(  I give up.
+                if (cmd != "undo") {
+                        this.__undoQueue = this.__undoQueue.concat(this.__redoQueue);
+                        this.__redoQueue = [];
+                }
+                if (this.previousCommand != cmd) {
+                        this.sameCommandCount(0);
                         if (cmd != "undo") {
-                                this.__undoQueue = this.__undoQueue.concat(this.__redoQueue);
-                                this.__redoQueue = [];
+                                this._placeUndoBoundary();
                         }
-                        if (this.previousCommand != cmd) {
-                                this.sameCommandCount(0);
-                                if (cmd != "undo") {
-                                        this._placeUndoBoundary();
-                                }
-                        } else if (cmd != "self_insert_command" || this.sameCommandCount() % 20 == 0) {
-                                if (cmd != "undo") {
-                                        this._placeUndoBoundary();
-                                }
+                } else if (cmd != "self_insert_command" || this.sameCommandCount() % 20 == 0) {
+                        if (cmd != "undo") {
+                                this._placeUndoBoundary();
                         }
-                        this.preventUpdates();
-                        try {
-                                this.callHooks("beforeInteractiveCommand");
-                                return func.apply(this, arguments);
-                        } finally {
-                                // XXX
-                                //
-                                // "Testing the command name against _mark is a disgusting hack. :-P"
-                                //      (quotemstr on irc.freenode.org/#emacs, 2009-11-24 20:37 EEST)
-                                //
-                                // ... and yes it is.
-                                if (!/_mark$/.test(this.currentCommand))
-                                        this.clearTransientMark();
-                                this.resumeUpdates();
-                                this.callHooks("afterInteractiveCommand");
-                                this.previousCommand = cmd;
-                                this.sameCommandCount(+1);
-                                this.whenActiveFrame("ensureCaretVisible");
-                        }
-                }.$A(this, args);
+                }
+                this.preventUpdates();
+                try {
+                        this.callHooks("beforeInteractiveCommand");
+                        return func.apply(this, args);
+                } finally {
+                        // XXX
+                        //
+                        // "Testing the command name against _mark is a disgusting hack. :-P"
+                        //      (quotemstr on irc.freenode.org/#emacs, 2009-11-24 20:37 EEST)
+                        //
+                        // ... and yes it is.
+                        if (!/_mark$/.test(this.currentCommand))
+                                this.clearTransientMark();
+                        this.resumeUpdates();
+                        this.callHooks("afterInteractiveCommand");
+                        this.previousCommand = cmd;
+                        this.sameCommandCount(+1);
+                        this.whenActiveFrame("ensureCaretVisible");
+                }
         };
 
         P.resetOverwriteMode = function(om) {
@@ -845,19 +846,19 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
                 this.keymap.r_foreach(function(km){
                         var h = km.getHandler(cc);
-                        if (h instanceof Function) {
-                                h();
+                        if (h instanceof Array) {
+                                this.callInteractively(h[0], h[1]);
                                 handled = true;
                         }
                         else if (h) {
                                 handled = foundPrefix = true;
                         }
                         else if (km.defaultHandler && cc.length == 1) {
-                                handled = km.defaultHandler();
+                                handled = this.callInteractively(km.defaultHandler[0], km.defaultHandler[1]);
                         }
                         if (handled)
                                 $BREAK();
-                });
+                }, this);
 
                 if (!foundPrefix) {
                         if (!handled) {

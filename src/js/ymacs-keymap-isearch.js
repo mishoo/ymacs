@@ -5,7 +5,7 @@
 
 // @require ymacs-keymap.js
 
-DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
+DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "C-g && ESCAPE": [ "isearch_abort", true ],
@@ -23,8 +23,7 @@ DEFINE_CLASS("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
         };
 
         D.CONSTRUCT = function() {
-                this.defaultHandler = this.makeHandler(this.buffer.COMMANDS["isearch_printing_char"], "isearch_printing_char");
-                this.defineKeys(D.KEYS);
+                this.defaultHandler = [ "isearch_printing_char" ];
         };
 
         function initIsearch(fw) {

@@ -13,19 +13,15 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                         REVERSE_KEYS[val] = key;
         });
 
-        D.DEFAULT_ARGS = {
-                definitions : [ "definitions" , null ],
-                buffer      : [ "buffer"      , null ]
+        D.CONSTRUCT_NOARGS = function() {
+                this.definitions = Object.makeCopy(this.__originalDefs);
         };
 
-        D.FIXARGS = function(args) {
-                if (!args.definitions)
-                        args.definitions = {};
-        };
-
-        D.CONSTRUCT = function() {
-                this.defaultHandler = this.makeHandler(this.buffer.COMMANDS["self_insert_command"], "self_insert_command");
-                this.currentPrefix = null;
+        P.FINISH_OBJECT_DEF = function() {
+                this.__originalDefs = {};
+                var keys = this.constructor.KEYS;
+                if (keys)
+                        this.defineKeys(keys);
         };
 
         P.parseKey = function(str) {
@@ -81,7 +77,6 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         };
 
         P.defineKey = function(key, func, args) {
-                var cmd = func;
                 if (func instanceof Array) {
                         args = func.slice(1);
                         func = func[0];
@@ -92,10 +87,8 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                                 this.defineKey(key, func, args);
                         }, this);
                 } else {
-                        if (typeof func == "string")
-                                func = this.buffer.COMMANDS[func];
                         key = key[0].trim();
-                        var dfn = this.definitions;
+                        var dfn = this.__originalDefs;
                         if (key.indexOf(" ") >= 0) {
                                 var a = key.split(/\s+/);
                                 key = a.pop();
@@ -107,7 +100,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                                 }, this);
                         }
                         key = this.parseKey(key);
-                        dfn[key.str] = this.makeHandler(func, cmd, args);
+                        dfn[key.str] = [ func, args ];
                 }
         };
 
@@ -117,17 +110,13 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 }, this);
         };
 
-        P.makeHandler = function(func, cmd, args) {
-                return this.buffer.makeInteractiveHandler(func, cmd, args);
-        };
-
         P.getHandler = function(keys) {
                 var handler = null, def = this.definitions;
                 keys.foreach(function(key){
                         var tmp = handler ? handler[key] : def[key];
                         if (tmp) {
                                 handler = tmp;
-                                if (handler instanceof Function)
+                                if (handler instanceof Array)
                                         $BREAK();
                         }
                         else if (handler) {
