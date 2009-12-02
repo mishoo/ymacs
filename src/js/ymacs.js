@@ -104,7 +104,31 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 return buf;
         };
 
-        P.switchToBuffer = function(buf) {
+        P.killBuffer = function(buf) {
+                buf = this.getBuffer(buf);
+                if (this.buffers.length > 1) {
+                        if (this.getActiveBuffer() === buf)
+                                this.switchToPreviousBuffer();
+                } else {
+                        // make a brand new buffer
+                        this.switchToBuffer(this.createBuffer());
+                }
+                this.buffers.remove(buf);
+                buf.destroy();
+        };
+
+        P.renameBuffer = function(buf, name) {
+                buf = this.getBuffer(buf);
+                buf.name = name;
+                this.updateModelineWithTimer();
+        };
+
+        P.switchToBuffer = function(maybeName) {
+                var buf = this.getBuffer(maybeName);
+                if (!buf) {
+                        // create new buffer
+                        buf = this.createBuffer({ name: maybeName });
+                }
                 var fr = this.getActiveFrame();
                 fr.setBuffer(buf);
                 this.callHooks("onBufferSwitch", buf);
@@ -136,6 +160,19 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 var buf = new Ymacs_Buffer(args);
                 if (!args.hidden)
                         this.buffers.push(buf);
+                //
+                // XXX: although this seems the right way to do it,
+                //      instead of doing it in killBuffer, for some
+                //      reason we never get this event.  Should
+                //      investigate.
+                //
+                // buf.addEventListener("onDestroy", function(buf){
+                //         console.log("got here, %s, %s", this.getActiveBuffer().name, buf.name);
+                //         if (this.getActiveBuffer() === buf)
+                //                 this.switchToPreviousBuffer();
+                //         this.buffers.remove(buf);
+                // }.$(this, buf));
+                //
                 return buf;
         };
 

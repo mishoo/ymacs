@@ -55,6 +55,19 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 $popupActive = true;
         };
 
+        function read_with_continuation(completions, cont) {
+                this.whenMinibuffer(function(mb){
+                        var changed_vars = mb.setq({
+                                completion_list: completions,
+                                minibuffer_continuation: function(what){
+                                        mb.setq(changed_vars);
+                                        if (cont)
+                                                cont.call(this, what);
+                                }.$(this)
+                        });
+                });
+        };
+
         Ymacs_Buffer.newCommands({
 
                 minibuffer_prompt: function(prompt, nofocus) {
@@ -72,15 +85,19 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 },
 
                 minibuffer_read_command: function(cont) {
-                        this.whenMinibuffer(function(mb){
-                                var commandNames = Array.hashKeys(this.COMMANDS).sort();
-                                mb.setq("completion_list", commandNames);
-                                mb.setq("minibuffer_continuation", function(what){
-                                        mb.setq("minibuffer_continuation", null);
-                                        if (cont)
-                                                cont.call(this, what);
-                                }.$(this));
+                        var commandNames = Array.hashKeys(this.COMMANDS).sort();
+                        read_with_continuation.call(this, commandNames, cont);
+                },
+
+                minibuffer_read_buffer: function(cont) {
+                        this.whenYmacs(function(ymacs){
+                                var bufferNames = ymacs.buffers.map("name").sort();
+                                read_with_continuation.call(this, bufferNames, cont);
                         });
+                },
+
+                minibuffer_read_string: function(completions, cont) {
+                        read_with_continuation.call(this, completions, cont);
                 },
 
                 minibuffer_prompt_end: function() {
@@ -195,9 +212,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         } else {
                                 this.signalError("Select something...");
                         }
-                } else {
-                        this.cmd("minibuffer_complete_and_exit");
                 }
+                this.cmd("minibuffer_complete_and_exit");
         };
 
         function handle_tab() {

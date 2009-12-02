@@ -802,6 +802,30 @@ Ymacs_Buffer.newCommands({
                 this.whenYmacs("switchToPreviousBuffer");
         },
 
+        switch_to_buffer: function() {
+                this.cmd("minibuffer_prompt", "Switch to buffer: ");
+                this.cmd("minibuffer_read_buffer", function(name){
+                        this.whenYmacs(function(ymacs){
+                                ymacs.switchToBuffer(name);
+                        });
+                });
+        },
+
+        kill_buffer: function() {
+                this.whenYmacs(function(ymacs){
+                        ymacs.killBuffer(this);
+                });
+        },
+
+        rename_buffer: function() {
+                this.cmd("minibuffer_prompt", "Rename current buffer to: ");
+                this.cmd("minibuffer_read_string", null, function(name){
+                        this.whenYmacs(function(ymacs){
+                                ymacs.renameBuffer(this, name);
+                        });
+                });
+        },
+
         /* -----[ other ]----- */
 
         delete_region_or_line: function() {

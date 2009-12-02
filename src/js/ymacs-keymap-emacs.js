@@ -138,6 +138,8 @@ DEFINE_CLASS("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
                 "C-x C-ARROW_LEFT && C-x ARROW_LEFT && C-S-TAB" : "previous_buffer",
+                "C-x b"                                         : "switch_to_buffer",
+                "C-x k"                                         : "kill_buffer",
 
                 // frames
                 "C-x 1"                                   : "delete_other_frames",
