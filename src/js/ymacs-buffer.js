@@ -320,11 +320,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this.__redoQueue = [];
                         }
                         if (this.previousCommand != cmd) {
-                                this.sameCommandCount = 0;
+                                this.sameCommandCount(0);
                                 if (cmd != "undo") {
                                         this._placeUndoBoundary();
                                 }
-                        } else if (cmd != "self_insert_command" || this.sameCommandCount % 20 == 0) {
+                        } else if (cmd != "self_insert_command" || this.sameCommandCount() % 20 == 0) {
                                 if (cmd != "undo") {
                                         this._placeUndoBoundary();
                                 }
@@ -345,7 +345,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this.resumeUpdates();
                                 this.callHooks("afterInteractiveCommand");
                                 this.previousCommand = cmd;
-                                this.sameCommandCount++;
+                                this.sameCommandCount(+1);
                                 this.whenActiveFrame("ensureCaretVisible");
                         }
                 }.$A(this, args);
@@ -548,6 +548,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this._placeUndoBoundary();
                         return true;
                 }
+        };
+
+        var $sameCommandCount = 0;
+        P.sameCommandCount = function(diff) {
+                if (diff == null)
+                        return $sameCommandCount;
+                return $sameCommandCount += diff;
         };
 
         /* -----[ not-so-public API ]----- */

@@ -31,7 +31,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 list.foreach(function(item){
                         new DlMenuItem({ parent: $menu, label: item.htmlEscape(), data: item });
                 });
-                var popup = DlCompletionPopup.get();
+                var popup = Ymacs_Completion_Popup.get();
                 popup.popup({
                         timeout: 0,
                         content: $menu,
@@ -91,7 +91,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
 
                 minibuffer_read_buffer: function(cont) {
                         this.whenYmacs(function(ymacs){
-                                var bufferNames = ymacs.buffers.map("name").sort();
+                                var bufferNames = ymacs.buffers.map("name");
+                                bufferNames.push(bufferNames.shift());
                                 read_with_continuation.call(this, bufferNames, cont);
                         });
                 },
@@ -249,10 +250,15 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 };
 
                 D.CONSTRUCT = function() {
-                        this.defaultHandler = null;
+                        this.defaultHandler = function() {
+                                DlPopup.clearAllPopups();
+                                return false; // say it's not handled though
+                        };
                         this.defineKeys(D.KEYS);
                 };
 
         });
 
 })();
+
+DEFINE_CLASS("Ymacs_Completion_Popup", DlCompletionPopup);

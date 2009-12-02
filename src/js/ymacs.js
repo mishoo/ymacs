@@ -123,35 +123,50 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.updateModelineWithTimer();
         };
 
+        P._do_switchToBuffer = function(buf) {
+                this.getActiveFrame().setBuffer(buf);
+                this.callHooks("onBufferSwitch", buf);
+        };
+
         P.switchToBuffer = function(maybeName) {
-                var buf = this.getBuffer(maybeName);
+                var buf = this.getBuffer(maybeName), a = this.buffers;
                 if (!buf) {
                         // create new buffer
                         buf = this.createBuffer({ name: maybeName });
                 }
-                var fr = this.getActiveFrame();
-                fr.setBuffer(buf);
-                this.callHooks("onBufferSwitch", buf);
+                a.remove(buf);
+                a.unshift(buf);
+                this._do_switchToBuffer(buf);
         };
 
-        P.switchToNextBuffer = function() {
-                var fr = this.getActiveFrame();
-                this.switchToBuffer(this.getNextBuffer(fr.buffer));
-        };
-
-        P.switchToPreviousBuffer = function() {
-                var fr = this.getActiveFrame();
-                this.switchToBuffer(this.getPrevBuffer(fr.buffer));
-        };
-
-        P.getNextBuffer = function(buf) {
+        P.switchToNextBuffer = function(n) {
                 var a = this.buffers;
-                return a[a.rotateIndex(a.find(buf) + 1)];
+                if (a.length > 1) {
+                        var buf = a.shift();
+                        a.push(buf);
+                        this._do_switchToBuffer(a[0]);
+                }
         };
 
-        P.getPrevBuffer = function(buf) {
+        P.switchToPreviousBuffer = function(n) {
                 var a = this.buffers;
-                return a[a.rotateIndex(a.find(buf) - 1)];
+                if (a.length > 1) {
+                        var buf = a.pop();
+                        a.unshift(buf);
+                        this._do_switchToBuffer(buf);
+                }
+        };
+
+        P.getNextBuffer = function(buf, n) {
+                if (n == null) n = 1;
+                var a = this.buffers;
+                return a[a.rotateIndex(a.find(buf) + n)];
+        };
+
+        P.getPrevBuffer = function(buf, n) {
+                if (n == null) n = 1;
+                var a = this.buffers;
+                return a[a.rotateIndex(a.find(buf) - n)];
         };
 
         P.createBuffer = function(args) {

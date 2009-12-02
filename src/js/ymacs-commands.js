@@ -795,11 +795,11 @@ Ymacs_Buffer.newCommands({
         },
 
         next_buffer: function() {
-                this.whenYmacs("switchToNextBuffer");
+                this.whenYmacs("switchToNextBuffer", this.sameCommandCount() + 1);
         },
 
         previous_buffer: function() {
-                this.whenYmacs("switchToPreviousBuffer");
+                this.whenYmacs("switchToPreviousBuffer", this.sameCommandCount() + 1);
         },
 
         switch_to_buffer: function() {
