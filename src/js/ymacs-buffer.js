@@ -827,10 +827,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.interactiveEvent = ev;
                 var lcwk = this._lastCommandWasKill;
 
+                if (this.__nextIsMeta)
+                        ev.altKey = true;
+                this.__nextIsMeta = false;
+
                 var key = Ymacs_Keymap.unparseKey(ev);
                 var cc = this.currentKeys;
-                cc.push(key);
                 var foundPrefix = false;
+                cc.push(key);
 
                 this.keymap.r_foreach(function(km){
                         var h = km.getHandler(cc);
@@ -849,9 +853,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 });
 
                 if (!foundPrefix) {
-                        if (!handled && cc.length > 1) {
-                                this.signalError(cc.join(" ").bold() + " is undefined", true);
-                                handled = true;
+                        if (!handled) {
+                                if (cc.length > 1) {
+                                        this.signalError(cc.join(" ").bold() + " is undefined", true);
+                                        handled = true;
+                                }
+                                if (key === "ESCAPE") {
+                                        this.__nextIsMeta = true;
+                                }
                         }
                         cc.splice(0, cc.length);
                 }
