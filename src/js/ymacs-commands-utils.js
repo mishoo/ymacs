@@ -39,6 +39,22 @@ Ymacs_Buffer.newCommands({
                 });
         },
 
+        htmlize_region: function() {
+                var r = this.cmd("get_region");
+                this.tokenizer.finishParsing();
+                var row = this._positionToRowCol(r.begin).row,
+                    end = this._positionToRowCol(r.end).row,
+                    html = String.buffer();
+                while (row <= end) {
+                        html(this._textProperties.getLineHTML(row, this.code[row], null), "\n");
+                        row++;
+                }
+                html = html.get();
+                var tmp = this.ymacs.switchToBuffer("*Htmlize*");
+                tmp.setCode(html);
+                tmp.cmd("xml_mode", true);
+        },
+
         eval_region: function() {
                 var r = this.cmd("get_region"),
                     code = this.cmd("buffer_substring", r.begin, r.end),

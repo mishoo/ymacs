@@ -108,7 +108,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 buf = this.getBuffer(buf);
                 if (this.buffers.length > 1) {
                         if (this.getActiveBuffer() === buf)
-                                this.switchToPreviousBuffer();
+                                this.switchToNextBuffer();
                 } else {
                         // make a brand new buffer
                         this.switchToBuffer(this.createBuffer());
@@ -137,6 +137,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 a.remove(buf);
                 a.unshift(buf);
                 this._do_switchToBuffer(buf);
+                return buf;
         };
 
         P.switchToNextBuffer = function(n) {
