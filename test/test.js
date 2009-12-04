@@ -65,16 +65,26 @@ function () {\n\
 }\n\
 \n\
 // select the following few lines and try M-x eval_region\n\
-// then the C-i and C-p commands should work\n\
-b = ymacs.getActiveBuffer();\n\
-b.keymap[0].defineKeys({\n\
-    'C-i': function(){\n\
-        this.cmd('minibuffer_prompt', 'Test prompt: ');\n\
-    },\n\
-    'C-p': function(){\n\
-        this.signalInfo(this.cmd('minibuffer_contents'));\n\
-    }\n\
+// then try \"C-x w\" to count the words in this buffer\n\
+//\n\
+// Note that once defined, it's not easy to change a keymap...\n\
+// I should figure out how to fix this.\n\
+DEFINE_SINGLETON(\"My_Keymap\", Ymacs_Keymap, function(D){\n\
+    D.KEYS = {\n\
+        \"C-x w\": function() {\n\
+            this.cmd(\"save_excursion\", function(){\n\
+                this.cmd(\"beginning_of_buffer\");\n\
+                var count = 0;\n\
+                while (!this.cmd(\"eob_p\")) {\n\
+                    this.cmd(\"forward_word\");\n\
+                    ++count;\n\
+                }\n\
+                alert(count + \" words in this buffer\");\n\
+            });\n\
+        }\n\
+    };\n\
 });\n\
+this.pushKeymap(My_Keymap());\n\
 ");
 
         var xml = new Ymacs_Buffer({ name: "index.html" });
