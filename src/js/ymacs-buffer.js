@@ -175,7 +175,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
 
                 this.keymap = [];
-                this._keymap_isearch = Ymacs_Keymap_ISearch();
                 this.pushKeymap(this.makeDefaultKeymap());
                 this.setCode(this._code);
                 this._lastCommandWasKill = 0;

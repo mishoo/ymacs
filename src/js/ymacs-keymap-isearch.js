@@ -28,7 +28,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
         function initIsearch(fw) {
                 if (!this._isearchContext) {
-                        this.pushKeymap(this._keymap_isearch);
+                        this.pushKeymap(Ymacs_Keymap_ISearch());
                         this.cmd("set_mark_command");
                         this.setMinibuffer(fw ? "I-Search: " : "I-Search backward: ");
                         this._isearchContext = {
@@ -127,7 +127,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         if (!cancelled)
                                 this._isearchLastText = getText(this);
                         this.setMinibuffer("");
-                        this.popKeymap(this._keymap_isearch);
+                        this.popKeymap(Ymacs_Keymap_ISearch());
                         this._isearchContext.mbMark.destroy();
                         this._isearchContext = null;
                         if (cancelled)
