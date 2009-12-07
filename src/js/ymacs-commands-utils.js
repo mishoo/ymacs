@@ -21,7 +21,7 @@ Ymacs_Buffer.newCommands({
                                 this.signalError("Cannot lineup here");
                                 return;
                         }
-                        while (this._rowcol.row <= r.end) {
+                        while (this._rowcol.row <= rcend.row) {
                                 var pos = this.getLine().indexOf(ch);
                                 if (pos >= 0) {
                                         if (pos > max)

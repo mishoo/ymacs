@@ -84,9 +84,23 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         });
                 },
 
+                minibuffer_read_number: function(cont) {
+                        read_with_continuation.call(this, null, cont);
+                        // XXX: enforce number!
+                },
+
                 minibuffer_read_command: function(cont) {
+                        var commandNames = Array.hashKeys(this.COMMANDS).grep(function(cmd){
+                                return this.COMMANDS[cmd].ymacsInteractive;
+                        }, this).sort();
+                        read_with_continuation.call(this, commandNames, cont);
+                        // XXX: enforce existing command!
+                },
+
+                minibuffer_read_function: function(cont) {
                         var commandNames = Array.hashKeys(this.COMMANDS).sort();
                         read_with_continuation.call(this, commandNames, cont);
+                        // XXX: enforce existing function!
                 },
 
                 minibuffer_read_buffer: function(cont) {
@@ -95,6 +109,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                 bufferNames.push(bufferNames.shift());
                                 read_with_continuation.call(this, bufferNames, cont);
                         });
+                        // XXX: enforce existing buffer!
                 },
 
                 minibuffer_read_string: function(completions, cont) {

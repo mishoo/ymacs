@@ -18,7 +18,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "onOverlayChange",
                 "onOverlayDelete",
                 "beforeInteractiveCommand",
-                "afterInteractiveCommand"
+                "afterInteractiveCommand",
+                "finishedEvent"
         ];
 
         D.DEFAULT_ARGS = {
@@ -39,6 +40,23 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 syntax_word                 : { test: TEST_UNICODE_WORD_CHAR },
                 syntax_word_dabbrev         : { test: TEST_DABBREV_WORD_CHAR },
                 syntax_paragraph_sep        : /\n\s*\n/g
+        };
+
+        function setq(key, val) {
+                if (typeof key == "string") {
+                        if (val === undefined)
+                                delete this[key];
+                        else
+                                this[key] = val;
+                        return val;
+                } else {
+                        var changed = {};
+                        for (var i in key) {
+                                changed[i] = this[i];
+                                setq.call(this, i, key[i]);
+                        }
+                        return changed;
+                }
         };
 
         var MAX_UNDO_RECORDS = 50000; // XXX: should we not limit?
@@ -218,36 +236,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         : GLOBAL_VARS[key];
         };
 
-        P.setVariable = function(key, val) {
-                if (typeof key == "string") {
-                        return this.variables[key] = val;
-                } else {
-                        var changed = {};
-                        for (var i in key) {
-                                changed[i] = this.variables[i];
-                                if (key[i] === undefined)
-                                        delete this.variables[i];
-                                else
-                                        this.variables[i] = key[i];
-                        }
-                        return changed;
-                }
+        P.setVariable = function() {
+                return setq.apply(this.variables, arguments);
         };
 
-        D.setq = D.setVariable = D.setGlobal = P.setGlobal = function(key, val) {
-                if (typeof key == "string") {
-                        return GLOBAL_VARS[key] = val;
-                } else {
-                        var changed = {};
-                        for (var i in key) {
-                                changed[i] = GLOBAL_VARS[i];
-                                if (key[i] === undefined)
-                                        delete GLOBAL_VARS[i];
-                                else
-                                        GLOBAL_VARS[i] = key[i];
-                        }
-                        return changed;
-                }
+        D.setq = D.setVariable = D.setGlobal = P.setGlobal = function() {
+                return setq.apply(GLOBAL_VARS, arguments);
         };
 
         P.setq = P.setVariable;
@@ -261,10 +255,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P.pushKeymap = function(keymap) {
                 this.popKeymap(keymap);
                 this.keymap.push(keymap);
+                keymap.attached(this);
         };
 
         P.popKeymap = function(keymap) {
                 this.keymap.remove(keymap);
+                keymap.detached(this);
         };
 
         P.makeDefaultKeymap = function() {
@@ -388,8 +384,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this.callHooks("beforeInteractiveCommand");
                         if (func.ymacsCallInteractively) {
                                 return func.ymacsCallInteractively.apply(this, args);
+                        } else {
+                                return func.apply(this, args);
                         }
-                        return func.apply(this, args);
                 } finally {
                         // XXX
                         //
@@ -614,12 +611,16 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return $lastKeyEvent = ev;
         };
 
+        P.getPrefixArg = function(noDiscard) {
+                var ret = this.getq("universal_prefix");
+                if (!noDiscard)
+                        this.setq("universal_prefix", undefined);
+                return ret;
+        };
+
         /* -----[ not-so-public API ]----- */
 
         // BEGIN: undo queue
-
-        // DEL operations save the removed text.
-        // ADD operations only save the amount of added text.
 
         P._recordChange = function(type, pos, len, text) {
                 if (len > 0) {
@@ -909,6 +910,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         else if (h) {
                                 handled = foundPrefix = true;
                         }
+                        else if (key === "ESCAPE") {
+                                this.__nextIsMeta = true;
+                                handled = true;
+                        }
                         else if (km.defaultHandler && cc.length == 1) {
                                 handled = this.callInteractively(km.defaultHandler[0], km.defaultHandler[1]);
                         }
@@ -922,9 +927,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                         this.signalError(cc.join(" ").bold() + " is undefined", true);
                                         handled = true;
                                 }
-                                if (key === "ESCAPE") {
-                                        this.__nextIsMeta = true;
-                                }
                         }
                         cc.splice(0, cc.length);
                 }
@@ -934,6 +936,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this._lastCommandWasKill = 0;
                 }
 
+                this.callHooks("finishedEvent", handled);
                 this.interactiveEvent(null);
                 return handled;
         };

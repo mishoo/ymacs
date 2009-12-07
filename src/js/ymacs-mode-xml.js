@@ -197,7 +197,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "C-c /"  : "xml_close_tag",
-                "C-c \\" : "xml_zen_expand",
                 "ENTER"  : "newline_and_indent"
         };
 
@@ -220,13 +219,9 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
 Ymacs_Buffer.newCommands({
 
-        xml_close_tag: function() {
+        xml_close_tag: Ymacs_Interactive(function() {
                 this.cmd("close_last_xml_tag");
                 this.cmd("indent_line");
-        },
-
-        xml_zen_expand: function() {
-                
-        }
+        })
 
 });

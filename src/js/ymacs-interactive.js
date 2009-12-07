@@ -21,11 +21,16 @@
          */
 
         window.Ymacs_Interactive = function(args, func) {
-                var documentation;
-                if (!(func instanceof Function)) {
-                        documentation = func;
-                        func = arguments[2];
-                        func.ymacsDoc = documentation;
+                if (arguments.length == 1) {
+                        func = args;
+                        args = null;
+                } else {
+                        var documentation;
+                        if (!(func instanceof Function)) {
+                                documentation = func;
+                                func = arguments[2];
+                                func.ymacsDoc = documentation;
+                        }
                 }
                 func.ymacsInteractive = true;
                 if (args instanceof Function) {
@@ -55,18 +60,26 @@
                 return func;
         };
 
+        var $TRUE = (function(){});
+        $TRUE.toString = function() { return "" };
+
         /* -----[ argument reader functions ]----- */
 
         function read_function_name(arg, cont) {
-
+                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_read_function", cont);
+                // XXX: enforce it!
         };
 
         function read_existing_buffer_name(arg, cont) {
-
+                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_read_buffer", cont);
+                // XXX: enforce it!
         };
 
         function read_buffer_name(arg, cont) {
-
+                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_read_buffer", cont);
         };
 
         function read_character(arg, cont) {
@@ -76,6 +89,7 @@
         function read_command_name(arg, cont) {
                 this.cmd("minibuffer_prompt", arg);
                 this.cmd("minibuffer_read_command", cont);
+                // XXX: enforce it!
         };
 
         function get_point(arg, cont) {
@@ -103,23 +117,35 @@
         };
 
         function read_arbitrary_text(arg, cont) {
-
+                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_read_string", null, cont);
         };
 
         function read_number(arg, cont) {
-
+                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_read_number", cont);
         };
 
         function read_number_or_prefix(arg, cont) {
-
+                var n = parseInt(this.getPrefixArg(), 10);
+                if (!isNaN(n))
+                        cont.call(this, n);
+                else
+                        read_number.call(this, arg, cont);
         };
 
         function get_numeric_prefix(arg, cont) {
-                
+                var n = parseInt(this.getPrefixArg(), 10);
+                if (isNaN(n))
+                        n = null;
+                cont.call(this, n);
         };
 
         function get_raw_prefix(arg, cont) {
-
+                arg = this.getPrefixArg();
+                if (arg === "")
+                        arg = $TRUE;
+                cont.call(this, arg);
         };
 
         function get_point_and_mark(arg, cont) {

@@ -29,7 +29,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
         Ymacs_Buffer.newCommands({
 
-                matching_paren: function() {
+                matching_paren: Ymacs_Interactive(function() {
                         var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                         if (p) {
                                 var parens = p.context.passedParens;
@@ -42,27 +42,27 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         }
                                 }, this);
                         }
-                },
+                }),
 
-                indent_sexp: function() {
+                indent_sexp: Ymacs_Interactive(function() {
                         var pos = this.cmd("matching_paren");
                         if (pos) {
                                 this.cmd("indent_region", this.caretMarker.getPosition(), pos);
                         } else {
                                 this.signalError("Balanced expression not found");
                         }
-                },
+                }),
 
-                goto_matching_paren: function() {
+                goto_matching_paren: Ymacs_Interactive(function() {
                         var pos = this.cmd("matching_paren");
                         if (pos) {
                                 this.cmd("goto_char", pos);
                                 this.cmd("recenter_top_bottom");
                                 return true;
                         }
-                },
+                }),
 
-                forward_sexp: function() {
+                forward_sexp: Ymacs_Interactive(function() {
                         var p = this.tokenizer.finishParsing(), rc = this._rowcol;
                         if (p) {
                                 // find next paren
@@ -78,9 +78,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
                                 return true;
                         }
-                },
+                }),
 
-                backward_sexp: function() {
+                backward_sexp: Ymacs_Interactive(function() {
                         var p = this.tokenizer.finishParsing(), rc = this._rowcol;
                         if (p) {
                                 // find next paren
@@ -96,9 +96,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 this.cmd("goto_char", this._rowColToPosition(prev.opened.line, prev.opened.col));
                                 return true;
                         }
-                },
+                }),
 
-                kill_sexp: function() {
+                kill_sexp: Ymacs_Interactive(function() {
                         this._killingAction(
                                 this.point(),
                                 this.cmd("save_excursion", function() {
@@ -106,16 +106,16 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         return this.point();
                                 })
                         );
-                },
+                }),
 
-                transpose_sexps: function() {
+                transpose_sexps: Ymacs_Interactive(function() {
                         var a = [];
                         this.cmd("forward_sexp"); a.push(this.point());
                         this.cmd("backward_sexp"); a.push(this.point());
                         this.cmd("backward_sexp"); a.push(this.point());
                         this.cmd("forward_sexp"); a.push(this.point());
                         this.cmd("goto_char", this._swapAreas(a));
-                }
+                })
 
         });
 

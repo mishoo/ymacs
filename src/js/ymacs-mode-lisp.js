@@ -9,22 +9,22 @@
 
         Ymacs_Buffer.newCommands({
 
-                lisp_open_paren: function(what) {
+                lisp_open_paren: Ymacs_Interactive(function(what) {
                         if (what == null)
                                 what = "(";
                         what += isOpenParen(what);
                         this.cmd("insert", what);
                         this.cmd("backward_char");
-                },
+                }),
 
-                lisp_close_paren: function(what) {
+                lisp_close_paren: Ymacs_Interactive(function(what) {
                         var re = new RegExp("\\s*\\" + what, "ig");
                         if (this.cmd("looking_at", re))
                                 this._deleteText(this.point(), this.matchData.after);
                         this.cmd("insert", what);
-                },
+                }),
 
-                lisp_close_all_parens: function() {
+                lisp_close_all_parens: Ymacs_Interactive(function() {
                         var p = this.tokenizer.getParserForLine(this._rowcol.row);
                         if (p) {
                                 // this kind of sucks, we need to rewind the stream to that location..
@@ -40,7 +40,7 @@
                                         this.cmd("lisp_close_paren", isOpenParen(p.type));
                                 }, this);
                         }
-                }
+                })
 
         });
 

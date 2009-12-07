@@ -127,4 +127,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 return handler;
         };
 
+        P.attached = Function.noop;
+        P.detached = Function.noop;
+
 });

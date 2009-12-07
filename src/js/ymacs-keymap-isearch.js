@@ -70,35 +70,35 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
         Ymacs_Buffer.newCommands({
 
-                isearch_get_search_text: function() {
+                isearch_get_search_text: Ymacs_Interactive(function() {
                         if (this._isearchContext) {
                                 return this.getMinibuffer()._bufferSubstring(this._isearchContext.mbMark);
                         }
-                },
+                }),
 
-                isearch_forward: function() {
+                isearch_forward: Ymacs_Interactive(function() {
                         if (!initIsearch.call(this, true)) {
                                 if (!updateIsearch.call(this, true))
                                         this.signalError("No more forward occurrences of the search text");
                         }
-                },
+                }),
 
-                isearch_forward_regexp: function() {
+                isearch_forward_regexp: Ymacs_Interactive(function() {
                         this.signalError("Not implemented, but should be easy.  Volunteers?");
-                },
+                }),
 
-                isearch_backward_regexp: function() {
+                isearch_backward_regexp: Ymacs_Interactive(function() {
                         this.signalError("Not implemented, but should be easy.  Volunteers?");
-                },
+                }),
 
-                isearch_backward: function() {
+                isearch_backward: Ymacs_Interactive(function() {
                         if (!initIsearch.call(this, false)) {
                                 if (!updateIsearch.call(this, false))
                                         this.signalError("No more backward occurrences of the search text");
                         }
-                },
+                }),
 
-                isearch_yank_word_or_char: function() {
+                isearch_yank_word_or_char: Ymacs_Interactive(function() {
                         var pos = this.point();
                         this.cmd("forward_word");
                         var pos2 = this.point();
@@ -107,12 +107,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                                 this.getMinibuffer()._placeUndoBoundary();
                                 this.getMinibuffer().cmd("insert", word.toLowerCase());
                         }
-                },
+                }),
 
-                isearch_printing_char: function() {
+                isearch_printing_char: Ymacs_Interactive(function() {
                         var ev = this.interactiveEvent();
                         if (ev.charCode && !ev.ctrlKey && !ev.altKey) {
-                                this.getMinibuffer().cmd("self_insert_command", ev);
+                                this.getMinibuffer().cmd("self_insert_command");
                                 var text = getText(this);
                                 this.cmd("goto_char", this._isearchContext.point);
                                 doSearch.call(this, text);
@@ -121,9 +121,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                                 this.cmd("isearch_abort");
                                 return false;
                         }
-                },
+                }),
 
-                isearch_abort: function(cancelled) {
+                isearch_abort: Ymacs_Interactive(function(cancelled) {
                         if (!cancelled)
                                 this._isearchLastText = getText(this);
                         this.setMinibuffer("");
@@ -133,7 +133,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         if (cancelled)
                                 this.cmd("exchange_point_and_mark");
                         return true;
-                }
+                })
 
         });
 
