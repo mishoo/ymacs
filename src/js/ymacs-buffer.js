@@ -202,8 +202,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         else
                                 return this.cmdApply(cont, Array.$(arguments, 2));
                 } finally {
-                        for (i in saved)
-                                this.variables[i] = saved[i];
+                        for (i in saved) {
+                                if (saved[i] === undefined)
+                                        delete this.variables[i];
+                                else
+                                        this.variables[i] = saved[i];
+                        }
                 }
         };
 
