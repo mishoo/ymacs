@@ -26,6 +26,19 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 tokenizer : [ "tokenizer" , null ]
         };
 
+        var GLOBAL_VARS = {
+                case_fold_search            : true,
+                line_movement_requested_col : 0,
+                fill_column                 : 78,
+                tab_width                   : 8,
+                indent_level                : 8,
+
+                // syntax variables
+                syntax_word                 : { test: TEST_UNICODE_WORD_CHAR },
+                syntax_word_dabbrev         : { test: TEST_DABBREV_WORD_CHAR },
+                syntax_paragraph_sep        : /\n\s*\n/g
+        };
+
         var MAX_UNDO_RECORDS = 50000; // XXX: should we not limit?
 
         function MRK(x) {
@@ -68,18 +81,23 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         D.newMode = P.newMode = function(name, activate) {
-                var modevar = "*" + name + "*";
+                var modevar = "*" + name + "*", hookvar = modevar + "hooks";
+                D.setGlobal(hookvar, []);
                 this.COMMANDS[name] = function(force) {
                         var status = this.getq(modevar);
                         if (status) {
                                 // currently active
                                 if (force !== true) {
                                         // deactivate
+                                        this.getq(hookvar).foreach(function(hook){
+                                                hook.call(this, false);
+                                        }, this);
                                         if (status instanceof Function) {
                                                 // clean-up
                                                 status.call(this);
                                         }
                                         this.setq(modevar, null);
+                                        this.modes.remove(name);
                                 }
                         }
                         else {
@@ -89,10 +107,28 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                         if (!(off instanceof Function))
                                                 off = true;
                                         this.setq(modevar, off);
+                                        this.modes.push(name);
+                                        this.getq(hookvar).foreach(function(hook){
+                                                hook.call(this, true);
+                                        }, this);
                                 }
                         }
                         return status;
                 };
+        };
+
+        D.addModeHook = P.addModeHook = function(name, func) {
+                if (typeof func == "string")
+                        func = this.COMMANDS[func];
+                var hookvar = "*" + name + "*hooks";
+                this.getq(hookvar).pushUnique(func);
+        };
+
+        D.removeModeHook = P.removeModeHook = function(name, func) {
+                if (typeof func == "string")
+                        func = this.COMMANDS[func];
+                var hookvar = "*" + name + "*hooks";
+                this.getq(hookvar).remove(func);
         };
 
         D.FIXARGS = function(args) {
@@ -118,18 +154,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.currentCommand = null;
                 this.currentKeys = [];
 
-                this.variables = {
-                        case_fold_search            : true,
-                        line_movement_requested_col : 0,
-                        fill_column                 : 78,
-                        tab_width                   : 8,
-                        indent_level                : 8,
-
-                        // syntax variables
-                        syntax_word                 : { test: TEST_UNICODE_WORD_CHAR },
-                        syntax_word_dabbrev         : { test: TEST_DABBREV_WORD_CHAR },
-                        syntax_paragraph_sep        : /\n\s*\n/g
-                };
+                this.variables = {};
+                this.modes = [];
 
                 this.caretMarker.onChange.push(function(pos) {
                         this._rowcol = this.caretMarker.getRowCol();
@@ -182,7 +208,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.getVariable = function(key) {
-                return this.variables[key];
+                return key in this.variables
+                        ? this.variables[key]
+                        : GLOBAL_VARS[key];
         };
 
         P.setVariable = function(key, val) {
@@ -201,8 +229,27 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        D.setq = D.setVariable = D.setGlobal = P.setGlobal = function(key, val) {
+                if (typeof key == "string") {
+                        return GLOBAL_VARS[key] = val;
+                } else {
+                        var changed = {};
+                        for (var i in key) {
+                                changed[i] = GLOBAL_VARS[i];
+                                if (key[i] === undefined)
+                                        delete GLOBAL_VARS[i];
+                                else
+                                        GLOBAL_VARS[i] = key[i];
+                        }
+                        return changed;
+                }
+        };
+
         P.setq = P.setVariable;
         P.getq = P.getVariable;
+        D.getq = D.getVariable = function(key) {
+                return GLOBAL_VARS[key];
+        };
 
         /* -----[ public API ]----- */
 
@@ -384,12 +431,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 if (!/_mark$/.test(this.currentCommand))
                         this.clearTransientMark();
                 return this.COMMANDS[cmd].apply(this, args);
-        };
-
-        P.cmdRepeat = function(times) {
-                var args = Array.$(arguments, 1);
-                while (times-- > 0)
-                        this.cmd.apply(this, args);
         };
 
         P.createDialog = function(args) {

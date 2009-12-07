@@ -436,14 +436,12 @@ Ymacs_Buffer.newCommands({
                 return this._bufferSubstring(start, end);
         },
 
-        kill_line: function(x, wholeLine) {
-                if (typeof x == "number" && x != 0)
-                        this.cmdRepeat(x, "kill_line", 0, true);
+        kill_line: function() {
                 var pos = this.point(),
-                rc = this._rowcol,
-                line = this.code[rc.row],
-                end = pos + line.length - rc.col;
-                if (rc.row < this.code.length - 1 && (wholeLine || this.cmd("looking_at", /\s*$/mg)))
+                    rc = this._rowcol,
+                    line = this.code[rc.row],
+                    end = pos + line.length - rc.col;
+                if (rc.row < this.code.length - 1 && this.cmd("looking_at", /\s*$/mg))
                         end++;
                 this._killingAction(pos, end);
         },
