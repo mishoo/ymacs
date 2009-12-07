@@ -81,14 +81,14 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                         args = func.slice(1);
                         func = func[0];
                 }
-                key = key.split(/\s*&&\s*/);
+                key = key.trim().split(/\s*&&\s*/);
                 if (key.length > 1) {
                         key.foreach(function(key){
                                 this.defineKey(key, func, args);
                         }, this);
                 } else {
                         key = key[0].trim();
-                        var dfn = this.__originalDefs;
+                        var dfn = this.definitions || this.__originalDefs;
                         if (key.indexOf(" ") >= 0) {
                                 var a = key.split(/\s+/);
                                 key = a.pop();
