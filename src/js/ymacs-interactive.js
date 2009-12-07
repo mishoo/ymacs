@@ -5,81 +5,134 @@
 
 // @require ymacs-buffer.js
 
-EXTEND_CLASS(Ymacs_Buffer, function(D, P){
+(function(){
 
-        function read_function_name(cont) {
+        /*
+         * This is a wrapper that makes it easy to define "interactive" commands.  Pass two arguments: arguments
+         * description (args), and a function (func).  args can be null, or a string, an array or a function.  When null
+         * it is assumed that the function should not receive any arguments.  When an array or a string, it contains
+         * some argument descriptions similar to Emacs:
+         *
+         *    http://www.gnu.org/s/emacs/manual/html_node/elisp/Interactive-Codes.html#Interactive-Codes
+         *
+         * (note that Emacs does not take a list for this argument).
+         *
+         * Ymacs_Interactive returns func.  When not called interactively, the code should supply all the required
+         * arguments and the function is called with no performance penalty.  To call it interactively, use
+         * func.ymacsCallInteractively(), which will read arguments from the minibuffer according to their description.
+         */
+
+        window.Ymacs_Interactive = function(args, func) {
+                var documentation;
+                if (!(func instanceof Function)) {
+                        documentation = func;
+                        func = arguments[2];
+                        func.ymacsDoc = documentation;
+                }
+                func.ymacsInteractive = true;
+                if (args instanceof Function) {
+                        func.ymacsGetArgs = args;
+                }
+                else if (args != null) {
+                        if (!(args instanceof Array))
+                                args = args.split(/\n+/);
+                        var collect;
+                        var execute = function(arg) {
+                                collect.push(arg);
+                                return func.apply(this, collect);
+                        };
+                        while (args.length > 0) {
+                                execute = createArgumentFunction(args.pop(), function(next, arg) {
+                                        collect.push(arg);
+                                        next.call(this);
+                                }.$(null, execute));
+                        }
+                        func.ymacsCallInteractively = function(){
+                                collect = [];
+                                return execute.call(this);
+                        };
+                } else {
+                        func.ymacsCallInteractively = func;
+                }
+                return func;
+        };
+
+        /* -----[ argument reader functions ]----- */
+
+        function read_function_name(arg, cont) {
 
         };
 
-        function read_existing_buffer_name(cont) {
+        function read_existing_buffer_name(arg, cont) {
 
         };
 
-        function read_buffer_name(cont) {
+        function read_buffer_name(arg, cont) {
 
         };
 
-        function read_character(cont) {
+        function read_character(arg, cont) {
 
         };
 
-        function read_command_name(cont) {
+        function read_command_name(arg, cont) {
+                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_read_command", cont);
+        };
+
+        function get_point(arg, cont) {
+                cont.call(this, this.point());
+        };
+
+        function get_mouse_event(arg, cont) {
 
         };
 
-        function get_point(cont) {
-                cont(this.point());
+        function irrelevant(arg, cont) {
+                cont.call(this, null);
         };
 
-        function get_mouse_event(cont) {
-
-        };
-
-        function irrelevant(cont) {
-                cont(null);
-        };
-
-        function read_key_sequence(cont) {
+        function read_key_sequence(arg, cont) {
 
         };
 
-        function read_key_sequence2(cont) {
+        function read_key_sequence2(arg, cont) {
 
         };
 
-        function get_mark(cont) {
-                cont(this.markMarker.getPosition());
+        function get_mark(arg, cont) {
+                cont.call(this, this.markMarker.getPosition());
         };
 
-        function read_arbitrary_text(cont) {
-
-        };
-
-        function read_number(cont) {
+        function read_arbitrary_text(arg, cont) {
 
         };
 
-        function read_number_or_prefix(cont) {
+        function read_number(arg, cont) {
 
         };
 
-        function get_numeric_prefix(cont) {
+        function read_number_or_prefix(arg, cont) {
 
         };
 
-        function get_raw_prefix(cont) {
+        function get_numeric_prefix(arg, cont) {
 
         };
 
-        function get_point_and_mark(cont) {
-                return this.getRegion();
-        };
-
-        function read_key_sequence3(cont) {
+        function get_raw_prefix(arg, cont) {
 
         };
 
-        function read_variable_name(cont) {
+        function get_point_and_mark(arg, cont) {
+                cont.call(this, this.getRegion());
+        };
+
+        function read_key_sequence3(arg, cont) {
+
+        };
+
+        function read_variable_name(arg, cont) {
 
         };
 
@@ -113,27 +166,10 @@ EXTEND_CLASS(Ymacs_Buffer, function(D, P){
                 // no x, X, z and Z either
         };
 
-        function createArgumentFunction(arg) {
+        function createArgumentFunction(arg, cont) {
                 var code = arg.charAt(0);
                 arg = arg.substr(1);
+                return ARG_READERS[code].$(null, arg, cont);
         };
 
-        D.newInteractiveCommand = function(cmd, args, func){
-                if (args instanceof Function) {
-
-                }
-                else {
-                        if (!(args instanceof Array))
-                                args = args.trim().split(/\n+/);
-                        args = args.map(createArgumentFunction);
-                }
-        };
-
-});
-
-Ymacs_Buffer.newCommands({
-
-        completing_read: function(prompt, collection) {
-        }
-
-});
+})();

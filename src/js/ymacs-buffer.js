@@ -208,7 +208,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.getVariable = function(key) {
-                return key in this.variables
+                return (key in this.variables)
                         ? this.variables[key]
                         : GLOBAL_VARS[key];
         };
@@ -381,6 +381,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.preventUpdates();
                 try {
                         this.callHooks("beforeInteractiveCommand");
+                        if (func.ymacsCallInteractively) {
+                                return func.ymacsCallInteractively.apply(this, args);
+                        }
                         return func.apply(this, args);
                 } finally {
                         // XXX
