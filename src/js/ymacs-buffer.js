@@ -3,6 +3,8 @@
 // Distributed under a BSD-style license.
 // http://www.ymacs.org/
 
+// @require ymacs-interactive.js
+
 DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         D.DEFAULT_EVENTS = [

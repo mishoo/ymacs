@@ -11,9 +11,9 @@ Ymacs_Buffer.newCommands({
                 return this.getRegion();
         },
 
-        cperl_lineup: function() {
+        cperl_lineup: Ymacs_Interactive("r", function(r){
                 this.cmd("save_excursion", function(){
-                        var r = this.getRegion(), rcend = this._positionToRowCol(r.end), max = 0, lines = [];
+                        var rcend = this._positionToRowCol(r.end), max = 0, lines = [];
                         this.cmd("goto_char", r.begin);
                         this.cmd("forward_whitespace", true);
                         var ch = this.charAt();
@@ -37,10 +37,9 @@ Ymacs_Buffer.newCommands({
                                 this.cmd("insert", " ".x(max - l[1]));
                         }, this);
                 });
-        },
+        }),
 
-        htmlize_region: function() {
-                var r = this.cmd("get_region");
+        htmlize_region: Ymacs_Interactive("r", function(r) {
                 this.tokenizer.finishParsing();
                 var row = this._positionToRowCol(r.begin).row,
                     end = this._positionToRowCol(r.end).row,
@@ -53,18 +52,22 @@ Ymacs_Buffer.newCommands({
                 var tmp = this.ymacs.switchToBuffer("*Htmlize*");
                 tmp.setCode(html);
                 tmp.cmd("xml_mode", true);
-        },
+        }),
 
-        eval_region: function() {
-                var r = this.cmd("get_region"),
-                    code = this.cmd("buffer_substring", r.begin, r.end),
-                    buffer = this;
-                code = "(function(){" + code + "}).call(buffer)";
+        execute_extended_command: Ymacs_Interactive("CM-x ", function(cmd) {
+                this.callInteractively(cmd);
+        }),
+
+        eval_region: Ymacs_Interactive("r", function(r) {
+                var code = this.cmd("buffer_substring", r.begin, r.end);
                 try {
-                        eval(code);
+                        code = new Function("buffer", code);
+                        code.call(this, this);
                 } catch(ex) {
                         this.signalError(ex.name + ": " + ex.message);
+                        if (window.console)
+                                console.log(ex);
                 }
-        }
+        })
 
 });

@@ -3,8 +3,6 @@
 // Distributed under a BSD-style license.
 // http://www.ymacs.org/
 
-// @require ymacs-buffer.js
-
 (function(){
 
         /*

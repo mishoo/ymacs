@@ -144,6 +144,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-x 3"                                   : "split_frame_horizontally",
                 "C-x o"                                   : "other_frame",
 
+                // eval
+                "M-x"                                     : "execute_extended_command",
+
                 // necessary evil
                 "C-S-y"                                   : "yank_from_operating_system",
                 "M-S-w"                                   : "copy_for_operating_system",
@@ -176,15 +179,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                                 size    : this.getCodeSize(),
                                 sizeKB  : this.getCodeSize().formatBytes(2)
                         }), true);
-                },
-
-                // XXX: ONLY TESTING FOR NOW
-                "M-x": function() {
-                        // can we do this? :-)
-                        this.cmd("minibuffer_prompt", "M-x ");
-                        this.cmd("minibuffer_read_command", function(cmd) {
-                                this.callInteractively(cmd);
-                        });
                 }
         };
 
