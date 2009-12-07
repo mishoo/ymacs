@@ -7,10 +7,10 @@
 
 Ymacs_Buffer.newCommands({
 
-        forward_char: function(x) {
+        forward_char: Ymacs_Interactive("p", function(x) {
                 if (x == null) x = 1;
                 return this.cmd("goto_char", this.point() + x);
-        },
+        }),
 
         backward_char: function(x) {
                 if (x == null) x = 1;
@@ -143,11 +143,10 @@ Ymacs_Buffer.newCommands({
                 this.resetOverwriteMode();
         },
 
-        self_insert_command: function(ev) {
+        self_insert_command: function() {
                 this.deleteTransientRegion();
-                if (!ev)
-                        ev = this.interactiveEvent;
-                var ch = String.fromCharCode(ev.charCode),
+                var ev = this.interactiveEvent(),
+                    ch = String.fromCharCode(ev.charCode),
                     rc = this._rowcol;
                 if (ev.charCode && ch && !ev.altKey && !ev.ctrlKey) {
                         var line = this.code[rc.row];

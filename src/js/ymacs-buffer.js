@@ -607,6 +607,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return $sameCommandCount += diff;
         };
 
+        var $lastKeyEvent;
+        P.interactiveEvent = function(ev) {
+                if (arguments.length == 0)
+                        return $lastKeyEvent;
+                return $lastKeyEvent = ev;
+        };
+
         /* -----[ not-so-public API ]----- */
 
         // BEGIN: undo queue
@@ -881,7 +888,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._handleKeyEvent = function(ev) {
                 var handled = false;
-                this.interactiveEvent = ev;
+                this.interactiveEvent(ev);
                 var lcwk = this._lastCommandWasKill;
 
                 if (this.__nextIsMeta)
@@ -927,7 +934,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         this._lastCommandWasKill = 0;
                 }
 
-                this.interactiveEvent = null;
+                this.interactiveEvent(null);
                 return handled;
         };
 

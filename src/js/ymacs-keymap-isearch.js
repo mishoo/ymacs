@@ -110,7 +110,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                 },
 
                 isearch_printing_char: function() {
-                        var ev = this.interactiveEvent;
+                        var ev = this.interactiveEvent();
                         if (ev.charCode && !ev.ctrlKey && !ev.altKey) {
                                 this.getMinibuffer().cmd("self_insert_command", ev);
                                 var text = getText(this);
