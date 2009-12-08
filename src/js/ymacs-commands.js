@@ -88,36 +88,22 @@ Ymacs_Buffer.newCommands({
                 return this.point() == 0;
         },
 
-        backward_delete_char: function() {
+        backward_delete_char: Ymacs_Interactive("p", function(n){
                 if (!this.deleteTransientRegion()) {
+                        if (n == null) n = 1;
                         var pos = this.point();
-                        if (pos > 0) {
-                                var rc = this._rowcol, line = this.code[rc.row], ch;
-                                if (rc.col > 0) {
-                                        ch = line.charAt(rc.col - 1);
-                                        line = line.substr(0, rc.col - 1) + line.substr(rc.col);
-                                        this._replaceLine(rc.row, line);
-                                } else {
-                                        ch = "\n";
-                                        // merge with the previous line
-                                        line = this.code[rc.row - 1] + line;
-                                        this._replaceLine(rc.row - 1, line);
-                                        this._deleteLine(rc.row);
-                                }
-                                // *** UNDO RECORDING
-                                if (!this.__preventUndo)
-                                        this._recordChange(2, pos - 1, 1, ch);
-                                this._updateMarkers(pos, -1);
-                        }
+                        if (pos > 0)
+                                this._deleteText(pos - n, pos);
                 }
-        },
+        }),
 
-        delete_char: function() {
+        delete_char: Ymacs_Interactive("p", function(n){
                 if (!this.deleteTransientRegion()) {
-                        if (this.cmd("forward_char"))
-                                this.cmd("backward_delete_char");
+                        if (n == null) n = 1;
+                        var pos = this.point();
+                        this._deleteText(pos, pos + n);
                 }
-        },
+        }),
 
         delete_whitespace: Ymacs_Interactive("P", function(noLine) {
                 if (!this.deleteTransientRegion()) {
@@ -162,16 +148,21 @@ Ymacs_Buffer.newCommands({
                 return false;
         }),
 
-        newline: function() {
+        newline: Ymacs_Interactive_X(function() {
                 this.deleteTransientRegion();
                 this.cmd("insert", "\n");
-        },
+        }),
 
-        newline_and_indent: function() {
-                this.cmd("backward_delete_whitespace", true);
-                this.cmd("newline");
-                this.cmd("indent_line");
-        },
+        newline_and_indent: Ymacs_Interactive("p", function(n){
+                if (n == null) n = 1;
+                n.times(function(i){
+                        if (i > 0)
+                                this.cmd("forward_line");
+                        this.cmd("backward_delete_whitespace", true);
+                        this.cmd("newline");
+                        this.cmd("indent_line");
+                }, this);
+        }),
 
         indent_line: Ymacs_Interactive("P", function(noEmpty) {
                 if (this.tokenizer) {
@@ -199,11 +190,11 @@ Ymacs_Buffer.newCommands({
                 this.cmd("insert", " ".x(this.getq("indent_line")));
         }),
 
-        indent_region: Ymacs_Interactive("r", function(r) {
+        indent_region: Ymacs_Interactive("r", function(begin, end) {
                 this.cmd("save_excursion", function() {
-                        var end = this.createMarker(r.end);
-                        this.cmd("goto_char", r.begin);
-                        while (this.point() < end.getPosition()) {
+                        var m = this.createMarker(end);
+                        this.cmd("goto_char", begin);
+                        while (this.point() < m.getPosition()) {
                                 this.cmd("indent_line", true);
                                 this.cmd("beginning_of_line");
                                 if (!this.cmd("forward_line"))
@@ -257,26 +248,40 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
-        search_forward_regexp: function(rx) {
-                var code = this.getCode();
-                var pos = rx.lastIndex = this.point();
-                var ret = this.matchData = rx.exec(code);
+        make_regexp: function(rx) {
+                if (!(rx instanceof RegExp)) {
+                        var matchCase = rx.toLowerCase() != rx.toUpperCase();
+                        try {
+                                rx = new RegExp(rx, matchCase ? "ig" : "g");
+                        } catch(ex) {
+                                throw new Ymacs_Exception("Invalid regexp");
+                        }
+                }
+                return rx;
+        },
+
+        search_forward_regexp: Ymacs_Interactive("sRegExp search: ", function(rx) {
+                rx = this.cmd("make_regexp", rx);
+                var code = this.getCode(),
+                    pos = rx.lastIndex = this.point(),
+                    ret = this.matchData = rx.exec(code);
                 if (ret && rx.lastIndex != pos) {
                         ret.after = rx.lastIndex;
                         this.cmd("goto_char", rx.lastIndex);
                         return true;
                 }
-        },
+        }),
 
-        search_backward_regexp: function(rx) {
+        search_backward_regexp: Ymacs_Interactive("sBackward RegExp search: ", function(rx) {
+                rx = this.cmd("make_regexp", rx);
                 var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point());
                 if (m && m.index != this.point()) {
                         this.cmd("goto_char", m.index);
                         return true;
                 }
-        },
+        }),
 
-        forward_word: function() {
+        forward_word: Ymacs_Interactive_X(function(){
                 var word = this.getq("syntax_word"), end = false;
                 while (!end && !word.test(this.charAt()))
                         if (!this.cmd("forward_char"))
@@ -284,9 +289,9 @@ Ymacs_Buffer.newCommands({
                 while (!end && word.test(this.charAt()))
                         if (!this.cmd("forward_char"))
                                 end = true;
-        },
+        }),
 
-        backward_word: function() {
+        backward_word: Ymacs_Interactive_X(function(){
                 var word = this.getq("syntax_word"), end = false;
                 while (!end && !word.test(this.charAt(-1)))
                         if (!this.cmd("backward_char"))
@@ -294,25 +299,25 @@ Ymacs_Buffer.newCommands({
                 while (!end && word.test(this.charAt(-1)))
                         if (!this.cmd("backward_char"))
                                 end = true;
-        },
+        }),
 
-        forward_paragraph: function() {
+        forward_paragraph: Ymacs_Interactive_X(function(){
                 this.cmd("forward_whitespace");
                 if (this.cmd("search_forward_regexp", this.getq("syntax_paragraph_sep")))
                         this.cmd("goto_char", this.cmd("match_beginning") + 1);
                 else
                         this.cmd("end_of_buffer");
-        },
+        }),
 
-        backward_paragraph: function() {
+        backward_paragraph: Ymacs_Interactive_X(function(){
                 this.cmd("backward_whitespace");
                 if (this.cmd("search_backward_regexp", this.getq("syntax_paragraph_sep")))
                         this.cmd("goto_char", this.cmd("match_end") - 1);
                 else
                         this.cmd("beginning_of_buffer");
-        },
+        }),
 
-        transpose_words: function() {
+        transpose_words: Ymacs_Interactive_X(function() {
                 // if we're in the middle of a word, some
                 // weird things happen; better skip it, just
                 // like Emacs does.
@@ -326,9 +331,9 @@ Ymacs_Buffer.newCommands({
                 this.cmd("backward_word"); a.push(this.point());
                 this.cmd("forward_word"); a.push(this.point());
                 this.cmd("goto_char", this._swapAreas(a));
-        },
+        }),
 
-        transpose_lines: function() {
+        transpose_lines: Ymacs_Interactive_X(function() {
                 var a = [];
                 this.cmd("backward_line");
                 this.cmd("beginning_of_line"); a.push(this.point());
@@ -336,27 +341,27 @@ Ymacs_Buffer.newCommands({
                 this.cmd("forward_char"); a.push(this.point());
                 this.cmd("end_of_line"); a.push(this.point());
                 this.cmd("goto_char", this._swapAreas(a) + 1);
-        },
+        }),
 
-        transpose_chars: function() {
+        transpose_chars: Ymacs_Interactive_X(function() {
                 var pos = this.point();
                 if (this.cmd("backward_char"))
                         this.cmd("goto_char", this._swapAreas([ pos - 1, pos, pos, pos + 1 ]));
-        },
+        }),
 
-        kill_word: function() {
+        kill_word: Ymacs_Interactive_X(function() {
                 var pos = this.point();
                 this.cmd("forward_word");
                 var pos2 = this.point();
                 this._killingAction(pos, pos2, false);
-        },
+        }),
 
-        backward_kill_word: function() {
+        backward_kill_word: Ymacs_Interactive_X(function() {
                 var pos = this.point();
                 this.cmd("backward_word");
                 var pos2 = this.point();
                 this._killingAction(pos, pos2, true);
-        },
+        }),
 
         _apply_operation_on_word: function (op, cc) {
                 var pos = this.point();
@@ -376,23 +381,28 @@ Ymacs_Buffer.newCommands({
                 }
         },
 
-        capitalize_word: function() {
+        capitalize_word: Ymacs_Interactive_X(function() {
                 this.cmd("_apply_operation_on_word", function() {
                         return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
                 }, "capitalize_word");
-        },
+        }),
 
-        downcase_word: function() {
+        downcase_word: Ymacs_Interactive_X(function() {
                 this.cmd("_apply_operation_on_word", String.prototype.toLowerCase, "downcase_word");
-        },
+        }),
 
-        upcase_word: function() {
+        upcase_word: Ymacs_Interactive_X(function() {
                 this.cmd("_apply_operation_on_word", String.prototype.toUpperCase, "upcase_word");
-        },
+        }),
 
-        goto_char: function(pos) {
+        goto_char: Ymacs_Interactive("NGoto char: ", function(pos){
                 return this._repositionCaret(pos);
-        },
+        }),
+
+        goto_line: Ymacs_Interactive("NGoto line: ", function(row){
+                var pos = this._rowColToPosition(row - 1, 0);
+                return this.cmd("goto_char", pos);
+        }),
 
         insert: function() {
                 return this._insertText(Array.$(arguments).join(""));
@@ -402,7 +412,7 @@ Ymacs_Buffer.newCommands({
                 return this._bufferSubstring(start, end);
         },
 
-        kill_line: function() {
+        kill_line: Ymacs_Interactive_X(function() {
                 var pos = this.point(),
                     rc = this._rowcol,
                     line = this.code[rc.row],
@@ -410,7 +420,7 @@ Ymacs_Buffer.newCommands({
                 if (rc.row < this.code.length - 1 && this.cmd("looking_at", /\s*$/mg))
                         end++;
                 this._killingAction(pos, end);
-        },
+        }),
 
         save_excursion: function() {
                 return this._saveExcursion.apply(this, arguments);
@@ -424,21 +434,23 @@ Ymacs_Buffer.newCommands({
                 return this.caretMarker.getPosition();
         },
 
-        kill_region: function() {
-                this._killingAction(this.caretMarker, this.markMarker);
-        },
+        kill_region: Ymacs_Interactive("r", function(begin, end){
+                this._killingAction(begin, end);
+        }),
 
-        copy_region_as_kill: function() {
-                this._killingAction(this.caretMarker, this.markMarker, false, true);
-        },
+        copy_region_as_kill: Ymacs_Interactive("r", function(begin, end){
+                this._killingAction(begin, end, false, true);
+        }),
 
-        yank: function() {
+        yank: Ymacs_Interactive("P", function(atStart){
                 var point = this.point();
                 this._insertText(this.ymacs.killRingText());
                 this.cmd("set_mark_command", point);
-        },
+                if (atStart)
+                        this.cmd("exchange_point_and_mark");
+        }),
 
-        yank_pop: function() {
+        yank_pop: Ymacs_Interactive(function() {
                 if (/^yank/.test(this.previousCommand)) {
                         this.ymacs.rotateKillRing(false);
                         this._deleteText(this.caretMarker, this.markMarker);
@@ -446,9 +458,9 @@ Ymacs_Buffer.newCommands({
                 } else {
                         this.signalError("Previous command was not a yank");
                 }
-        },
+        }),
 
-        yank_shift: function() {
+        yank_shift: Ymacs_Interactive(function() {
                 if (/^yank/.test(this.previousCommand)) {
                         this.ymacs.rotateKillRing(true);
                         this._deleteText(this.caretMarker, this.markMarker);
@@ -456,28 +468,27 @@ Ymacs_Buffer.newCommands({
                 } else {
                         this.signalError("Previous command was not a yank");
                 }
-        },
+        }),
 
         mark: function() {
                 return this.markMarker.getPosition();
         },
 
-        set_mark_command: function(x) {
-                if (x == null) x = this.point();
+        set_mark_command: Ymacs_Interactive("d", function(x){
                 this.markMarker.setPosition(x);
-        },
+        }),
 
-        exchange_point_and_mark: function() {
+        exchange_point_and_mark: Ymacs_Interactive(function(){
                 this.caretMarker.swap(this.markMarker);
-        },
+        }),
 
-        recenter_top_bottom: function() {
+        recenter_top_bottom: Ymacs_Interactive(function() {
                 this._centerOnCaret();
-        },
+        }),
 
         /* -----[ paragraphs ]----- */
 
-        fill_paragraph: function(noPrefix) {
+        fill_paragraph: Ymacs_Interactive("P", function(noPrefix) {
                 this.cmd("save_excursion", function(){
                         if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
                                 this.cmd("forward_paragraph");
@@ -536,16 +547,16 @@ Ymacs_Buffer.newCommands({
 
                         this.cmd("recenter_top_bottom");
                 });
-        },
+        }),
 
-        fill_paragraph_no_prefix: function() {
+        fill_paragraph_no_prefix: Ymacs_Interactive(function() {
                 return this.cmd("fill_paragraph", true);
-        },
+        }),
 
         // this looks at the style of the current paragraph and starts
         // a similar one, i.e. using same indentation level and prefix
         // (list-like prefixes are incremented)
-        start_next_paragraph: function() {
+        start_next_paragraph: Ymacs_Interactive(function() {
                 this.cmd("backward_paragraph");
                 if (this.point() > 0)
                         this.cmd("forward_char");
@@ -576,25 +587,25 @@ Ymacs_Buffer.newCommands({
                         this.cmd("newline");
                         this.cmd("backward_char");
                 };
-        },
+        }),
 
-        scroll_down: function() {
+        scroll_down: Ymacs_Interactive_X(function() {
                 this.whenActiveFrame(function(frame){
                         var hl = frame.heightInLines();
                         this.cmd("forward_line", Math.round(hl / 1.33));
                         this.cmd("recenter_top_bottom");
                 });
-        },
+        }),
 
-        scroll_up: function() {
+        scroll_up: Ymacs_Interactive_X(function() {
                 this.whenActiveFrame(function(frame){
                         var hl = frame.heightInLines();
                         this.cmd("backward_line", Math.round(hl / 1.33));
                         this.cmd("recenter_top_bottom");
                 });
-        },
+        }),
 
-        nuke_trailing_whitespace: function() {
+        nuke_trailing_whitespace: Ymacs_Interactive(function() {
                 this.cmd("save_excursion", function(){
                         this.cmd("goto_char", 0);
                         while (this._rowcol.row < this.code.length) {
@@ -608,7 +619,7 @@ Ymacs_Buffer.newCommands({
                                         break;
                         }
                 });
-        },
+        }),
 
         match_string: function(n) {
                 return this.matchData[n];
@@ -622,7 +633,7 @@ Ymacs_Buffer.newCommands({
                 return this.matchData.index + this.matchData[0].length;
         },
 
-        undo: function() {
+        undo: Ymacs_Interactive_X(function() {
                 var q = this.__undoQueue;
                 this.__undoQueue = this.__redoQueue;
                 this._placeUndoBoundary();
@@ -630,23 +641,28 @@ Ymacs_Buffer.newCommands({
                         this.signalError("No further undo information");
                 }
                 this.__undoQueue = q;
-        },
+        }),
 
-        center_line: function() {
-                this.cmd("save_excursion", function(){
-                        this.cmd("end_of_line");
-                        this.cmd("backward_delete_whitespace");
-                        this.cmd("beginning_of_line");
-                        this.cmd("delete_whitespace");
-                        var line = this.code[this._rowcol.row];
-                        var indent = Math.floor((this.getq("fill_column") - line.length) / 2);
-                        this.cmd("insert", " ".x(indent));
-                });
-        },
+        center_line: Ymacs_Interactive("p", function(n){
+                if (n == null) n = 1;
+                n.times(function(i){
+                        if (i > 0)
+                                this.cmd("forward_line");
+                        this.cmd("save_excursion", function(){
+                                this.cmd("end_of_line");
+                                this.cmd("backward_delete_whitespace");
+                                this.cmd("beginning_of_line");
+                                this.cmd("delete_whitespace");
+                                var line = this.code[this._rowcol.row];
+                                var indent = Math.floor((this.getq("fill_column") - line.length) / 2);
+                                this.cmd("insert", " ".x(indent));
+                        });
+                }, this);
+        }),
 
         /* -----[ dabbrev ]----- */
 
-        dabbrev_expand: function() {
+        dabbrev_expand: Ymacs_Interactive_X(function() {
                 if (this.previousCommand != "dabbrev_expand")
                         this.setq("dabbrev_context", null);
 
@@ -738,33 +754,33 @@ Ymacs_Buffer.newCommands({
                         ctx.length = expansion.length;
                         ctx.encountered[expansion] = true;
                 }
-        },
+        }),
 
         /* -----[ frames and buffers ]----- */
 
-        split_frame_vertically: function() {
+        split_frame_vertically: Ymacs_Interactive(function() {
                 this.whenActiveFrame("vsplit");
-        },
+        }),
 
-        split_frame_horizontally: function() {
+        split_frame_horizontally: Ymacs_Interactive(function() {
                 this.whenActiveFrame("hsplit");
-        },
+        }),
 
-        delete_other_frames: function() {
+        delete_other_frames: Ymacs_Interactive(function() {
                 this.whenActiveFrame("deleteOtherFrames");
-        },
+        }),
 
-        other_frame: function() {
+        other_frame: Ymacs_Interactive(function() {
                 this.whenYmacs("focusOtherFrame");
-        },
+        }),
 
-        next_buffer: function() {
+        next_buffer: Ymacs_Interactive(function() {
                 this.whenYmacs("switchToNextBuffer", this.sameCommandCount() + 1);
-        },
+        }),
 
-        previous_buffer: function() {
+        previous_buffer: Ymacs_Interactive(function() {
                 this.whenYmacs("switchToPreviousBuffer", this.sameCommandCount() + 1);
-        },
+        }),
 
         switch_to_buffer: Ymacs_Interactive("BSwitch to buffer: ", function(name) {
                 this.whenYmacs(function(ymacs){
@@ -772,24 +788,21 @@ Ymacs_Buffer.newCommands({
                 });
         }),
 
-        kill_buffer: function() {
+        kill_buffer: Ymacs_Interactive(function() {
                 this.whenYmacs(function(ymacs){
                         ymacs.killBuffer(this);
                 });
-        },
+        }),
 
-        rename_buffer: function() {
-                this.cmd("minibuffer_prompt", "Rename current buffer to: ");
-                this.cmd("minibuffer_read_string", null, function(name){
-                        this.whenYmacs(function(ymacs){
-                                ymacs.renameBuffer(this, name);
-                        });
+        rename_buffer: Ymacs_Interactive("sRename current buffer to: ", function(name){
+                this.whenYmacs(function(ymacs){
+                        ymacs.renameBuffer(this, name);
                 });
-        },
+        }),
 
         /* -----[ other ]----- */
 
-        delete_region_or_line: function() {
+        delete_region_or_line: Ymacs_Interactive(function() {
                 if (!this.deleteTransientRegion()) {
                         this.cmd("beginning_of_line");
                         var pos = this.point();
@@ -798,10 +811,10 @@ Ymacs_Buffer.newCommands({
                                 return true;
                         }
                 }
-        },
+        }),
 
         // http://mihai.bazon.net/blog/close-last-xml-tag-emacs
-        close_last_xml_tag: function() {
+        close_last_xml_tag: Ymacs_Interactive_X(function() {
                 var tag, quote;
                 this.cmd("save_excursion", function() {
                         var skip = 1;
@@ -820,9 +833,9 @@ Ymacs_Buffer.newCommands({
                 if (tag) {
                         this.cmd("insert", "</", tag, ">");
                 } else {
-                        this.signalError("Couldn't find a tag to close");
+                        throw new Ymacs_Exception("Couldn't find a tag to close");
                 }
-        },
+        }),
 
         bind_variables: function() {
                 return this.withVariables.apply(this, arguments);
@@ -857,62 +870,56 @@ Ymacs_Buffer.newCommands({
 
         Ymacs_Buffer.newCommands({
 
-                yank_from_operating_system: function() {
+                yank_from_operating_system: Ymacs_Interactive(function() {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
                                 this.cmd("set_mark_command");
                                 var code = entry.getValue().replace(/\t/g, "        ");
                                 this.cmd("insert", code);
                                 this.cmd.delayed(20, this, "recenter_top_bottom");
                         });
-                },
+                }),
 
-                copy_for_operating_system: function() {
+                copy_for_operating_system: Ymacs_Interactive(function() {
                         var text = this._bufferSubstring(this.caretMarker, this.markMarker);
                         modalTextarea.call(this, "Press CTRL-C", text, function(entry){
                                 this.cmd("copy_region_as_kill");
                         });
-                },
+                }),
 
-                kill_for_operating_system: function() {
+                kill_for_operating_system: Ymacs_Interactive(function() {
                         var text = this._bufferSubstring(this.caretMarker, this.markMarker);
                         modalTextarea.call(this, "Press CTRL-C or CTRL-X", text, function(entry){
                                 this.cmd("kill_region");
                         });
-                }
+                })
 
         });
 
 })();
 
-/* -----[ transient mark commands are quite similar to one another, so let's define them automagically ]----- */
+/* -----[ transient mark extension commands ]----- */
 
-(function(){
+[
+        "forward_char",
+        "forward_word",
+        "forward_line",
+        "forward_paragraph",
+        "forward_sexp",
+        "beginning_of_line",
+        "beginning_of_indentation_or_line",
+        "beginning_of_buffer",
+        "backward_char",
+        "backward_word",
+        "backward_line",
+        "backward_paragraph",
+        "backward_sexp",
+        "end_of_line",
+        "end_of_buffer"
 
-        function define_transient_mark_cmd(cmd) {
-                Ymacs_Buffer.COMMANDS[cmd + "_mark"] = function() {
-                        this.ensureTransientMark();
-                        this.cmdApply(cmd, arguments);
-                        this.ensureTransientMark();
-                };
-        };
-
-        [
-                "forward_char",
-                "forward_word",
-                "forward_line",
-                "forward_paragraph",
-                "forward_sexp",
-                "beginning_of_line",
-                "beginning_of_indentation_or_line",
-                "beginning_of_buffer",
-                "backward_char",
-                "backward_word",
-                "backward_line",
-                "backward_paragraph",
-                "backward_sexp",
-                "end_of_line",
-                "end_of_buffer"
-
-        ].foreach(define_transient_mark_cmd);
-
-})();
+].foreach(function(cmd) {
+        Ymacs_Buffer.COMMANDS[cmd + "_mark"] = Ymacs_Interactive(function(){
+                this.ensureTransientMark();
+                this.cmdApply(cmd, arguments);
+                this.ensureTransientMark();
+        });
+});

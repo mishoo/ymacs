@@ -132,6 +132,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-s"                                   : "isearch_forward_regexp",
                 "M-C-r"                                   : "isearch_backward_regexp",
                 "C-u"                                     : "universal_argument",
+                "M-g"                                     : "goto_line",
 
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
@@ -192,10 +193,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
         P.defaultHandler = [ function(){
                 var ev = this.interactiveEvent(),
                     ch = String.fromCharCode(ev.charCode),
-                    prefix = this.getq("universal_prefix");
+                    prefix = this.getPrefixArg(true);
                 if (ev.charCode && (/^[0-9]$/.test(ch) || (ch === "-" && prefix === "")) && !ev.altKey && !ev.ctrlKey) {
                         prefix += ch;
-                        this.setq("universal_prefix", prefix);
+                        this.setPrefixArg(prefix);
                         return true;
                 }
                 this.popKeymap(Ymacs_Keymap_UniversalArgument());
@@ -203,7 +204,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
         } ];
 
         P.attached = function(buffer) {
-                buffer.setq("universal_prefix", "");
+                buffer.setPrefixArg("");
         };
 
 });

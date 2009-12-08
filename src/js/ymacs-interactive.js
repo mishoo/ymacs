@@ -3,9 +3,13 @@
 // Distributed under a BSD-style license.
 // http://www.ymacs.org/
 
+// @require ymacs-exception.js
+
 (function(){
 
         /*
+         * Ymacs_Interactive(args_description, function_reference)
+         *
          * This is a wrapper that makes it easy to define "interactive" commands.  Pass two arguments: arguments
          * description (args), and a function (func).  args can be null, or a string, an array or a function.  When null
          * it is assumed that the function should not receive any arguments.  When an array or a string, it contains
@@ -40,13 +44,13 @@
                         if (!(args instanceof Array))
                                 args = args.split(/\n+/);
                         var collect;
-                        var execute = function(arg) {
-                                collect.push(arg);
-                                return func.apply(this, collect);
+                        var execute = function() {
+                                collect.append(Array.$(arguments));
+                                return this.callInteractively(func, collect, true);
                         };
                         while (args.length > 0) {
-                                execute = createArgumentFunction(args.pop(), function(next, arg) {
-                                        collect.push(arg);
+                                execute = createArgumentFunction(args.pop(), function(next) {
+                                        collect.append(Array.$(arguments, 1));
                                         next.call(this);
                                 }.$(null, execute));
                         }
@@ -60,25 +64,40 @@
                 return func;
         };
 
+        window.Ymacs_Interactive_X = function(func) {
+                return Ymacs_Interactive("p", function(n){
+                        if (n == null) n = 1;
+                        n.times(func, this);
+                });
+        };
+
         var $TRUE = (function(){});
         $TRUE.toString = function() { return "" };
 
         /* -----[ argument reader functions ]----- */
 
+        function make_prefix(arg) {
+                var pr = this.getPrefixArg(true /* noDiscard */);
+                if (pr) {
+                        arg = pr + " " + arg;
+                }
+                return arg;
+        };
+
         function read_function_name(arg, cont) {
-                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
                 this.cmd("minibuffer_read_function", cont);
                 // XXX: enforce it!
         };
 
         function read_existing_buffer_name(arg, cont) {
-                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
                 this.cmd("minibuffer_read_buffer", cont);
                 // XXX: enforce it!
         };
 
         function read_buffer_name(arg, cont) {
-                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
                 this.cmd("minibuffer_read_buffer", cont);
         };
 
@@ -87,7 +106,7 @@
         };
 
         function read_command_name(arg, cont) {
-                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
                 this.cmd("minibuffer_read_command", cont);
                 // XXX: enforce it!
         };
@@ -117,12 +136,12 @@
         };
 
         function read_arbitrary_text(arg, cont) {
-                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
                 this.cmd("minibuffer_read_string", null, cont);
         };
 
         function read_number(arg, cont) {
-                this.cmd("minibuffer_prompt", arg);
+                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
                 this.cmd("minibuffer_read_number", cont);
         };
 
@@ -149,7 +168,8 @@
         };
 
         function get_point_and_mark(arg, cont) {
-                cont.call(this, this.getRegion());
+                var r = this.getRegion();
+                cont.call(this, r.begin, r.end);
         };
 
         function read_key_sequence3(arg, cont) {

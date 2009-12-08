@@ -23,10 +23,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         ];
 
         D.DEFAULT_ARGS = {
-                name      : [ "name"      , "*scratch*" ],
-                _code     : [ "code"      , null ],
-                ymacs     : [ "ymacs"     , null ],
-                tokenizer : [ "tokenizer" , null ]
+                name         : [ "name"         , "*scratch*" ],
+                _code        : [ "code"         , null ],
+                ymacs        : [ "ymacs"        , null ],
+                tokenizer    : [ "tokenizer"    , null ],
+                isMinibuffer : [ "isMinibuffer" , false ]
         };
 
         var GLOBAL_VARS = {
@@ -97,13 +98,17 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         D.COMMANDS = P.COMMANDS = {};
 
         D.newCommands = P.newCommands = function(cmds) {
-                Object.merge(this.COMMANDS, cmds);
+                for (var name in cmds) {
+                        var func = cmds[name];
+                        func.ymacsCommand = name;
+                        this.COMMANDS[name] = func;
+                }
         };
 
         D.newMode = P.newMode = function(name, activate) {
                 var modevar = "*" + name + "*", hookvar = modevar + "hooks";
                 D.setGlobal(hookvar, []);
-                this.COMMANDS[name] = function(force) {
+                this.COMMANDS[name] = Ymacs_Interactive("P", function(force){
                         var status = this.getq(modevar);
                         if (status) {
                                 // currently active
@@ -134,7 +139,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 }
                         }
                         return status;
-                };
+                });
         };
 
         D.addModeHook = P.addModeHook = function(name, func) {
@@ -356,11 +361,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return this.charAtRowCol(rc.row, rc.col);
         };
 
-        P.callInteractively = function(func, args) {
-                var cmd = null;
+        P.callInteractively = function(func, args, finalArgs) {
+                var cmd;
                 if (!(func instanceof Function)) {
                         cmd = func;
                         func = this.COMMANDS[func];
+                } else {
+                        cmd = func.ymacsCommand || null;
                 }
                 this.currentCommand = cmd;
                 // the amount of brain twisting to get
@@ -382,10 +389,16 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.preventUpdates();
                 try {
                         this.callHooks("beforeInteractiveCommand");
-                        if (func.ymacsCallInteractively) {
+                        if (func.ymacsCallInteractively && !finalArgs) {
                                 return func.ymacsCallInteractively.apply(this, args);
                         } else {
                                 return func.apply(this, args);
+                        }
+                } catch(ex) {
+                        if (ex instanceof Ymacs_Exception) {
+                                this.signalError(ex.message);
+                        } else {
+                                throw ex;
                         }
                 } finally {
                         // XXX
@@ -618,6 +631,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return ret;
         };
 
+        P.setPrefixArg = function(val) {
+                return this.setq("universal_prefix", val);
+        };
+
         /* -----[ not-so-public API ]----- */
 
         // BEGIN: undo queue
@@ -743,8 +760,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._deleteText = function(begin, end) {
-                begin = MRK(begin);
-                end = MRK(end);
+                begin = this._boundPosition(MRK(begin));
+                end = this._boundPosition(MRK(end));
                 if (end < begin) { var tmp = begin; begin = end; end = tmp; }
                 // *** UNDO RECORDING
                 if (this.__preventUndo == 0)

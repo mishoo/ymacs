@@ -36,7 +36,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.updateModelineWithTimer = this.updateModeline.clearingTimeout(0, this);
 
                 /* -----[ minibuffer ]----- */
-                this.minibuffer = this.createBuffer({ hidden: true });
+                this.minibuffer = this.createBuffer({ hidden: true, isMinibuffer: true });
                 this.minibuffer.cmd("minibuffer_mode");
                 this.minibuffer_frame = this.createFrame({
                         isMinibuffer         : true,

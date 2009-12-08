@@ -11,10 +11,10 @@ Ymacs_Buffer.newCommands({
                 return this.getRegion();
         },
 
-        cperl_lineup: Ymacs_Interactive("r", function(r){
+        cperl_lineup: Ymacs_Interactive("r", function(begin, end){
                 this.cmd("save_excursion", function(){
-                        var rcend = this._positionToRowCol(r.end), max = 0, lines = [];
-                        this.cmd("goto_char", r.begin);
+                        var rcend = this._positionToRowCol(end), max = 0, lines = [];
+                        this.cmd("goto_char", begin);
                         this.cmd("forward_whitespace", true);
                         var ch = this.charAt();
                         if (ch.toLowerCase() != ch.toUpperCase()) {
@@ -39,11 +39,11 @@ Ymacs_Buffer.newCommands({
                 });
         }),
 
-        htmlize_region: Ymacs_Interactive("r", function(r) {
+        htmlize_region: Ymacs_Interactive("r", function(begin, end) {
                 this.tokenizer.finishParsing();
-                var row = this._positionToRowCol(r.begin).row,
-                    end = this._positionToRowCol(r.end).row,
+                var row = this._positionToRowCol(begin).row,
                     html = String.buffer();
+                end = this._positionToRowCol(end).row;
                 while (row <= end) {
                         html(this._textProperties.getLineHTML(row, this.code[row], null), "\n");
                         row++;
@@ -58,8 +58,8 @@ Ymacs_Buffer.newCommands({
                 this.callInteractively(cmd);
         }),
 
-        eval_region: Ymacs_Interactive("r", function(r) {
-                var code = this.cmd("buffer_substring", r.begin, r.end);
+        eval_region: Ymacs_Interactive("r", function(begin, end) {
+                var code = this.cmd("buffer_substring", begin, end);
                 try {
                         code = new Function("buffer", code);
                         code.call(this, this);

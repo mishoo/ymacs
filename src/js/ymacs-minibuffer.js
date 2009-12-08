@@ -163,8 +163,6 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 },
 
                 minibuffer_complete_and_exit: function() {
-                        // this.cmd("minibuffer_complete");
-                        // DlPopup.clearAllPopups();
                         this.whenMinibuffer(function(mb){
                                 mb.cmd("minibuffer_keyboard_quit", this.getq("minibuffer_continuation"));
                         });
@@ -178,6 +176,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                 (function(text){
                                         if (cont)
                                                 cont.call(this, text);
+                                        this.getPrefixArg();
                                 }).delayed(1, this, text);
                         });
                         DlPopup.clearAllPopups();
