@@ -88,7 +88,7 @@ Ymacs_Buffer.newCommands({
                 return this.point() == 0;
         },
 
-        backward_delete_char: Ymacs_Interactive("p", function(n){
+        backward_delete_char: Ymacs_Interactive("^p", function(n){
                 if (!this.deleteTransientRegion()) {
                         if (n == null) n = 1;
                         var pos = this.point();
@@ -97,7 +97,7 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
-        delete_char: Ymacs_Interactive("p", function(n){
+        delete_char: Ymacs_Interactive("^p", function(n){
                 if (!this.deleteTransientRegion()) {
                         if (n == null) n = 1;
                         var pos = this.point();
@@ -105,7 +105,7 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
-        delete_whitespace: Ymacs_Interactive("P", function(noLine) {
+        delete_whitespace: Ymacs_Interactive("^P", function(noLine) {
                 if (!this.deleteTransientRegion()) {
                         var p = this.point();
                         if (this.cmd("forward_whitespace", noLine)) {
@@ -115,7 +115,7 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
-        backward_delete_whitespace: Ymacs_Interactive("P", function(noLine) {
+        backward_delete_whitespace: Ymacs_Interactive("^P", function(noLine) {
                 if (!this.deleteTransientRegion()) {
                         var p = this.point();
                         if (this.cmd("backward_whitespace", noLine)) {
@@ -133,7 +133,7 @@ Ymacs_Buffer.newCommands({
                 this.resetOverwriteMode();
         }),
 
-        self_insert_command: Ymacs_Interactive("p", function(repeat) {
+        self_insert_command: Ymacs_Interactive("^p", function(repeat) {
                 this.deleteTransientRegion();
                 var ev = this.interactiveEvent(),
                     ch = String.fromCharCode(ev.charCode),
@@ -148,9 +148,10 @@ Ymacs_Buffer.newCommands({
                 return false;
         }),
 
-        newline: Ymacs_Interactive_X(function() {
+        newline: Ymacs_Interactive("^p", function(n){
+                if (n == null) n = 1;
                 this.deleteTransientRegion();
-                this.cmd("insert", "\n");
+                this.cmd("insert", "\n".x(n));
         }),
 
         newline_and_indent: Ymacs_Interactive("p", function(n){
@@ -802,7 +803,7 @@ Ymacs_Buffer.newCommands({
 
         /* -----[ other ]----- */
 
-        delete_region_or_line: Ymacs_Interactive(function() {
+        delete_region_or_line: Ymacs_Interactive("^", function() {
                 if (!this.deleteTransientRegion()) {
                         this.cmd("beginning_of_line");
                         var pos = this.point();
@@ -917,7 +918,7 @@ Ymacs_Buffer.newCommands({
         "end_of_buffer"
 
 ].foreach(function(cmd) {
-        Ymacs_Buffer.COMMANDS[cmd + "_mark"] = Ymacs_Interactive(function(){
+        Ymacs_Buffer.COMMANDS[cmd + "_mark"] = Ymacs_Interactive("^", function(){
                 this.ensureTransientMark();
                 this.cmdApply(cmd, arguments);
                 this.ensureTransientMark();

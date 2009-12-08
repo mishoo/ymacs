@@ -389,6 +389,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.preventUpdates();
                 try {
                         this.callHooks("beforeInteractiveCommand");
+                        if (!func.ymacsMarkExtend)
+                                this.clearTransientMark();
                         if (func.ymacsCallInteractively && !finalArgs) {
                                 return func.ymacsCallInteractively.apply(this, args);
                         } else {
@@ -401,14 +403,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 throw ex;
                         }
                 } finally {
-                        // XXX
-                        //
-                        // "Testing the command name against _mark is a disgusting hack. :-P"
-                        //      (quotemstr on irc.freenode.org/#emacs, 2009-11-24 20:37 EEST)
-                        //
-                        // ... and yes it is.
-                        if (!/_mark$/.test(this.currentCommand))
-                                this.clearTransientMark();
                         this.resumeUpdates();
                         this.callHooks("afterInteractiveCommand");
                         this.previousCommand = cmd;
@@ -440,14 +434,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.cmd = function(cmd) {
-                if (!/_mark$/.test(this.currentCommand))
-                        this.clearTransientMark();
                 return this.COMMANDS[cmd].apply(this, Array.$(arguments, 1));
         };
 
         P.cmdApply = function(cmd, args) {
-                if (!/_mark$/.test(this.currentCommand))
-                        this.clearTransientMark();
                 return this.COMMANDS[cmd].apply(this, args);
         };
 

@@ -54,11 +54,11 @@ Ymacs_Buffer.newCommands({
                 tmp.cmd("xml_mode", true);
         }),
 
-        execute_extended_command: Ymacs_Interactive("CM-x ", function(cmd) {
+        execute_extended_command: Ymacs_Interactive("^CM-x ", function(cmd) {
                 this.callInteractively(cmd);
         }),
 
-        eval_region: Ymacs_Interactive("r", function(begin, end) {
+        eval_region: Ymacs_Interactive("^r", function(begin, end) {
                 var code = this.cmd("buffer_substring", begin, end);
                 try {
                         code = new Function("buffer", code);

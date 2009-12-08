@@ -532,7 +532,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 buf.clearTransientMark();
                 buf.cmd("goto_char", buf._rowColToPosition(rc.row, rc.col));
                 if (CLICK_COUNT == 1) {
-                        buf.currentCommand = "mouse_mark"; // which sucks, but does the job.
                         buf.ensureTransientMark();
                         DlEvent.captureGlobals(this._dragSelectCaptures);
                 }

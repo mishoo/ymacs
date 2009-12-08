@@ -41,23 +41,43 @@
                         func.ymacsGetArgs = args;
                 }
                 else if (args != null) {
-                        if (!(args instanceof Array))
-                                args = args.split(/\n+/);
-                        var collect;
-                        var execute = function() {
-                                collect.append(Array.$(arguments));
-                                return this.callInteractively(func, collect, true);
-                        };
-                        while (args.length > 0) {
-                                execute = createArgumentFunction(args.pop(), function(next) {
-                                        collect.append(Array.$(arguments, 1));
-                                        next.call(this);
-                                }.$(null, execute));
+                        if (!(args instanceof Array)) {
+                                var m = /^[\^\@\*]+/.exec(args);
+                                if (m) {
+                                        m = m[0];
+                                        args = args.substr(m.length);
+                                        if (m.indexOf("^") >= 0) {
+                                                func.ymacsMarkExtend = true;
+                                        }
+                                        if (m.indexOf("*") >= 0) {
+                                                func.ymacsWarnReadonly = true;
+                                        }
+                                        if (m.indexOf("@") >= 0) {
+                                                func.ymacsSelectFrame = true;
+                                        }
+                                }
+                                if (args)
+                                        args = args.split(/\n+/);
                         }
-                        func.ymacsCallInteractively = function(){
-                                collect = [];
-                                return execute.call(this);
-                        };
+                        if (args) {
+                                var collect,
+                                    execute = function() {
+                                            collect.append(Array.$(arguments));
+                                            return this.callInteractively(func, collect, true);
+                                    };
+                                while (args.length > 0) {
+                                        execute = createArgumentFunction(args.pop(), function(next) {
+                                                collect.append(Array.$(arguments, 1));
+                                                next.call(this);
+                                        }.$(null, execute));
+                                }
+                                func.ymacsCallInteractively = function(){
+                                        collect = [];
+                                        return execute.call(this);
+                                };
+                        } else {
+                                func.ymacsCallInteractively = func;
+                        }
                 } else {
                         func.ymacsCallInteractively = func;
                 }
