@@ -125,7 +125,7 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
-        universal_argument: Ymacs_Interactive(function(){
+        universal_argument: Ymacs_Interactive("^", function(){
                 this.pushKeymap(Ymacs_Keymap_UniversalArgument());
         }),
 
@@ -134,11 +134,11 @@ Ymacs_Buffer.newCommands({
         }),
 
         self_insert_command: Ymacs_Interactive("^p", function(repeat) {
-                this.deleteTransientRegion();
                 var ev = this.interactiveEvent(),
                     ch = String.fromCharCode(ev.charCode),
                     rc = this._rowcol;
                 if (ev.charCode && ch && !ev.altKey && !ev.ctrlKey) {
+                        this.deleteTransientRegion();
                         if (repeat != null)
                                 ch = ch.x(repeat);
                         this.cmd("insert", ch);
@@ -479,7 +479,7 @@ Ymacs_Buffer.newCommands({
                 this.markMarker.setPosition(x);
         }),
 
-        exchange_point_and_mark: Ymacs_Interactive(function(){
+        exchange_point_and_mark: Ymacs_Interactive("^", function(){
                 this.caretMarker.swap(this.markMarker);
         }),
 

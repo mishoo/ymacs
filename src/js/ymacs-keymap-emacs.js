@@ -190,7 +190,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 
 DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
 
-        P.defaultHandler = [ function(){
+        P.defaultHandler = [ Ymacs_Interactive("^", function(){
                 var ev = this.interactiveEvent(),
                     ch = String.fromCharCode(ev.charCode),
                     prefix = this.getPrefixArg(true);
@@ -201,7 +201,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
                 }
                 this.popKeymap(Ymacs_Keymap_UniversalArgument());
                 return false;
-        } ];
+        }) ];
 
         P.attached = function(buffer) {
                 buffer.setPrefixArg("");

@@ -55,10 +55,17 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 $popupActive = true;
         };
 
-        function read_with_continuation(completions, cont) {
+        function read_with_continuation(completions, cont, validate) {
                 this.whenMinibuffer(function(mb){
                         var changed_vars = mb.setq({
                                 completion_list: completions,
+                                minibuffer_validation: function(what){
+                                        if (what == null)
+                                                what = mb.cmd("minibuffer_contents");
+                                        if (validate)
+                                                return validate.call(this, mb, what);
+                                        return true; // accept anything by default
+                                }.$(this),
                                 minibuffer_continuation: function(what){
                                         mb.setq(changed_vars);
                                         if (cont)
@@ -85,22 +92,37 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 },
 
                 minibuffer_read_number: function(cont) {
-                        read_with_continuation.call(this, null, cont);
-                        // XXX: enforce number!
+                        read_with_continuation.call(this, null, cont, function(mb, text){
+                                var n = parseInt(text, 10);
+                                if (isNaN(n))
+                                        mb.signalError("Please enter a number");
+                                return !isNaN(n);
+                        });
                 },
 
                 minibuffer_read_command: function(cont) {
                         var commandNames = Array.hashKeys(this.COMMANDS).grep(function(cmd){
                                 return this.COMMANDS[cmd].ymacsInteractive;
                         }, this).sort();
-                        read_with_continuation.call(this, commandNames, cont);
-                        // XXX: enforce existing command!
+                        read_with_continuation.call(this, commandNames, cont, function(mb, name){
+                                var cmd = this.COMMANDS[name],
+                                    ret = cmd && cmd.ymacsInteractive;
+                                if (!ret) {
+                                        mb.signalError("No such command: " + name);
+                                }
+                                return ret;
+                        });
                 },
 
                 minibuffer_read_function: function(cont) {
                         var commandNames = Array.hashKeys(this.COMMANDS).sort();
-                        read_with_continuation.call(this, commandNames, cont);
-                        // XXX: enforce existing function!
+                        read_with_continuation.call(this, commandNames, cont, function(mb, name){
+                                var cmd = this.COMMANDS[name],
+                                    ret = !!cmd;
+                                if (!ret)
+                                        mb.signalError("No such function: " + name);
+                                return ret;
+                        });
                 },
 
                 minibuffer_read_buffer: function(cont) {
@@ -108,8 +130,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                 var bufferNames = ymacs.buffers.map("name");
                                 bufferNames.push(bufferNames.shift());
                                 read_with_continuation.call(this, bufferNames, cont);
+                                handle_tab.call(this);
                         });
-                        // XXX: enforce existing buffer!
                 },
 
                 minibuffer_read_string: function(completions, cont) {
@@ -153,7 +175,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                                 mb.cmd("minibuffer_replace_input", prefix);
                                         }
                                         else if (a.length == 1) {
-                                                this.signalError("Sole completion");
+                                                mb.signalError("Sole completion");
                                         }
                                         else {
                                                 popupCompletionMenu(this.getMinibufferFrame(), a);
@@ -164,7 +186,9 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
 
                 minibuffer_complete_and_exit: function() {
                         this.whenMinibuffer(function(mb){
-                                mb.cmd("minibuffer_keyboard_quit", this.getq("minibuffer_continuation"));
+                                if (mb.getq("minibuffer_validation").call(mb)) {
+                                        mb.cmd("minibuffer_keyboard_quit", this.getq("minibuffer_continuation"));
+                                }
                         });
                 },
 
@@ -232,11 +256,9 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         };
 
         function handle_tab() {
-                if ($popupActive) {
-                        handle_arrow_down.call(this);
-                } else {
+                if (!$popupActive)
                         this.cmd("minibuffer_complete");
-                }
+                handle_arrow_down.call(this); // autoselect the first one anyway
         };
 
         function handle_s_tab() {
