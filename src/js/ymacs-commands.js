@@ -220,6 +220,7 @@ Ymacs_Buffer.newCommands({
         }),
 
         indent_region: Ymacs_Interactive("r", function(begin, end) {
+                if (end < begin) { var tmp = begin; begin = end; end = tmp; }
                 this.cmd("save_excursion", function() {
                         var m = this.createMarker(end);
                         this.cmd("goto_char", begin);

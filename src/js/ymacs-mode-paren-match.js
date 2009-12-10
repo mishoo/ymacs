@@ -57,7 +57,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
         Ymacs_Buffer.newCommands({
 
-                matching_paren: Ymacs_Interactive(function() {
+                matching_paren: function() {
                         var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                         if (p) {
                                 var parens = p.context.passedParens;
@@ -70,12 +70,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         }
                                 }, this);
                         }
-                }),
+                },
 
                 indent_sexp: Ymacs_Interactive(function() {
                         var pos = this.cmd("matching_paren");
-                        if (pos) {
-                                this.cmd("indent_region", this.caretMarker.getPosition(), pos);
+                        if (pos != null) {
+                                this.cmd("indent_region", this.point(), pos);
                         } else {
                                 this.signalError("Balanced expression not found");
                         }
@@ -83,7 +83,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
                 goto_matching_paren: Ymacs_Interactive(function() {
                         var pos = this.cmd("matching_paren");
-                        if (pos) {
+                        if (pos != null) {
                                 this.cmd("goto_char", pos);
                                 this.cmd("recenter_top_bottom");
                                 return true;
