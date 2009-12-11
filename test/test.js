@@ -145,22 +145,26 @@ to the current one.\n\
         var item = new DlMenuItem({ parent: menu, label: "Load its own code!".makeLabel() });
 
         var files = [
-                "ymacs-buffer.js",
-                "ymacs-commands.js",
+                "ymacs.js",
+                "ymacs-regexp.js",
                 "ymacs-frame.js",
+                "ymacs-textprop.js",
+                "ymacs-exception.js",
+                "ymacs-interactive.js",
+                "ymacs-buffer.js",
+                "ymacs-marker.js",
+                "ymacs-commands.js",
+                "ymacs-commands-utils.js",
+                "ymacs-keymap.js",
                 "ymacs-keymap-emacs.js",
                 "ymacs-keymap-isearch.js",
-                "ymacs-keymap.js",
-                "ymacs-marker.js",
+                "ymacs-minibuffer.js",
                 "ymacs-tokenizer.js",
                 "ymacs-mode-paren-match.js",
+                "ymacs-mode-lisp.js",
                 "ymacs-mode-js.js",
                 "ymacs-mode-xml.js",
-                "ymacs-mode-lisp.js",
-                "ymacs-mode-markdown.js",
-                "ymacs-regexp.js",
-                "ymacs-textprop.js",
-                "ymacs.js"
+                "ymacs-mode-markdown.js"
         ];
         var submenu = new DlVMenu({});
         item.setMenu(submenu);
