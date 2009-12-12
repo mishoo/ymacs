@@ -695,9 +695,9 @@ Ymacs_Buffer.newCommands({
                                 this.cmd("forward_line");
                         this.cmd("save_excursion", function(){
                                 this.cmd("end_of_line");
-                                this.cmd("backward_delete_whitespace");
+                                this.cmd("backward_delete_whitespace", true);
                                 this.cmd("beginning_of_line");
-                                this.cmd("delete_whitespace");
+                                this.cmd("delete_whitespace", true);
                                 var line = this.code[this._rowcol.row];
                                 var indent = Math.floor((this.getq("fill_column") - line.length) / 2);
                                 this.cmd("insert", " ".x(indent));
