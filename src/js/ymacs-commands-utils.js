@@ -91,6 +91,7 @@ Ymacs_Buffer.newCommands({
                 try {
                         code = new Function("buffer", code);
                         code.call(this, this);
+                        this.clearTransientMark();
                 } catch(ex) {
                         this.signalError(ex.name + ": " + ex.message);
                         if (window.console)

@@ -877,7 +877,42 @@ Ymacs_Buffer.newCommands({
 
         bind_variables: function() {
                 return this.withVariables.apply(this, arguments);
-        }
+        },
+
+        for_region: Ymacs_Interactive("^r\nCExecute command within region: ", function(begin, end, func) {
+                if (end < begin) { var tmp = begin; begin = end; end = tmp; } // MACROS!  I WANT MACROS!  EVAL SUCKS. x-(
+                if (!(func instanceof Function))
+                        func = this.COMMANDS[func];
+                this.clearTransientMark();
+                this.cmd("goto_char", begin);
+                begin = this.createMarker(begin, true);
+                end = this.createMarker(end);
+                this.withCommands(
+                        {
+                                goto_char: function(pos){
+                                        if (pos >= begin.getPosition() && pos <= end.getPosition())
+                                                return this._repositionCaret(pos);
+                                        throw "YMACS_RESTRICT";
+                                }
+                        },
+                        function() {
+                                try {
+                                        while (true) {
+                                                var tmp = this.point();
+                                                func.call(this);
+                                                if (this.point() == tmp && !this.cmd("forward_line"))
+                                                        break;
+                                        }
+                                } catch(ex) {
+                                        if (ex !== "YMACS_RESTRICT")
+                                                throw ex;
+                                } finally {
+                                        begin.destroy();
+                                        end.destroy();
+                                }
+                        }
+                );
+        })
 
 });
 
@@ -908,25 +943,25 @@ Ymacs_Buffer.newCommands({
 
         Ymacs_Buffer.newCommands({
 
-                yank_from_operating_system: Ymacs_Interactive(function() {
+                yank_from_operating_system: Ymacs_Interactive("P", function(atStart) {
                         modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
-                                this.cmd("set_mark_command");
                                 var code = entry.getValue().replace(/\t/g, "        ");
-                                this.cmd("insert", code);
+                                this._saveKilledText(code);
+                                this.cmd("yank", atStart);
                                 this.cmd.delayed(20, this, "recenter_top_bottom");
                         });
                 }),
 
                 copy_for_operating_system: Ymacs_Interactive(function() {
                         var text = this._bufferSubstring(this.caretMarker, this.markMarker);
-                        modalTextarea.call(this, "Press CTRL-C", text, function(entry){
+                        modalTextarea.call(this, "Press CTRL-C", text, function(){
                                 this.cmd("copy_region_as_kill");
                         });
                 }),
 
                 kill_for_operating_system: Ymacs_Interactive(function() {
                         var text = this._bufferSubstring(this.caretMarker, this.markMarker);
-                        modalTextarea.call(this, "Press CTRL-C or CTRL-X", text, function(entry){
+                        modalTextarea.call(this, "Press CTRL-C or CTRL-X", text, function(){
                                 this.cmd("kill_region");
                         });
                 })

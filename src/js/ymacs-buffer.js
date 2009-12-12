@@ -263,6 +263,20 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        P.withCommands = function(cmds, cont) {
+                var saved = this.COMMANDS;
+                this.COMMANDS = Object.makeCopy(saved);
+                Object.merge(this.COMMANDS, cmds);
+                try {
+                        if (cont instanceof Function)
+                                return cont.apply(this, Array.$(arguments, 2));
+                        else
+                                return this.cmdApply(cont, Array.$(arguments, 2));
+                } finally {
+                        this.COMMANDS = saved;
+                }
+        };
+
         P.getVariable = function(key) {
                 return (key in this.variables)
                         ? this.variables[key]
@@ -843,12 +857,15 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 p1 = MRK(p1);
                 p2 = MRK(p2);
                 var text = this._bufferSubstring(p1, p2);
-                if (!this._lastCommandWasKill) {
-                        this.ymacs.killRingToMaster();
-                }
-                this.ymacs.pushToKillRing(text, prepend);
+                this._saveKilledText(text, prepend);
                 if (!noDelete)
                         this._deleteText(p1, p2);
+        };
+
+        P._saveKilledText = function(text, prepend) {
+                if (!this._lastCommandWasKill)
+                        this.ymacs.killRingToMaster();
+                this.ymacs.pushToKillRing(text, prepend);
                 this._lastCommandWasKill++;
         };
 
