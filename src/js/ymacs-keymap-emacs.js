@@ -161,6 +161,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-C-r"                                   : "isearch_backward_regexp",
                 "C-u"                                     : "universal_argument",
                 "M-g"                                     : "goto_line",
+                "C-x h"                                   : "mark_whole_buffer",
 
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",

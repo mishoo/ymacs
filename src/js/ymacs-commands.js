@@ -512,6 +512,14 @@ Ymacs_Buffer.newCommands({
                 this.caretMarker.swap(this.markMarker);
         }),
 
+        mark_whole_buffer: Ymacs_Interactive(function(){
+                this.clearTransientMark();
+                this.cmd("end_of_buffer");
+                this.ensureTransientMark();
+                this.cmd("beginning_of_buffer");
+                this.ensureTransientMark();
+        }),
+
         recenter_top_bottom: Ymacs_Interactive(function() {
                 this._centerOnCaret();
         }),
