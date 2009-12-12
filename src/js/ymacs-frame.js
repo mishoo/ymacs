@@ -137,7 +137,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P.ensureCaretVisible = function() {
                 this._redrawCaret();
 
-                var caret = this.getCaretElement(), div = this.getElement(), line = this.getLineDivElement(this.buffer._rowcol.row);
+                var caret = this.getCaretElement();
+                if (!caret)
+                        return;
+                var div = this.getElement(), line = this.getLineDivElement(this.buffer._rowcol.row);
 
                 // vertical
                 var diff = line.offsetTop + line.offsetHeight - (div.scrollTop + div.clientHeight);
@@ -185,7 +188,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         }
                         this._redrawBuffer();
                         this._redrawCaret(true);
-                        // this.ensureCaretVisible();
+                        this.centerOnCaret();
                 }
         };
 

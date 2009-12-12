@@ -188,10 +188,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 minibuffer_complete: function() {
                         this.whenMinibuffer(function(mb){
                                 var a = mb.getq("completion_list"),
-                                    str = mb.cmd("minibuffer_contents");
+                                    str = mb.cmd("minibuffer_contents"),
+                                    str2 = str.replace(/-/g, "_");
                                 if (a && a.length > 0) {
                                         a = a.grep(function(cmd){
-                                                return cmd.indexOf(str) == 0;
+                                                return cmd.indexOf(str) == 0 || cmd.indexOf(str2) == 0;
                                         });
                                 }
                                 if (!a || a.length == 0) {
