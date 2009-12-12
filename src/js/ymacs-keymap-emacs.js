@@ -226,6 +226,11 @@ DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
                 if (ev.charCode && (/^[0-9]$/.test(ch) || (ch === "-" && prefix === "")) && !ev.altKey && !ev.ctrlKey) {
                         prefix += ch;
                         this.setPrefixArg(prefix);
+                        if (!this.isMinibuffer) {
+                                this.whenMinibuffer(function(mb){
+                                        mb.cmd("insert", " ", ch);
+                                });
+                        }
                         return true;
                 }
                 this.popKeymap(Ymacs_Keymap_UniversalArgument());

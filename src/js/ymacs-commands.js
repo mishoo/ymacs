@@ -155,6 +155,8 @@ Ymacs_Buffer.newCommands({
 
         universal_argument: Ymacs_Interactive("^", function(){
                 this.pushKeymap(Ymacs_Keymap_UniversalArgument());
+                if (!this.isMinibuffer)
+                        this.setMinibuffer("C-u");
         }),
 
         overwrite_mode: Ymacs_Interactive(function() {
@@ -438,8 +440,13 @@ Ymacs_Buffer.newCommands({
                 return this._insertText(Array.$(arguments).join(""));
         },
 
-        buffer_substring: function(start, end) {
-                return this._bufferSubstring(start, end);
+        buffer_substring: function(begin, end) {
+                if (arguments.length == 0) {
+                        var r = this.getRegion();
+                        begin = r.begin;
+                        end = r.end;
+                }
+                return this._bufferSubstring(begin, end);
         },
 
         kill_line: Ymacs_Interactive_X(function() {
@@ -932,10 +939,15 @@ Ymacs_Buffer.newCommands({
                 dlg.setSize({ x: 350, y: 250 });
                 entry.addEventListener("onKeyPress", function(ev){
                         if (ev.keyCode != DlKeyboard.ESCAPE) {
-                                cont.call(this, entry);
+                                var code = entry.getValue().replace(/\t/g, "        ");
                                 dlg.destroy();
+                                cont.delayed(0, this, code);
+                                // XXX Without a delay here, be it zero, stars will align in such a way that
+                                // yank_from_operating_system will move the caret in some bizarre position after
+                                // inserting the pasted text.
+                                // cont.call(this, code);
                         }
-                }.clearingTimeout(2, this));
+                }.clearingTimeout(0, this));
                 dlg.show(true);
                 entry.select();
         };
@@ -943,26 +955,23 @@ Ymacs_Buffer.newCommands({
 
         Ymacs_Buffer.newCommands({
 
-                yank_from_operating_system: Ymacs_Interactive("P", function(atStart) {
-                        modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(entry){
-                                var code = entry.getValue().replace(/\t/g, "        ");
+                yank_from_operating_system: Ymacs_Interactive(function() {
+                        modalTextarea.call(this, "Paste below (press CTRL-V)", null, function(code){
                                 this._saveKilledText(code);
-                                this.cmd("yank", atStart);
-                                this.cmd.delayed(20, this, "recenter_top_bottom");
+                                this.cmd("yank");
+                                this.cmd("recenter_top_bottom");
                         });
                 }),
 
-                copy_for_operating_system: Ymacs_Interactive(function() {
-                        var text = this._bufferSubstring(this.caretMarker, this.markMarker);
-                        modalTextarea.call(this, "Press CTRL-C", text, function(){
-                                this.cmd("copy_region_as_kill");
+                copy_for_operating_system: Ymacs_Interactive("r", function(begin, end) {
+                        modalTextarea.call(this, "Press CTRL-C", this.cmd("buffer_substring"), function(){
+                                this.cmd("copy_region_as_kill", begin, end);
                         });
                 }),
 
-                kill_for_operating_system: Ymacs_Interactive(function() {
-                        var text = this._bufferSubstring(this.caretMarker, this.markMarker);
-                        modalTextarea.call(this, "Press CTRL-C or CTRL-X", text, function(){
-                                this.cmd("kill_region");
+                kill_for_operating_system: Ymacs_Interactive("r", function(begin, end) {
+                        modalTextarea.call(this, "Press CTRL-C or CTRL-X", this.cmd("buffer_substring"), function(){
+                                this.cmd("kill_region", begin, end);
                         });
                 })
 

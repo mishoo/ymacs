@@ -8,7 +8,6 @@
 }
 
 .Ymacs-caret {
-  opacity: 0.5;
   margin: 0;
   padding: 0;
 }
@@ -16,6 +15,8 @@
 .Ymacs_Frame-focus .Ymacs-caret {
   opacity: 1;
 }
+
+.Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; }
 
 .Ymacs_Frame-hasOverlays .Ymacs-current-line {
   background: transparent !important;
