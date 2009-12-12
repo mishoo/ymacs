@@ -164,6 +164,7 @@ to the current one.\n\
                 "ymacs-mode-lisp.js",
                 "ymacs-mode-js.js",
                 "ymacs-mode-xml.js",
+                "ymacs-mode-css.js",
                 "ymacs-mode-markdown.js"
         ];
         var submenu = new DlVMenu({});

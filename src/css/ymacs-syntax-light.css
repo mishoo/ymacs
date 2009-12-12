@@ -2,8 +2,8 @@
 
 .Ymacs-Theme-light .Ymacs_Frame .type { color: #6b8e23; font-weight: bold; }
 .Ymacs-Theme-light .Ymacs_Frame .builtin   { color: #9932cc; }
-.Ymacs-Theme-light .Ymacs_Frame .function-name   { color: rgb(135, 206, 250);  font-weight: bold; }
-.Ymacs-Theme-light .Ymacs_Frame .variable-name   { color: rgb(238, 221, 130);  font-weight: bold; }
+.Ymacs-Theme-light .Ymacs_Frame .function-name   { color: #5f5fff;  font-weight: bold; }
+.Ymacs-Theme-light .Ymacs_Frame .variable-name   { color: #ba8912;  font-weight: bold; }
 .Ymacs-Theme-light .Ymacs_Frame .constant   { color: #53868b; font-style: normal;  }
 
 .Ymacs-Theme-light .Ymacs_Frame .string { color: #8b6969; font-style: normal;  }
