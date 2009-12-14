@@ -199,6 +199,11 @@ to the current one.\n\
 
         menu.addFiller();
 
+        var item = new DlMenuItem({ parent: menu, label: "Toggle line numbers".makeLabel() });
+        item.addEventListener("onSelect", function() {
+                ymacs.getActiveBuffer().cmd("toggle_line_numbers");
+        });
+
         /* -----[ color theme ]----- */
 
         var item = new DlMenuItem({ parent: menu, label: "Color theme".makeLabel() });
