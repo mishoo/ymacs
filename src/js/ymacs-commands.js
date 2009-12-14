@@ -70,7 +70,8 @@ Ymacs_Buffer.newCommands({
                 if (this.cmd("search_forward_regexp", re)) {
                         this.cmd("backward_char");
                         return true;
-                }
+                } else if (!noLine)
+                        return this.cmd("end_of_buffer");
         }),
 
         backward_whitespace: Ymacs_Interactive("P", function(noLine) {
@@ -78,7 +79,8 @@ Ymacs_Buffer.newCommands({
                 if (this.cmd("search_backward_regexp", re)) {
                         this.cmd("forward_char");
                         return true;
-                }
+                } else if (!noLine)
+                        return this.cmd("beginning_of_buffer");
         }),
 
         beginning_of_line: Ymacs_Interactive(function() {
