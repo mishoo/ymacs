@@ -58,7 +58,9 @@
 .Ymacs-line-numbers .Ymacs-frame-content div.line:before {
   color: #888;
   display: inline-block;
-  width: 5em;
-  content: counter(ymacs-line, decimal) ". ";
+  width: 3em;
+  padding-right: 0.5em;
+  margin-right: 0.5em;
+  content: counter(ymacs-line, decimal);
   text-align: right;
 }
