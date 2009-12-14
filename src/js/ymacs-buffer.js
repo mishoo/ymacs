@@ -735,6 +735,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._replaceLine = function(row, text) {
                 this.code[row] = text;
+                this._textProperties.replaceLine(row, text);
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onLineChange", row);
                 } else {

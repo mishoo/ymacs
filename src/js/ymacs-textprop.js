@@ -44,7 +44,6 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
         };
 
         P.insertLine = function(row) {
-                // console.log("textprop: insertLine %d", row);
                 if (this.props.length < row)
                         this.props[row] = null;
                 else {
@@ -53,8 +52,15 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
         };
 
         P.deleteLine = function(row) {
-                // console.log("textprop: deleteLine %d", row);
                 this.props.splice(row, 1);
+        };
+
+        P.replaceLine = function(row, text) {
+                var p = this.props[row];
+                if (p && p.length > text.length) {
+                        // remove extra-properties
+                        p.splice(text.length, p.length);
+                }
         };
 
         P.addLineProps = function(row, i, j, prop, val) {
