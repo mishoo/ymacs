@@ -734,7 +734,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         // END: undo
 
         P._replaceLine = function(row, text) {
-                // this._textProperties[row] = null; // XXX: OLD
                 this.code[row] = text;
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onLineChange", row);
@@ -745,10 +744,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._deleteLine = function(row) {
                 this.code.splice(row, 1);
-                row--; // it might seem weird, but the actual row that
-                       // we're operating on is row - 1, because of
-                       // the algorithms implemented in _deleteText
-                       // and _insertText (*1)
                 this._textProperties.deleteLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickDeleteLine(row);
@@ -761,7 +756,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P._insertLine = function(row, text) {
                 this.code.splice(row, 0, text);
-                row--; // see (*1) above
                 this._textProperties.insertLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickInsertLine(row);
@@ -780,16 +774,33 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 // *** UNDO RECORDING
                 if (this.__preventUndo == 0)
                         this._recordChange(1, pos, text.length);
-                var rc = pos == this.point() ? this._rowcol : this._positionToRowCol(pos);
-                var lines = text.split(/\n/), i = rc.row, rest = this.code[i].substr(rc.col);
-                if (lines.length > 1) {
-                        this._replaceLine(i, this.code[i].substr(0, rc.col) + lines.shift());
-                        lines.foreach(function(text){
-                                this._insertLine(++i, text);
+                var rc = pos == this.point() ? this._rowcol : this._positionToRowCol(pos),
+                    i = rc.row;
+                if (/^\n+$/.test(text) && rc.col == 0) {
+                        // handle this case separately, since it's so
+                        // frequently used (ENTER pressed) and the
+                        // default algorithm messes up colorization
+                        // for a fraction of a second, flashing badly.
+                        text.length.times(function(j){
+                                this._insertLine(i + j, "");
                         }, this);
-                        this._replaceLine(i, this.code[i] + rest);
                 } else {
-                        this._replaceLine(i, this.code[i].substr(0, rc.col) + lines[0] + this.code[i].substr(rc.col));
+                        var lines = text.split(/\n/), ln = this.code[i], rest = ln.substr(rc.col);
+                        if (lines.length > 1) {
+                                if (rest !== "") {
+                                        this._replaceLine(i, ln.substr(0, rc.col) + lines.shift());
+                                }
+                                else {
+                                        lines.shift();
+                                }
+                                lines.foreach(function(text){
+                                        this._insertLine(++i, text);
+                                }, this);
+                                if (rest !== "")
+                                        this._replaceLine(i, this.code[i] + rest);
+                        } else {
+                                this._replaceLine(i, ln.substr(0, rc.col) + lines[0] + ln.substr(rc.col));
+                        }
                 }
                 this._updateMarkers(pos, text.length);
         };

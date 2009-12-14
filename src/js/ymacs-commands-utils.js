@@ -99,7 +99,7 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
-        toggle_line_numbers: Ymacs_Interactive(function(){
+        toggle_line_numbers: Ymacs_Interactive("^", function(){
                 this.whenActiveFrame("toggleLineNumbers");
         })
 

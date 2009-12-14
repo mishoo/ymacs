@@ -43,27 +43,18 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
                 this.props = [];
         };
 
-        // inserts n empty properties at position row
-        P.insertLine = function(row, n) {
-                if (n == null)
-                        n = 1;
-                if (this.props.length < row) {
+        P.insertLine = function(row) {
+                // console.log("textprop: insertLine %d", row);
+                if (this.props.length < row)
                         this.props[row] = null;
-                        --n;
-                }
-                if (n > 0) {
-                        var a = new Array(n + 2);
-                        a[0] = row;
-                        a[1] = 0;
-                        this.props.splice.apply(this.props, a);
+                else {
+                        this.props.splice(row, 0, null);
                 }
         };
 
-        // removes n properties at position row
-        P.deleteLine = function(row, n) {
-                if (n == null)
-                        n = 1;
-                this.props.splice(row, n);
+        P.deleteLine = function(row) {
+                // console.log("textprop: deleteLine %d", row);
+                this.props.splice(row, 1);
         };
 
         P.addLineProps = function(row, i, j, prop, val) {
