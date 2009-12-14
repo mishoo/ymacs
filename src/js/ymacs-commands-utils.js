@@ -97,6 +97,10 @@ Ymacs_Buffer.newCommands({
                         if (window.console)
                                 console.log(ex);
                 }
+        }),
+
+        toggle_line_numbers: Ymacs_Interactive(function(){
+                this.whenActiveFrame("toggleLineNumbers");
         })
 
 });

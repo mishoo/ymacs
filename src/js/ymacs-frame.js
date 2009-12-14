@@ -82,7 +82,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.initDOM = function() {
                 D.BASE.initDOM.apply(this, arguments);
-                this.getElement().innerHTML = "<div class='content'></div>";
+                this.getElement().innerHTML = "<div class='Ymacs-frame-content'></div>";
                 this.addEventListener({
                         onDestroy   : this._on_destroy,
                         onFocus     : this._on_focus,
@@ -248,6 +248,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
                 // update dimensions
                 cont.__doLayout();
+        };
+
+        P.toggleLineNumbers = function() {
+                this.condClass(this.__lineNumbers =! this.__lineNumbers, "Ymacs-line-numbers");
         };
 
         function insertInText(div, col, el) {

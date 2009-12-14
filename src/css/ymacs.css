@@ -52,3 +52,13 @@
 }
 
 .Ymacs_Completion_Popup .DlMenuItem .div2 { font-size: 100%; }
+
+.Ymacs-line-numbers .Ymacs-frame-content { counter-reset: ymacs-line 0; }
+.Ymacs-line-numbers .Ymacs-frame-content div.line { counter-increment: ymacs-line; }
+.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
+  color: #888;
+  display: inline-block;
+  width: 5em;
+  content: counter(ymacs-line, decimal) ". ";
+  text-align: right;
+}
