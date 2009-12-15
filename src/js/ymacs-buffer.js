@@ -788,17 +788,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 } else {
                         var lines = text.split(/\n/), ln = this.code[i], rest = ln.substr(rc.col);
                         if (lines.length > 1) {
-                                if (rest !== "") {
-                                        this._replaceLine(i, ln.substr(0, rc.col) + lines.shift());
-                                }
-                                else {
-                                        lines.shift();
-                                }
+                                this._replaceLine(i, ln.substr(0, rc.col) + lines.shift());
                                 lines.foreach(function(text){
                                         this._insertLine(++i, text);
                                 }, this);
-                                if (rest !== "")
-                                        this._replaceLine(i, this.code[i] + rest);
+                                this._replaceLine(i, this.code[i] + rest);
                         } else {
                                 this._replaceLine(i, ln.substr(0, rc.col) + lines[0] + ln.substr(rc.col));
                         }
