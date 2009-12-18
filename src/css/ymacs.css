@@ -18,9 +18,9 @@
 
 .Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; }
 
-.Ymacs_Frame-hasOverlays .Ymacs-current-line {
-  background: transparent !important;
-}
+/* .Ymacs_Frame-hasOverlays .Ymacs-current-line { */
+/*   background: transparent !important; */
+/* } */
 
 .Ymacs-overwrite-mode .Ymacs-caret {
   -moz-border-radius: 15px;

@@ -121,6 +121,7 @@
 
         var $TRUE = (function(){});
         $TRUE.toString = function() { return "" };
+        $TRUE.empty = true;
 
         /* -----[ argument reader functions ]----- */
 

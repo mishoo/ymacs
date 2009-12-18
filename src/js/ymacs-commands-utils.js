@@ -67,14 +67,22 @@ Ymacs_Buffer.newCommands({
                 });
         }),
 
-        htmlize_region: Ymacs_Interactive("r", function(begin, end) {
+        htmlize_region: Ymacs_Interactive("r\nP", function(begin, end, lineNum) {
                 this.tokenizer.finishParsing();
                 var row = this._positionToRowCol(begin).row,
-                    html = String.buffer();
+                    html = String.buffer(),
+                    line = row, pad;
+                if (lineNum && !lineNum.empty)
+                        line = parseInt(lineNum, 10);
                 end = this._positionToRowCol(end).row;
+                pad = String(end).length;
                 while (row <= end) {
-                        html(this._textProperties.getLineHTML(row, this.code[row], null), "\n");
-                        row++;
+                        html("<div class='line'>");
+                        if (lineNum)
+                                html("<span class='line-number'>", line.zeroPad(pad, " "), "</span>");
+                        ++line;
+                        html(this._textProperties.getLineHTML(row, this.code[row], null), "</div>\n");
+                        ++row;
                 }
                 html = html.get();
                 var tmp = this.ymacs.switchToBuffer("*Htmlize*");
