@@ -879,9 +879,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._positionToRowCol = function(pos) {
-                var line = 0;
-                while (pos > 0 && line < this.code.length) {
-                        var len = this.code[line].length;
+                var line = 0, a = this.code, n = a.length;
+                while (pos > 0 && line < n) {
+                        var len = a[line].length;
                         if (len >= pos)
                                 break;
                         pos -= len + 1; // one for the newline
@@ -891,12 +891,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._rowColToPosition = function(row, col) {
-                var pos = 0, i = Math.min(row, this.code.length - 1), n = i;
+                var pos = 0, a = this.code, i = Math.min(row, a.length - 1), n = i;
                 if (i < 0)
                         return 0;
                 while (--i >= 0)
-                        pos += this.code[i].length + 1; // one for the newline
-                return pos + Math.min(col, this.code[n].length);
+                        pos += a[i].length + 1; // one for the newline
+                return pos + Math.min(col, a[n].length);
         };
 
         P._boundPosition = function(pos) {
