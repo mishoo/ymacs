@@ -173,6 +173,11 @@ Ymacs_Buffer.newCommands({
                         this.deleteTransientRegion();
                         if (repeat != null)
                                 ch = ch.x(repeat);
+                        if (this.overwriteMode) {
+                                var line = this.code[rc.row], left = line.length - rc.col;
+                                if (left > 0)
+                                        this.cmd("delete_char", Math.min(left, repeat || 1));
+                        }
                         this.cmd("insert", ch);
                         ev.domStop = true;
                         return true;
