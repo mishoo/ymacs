@@ -946,7 +946,8 @@ Ymacs_Buffer.newCommands({
                 dlg.setSize({ x: 350, y: 250 });
                 entry.addEventListener("onKeyPress", function(ev){
                         if (ev.keyCode != DlKeyboard.ESCAPE) {
-                                var code = entry.getValue().replace(/\t/g, "        ");
+                                // var code = entry.getValue().replace(/\t/g, "        ");
+                                var code = entry.getValue();
                                 dlg.destroy();
                                 cont.delayed(0, this, code);
                                 // XXX Without a delay here, be it zero, stars will align in such a way that

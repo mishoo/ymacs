@@ -333,7 +333,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.setCode = function(code) {
-                this.__code = code = code.replace(/\t/g, " ".x(this.getq("tab_width")));
+                // this.__code = code = code.replace(/\t/g, " ".x(this.getq("tab_width")));
+                this.__code = code;
                 this.__size = code.length;
                 this.__undoQueue = [];
                 this.__redoQueue = [];
