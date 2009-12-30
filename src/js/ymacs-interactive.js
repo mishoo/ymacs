@@ -125,28 +125,28 @@
 
         /* -----[ argument reader functions ]----- */
 
-        function make_prefix(arg) {
+        function prompt(arg) {
                 var pr = this.getPrefixArg(true /* noDiscard */);
                 if (pr) {
                         arg = pr + " " + arg;
                 }
-                return arg;
+                this.cmd("minibuffer_prompt", arg);
         };
 
         function read_function_name(arg, cont) {
-                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
+                prompt.call(this, arg);
                 this.cmd("minibuffer_read_function", cont);
                 // XXX: enforce it!
         };
 
         function read_existing_buffer_name(arg, cont) {
-                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
+                prompt.call(this, arg);
                 this.cmd("minibuffer_read_buffer", cont);
                 // XXX: enforce it!
         };
 
         function read_buffer_name(arg, cont) {
-                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
+                prompt.call(this, arg);
                 this.cmd("minibuffer_read_buffer", cont);
         };
 
@@ -155,7 +155,7 @@
         };
 
         function read_command_name(arg, cont) {
-                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
+                prompt.call(this, arg);
                 this.cmd("minibuffer_read_command", cont);
                 // XXX: enforce it!
         };
@@ -185,12 +185,12 @@
         };
 
         function read_arbitrary_text(arg, cont) {
-                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
+                prompt.call(this, arg);
                 this.cmd("minibuffer_read_string", null, cont);
         };
 
         function read_number(arg, cont) {
-                this.cmd("minibuffer_prompt", make_prefix.call(this, arg));
+                prompt.call(this, arg);
                 this.cmd("minibuffer_read_number", cont);
         };
 

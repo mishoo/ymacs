@@ -137,7 +137,8 @@ to the current one.\n\
 
         var layout = new DlLayout({ parent: dlg });
 
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ], className: "Ymacs-Theme-dark" });
+        var empty = new Ymacs_Buffer({ name: "empty" });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ empty, javascript, xml, lisp, markdown, txt, keys ], className: "Ymacs-Theme-dark" });
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });

@@ -39,6 +39,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         var EX = DlException.stopEventBubbling;
 
+        var LINE_DIV = DOM.createElement("div", null, { className: "line", innerHTML: "<br/>" });
+
+        var BLINK_TIMEOUT = 200;
+
         D.DEFAULT_EVENTS = [ "onPointChange" ];
 
         D.DEFAULT_ARGS = {
@@ -54,8 +58,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 _focusable           : [ "focusable"            , true ],
                 _fillParent          : [ "fillParent"           , true ]
         };
-
-        var BLINK_TIMEOUT = 200;
 
         D.CONSTRUCT = function() {
                 this.__blinkCaret = this.__blinkCaret.$(this);
@@ -356,6 +358,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this._on_bufferLineChange(rc.row);
                 }
 
+                // var caret = this.getCaretElement();
+                // if (caret)
+                //         DOM.strip(caret);
+                // this._on_bufferLineChange(rc.row);
+
                 if (isActive)
                         this.__restartBlinking();
 
@@ -430,16 +437,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P._on_bufferLineChange = function(row) {
                 var div = this.getLineDivElement(row);
                 if (div) {
+                        //console.log("Redrawing line %d [%s]", row, this.buffer.code[row]);
                         div.innerHTML = this._getLineHTML(row);
                 }
         };
 
         P._on_bufferInsertLine = function(row, drawIt) {
-                var div;
+                var div = LINE_DIV.cloneNode(true);
                 if (drawIt)
-                        div = DOM.createFromHtml(this._getLineHTML(row).htmlEmbed("div", "line"));
-                else
-                        div = DOM.createElement("div", null, { className: "line" });
+                        div.innerHTML = this._getLineHTML(row);
                 this.getContentElement().insertBefore(div, this.getLineDivElement(row));
         };
 

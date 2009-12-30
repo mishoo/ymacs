@@ -1,7 +1,7 @@
 #! /bin/bash
 
 pushd ~/work/thelib/
-./make.pl
+./make.pl -f 0
 mv DynarchLIB.zip /tmp/
 popd
 unzip /tmp/DynarchLIB.zip

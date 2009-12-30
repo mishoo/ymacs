@@ -443,9 +443,9 @@ Ymacs_Buffer.newCommands({
                 return this.cmd("goto_char", pos);
         }),
 
-        insert: function() {
+        insert: Ymacs_Interactive("sInsert text: ", function(){
                 return this._insertText(Array.$(arguments).join(""));
-        },
+        }),
 
         buffer_substring: function(begin, end) {
                 if (arguments.length == 0) {

@@ -749,10 +749,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._textProperties.deleteLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickDeleteLine(row);
-                if (this.__preventUpdates != 0) {
-                        this.__dirtyLines.splice(row, 1, true);
-                        // console.log("Dirty: %o", this.__dirtyLines);
-                }
+                this.__dirtyLines.splice(row, 1);
                 this.callHooks("onDeleteLine", row);
         };
 
@@ -761,11 +758,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._textProperties.insertLine(row);
                 if (this.tokenizer)
                         this.tokenizer.quickInsertLine(row);
-                if (this.__preventUpdates == 0) {
-                        this.callHooks("onInsertLine", row, true);
-                } else {
+                var drawIt = this.__preventUpdates == 0;
+                this.callHooks("onInsertLine", row, drawIt);
+                if (!drawIt) {
                         this.__dirtyLines.splice(row, 0, true);
-                        this.callHooks("onInsertLine", row);
                 }
         };
 
