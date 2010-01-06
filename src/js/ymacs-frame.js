@@ -492,9 +492,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         return null;
                 var p1 = this.coordinates(props.line1, props.col1);
                 var p2 = this.coordinates(props.line2, props.col2);
+                var p0 = this.__lineNumbers ? this.coordinates(props.line1, 0) : { x: 0, y: 0 };
+                p1.x -= p0.x;
+                p2.x -= p0.x;
                 var str = String.buffer(
                         "<div id='", this.getOverlayId(name), "' class='Ymacs_Overlay ", name,
-                        "' style='top:", p1.y, "px'>"
+                        "' style='top:", p1.y, "px;left:", p0.x, "px'>"
                 );
                 if (props.line1 == props.line2) {
                         str("<div class='", name, "' style='margin-left:", p1.x,
