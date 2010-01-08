@@ -39,6 +39,9 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 buffers : [ "buffers" , null ],
                 frames  : [ "frames"  , null ],
 
+                // default options
+                cf_lineNumbers: [ "lineNumbers", false ],
+
                 // override in DlWidget
                 _focusable : [ "focusable"  , true ]
         };
