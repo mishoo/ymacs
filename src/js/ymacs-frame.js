@@ -80,7 +80,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.buffer = null;
                 if (buffer)
                         this.setBuffer(buffer);
-                if (!this.isMinibuffer && this.ymacs.cfg_lineNumbers)
+                if (!this.isMinibuffer && this.ymacs.cf_lineNumbers)
                         this.toggleLineNumbers();
         };
 
