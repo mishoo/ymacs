@@ -47,7 +47,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "onOverlayDelete",
                 "beforeInteractiveCommand",
                 "afterInteractiveCommand",
-                "finishedEvent"
+                "finishedEvent",
+                "onTextInsert",
+                "onTextDelete"
         ];
 
         D.DEFAULT_ARGS = {
@@ -766,6 +768,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._insertText = function(text, pos) {
+                if (text.length == 0)
+                        return;
                 if (pos == null)
                         pos = this.caretMarker.getPosition();
                 pos = MRK(pos);
@@ -795,11 +799,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         }
                 }
                 this._updateMarkers(pos, text.length);
+                this.callHooks("onTextInsert", pos, text);
         };
 
         P._deleteText = function(begin, end) {
                 begin = this._boundPosition(MRK(begin));
                 end = this._boundPosition(MRK(end));
+                if (begin == end)
+                        return;
                 if (end < begin) { var tmp = begin; begin = end; end = tmp; }
                 // *** UNDO RECORDING
                 if (this.__preventUndo == 0)
@@ -820,6 +827,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         (erc.row - brc.row).times(this._deleteLine.$(this, line));
                 }
                 this._updateMarkers(begin, begin - end, begin);
+                this.callHooks("onTextDelete", begin, end);
         };
 
         P._replaceText = function(begin, end, text) {

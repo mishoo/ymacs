@@ -33,7 +33,11 @@
 
 DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
-        D.DEFAULT_EVENTS = [ "onBufferSwitch" ];
+        D.DEFAULT_EVENTS = [
+                "onBufferSwitch",
+                "onCreateBuffer",
+                "onDeleteBuffer"
+        ];
 
         D.DEFAULT_ARGS = {
                 buffers : [ "buffers" , null ],
@@ -137,6 +141,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
         P.killBuffer = function(buf) {
                 buf = this.getBuffer(buf);
+                this.callHooks("onDeleteBuffer", buf);
                 if (this.buffers.length > 1) {
                         if (this.getActiveBuffer() === buf)
                                 this.switchToNextBuffer();
@@ -220,6 +225,9 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 //         this.buffers.remove(buf);
                 // }.$(this, buf));
                 //
+
+                this.callHooks("onCreateBuffer", buf);
+
                 return buf;
         };
 
