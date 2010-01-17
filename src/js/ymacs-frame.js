@@ -92,8 +92,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onFocus     : this._on_focus,
                         onBlur      : this._on_blur,
                         onMouseDown : this._on_mouseDown,
-                        // onKeyDown   : this._on_keyPress,
+                        onKeyDown   : this._on_keyDown,
                         onKeyPress  : this._on_keyPress,
+                        onKeyUp     : this._on_keyUp,
                         onResize    : this.centerOnCaret
                 });
                 this._dragSelectCaptures = {
@@ -135,7 +136,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.getLineDivElement = function(row) {
-                return this.getContentElement().childNodes[row];
+                return this.getContentElement().childNodes[row] || null;
         };
 
         P.ensureCaretVisible = function() {
@@ -446,9 +447,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_bufferInsertLine = function(row, drawIt) {
                 var div = LINE_DIV.cloneNode(true);
-                if (drawIt)
-                        div.innerHTML = this._getLineHTML(row);
                 this.getContentElement().insertBefore(div, this.getLineDivElement(row));
+                if (drawIt) {
+                        div.innerHTML = this._getLineHTML(row);
+                }
         };
 
         P._on_bufferDeleteLine = function(row) {
@@ -611,9 +613,30 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 DlEvent.releaseGlobals(this._dragSelectCaptures);
         };
 
+        P._on_keyDown = function(ev) {
+                if (!is_gecko) {
+                        var ki = window.KEYBOARD_INSANITY, code = ev.keyCode;
+                        if (code in ki.modifiers)
+                                EX();
+                        if ((code in ki.letters || code in ki.digits || code in ki.symbols) && !(ev.ctrlKey || ev.altKey)) {
+                                return; // to be handled by the upcoming keypress event
+                        }
+                        ev.charCode = ki.getCharCode(code, ev.shiftKey);
+                        if (ev.charCode)
+                                ev.keyCode = 0;
+                        if (this.buffer._handleKeyEvent(ev))
+                                EX();
+                }
+        };
+
         P._on_keyPress = function(ev) {
+                if (!is_gecko)
+                        ev.keyCode = 0;
                 if (this.buffer._handleKeyEvent(ev))
                         EX();
+        };
+
+        P._on_keyUp = function(ev) {
         };
 
 });

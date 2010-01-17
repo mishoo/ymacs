@@ -407,6 +407,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.callInteractively = function(func, args, finalArgs) {
+                if (!args)
+                        args = []; // make IE happy
                 var cmd;
                 if (!(func instanceof Function)) {
                         cmd = func;
@@ -787,7 +789,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 this._insertLine(i + j, "");
                         }, this);
                 } else {
-                        var lines = text.split(/\n/), ln = this.code[i], rest = ln.substr(rc.col);
+                        var lines = text.split("\n"), ln = this.code[i], rest = ln.substr(rc.col);
                         if (lines.length > 1) {
                                 this._replaceLine(i, ln.substr(0, rc.col) + lines.shift());
                                 lines.foreach(function(text){

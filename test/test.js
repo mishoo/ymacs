@@ -301,7 +301,7 @@ to the current one.\n\
 
 DynarchDomUtils.trash($("x-loading"));
 
-if (!is_gecko) (function(){
+if (!is_gecko && !is_khtml) (function(){
 
         var dlg = new DlDialog({
                 title   : "Information",
