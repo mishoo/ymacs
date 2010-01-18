@@ -210,6 +210,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.currentKeys = [];
 
                 this.variables = {};
+                this.globalVariables = GLOBAL_VARS;
                 this.modes = [];
 
                 this.caretMarker.onChange.push(function(pos) {

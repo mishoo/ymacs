@@ -212,7 +212,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 },
 
                 minibuffer_read_variable: function(cont) {
-                        var completions = Array.hashKeys(this.variables).sort();
+                        var tmp = this.globalVariables;
+                        Object.merge(tmp, this.variables);
+                        var completions = Array.hashKeys(tmp).grep(function(name){
+                                return !/^\*/.test(name);
+                        }).sort();
                         read_with_continuation.call(this, completions, cont);
                 },
 
