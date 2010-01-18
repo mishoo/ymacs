@@ -302,9 +302,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         /* -----[ public API ]----- */
 
         P.pushKeymap = function(keymap) {
-                this.popKeymap(keymap);
-                this.keymap.push(keymap);
-                keymap.attached(this);
+                if (keymap instanceof Array) {
+                        keymap.foreach(this.pushKeymap, this);
+                } else {
+                        this.popKeymap(keymap);
+                        this.keymap.push(keymap);
+                        keymap.attached(this);
+                }
         };
 
         P.popKeymap = function(keymap) {

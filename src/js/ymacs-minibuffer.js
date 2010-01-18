@@ -57,7 +57,12 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         $menu.destroy();
                 $menu = new DlVMenu({});
                 list.foreach(function(item){
-                        new DlMenuItem({ parent: $menu, label: item.htmlEscape(), data: item });
+                        var data = item;
+                        if (typeof item != "string") {
+                                data = item.completion;
+                                item = item.label;
+                        }
+                        new DlMenuItem({ parent: $menu, label: item.htmlEscape(), data: data });
                 });
                 var popup = Ymacs_Completion_Popup.get();
                 popup.popup({
@@ -101,6 +106,46 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                 }.$(this)
                         });
                 });
+        };
+
+        function filename_completion(mb, str) {
+                var info = this.ymacs.ls_getFileDirectory(str),
+                    dir = info.dir,
+                    other = info.other,
+                    path = info.path,
+                    last = other[0];
+                if (other.length != 1)
+                        throw new Ymacs_Exception("Not found");
+                if (typeof dir[last] == "string")
+                        return [ path.concat([ last ]).join("/") ]; // fully completed
+                var completions = [];
+                for (var i in dir) {
+                        if (i.indexOf(last) == 0) {
+                                completions.push(i);
+                        }
+                }
+                var prefix = completions.common_prefix();
+                if (prefix != last) {
+                        if (completions.length == 1 && typeof dir[prefix] != "string")
+                                prefix += "/";
+                        mb.cmd("minibuffer_replace_input", path.concat([ prefix ]).join("/"));
+                }
+                else if (completions.length == 1) {
+                        // XXX: do we ever get here?
+                        throw new Ymacs_Exception("Single completion");
+                }
+                else {
+                        completions = completions.map(function(name){
+                                if (typeof dir[name] != "string")
+                                        name += "/";
+                                return {
+                                        label: name,
+                                        completion: path.concat([ name ]).join("/")
+                                };
+                        });
+                        popupCompletionMenu(this.getMinibufferFrame(), completions);
+                }
+                return null;
         };
 
         Ymacs_Buffer.newCommands({
@@ -166,6 +211,41 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         read_with_continuation.call(this, completions, cont);
                 },
 
+                minibuffer_read_variable: function(cont) {
+                        var completions = Array.hashKeys(this.variables).sort();
+                        read_with_continuation.call(this, completions, cont);
+                },
+
+                minibuffer_read_existing_file: function(cont) {
+                        var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
+                        if (dir) dir += "/";
+                        this.cmd("minibuffer_replace_input", dir);
+                        read_with_continuation.call(this, filename_completion, cont, function(mb, name){
+                                var ret = this.ymacs.ls_getFileContents(name, true);
+                                if (!ret)
+                                        mb.signalError("No such file: " + name);
+                                return ret;
+                        });
+                },
+
+                minibuffer_read_file: function(cont) {
+                        var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
+                        if (dir) dir += "/";
+                        read_with_continuation.call(this, filename_completion, cont);
+                },
+
+                minibuffer_read_file_or_directory: function(cont) {
+                        var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
+                        if (dir) dir += "/";
+                        read_with_continuation.call(this, filename_completion, cont);
+                },
+
+                minibuffer_read_directory: function(cont) {
+                        var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
+                        if (dir) dir += "/";
+                        read_with_continuation.call(this, filename_completion, cont);
+                },
+
                 minibuffer_prompt_end: function() {
                         return this.whenMinibuffer(function(mb){
                                 return mb.getq("minibuffer_end_marker").getPosition();
@@ -190,7 +270,12 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                                 var a = mb.getq("completion_list"),
                                     str = mb.cmd("minibuffer_contents"),
                                     str2 = str.replace(/-/g, "_");
-                                if (a && a.length > 0) {
+                                if (a instanceof Function) {
+                                        a = a.call(this, mb, str, str2);
+                                        if (!a)
+                                                return;
+                                }
+                                else if (a && a.length > 0) {
                                         a = a.grep(function(cmd){
                                                 return cmd.indexOf(str) == 0 || cmd.indexOf(str2) == 0;
                                         });
@@ -280,8 +365,9 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         } else {
                                 this.signalError("Select something...");
                         }
+                } else {
+                        this.cmd("minibuffer_complete_and_exit");
                 }
-                this.cmd("minibuffer_complete_and_exit");
         };
 
         function handle_tab() {

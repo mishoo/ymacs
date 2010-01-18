@@ -94,11 +94,17 @@ Ymacs_Buffer.newCommands({
                 this.callInteractively(cmd);
         }),
 
-        eval_region: Ymacs_Interactive("^r", function(begin, end) {
-                var code = this.cmd("buffer_substring", begin, end);
+        set_variable: Ymacs_Interactive("vSet variable: \nsTo value: ", function(variable, value) {
+                var tmp = parseFloat(value);
+                if (!isNaN(tmp))
+                        value = tmp;
+                this.setq(variable, value);
+        }),
+
+        eval_string: Ymacs_Interactive("^MEval string: ", function(code){
                 try {
-                        code = new Function("buffer", code);
-                        code.call(this, this);
+                        code = new Function("buffer", "ymacs", code);
+                        code.call(this, this, this.ymacs);
                         this.clearTransientMark();
                 } catch(ex) {
                         this.signalError(ex.name + ": " + ex.message);
@@ -107,8 +113,37 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
+        eval_region: Ymacs_Interactive("^r", function(begin, end) {
+                this.cmd("eval_string", this.cmd("buffer_substring", begin, end));
+        }),
+
         toggle_line_numbers: Ymacs_Interactive("^", function(){
                 this.whenActiveFrame("toggleLineNumbers");
+        }),
+
+        save_file: Ymacs_Interactive("FWrite file: ", function(name){
+                var files = this.ymacs.ls_getFileDirectory(name, "file");
+                files.dir[files.other[0]] = this.getCode();
+                this.ymacs.ls_set(files.store);
+                this.signalInfo("Saved in local storage");
+        }),
+
+        load_file: Ymacs_Interactive("fFind file: ", function(name){
+                var code = this.ymacs.ls_getFileContents(name);
+                var buffer = this.ymacs.createBuffer({ name: name });
+                buffer.setCode(code);
+                this.cmd("switch_to_buffer", name);
+        }),
+
+        delete_file: Ymacs_Interactive("fDelete file: ", function(name){
+                this.ymacs.ls_getFileContents(name);
+                var files = this.ymacs.ls_get();
+                delete files[name];
+                this.ymacs.ls_set(files);
+        }),
+
+        eval_file: Ymacs_Interactive("fEval file: ", function(name){
+                this.cmd("eval_string", this.ymacs.ls_getFileContents(name));
         })
 
 });

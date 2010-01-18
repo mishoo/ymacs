@@ -317,6 +317,50 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.addClass("Ymacs-Theme-" + themeId);
         };
 
+        /* -----[ local storage ]----- */
+
+        P.ls_get = function() {
+                return DlJSON.decode(localStorage.getItem(".ymacs") || "{}", true);
+        };
+
+        P.ls_set = function(src) {
+                localStorage.setItem(".ymacs", DlJSON.encode(src));
+        };
+
+        P.ls_getFileContents = function(name, nothrow) {
+                var info = this.ls_getFileDirectory(name), other = info.other, code;
+                if (other.length == 1) {
+                        code = info.dir[other[0]];
+                } else if (!nothrow) {
+                        throw new Ymacs_Exception("File not found");
+                }
+                return code;
+        };
+
+        P.ls_getFileDirectory = function(name, create) {
+                var store, dir = store = this.ls_get();
+                name = name.replace(/^[~\x2f]+/, "").split(/\x2f+/);
+                var path = [], other = [];
+                while (name.length > 0) {
+                        var part = name.shift();
+                        if (dir.hasOwnProperty(part) && (typeof dir[part] != "string")) {
+                                dir = dir[part];
+                                path.push(part);
+                        }
+                        else {
+                                other.push(part);
+                        }
+                };
+                if (create) {
+                        var n = create == "file" ? 1 : 0;
+                        while (other.length > n) {
+                                dir = dir[other.shift()] = {};
+                        }
+                        this.ls_set(store);
+                }
+                return { store: store, dir: dir, path: path, other: other };
+        };
+
         /* -----[ listeners ]----- */
 
         P._on_activeFramePointChange = function() {

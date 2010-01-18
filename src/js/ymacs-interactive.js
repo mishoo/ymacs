@@ -226,7 +226,28 @@
         };
 
         function read_variable_name(arg, cont) {
+                prompt.call(this, arg);
+                this.cmd("minibuffer_read_variable", cont);
+        };
 
+        function read_existing_file_name(arg, cont) {
+                prompt.call(this, arg);
+                this.cmd("minibuffer_read_existing_file", cont);
+        };
+
+        function read_file_name(arg, cont) {
+                prompt.call(this, arg);
+                this.cmd("minibuffer_read_file", cont);
+        };
+
+        function read_file_or_directory_name(arg, cont) {
+                prompt.call(this, arg);
+                this.cmd("minibuffer_read_file_or_directory", cont);
+        };
+
+        function read_existing_directory_name(arg, cont) {
+                prompt.call(this, arg);
+                this.cmd("minibuffer_read_directory", cont);
         };
 
         var ARG_READERS = {
@@ -249,12 +270,13 @@
                 r: get_point_and_mark,
                 s: read_arbitrary_text,
                 U: read_key_sequence3,
-                v: read_variable_name
+                v: read_variable_name,
 
-                // D: no directory name reader in Ymacs
-                // f:
-                // F:
-                // G: no file name reader in Ymacs
+                f: read_existing_file_name,
+                F: read_file_name,
+                G: read_file_or_directory_name,
+                D: read_existing_directory_name
+
                 // S: no reader for interned symbols in Ymacs
                 // no x, X, z and Z either
         };
