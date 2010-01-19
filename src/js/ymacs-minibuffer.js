@@ -217,7 +217,16 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         var completions = Array.hashKeys(tmp).grep(function(name){
                                 return !/^\*/.test(name);
                         }).sort();
-                        read_with_continuation.call(this, completions, cont);
+                        read_with_continuation.call(this, completions, cont
+                                                    // XXX: seems like a good idea, but it doesn't work
+                                                    // XXX: need to refactor the signalInfo stuff.  It doesn't show up
+                                                    //      currently because the buffer frame is not active, or something...
+                                                    // , function(mb, name){
+                                                    //         var val = this.getq(name);
+                                                    //         mb.signalInfo("Current value of " + name + ": " + val);
+                                                    //         return true;
+                                                    // }
+                                                   );
                 },
 
                 minibuffer_read_existing_file: function(cont) {
@@ -273,15 +282,16 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         this.whenMinibuffer(function(mb){
                                 var a = mb.getq("completion_list"),
                                     str = mb.cmd("minibuffer_contents"),
-                                    str2 = str.replace(/-/g, "_");
+                                    re = str.replace(/([\[\]\(\)\{\}\.\*\+\?\|\\])/g, "\\$1").replace(/([_-])/g, "[^_-]*[_-]");
+                                re = new RegExp("^" + re, "i");
                                 if (a instanceof Function) {
-                                        a = a.call(this, mb, str, str2);
+                                        a = a.call(this, mb, str, re);
                                         if (!a)
                                                 return;
                                 }
                                 else if (a && a.length > 0) {
                                         a = a.grep(function(cmd){
-                                                return cmd.indexOf(str) == 0 || cmd.indexOf(str2) == 0;
+                                                return re.test(cmd);
                                         });
                                 }
                                 if (!a || a.length == 0) {
