@@ -319,11 +319,18 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
         /* -----[ local storage ]----- */
 
+        function ensureLocalStorage() {
+                if (!(window.localStorage && window.localStorage.getItem))
+                        throw new Ymacs_Exception("Local storage facility not available in this browser");
+        };
+
         P.ls_get = function() {
+                ensureLocalStorage();
                 return DlJSON.decode(localStorage.getItem(".ymacs") || "{}", true);
         };
 
         P.ls_set = function(src) {
+                ensureLocalStorage();
                 localStorage.setItem(".ymacs", DlJSON.encode(src));
         };
 
