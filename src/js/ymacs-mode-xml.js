@@ -225,7 +225,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "C-c /"  : "xml_close_tag",
-                "S-TAB"  : "xml_zend_expand",
+                "S-TAB"  : "xml_zen_expand",
                 "ENTER"  : "newline_and_indent"
         };
 
@@ -336,7 +336,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                         this.cmd("indent_line");
                 }),
 
-                xml_zend_expand: Ymacs_Interactive(function() {
+                xml_zen_expand: Ymacs_Interactive(function() {
                         var html = String.buffer(),
                             start = this.cmd("save_excursion", function() {
                                     this.cmd("backward_whitespace");
