@@ -443,6 +443,10 @@ Ymacs_Buffer.newCommands({
                 return this.cmd("goto_char", pos);
         }),
 
+        delete_region: Ymacs_Interactive("r", function(begin, end){
+                this._deleteText(begin, end);
+        }),
+
         insert: Ymacs_Interactive("sInsert text: ", function(){
                 return this._insertText(Array.$(arguments).join(""));
         }),

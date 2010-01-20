@@ -225,6 +225,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
                 "C-c /"  : "xml_close_tag",
+                "S-TAB"  : "xml_zend_expand",
                 "ENTER"  : "newline_and_indent"
         };
 
@@ -245,11 +246,119 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
 });
 
-Ymacs_Buffer.newCommands({
+(function(){
 
-        xml_close_tag: Ymacs_Interactive(function() {
-                this.cmd("close_last_xml_tag");
-                this.cmd("indent_line");
-        })
+        var MODE_TYPE = 1, MODE_CLASS = 2, MODE_ID = 3, MODE_REPEAT = 4;
 
-});
+        function zen_render(el, html) {
+                var n = el.repeat || 1;
+                for (var i = 1; i <= n; ++i) {
+                        if (i > 1)
+                                html("\n");
+                        html("<", el.type);
+                        if (el.id) {
+                                html(' id="', el.id.replace(/\$/g, i), '"');
+                        }
+                        if (el.klass) {
+                                html(' class="', el.klass.replace(/\$/g, i), '"');
+                        }
+                        html(">");
+                        if (el.child) {
+                                html("\n");
+                                zen_render(el.child, html);
+                                html("\n");
+                        }
+                        html("</", el.type, ">");
+                        if (el.next) {
+                                html("\n");
+                                zen_render(el.next, html);
+                        }
+                }
+        };
+
+        function zen_parse(str) {
+                var el = { type: "" }, mode = MODE_TYPE;
+                OUTER: for (var i = 0; i < str.length; ++i) {
+                        var ch = str.charAt(i);
+                        switch (ch) {
+
+                            case "#":
+                                mode = MODE_ID;
+                                el.id = "";
+                                break;
+
+                            case ".":
+                                mode = MODE_CLASS;
+                                if (el.klass != null) {
+                                        el.klass += " ";
+                                } else {
+                                        el.klass = "";
+                                }
+                                break;
+
+                            case "*":
+                                mode = MODE_REPEAT;
+                                el.repeat = "";
+                                break;
+
+                            case ">":
+                                el.child = zen_parse(str.substr(i + 1));
+                                break OUTER;
+
+                            case "+":
+                                el.next = zen_parse(str.substr(i + 1));
+                                break OUTER;
+
+                            default:
+                                switch (mode) {
+                                    case MODE_TYPE:
+                                        el.type += ch;
+                                        break;
+                                    case MODE_CLASS:
+                                        el.klass += ch;
+                                        break;
+                                    case MODE_ID:
+                                        el.id += ch;
+                                        break;
+                                    case MODE_REPEAT:
+                                        el.repeat = parseInt(String(el.repeat) + ch, 10);
+                                        break;
+                                }
+                        }
+                }
+                return el;
+        };
+
+        Ymacs_Buffer.newCommands({
+
+                xml_close_tag: Ymacs_Interactive(function() {
+                        this.cmd("close_last_xml_tag");
+                        this.cmd("indent_line");
+                }),
+
+                xml_zend_expand: Ymacs_Interactive(function() {
+                        var html = String.buffer(),
+                            start = this.cmd("save_excursion", function() {
+                                    this.cmd("backward_whitespace");
+                                    while (this.point() > 0 && !this.cmd("looking_back", /[ \n;&]/))
+                                            this.cmd("backward_char");
+                                    return this.point();
+                            });
+                        try {
+                                zen_render(
+                                        zen_parse(
+                                                this.cmd("buffer_substring", start, this.point()).trim()
+                                        ),
+                                        html
+                                );
+                        } catch(ex) {
+                                throw new Ymacs_Exception("The Zen is not strong today :-/");
+                        }
+                        this.cmd("delete_region", start, this.point());
+                        this.cmd("insert", html.get());
+                        this.cmd("indent_region", start, this.point());
+                })
+
+        });
+
+})();

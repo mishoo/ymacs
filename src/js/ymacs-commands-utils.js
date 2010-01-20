@@ -117,6 +117,10 @@ Ymacs_Buffer.newCommands({
                 this.cmd("eval_string", this.cmd("buffer_substring", begin, end));
         }),
 
+        eval_buffer: Ymacs_Interactive(function(){
+                this.cmd("eval_string", this.getCode());
+        }),
+
         toggle_line_numbers: Ymacs_Interactive("^", function(){
                 this.whenActiveFrame("toggleLineNumbers");
         }),
