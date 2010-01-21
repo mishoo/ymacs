@@ -248,7 +248,15 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
 (function(){
 
-        var MODE_TYPE = 1, MODE_CLASS = 2, MODE_ID = 3, MODE_REPEAT = 4;
+        DEFINE_SINGLETON("Ymacs_Keymap_XML_Zen", Ymacs_Keymap, function(D, P){
+                D.KEYS = {
+                        "C-."   : "xml_zen_next_poi",
+                        "C-,"   : "xml_zen_prev_poi",
+                        "C-g"   : "xml_zen_stop"
+                };
+        });
+
+        var MODE_TYPE = 1, MODE_CLASS = 2, MODE_ID = 3, MODE_REPEAT = 4, MODE_ATTR = 5;
 
         function zen_render(el, html) {
                 var n = el.repeat || 1;
@@ -262,11 +270,18 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                         if (el.klass) {
                                 html(' class="', el.klass.replace(/\$/g, i), '"');
                         }
+                        if (el.attributes) {
+                                el.attributes.foreach(function(attr){
+                                        html(" ", attr, '="|"');
+                                });
+                        }
                         html(">");
                         if (el.child) {
                                 html("\n");
                                 zen_render(el.child, html);
                                 html("\n");
+                        } else {
+                                html("|");
                         }
                         html("</", el.type, ">");
                         if (el.next) {
@@ -276,10 +291,10 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                 }
         };
 
-        function zen_parse(str) {
+        function zen_parse(str, i) {
                 var el = { type: "" }, mode = MODE_TYPE;
-                OUTER: for (var i = 0; i < str.length; ++i) {
-                        var ch = str.charAt(i);
+                OUTER: while (i < str.length) {
+                        var ch = str.charAt(i++);
                         switch (ch) {
 
                             case "#":
@@ -296,17 +311,24 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                                 }
                                 break;
 
+                            case ":":
+                                mode = MODE_ATTR;
+                                if (el.attributes == null)
+                                        el.attributes = [];
+                                el.attributes.push("");
+                                break;
+
                             case "*":
                                 mode = MODE_REPEAT;
                                 el.repeat = "";
                                 break;
 
                             case ">":
-                                el.child = zen_parse(str.substr(i + 1));
+                                el.child = zen_parse(str, i);
                                 break OUTER;
 
                             case "+":
-                                el.next = zen_parse(str.substr(i + 1));
+                                el.next = zen_parse(str, i);
                                 break OUTER;
 
                             default:
@@ -323,6 +345,9 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                                     case MODE_REPEAT:
                                         el.repeat = parseInt(String(el.repeat) + ch, 10);
                                         break;
+                                    case MODE_ATTR:
+                                        el.attributes.push(el.attributes.pop() + ch);
+                                        break;
                                 }
                         }
                 }
@@ -337,26 +362,82 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                 }),
 
                 xml_zen_expand: Ymacs_Interactive(function() {
+                        this.cmd("xml_zen_stop");
                         var html = String.buffer(),
                             start = this.cmd("save_excursion", function() {
                                     this.cmd("backward_whitespace");
-                                    while (this.point() > 0 && !this.cmd("looking_back", /[ \n;&]/))
-                                            this.cmd("backward_char");
+                                    while (!this.cmd("looking_back", /[\x20\xa0\s\t\n;&]/))
+                                            if (!this.cmd("backward_char"))
+                                                    break;
                                     return this.point();
-                            });
+                            }),
+                            point = this.point();
                         try {
                                 zen_render(
                                         zen_parse(
-                                                this.cmd("buffer_substring", start, this.point()).trim()
+                                                this.cmd("buffer_substring", start, point).trim(), 0
                                         ),
                                         html
                                 );
                         } catch(ex) {
                                 throw new Ymacs_Exception("The Zen is not strong today :-/");
                         }
-                        this.cmd("delete_region", start, this.point());
-                        this.cmd("insert", html.get());
+                        html = html.get();
+                        this.cmd("delete_region", start, point);
+                        this.cmd("insert", html);
+                        start = this.createMarker(start);
                         this.cmd("indent_region", start, this.point());
+
+                        // locate points of interest
+                        var end = this.createMarker(), markers = [];
+                        this.cmd("goto_char", start.getPosition());
+                        while (this.cmd("search_forward", "|", end.getPosition())) {
+                                this.cmd("backward_delete_char");
+                                markers.push(this.createMarker());
+                        }
+                        var count = markers.length;
+                        if (count > 0) {
+                                // move to first POI
+                                this.cmd("goto_char", markers[0]);
+                                if (count > 1) {
+                                        // if there are more, enter "poi" mode
+                                        this.setq("xml_zen_markers", markers);
+                                        this.pushKeymap(Ymacs_Keymap_XML_Zen());
+                                }
+                        }
+
+                        // start/end markers no longer needed
+                        start.destroy();
+                        end.destroy();
+                }),
+
+                xml_zen_stop: Ymacs_Interactive(function(){
+                        var tmp = this.getq("xml_zen_markers");
+                        if (tmp) {
+                                tmp.map("destroy");
+                                this.setq("xml_zen_markers", null);
+                        }
+                        this.popKeymap(Ymacs_Keymap_XML_Zen());
+                }),
+
+                xml_zen_next_poi: Ymacs_Interactive(function(){
+                        var markers = this.getq("xml_zen_markers"), pos = this.point();
+                        markers.foreach(function(m){
+                                if (m.getPosition() > pos) {
+                                        this.cmd("goto_char", m.getPosition());
+                                        $BREAK();
+                                }
+                        }, this);
+                }),
+
+                xml_zen_prev_poi: Ymacs_Interactive(function(){
+                        var markers = this.getq("xml_zen_markers"), pos = this.point();
+                        markers.r_foreach(function(m){
+                                if (m.getPosition() < pos) {
+                                        this.cmd("goto_char", m.getPosition());
+                                        $BREAK();
+                                }
+                        }, this);
                 })
 
         });

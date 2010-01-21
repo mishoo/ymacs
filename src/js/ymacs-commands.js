@@ -259,20 +259,20 @@ Ymacs_Buffer.newCommands({
                 return m && m.after == this.point();
         },
 
-        search_forward: Ymacs_Interactive("sSearch: ", function(str) {
+        search_forward: Ymacs_Interactive("sSearch: ", function(str, bound) {
                 var code = this.getCode(), point = this.point();
                 if (this.getq("case_fold_search")) {
                         code = code.toLowerCase();
                         str = str.toLowerCase();
                 }
                 var pos = code.indexOf(str, point);
-                if (pos >= 0) {
+                if (pos >= 0 && (bound == null || pos <= bound)) {
                         this.cmd("goto_char", pos + str.length);
                         return true;
                 }
         }),
 
-        search_backward: Ymacs_Interactive("sSearch backward: ", function(str) {
+        search_backward: Ymacs_Interactive("sSearch backward: ", function(str, bound) {
                 var code = this.getCode(), point = this.point();
                 if (this.getq("case_fold_search")) {
                         code = code.toLowerCase();
@@ -281,7 +281,7 @@ Ymacs_Buffer.newCommands({
                 var pos = code.lastIndexOf(str, point);
                 if (pos == point)
                         pos = code.lastIndexOf(str, point - 1);
-                if (pos >= 0 && pos != point) {
+                if (pos >= 0 && pos != point && (bound == null || pos >= bound)) {
                         this.cmd("goto_char", pos);
                         return true;
                 }

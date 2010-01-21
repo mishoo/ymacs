@@ -440,7 +440,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
                 this.preventUpdates();
                 try {
-                        this.callHooks("beforeInteractiveCommand");
+                        this.callHooks("beforeInteractiveCommand", func.ymacsCommand, func);
                         if (!func.ymacsMarkExtend)
                                 this.clearTransientMark();
                         if (func.ymacsCallInteractively && !finalArgs) {
@@ -456,7 +456,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         }
                 } finally {
                         this.resumeUpdates();
-                        this.callHooks("afterInteractiveCommand");
+                        this.callHooks("afterInteractiveCommand", func.ymacsCommand, func);
                         this.previousCommand = cmd;
                         this.sameCommandCount(+1);
                         this.whenActiveFrame("ensureCaretVisible");
