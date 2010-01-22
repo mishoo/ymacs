@@ -156,7 +156,7 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
 
         var clearOvl = function() {
                 this.deleteOverlay("match-paren");
-        }.clearingTimeout(1000, this);
+        }.clearingTimeout(500, this);
 
         var events = {
                 beforeInteractiveCommand: function() {
@@ -165,16 +165,10 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
                 afterInteractiveCommand: function() {
                         var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                         if (p) {
-                                var parens = p.context.passedParens;
-                                parens.foreach(function(p){
+                                p.context.passedParens.foreach(function(p){
                                         var match = p.closed;
-                                        if (p.line == rc.row && p.col == rc.col) {
-                                                this.setOverlay("match-paren", {
-                                                        line1: p.line, line2: match.line,
-                                                        col1: p.col, col2: match.col + 1
-                                                });
-                                                clearOvl();
-                                        } else if (match.line == rc.row && match.col == rc.col - 1) {
+                                        if ((p.line == rc.row && p.col == rc.col) ||
+                                            (match.line == rc.row && match.col == rc.col - 1)) {
                                                 this.setOverlay("match-paren", {
                                                         line1: p.line, line2: match.line,
                                                         col1: p.col, col2: match.col + 1
@@ -183,7 +177,7 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
                                         }
                                 }, this);
                         }
-                }.clearingTimeout(250)
+                }.clearingTimeout(100)
         };
         this.addEventListener(events);
 

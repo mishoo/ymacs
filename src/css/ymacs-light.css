@@ -1,9 +1,4 @@
-@import url("ymacs-syntax-light.css");
-
-.Ymacs-Theme-light .Ymacs_Frame {
-  background-color: #fed;
-  color: #000;
-}
+@import url("themes/emacs-standard.css");
 
 .Ymacs-Theme-light .Ymacs-caret {
   background-color: #888;

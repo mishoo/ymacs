@@ -1,0 +1,42 @@
+.Ymacs-Theme-light .Ymacs_Frame { color: #000000; background-color: #ffffff;}
+.Ymacs-Theme-light .Ymacs_Frame .type { color: #000080;}
+.Ymacs-Theme-light .Ymacs_Frame .builtin { color: #da70d6;}
+.Ymacs-Theme-light .Ymacs_Frame .function-name { color: #0000ff; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .variable-name { color: #8b5a2b;}
+.Ymacs-Theme-light .Ymacs_Frame .constant { color: #000080;}
+.Ymacs-Theme-light .Ymacs_Frame .string { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .string-starter { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .string-stopper { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .regexp { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .regexp-starter { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .regexp-stopper { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .regexp-modifier { color: #008b00;}
+.Ymacs-Theme-light .Ymacs_Frame .keyword { color: #a020f0; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .comment { color: #cd0000; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .mcomment { color: #cd0000; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .comment-starter { color: #cd0000;}
+.Ymacs-Theme-light .Ymacs_Frame .mcomment-starter { color: #cd0000;}
+.Ymacs-Theme-light .Ymacs_Frame .mcomment-stopper { color: #cd0000;}
+.Ymacs-Theme-light .Ymacs_Frame .number { color: #000080;}
+.Ymacs-Theme-light .Ymacs_Frame .operator {}
+.Ymacs-Theme-light .Ymacs_Frame .error { color: #ff0000; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-open-tag { color: #0000ff; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-close-tag { color: #0000ff; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-attribute { color: #8b5a2b;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-entity-starter { color: #000080;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-entity-stopper { color: #000080;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-entity { color: #000080;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-open-bracket {}
+.Ymacs-Theme-light .Ymacs_Frame .xml-close-bracket {}
+.Ymacs-Theme-light .Ymacs_Frame .xml-closetag-slash {}
+.Ymacs-Theme-light .Ymacs_Frame .xml-cdata { color: #cd0000; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-cdata-starter { color: #cd0000;}
+.Ymacs-Theme-light .Ymacs_Frame .xml-cdata-stopper { color: #cd0000;}
+.Ymacs-Theme-light .Ymacs_Frame .lisp-keyword { color: #a020f0; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-heading1 {}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-heading2 {}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-heading3 {}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-heading4 {}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-heading5 { color: #ff0000; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-heading6 { color: #cd0000; font-weight: bold;}
+.Ymacs-Theme-light .Ymacs_Frame .markdown-blockquote { color: #cd0000; font-weight: bold;}

@@ -41,6 +41,21 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             $inComment  = null,
             PARSER      = { next: next, copy: copy, indentation: indentation };
 
+        function copy() {
+                var _tags = $tags.slice(0),
+                    _cont = $cont.slice(0),
+                    _inTag = $inTag,
+                    _inComment = $inComment;
+                function resume() {
+                        $cont = _cont.slice(0);
+                        $tags = _tags.slice(0);
+                        $inTag = _inTag;
+                        $inComment = _inComment;
+                        return PARSER;
+                };
+                return resume;
+        };
+
         function INDENT_LEVEL() {
                 return stream.buffer.getq("indent_level");
         };
@@ -186,20 +201,6 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 }
         };
 
-        function copy() {
-                var _tags = $tags.slice(0),
-                    _cont = $cont.slice(0),
-                    _inTag = $inTag,
-                    _inComment = $inComment;
-                return function() {
-                        $cont = _cont.slice(0);
-                        $tags = _tags.slice(0);
-                        $inTag = _inTag;
-                        $inComment = _inComment;
-                        return PARSER;
-                };
-        };
-
         function indentation() {
                 var indent, lastTag;
                 if ($inComment) {
@@ -224,9 +225,9 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
-                "C-c /"  : "xml_close_tag",
-                "S-TAB"  : "xml_zen_expand",
-                "ENTER"  : "newline_and_indent"
+                "C-c /"   : "xml_close_tag",
+                "C-ENTER" : "xml_zen_expand",
+                "ENTER"   : "newline_and_indent"
         };
 
 });
@@ -250,8 +251,8 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
         DEFINE_SINGLETON("Ymacs_Keymap_XML_Zen", Ymacs_Keymap, function(D, P){
                 D.KEYS = {
-                        "C-."   : "xml_zen_next_poi",
-                        "C-,"   : "xml_zen_prev_poi",
+                        "TAB"   : "xml_zen_next_poi",
+                        "S-TAB" : "xml_zen_prev_poi",
                         "C-g"   : "xml_zen_stop"
                 };
         });
@@ -325,10 +326,20 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
                             case ">":
                                 el.child = zen_parse(str, i);
+                                i = el.child.i;
+                                break OUTER;
+
+                            case "(":
+                                el.child = zen_parse(str, i);
+                                i = el.child.i;
+                                break;
+
+                            case ")":
                                 break OUTER;
 
                             case "+":
                                 el.next = zen_parse(str, i);
+                                i = el.next.i;
                                 break OUTER;
 
                             default:
@@ -351,7 +362,20 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                                 }
                         }
                 }
+
+                el.i = i;
                 return el;
+        };
+
+        function maybe_stop_zen() {
+                var point = this.point(),
+                    a = this.getq("xml_zen_markers"),
+                    start = a[0],
+                    end = a.peek();
+                if (point < start.getPosition() || point > end.getPosition() ||
+                    end.getPosition() == a.peek(1).getPosition()) {
+                        this.cmd("xml_zen_stop");
+                }
         };
 
         Ymacs_Buffer.newCommands({
@@ -372,6 +396,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                                     return this.point();
                             }),
                             point = this.point();
+
                         try {
                                 zen_render(
                                         zen_parse(
@@ -382,33 +407,36 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                         } catch(ex) {
                                 throw new Ymacs_Exception("The Zen is not strong today :-/");
                         }
+
                         html = html.get();
                         this.cmd("delete_region", start, point);
                         this.cmd("insert", html);
-                        start = this.createMarker(start);
-                        this.cmd("indent_region", start, this.point());
+                        start = this.createMarker(start, false, "xml_zen");
 
                         // locate points of interest
-                        var end = this.createMarker(), markers = [];
+                        var end = this.createMarker(this.point(), true, "xml_zen"), markers = [];
                         this.cmd("goto_char", start.getPosition());
                         while (this.cmd("search_forward", "|", end.getPosition())) {
                                 this.cmd("backward_delete_char");
-                                markers.push(this.createMarker());
+                                markers.push(this.createMarker(this.point(), true, "xml_zen_start"));
+                                markers.push(this.createMarker(this.point(), false, "xml_zen_end"));
                         }
+
+                        this.cmd("indent_region", start.getPosition(), end.getPosition());
+
                         var count = markers.length;
                         if (count > 0) {
                                 // move to first POI
                                 this.cmd("goto_char", markers[0]);
-                                if (count > 1) {
-                                        // if there are more, enter "poi" mode
-                                        this.setq("xml_zen_markers", markers);
-                                        this.pushKeymap(Ymacs_Keymap_XML_Zen());
-                                }
+                                markers.unshift(start);
+                                markers.push(end);
+                                this.setq("xml_zen_markers", markers);
+                                this.pushKeymap(Ymacs_Keymap_XML_Zen());
+                                this.addEventListener("afterInteractiveCommand", maybe_stop_zen);
+                        } else {
+                                start.destroy();
+                                end.destroy();
                         }
-
-                        // start/end markers no longer needed
-                        start.destroy();
-                        end.destroy();
                 }),
 
                 xml_zen_stop: Ymacs_Interactive(function(){
@@ -418,6 +446,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                                 this.setq("xml_zen_markers", null);
                         }
                         this.popKeymap(Ymacs_Keymap_XML_Zen());
+                        this.removeEventListener("afterInteractiveCommand", maybe_stop_zen);
                 }),
 
                 xml_zen_next_poi: Ymacs_Interactive(function(){

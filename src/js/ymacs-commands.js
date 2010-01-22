@@ -239,6 +239,7 @@ Ymacs_Buffer.newCommands({
                                 if (!this.cmd("forward_line"))
                                         break;
                         };
+                        m.destroy();
                 });
         }),
 

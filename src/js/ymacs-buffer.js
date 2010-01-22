@@ -621,7 +621,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P.ensureTransientMark = function() {
                 var rc = this._rowcol, tm;
                 if (!this.transientMarker) {
-                        this.transientMarker = this.createMarker(this.point());
+                        this.transientMarker = this.createMarker();
                         this.markMarker.setPosition(this.point());
                         tm = rc;
                 }
@@ -930,18 +930,17 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         P._updateMarkers = function(offset, delta, min) {
                 this.__size = null;
                 this.__code = null;
-                if (this.__undoInProgress == 0) {
+                // if (this.__undoInProgress == 0) {
                         this.markers.map("editorChange", offset, delta, min || 0);
-                }
+                // }
                 if (this.tokenizer) {
                         this.tokenizer.quickUpdate(Math.min(offset, offset + delta));
                 }
         };
 
         P._saveExcursion = function(cont) {
-                var tmp = this.createMarker(this.point());
+                var tmp = this.createMarker();
                 ++this.__savingExcursion;
-                var ret;
                 try {
                         return cont.call(this);
                 } finally {

@@ -75,17 +75,20 @@
         // XXX: much of the parser is actually copied from ymacs-mode-js.js.  I should somehow unify
         // the duplicate code.
 
-        var SPECIAL_FORMS = "defmacro defun defclass defmethod defgeneric defpackage in-package defreadtable in-readtable \
+        var SPECIAL_FORMS = "\
+deftype defstruct defclass \
+defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond \
 lambda let load-time-value quote macrolet \
 progn prog1 prog2 progv go flet the \
 if throw eval-when multiple-value-prog1 unwind-protect let* \
+ignore-errors handler-case case \
 labels function symbol-macrolet block tagbody catch locally \
-return-from setq multiple-value-call".qw().toHash(true);
+return return-from setq multiple-value-call".qw().toHash();
 
-        var COMMON_MACROS = "loop do while".qw().toHash(true);
+        var COMMON_MACROS = "loop do while".qw().toHash();
 
-        var CONSTANTS = "t nil".qw().toHash(true);
+        var CONSTANTS = "t nil".qw().toHash();
 
         var OPEN_PAREN = {
                 "(" : ")",
@@ -98,6 +101,10 @@ return-from setq multiple-value-call".qw().toHash(true);
                 "}" : "{",
                 "]" : "["
         };
+
+        var DEFINES_FUNCTION = "defun defgeneric defmethod".qw().toHash();
+
+        var DEFINES_TYPE = "deftype defclass defstruct".qw().toHash();
 
         var FORM_ARGS = {
                 "if"         : "3+",
@@ -235,7 +242,7 @@ return-from setq multiple-value-call".qw().toHash(true);
                                 f = f.toLowerCase();
                                 if (form == null)
                                         return f;
-                                return f == form;
+                                return typeof form == "string" ? f == form : f in form;
                         }
                 };
 
@@ -299,8 +306,11 @@ return-from setq multiple-value-call".qw().toHash(true);
                                         : null;
                                 if (!type) {
                                         // perhaps function name?
-                                        if (isForm("defun") && $list.length == 1) {
+                                        if (isForm(DEFINES_FUNCTION) && $list.length == 1) {
                                                 type = "function-name";
+                                        }
+                                        else if (isForm(DEFINES_TYPE) && $list.length == 1) {
+                                                type = "type";
                                         }
                                         // there are a lot of macros starting with "with-", so let's highlight this
                                         else if (/^with-/i.test(tmp.id)) {

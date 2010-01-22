@@ -162,6 +162,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-u"                                     : "universal_argument",
                 "M-g"                                     : "goto_line",
                 "C-x h"                                   : "mark_whole_buffer",
+                "C-g"                                     : Function.noop, // do nothing, still required so that we catch the binding.
 
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
@@ -193,6 +194,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-ENTER"                                 : "start_next_paragraph",
                 "M-S-q"                                   : "fill_paragraph_no_prefix",
                 "C-M-|"                                   : "cperl_lineup",
+                "C-F4"                                    : "kill_buffer",
 
                 // others
                 "C-x =": function() {
