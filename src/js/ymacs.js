@@ -67,9 +67,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 this.killMasterOfRings = [];
                 this.progress = {};
 
-                /* -----[ closures ]----- */
-                this.updateModelineWithTimer = this.updateModeline.clearingTimeout(0, this);
-
                 /* -----[ minibuffer ]----- */
                 this.minibuffer = this.createBuffer({ hidden: true, isMinibuffer: true });
                 this.minibuffer.cmd("minibuffer_mode");
@@ -81,10 +78,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                         className            : "Ymacs_Minibuffer"
                 });
 
-                /* -----[ mode line ]----- */
-                this.modeline = new DlContainer({ className: "Ymacs_Modeline" });
-                this.modeline.setContent("--Ymacs--");
-
                 /* -----[ main content ]----- */
                 if (this.buffers.length == 0)
                         this.createBuffer();
@@ -93,12 +86,11 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 var frame = this.createFrame({ parent: topCont, buffer: this.buffers[0] });
 
                 this.packWidget(this.minibuffer_frame, { pos: "bottom" });
-                this.packWidget(this.modeline, { pos: "bottom" });
                 this.packWidget(topCont, { pos: "top", fill: "*" });
 
-                this.__activeFrameEvents = {
-                        onPointChange: this._on_activeFramePointChange.$(this)
-                };
+                // this.__activeFrameEvents = {
+                //         // onPointChange: this._on_activeFramePointChange.$(this)
+                // };
 
                 this.setActiveFrame(frame);
                 frame._redrawCaret();
@@ -156,7 +148,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         P.renameBuffer = function(buf, name) {
                 buf = this.getBuffer(buf);
                 buf.name = name;
-                this.updateModelineWithTimer();
         };
 
         P._do_switchToBuffer = function(buf) {
@@ -265,16 +256,15 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
         P.setActiveFrame = function(frame, nofocus) {
                 var old = this.getActiveFrame();
-                if (old)
-                        old.removeEventListener(this.__activeFrameEvents);
+                // if (old)
+                //         old.removeEventListener(this.__activeFrameEvents);
                 if (!frame.isMinibuffer) {
                         this.frames.remove(frame);
                         this.frames.push(frame);
                 } else {
                         this.frames.unshift(this.frames.pop());
                 }
-                this.updateModelineWithTimer();
-                frame.addEventListener(this.__activeFrameEvents);
+                // frame.addEventListener(this.__activeFrameEvents);
                 if (!nofocus)
                         frame.focus();
         };
@@ -286,30 +276,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         P.getActiveBuffer = function() {
                 var frame = this.getActiveFrame();
                 return frame ? frame.buffer : this.buffers.peek();
-        };
-
-        P.updateProgress = function(name, val) {
-                if (val == null)
-                        delete this.progress[name];
-                else
-                        this.progress[name] = val;
-                this.updateModelineWithTimer();
-        };
-
-        P.updateModeline = function() {
-                var buffer = this.getActiveBuffer();
-                if (this.modeline && buffer !== this.minibuffer) {
-                        var rc = buffer._rowcol;
-                        var ml = String.buffer("-- <b>", buffer.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
-                        var pr = [];
-                        for (var i in this.progress) {
-                                pr.push(i + ": " + this.progress[i]);
-                        }
-                        if (pr.length > 0) {
-                                ml("[", pr.join(", "), "]");
-                        }
-                        this.modeline.setContent(ml.get());
-                }
         };
 
         P.setColorTheme = function(themeId) {
@@ -370,12 +336,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                         this.ls_set(store);
                 }
                 return { store: store, dir: dir, path: path, other: other };
-        };
-
-        /* -----[ listeners ]----- */
-
-        P._on_activeFramePointChange = function() {
-                this.updateModelineWithTimer();
         };
 
 });

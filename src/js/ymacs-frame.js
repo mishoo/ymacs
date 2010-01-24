@@ -51,15 +51,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 ymacs                : [ "ymacs"                , null ],
                 isMinibuffer         : [ "isMinibuffer"         , false ],
 
-                // override in DlContainer
-                _scrollBars          : [ "scroll"               , true ],
-
                 // override in DlWidget
                 _focusable           : [ "focusable"            , true ],
                 _fillParent          : [ "fillParent"           , true ]
         };
 
         D.CONSTRUCT = function() {
+                this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
                 this.__blinkCaret = this.__blinkCaret.$(this);
                 this.__caretId = Dynarch.ID();
                 this._bufferEvents = {
@@ -69,6 +67,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onPointChange            : this._on_bufferPointChange.$(this),
                         onResetCode              : this._on_bufferResetCode.$(this),
                         onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
+                        onProgressChange         : this._on_bufferProgressChange.$(this),
                         beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this)
                 };
                 this._moreBufferEvents = {
@@ -84,9 +83,16 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.toggleLineNumbers();
         };
 
+        var HTML = String.buffer(
+                "<div class='Ymacs-frame-overlays'>",
+                "<div class='Ymacs-frame-content'></div>",
+                "</div>",
+                "<div class='Ymacs_Modeline'></div>"
+        ).get();
+
         P.initDOM = function() {
                 D.BASE.initDOM.apply(this, arguments);
-                this.getElement().innerHTML = "<div class='Ymacs-frame-content'></div>";
+                this.getElement().innerHTML = HTML;
                 this.addEventListener({
                         onDestroy   : this._on_destroy,
                         onFocus     : this._on_focus,
@@ -127,8 +133,16 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 D.BASE.blur.call(this);
         };
 
-        P.getContentElement = function() {
+        P.getOverlaysContainer = function() {
                 return this.getElement().firstChild;
+        };
+
+        P.getModelineElement = function() {
+                return this.getElement().childNodes[1];
+        };
+
+        P.getContentElement = function() {
+                return this.getElement().firstChild.firstChild;
         };
 
         P.getCaretElement = function() {
@@ -145,7 +159,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 var caret = this.getCaretElement();
                 if (!caret)
                         return;
-                var div = this.getElement(), line = this.getLineDivElement(this.buffer._rowcol.row);
+                var div = this.getOverlaysContainer(), line = this.getLineDivElement(this.buffer._rowcol.row);
 
                 // vertical
                 var diff = line.offsetTop + line.offsetHeight - (div.scrollTop + div.clientHeight);
@@ -202,9 +216,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.centerOnLine = function(row) {
-                var line = this.getLineDivElement(row), div = this.getElement();
+                var line = this.getLineDivElement(row), div = this.getOverlaysContainer();
                 div.scrollTop = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
                 // this._redrawBuffer();
+        };
+
+        P.setModelineContent = function(html) {
+                this.getModelineElement().innerHTML = html;
         };
 
         P.deleteOtherFrames = function() {
@@ -370,6 +388,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.__restartBlinking();
 
                 this.callHooks("onPointChange", rc.row, rc.col);
+                this.redrawModelineWithTimer(rc);
         };
 
         P._getLineHTML = function(row) {
@@ -432,7 +451,17 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.heightInLines = function() {
-                return Math.floor(this.getElement().clientHeight / this.getCaretElement().offsetHeight);
+                return Math.floor(this.getOverlaysContainer().clientHeight / this.getCaretElement().offsetHeight);
+        };
+
+        P.setOuterSize = P.setSize = function(sz) {
+                DOM.setOuterSize(this.getOverlaysContainer(), sz.x, sz.y - this.getModelineElement().offsetHeight);
+        };
+
+        P.redrawModeline = function(rc) {
+                if (!rc)
+                        rc = this.buffer._positionToRowCol(this.caretMarker.getPosition());
+                this.setModelineContent(this.buffer.renderModelineContent(rc));
         };
 
         /* -----[ event handlers ]----- */
@@ -486,6 +515,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 Ymacs_Message_Popup.clearAll();
         };
 
+        P._on_bufferProgressChange = function() {
+                this.redrawModelineWithTimer(null);
+        };
+
         P.getOverlayId = function(name) {
                 return this.id + "-ovl-" + name;
         };
@@ -517,7 +550,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.getOverlaysCount = function() {
-                return this.getElement().childNodes.length - 1; // XXX: subtract the div.content; we need to revisit this if we add new elements.
+                return this.getOverlaysContainer().childNodes.length - 1; // XXX: subtract the div.content; we need to revisit this if we add new elements.
         };
 
         P._on_bufferOverlayChange = function(name, props, isNew) {
@@ -527,7 +560,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 var div = this.getOverlayHTML(name, props);
                 if (div) {
                         div = DOM.createFromHtml(div);
-                        this.getElement().appendChild(div);
+                        this.getOverlaysContainer().appendChild(div);
                         this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
                 }
         };

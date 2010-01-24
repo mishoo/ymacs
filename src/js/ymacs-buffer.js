@@ -48,6 +48,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "beforeInteractiveCommand",
                 "afterInteractiveCommand",
                 "finishedEvent",
+                "onProgressChange",
                 "onTextInsert",
                 "onTextDelete"
         ];
@@ -208,6 +209,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.previousCommand = null;
                 this.currentCommand = null;
                 this.currentKeys = [];
+                this.progress = {};
 
                 this.variables = {};
                 this.globalVariables = GLOBAL_VARS;
@@ -678,6 +680,26 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P.setPrefixArg = function(val) {
                 return this.setq("universal_prefix", val);
+        };
+
+        P.updateProgress = function(name, val) {
+                if (val == null)
+                        delete this.progress[name];
+                else
+                        this.progress[name] = val;
+                this.callHooks("onProgressChange");
+        };
+
+        P.renderModelineContent = function(rc) {
+                var ml = String.buffer("-- <b>", this.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
+                var pr = [];
+                for (var i in this.progress) {
+                        pr.push(i + ": " + this.progress[i]);
+                }
+                if (pr.length > 0) {
+                        ml("[", pr.join(", "), "]");
+                }
+                return ml.get();
         };
 
         /* -----[ not-so-public API ]----- */

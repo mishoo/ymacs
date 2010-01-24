@@ -207,7 +207,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 if (p != null) {
                         p = Math.round(p / this.stream.length() * 100) + "%";
                 }
-                this.buffer.whenYmacs("updateProgress", "Syntax highlighting", p);
+                this.buffer.updateProgress("Syntax highlighting", p);
         };
 
         P._do_quickUpdate = function(row) {
@@ -234,7 +234,6 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                                 a[s.line] = p.copy();
                                                 s.nextLine();
                                                 if  (--n == 0) {
-                                                        // this.buffer.whenActiveFrame("centerOnLine", s.line);
                                                         this.buffer.resumeUpdates();
                                                         this.timerUpdate = setTimeout(doit, first ? 500 : 50);
                                                         first = false;
