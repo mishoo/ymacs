@@ -1,0 +1,45 @@
+.Ymacs-Theme-gtk-ide .Ymacs_Frame { color: #000000; background-color: #ffffff; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .type { color: #36648b; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .builtin { color: #228b22; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .function-name { color: #6a5acd; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .variable-name { color: #b8860b; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .constant { color: #6b8e23; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .string { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .string-starter { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .string-stopper { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .regexp { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .regexp-starter { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .regexp-stopper { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .regexp-modifier { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .keyword { color: #00008b; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .comment { color: #8c8c8c; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .mcomment { color: #8c8c8c; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .comment-starter { color: #8c8c8c; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .mcomment-starter { color: #8c8c8c; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .mcomment-stopper { color: #8c8c8c; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .number { color: #6b8e23; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .operator { }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .error { color: #d02090; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-open-tag { color: #6a5acd; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-close-tag { color: #6a5acd; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-attribute { color: #b8860b; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-entity-starter { color: #6b8e23; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-entity-stopper { color: #6b8e23; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-entity { color: #6b8e23; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-open-bracket { }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-close-bracket { }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-closetag-slash { }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-cdata { color: #8c8c8c; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-cdata-starter { color: #8c8c8c; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .xml-cdata-stopper { color: #8c8c8c; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .lisp-keyword { color: #6b8e23; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-heading1 { font-size: 1.717em; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-heading2 { font-size: 1.400em; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-heading3 { font-size: 1.175em; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-heading4 { font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-heading5 { font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-heading6 { font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-blockquote { color: #8c8c8c; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-blockquote1 { color: #8c8c8c; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-blockquote2 { color: #8c8c8c; font-weight: bold; }
+.Ymacs-Theme-gtk-ide .Ymacs_Frame .markdown-blockquote3 { color: #8c8c8c; font-weight: bold; }

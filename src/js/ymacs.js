@@ -314,7 +314,11 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
 
         P.setColorTheme = function(themeId) {
                 this.delClass(/Ymacs-Theme-[^\s]*/g);
-                this.addClass("Ymacs-Theme-" + themeId);
+                if (!(themeId instanceof Array))
+                        themeId = [ themeId ];
+                themeId.foreach(function(themeId){
+                        this.addClass("Ymacs-Theme-" + themeId);
+                }, this);
         };
 
         /* -----[ local storage ]----- */

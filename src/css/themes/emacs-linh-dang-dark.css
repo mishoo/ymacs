@@ -1,0 +1,45 @@
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame { color: #ffffff; background-color: #000000; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .type { color: #98fb98; font-weight: bold; font-size: 0.908em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .builtin { color: #4682b4; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .function-name { color: #87cefa; font-weight: bold; font-size: 0.908em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .variable-name { color: #7fffd4; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .constant { color: #ffd700; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .string { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .string-starter { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .string-stopper { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .regexp { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .regexp-starter { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .regexp-stopper { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .regexp-modifier { color: #deb887; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .keyword { color: #87cefa; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .comment { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .mcomment { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .comment-starter { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .mcomment-starter { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .mcomment-stopper { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .number { color: #ffd700; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .operator { }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .error { color: #d2691e; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-open-tag { color: #87cefa; font-weight: bold; font-size: 0.908em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-close-tag { color: #87cefa; font-weight: bold; font-size: 0.908em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-attribute { color: #7fffd4; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-entity-starter { color: #ffd700; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-entity-stopper { color: #ffd700; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-entity { color: #ffd700; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-open-bracket { }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-close-bracket { }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-closetag-slash { }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-cdata { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-cdata-starter { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .xml-cdata-stopper { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .lisp-keyword { color: #ffd700; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-heading1 { font-weight: bold; font-size: 2.050em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-heading2 { font-weight: bold; font-size: 2.050em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-heading3 { font-weight: bold; font-size: 1.508em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-heading4 { font-weight: bold; font-size: 1.925em; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-heading5 { color: #8b0000; font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-heading6 { font-weight: bold; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-blockquote { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-blockquote1 { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-blockquote2 { color: #cdc0b0; }
+.Ymacs-Theme-linh-dang-dark .Ymacs_Frame .markdown-blockquote3 { color: #cdc0b0; }

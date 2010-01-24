@@ -138,7 +138,8 @@ to the current one.\n\
         var layout = new DlLayout({ parent: dlg });
 
         var empty = new Ymacs_Buffer({ name: "empty" });
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ], className: "Ymacs-Theme-dark" });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ] });
+        ymacs.setColorTheme([ "dark", "y" ]);
 
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
@@ -147,6 +148,7 @@ to the current one.\n\
 
         var files = [
                 "ymacs.js",
+                "ymacs-keyboard.js",
                 "ymacs-regexp.js",
                 "ymacs-frame.js",
                 "ymacs-textprop.js",
@@ -212,13 +214,36 @@ to the current one.\n\
         item.setMenu(submenu);
 
         [
-                "dark|Dark background",
-                "light|Light background"
-
+                "dark|y|Dark background (default)",
+                "dark|billw|>Billw",
+                "dark|charcoal-black|>Charcoal black",
+                "dark|clarity-and-beauty|>Clarity and beauty",
+                "dark|classic|>Classic",
+                "dark|gnome2|>Gnome 2",
+                "dark|calm-forest|>Calm forest",
+                "dark|linh-dang-dark|>Linh Dang Dark",
+                "dark|blue-mood|>Blue mood",
+                "dark|standard-dark|>Emacs standard (dark)",
+                null,
+                "light|y|Light background (default)",
+                "light|andreas|>Andreas",
+                "light|bharadwaj|>Bharadwaj",
+                "light|gtk-ide|>GTK IDE",
+                "light|high-contrast|>High contrast",
+                "light|scintilla|>Scintilla",
+                "light|standard-xemacs|>Standard XEmacs",
+                "light|vim-colors|>Vim colors",
+                "light|standard|>Emacs standard (light)"
         ].foreach(function(theme){
-                theme = theme.split(/\|/);
-                var item = new DlMenuItem({ parent: submenu, label: theme[1] });
-                item.addEventListener("onSelect", ymacs.setColorTheme.$(ymacs, theme[0]));
+                if (theme == null) {
+                        submenu.addSeparator();
+                } else {
+                        theme = theme.split(/\s*\|\s*/);
+                        var label = theme.pop();
+                        label = label.replace(/^>\s*/, "&nbsp;".x(4));
+                        var item = new DlMenuItem({ parent: submenu, label: label });
+                        item.addEventListener("onSelect", ymacs.setColorTheme.$(ymacs, theme));
+                }
         });
 
         /* -----[ font ]----- */

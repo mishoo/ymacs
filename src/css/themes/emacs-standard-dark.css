@@ -1,45 +1,45 @@
-.Ymacs-Theme-dark .Ymacs_Frame { color: #bebebe; background-color: #262626; }
-.Ymacs-Theme-dark .Ymacs_Frame .type { color: #98fb98; }
-.Ymacs-Theme-dark .Ymacs_Frame .builtin { color: #b0c4de; }
-.Ymacs-Theme-dark .Ymacs_Frame .function-name { color: #87cefa; }
-.Ymacs-Theme-dark .Ymacs_Frame .variable-name { color: #eedd82; }
-.Ymacs-Theme-dark .Ymacs_Frame .constant { color: #7fffd4; }
-.Ymacs-Theme-dark .Ymacs_Frame .string { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .string-starter { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .string-stopper { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .regexp { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .regexp-starter { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .regexp-stopper { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .regexp-modifier { color: #ffa07a; }
-.Ymacs-Theme-dark .Ymacs_Frame .keyword { color: #00ffff; }
-.Ymacs-Theme-dark .Ymacs_Frame .comment { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .mcomment { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .comment-starter { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .mcomment-starter { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .mcomment-stopper { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .number { color: #7fffd4; }
-.Ymacs-Theme-dark .Ymacs_Frame .operator { }
-.Ymacs-Theme-dark .Ymacs_Frame .error { color: #ffc0cb; font-weight: bold; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-open-tag { color: #87cefa; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-close-tag { color: #87cefa; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-attribute { color: #eedd82; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-entity-starter { color: #7fffd4; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-entity-stopper { color: #7fffd4; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-entity { color: #7fffd4; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-open-bracket { }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-close-bracket { }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-closetag-slash { }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-cdata { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-cdata-starter { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .xml-cdata-stopper { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .lisp-keyword { color: #b0c4de; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading1 { font-size: 1.711em; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading2 { font-size: 1.434em; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading3 { font-size: 1.211em; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading4 { font-weight: bold; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading5 { font-weight: bold; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-heading6 { font-weight: bold; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote1 { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote2 { color: #ff7f24; }
-.Ymacs-Theme-dark .Ymacs_Frame .markdown-blockquote3 { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame { color: #bebebe; background-color: #262626; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .type { color: #98fb98; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .builtin { color: #b0c4de; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .function-name { color: #87cefa; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .variable-name { color: #eedd82; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .constant { color: #7fffd4; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .string { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .string-starter { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .string-stopper { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .regexp { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .regexp-starter { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .regexp-stopper { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .regexp-modifier { color: #ffa07a; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .keyword { color: #00ffff; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .comment { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .mcomment { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .comment-starter { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .mcomment-starter { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .mcomment-stopper { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .number { color: #7fffd4; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .operator { }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .error { color: #ffc0cb; font-weight: bold; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-open-tag { color: #87cefa; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-close-tag { color: #87cefa; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-attribute { color: #eedd82; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-entity-starter { color: #7fffd4; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-entity-stopper { color: #7fffd4; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-entity { color: #7fffd4; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-open-bracket { }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-close-bracket { }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-closetag-slash { }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-cdata { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-cdata-starter { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .xml-cdata-stopper { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .lisp-keyword { color: #b0c4de; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-heading1 { font-size: 1.711em; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-heading2 { font-size: 1.434em; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-heading3 { font-size: 1.211em; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-heading4 { font-weight: bold; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-heading5 { font-weight: bold; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-heading6 { font-weight: bold; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-blockquote { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-blockquote1 { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-blockquote2 { color: #ff7f24; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame .markdown-blockquote3 { color: #ff7f24; }

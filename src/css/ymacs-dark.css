@@ -1,4 +1,14 @@
+@import url("ymacs-syntax-dark.css");
+
+@import url("themes/emacs-billw.css");
 @import url("themes/emacs-charcoal-black.css");
+@import url("themes/emacs-clarity-and-beauty.css");
+@import url("themes/emacs-classic.css");
+@import url("themes/emacs-gnome2.css");
+@import url("themes/emacs-calm-forest.css");
+@import url("themes/emacs-linh-dang-dark.css");
+@import url("themes/emacs-blue-mood.css");
+@import url("themes/emacs-standard-dark.css");
 
 .Ymacs-Theme-dark .Ymacs-caret {
   background-color: #aaa;
