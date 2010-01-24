@@ -10,9 +10,10 @@
 
 .Ymacs-frame-overlays {
   overflow: auto;
+  position: relative;
 }
 
-.Ymacs-frame-content div.line {
+.Ymacs-frame-content {
   white-space: pre;
 }
 
