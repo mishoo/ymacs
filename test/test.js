@@ -223,6 +223,7 @@ to the current one.\n\
                 "dark|calm-forest|>Calm forest",
                 "dark|linh-dang-dark|>Linh Dang Dark",
                 "dark|blue-mood|>Blue mood",
+                "dark|zenburn|>Zenburn",
                 "dark|standard-dark|>Emacs standard (dark)",
                 null,
                 "light|y|Light background (default)",
