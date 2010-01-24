@@ -255,16 +255,14 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         };
 
         P.setActiveFrame = function(frame, nofocus) {
-                var old = this.getActiveFrame();
-                // if (old)
-                //         old.removeEventListener(this.__activeFrameEvents);
                 if (!frame.isMinibuffer) {
+                        var old = this.getActiveFrame();
+                        if (old && !nofocus) {
+                                old.delClass("Ymacs_Frame-active");
+                        }
                         this.frames.remove(frame);
                         this.frames.push(frame);
-                } else {
-                        this.frames.unshift(this.frames.pop());
                 }
-                // frame.addEventListener(this.__activeFrameEvents);
                 if (!nofocus)
                         frame.focus();
         };

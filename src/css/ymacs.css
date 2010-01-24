@@ -75,3 +75,6 @@
   content: counter(ymacs-line, decimal);
   text-align: right;
 }
+
+.Ymacs-splitbar-horiz { border-bottom: 1px solid #000; }
+.Ymacs-splitbar-vert { border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000; }

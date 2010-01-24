@@ -243,7 +243,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 // now create a layout, pack c1 and c2 and a resize bar
                 var layout = new DlLayout({ parent: cont });
                 layout.packWidget(c1, { pos: "top", fill: "50%" });
-                var rb = new DlResizeBar({ widget: c1, horiz: true });
+                var rb = new DlResizeBar({ widget: c1, horiz: true, className: "Ymacs-splitbar-horiz" });
                 layout.packWidget(rb, { pos: "top" });
                 layout.packWidget(c2, { pos: "top", fill: "*" });
 
@@ -265,7 +265,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 // now create a layout, pack c1 and c2 and a resize bar
                 var layout = new DlLayout({ parent: cont });
                 layout.packWidget(c1, { pos: "left", fill: "50%" });
-                var rb = new DlResizeBar({ widget: c1 });
+                var rb = new DlResizeBar({ widget: c1, className: "Ymacs-splitbar-vert" });
                 layout.packWidget(rb, { pos: "left" });
                 layout.packWidget(c2, { pos: "left", fill: "*" });
 
@@ -459,9 +459,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.redrawModeline = function(rc) {
-                if (!rc)
-                        rc = this.buffer._positionToRowCol(this.caretMarker.getPosition());
-                this.setModelineContent(this.buffer.renderModelineContent(rc));
+                this.setModelineContent(this.buffer.renderModelineContent(rc || this.caretMarker.getRowCol()));
         };
 
         /* -----[ event handlers ]----- */
@@ -581,6 +579,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 window.focus();
                 // console.log("FOCUS for %s", this.buffer.name);
                 this.ymacs.setActiveFrame(this, true);
+                this.addClass("Ymacs_Frame-active");
                 if (!this.isMinibuffer) {
                         this.buffer.cmd("goto_char", this.caretMarker.getPosition());
                 }

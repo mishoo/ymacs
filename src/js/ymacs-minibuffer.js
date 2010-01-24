@@ -324,7 +324,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         this.whenMinibuffer(function(mb){
                                 var text = this.cmd("minibuffer_contents");
                                 mb.setCode("");
-                                this.cmd("other_frame");
+                                this.ymacs.getActiveFrame().focus();
                                 (function(text){
                                         if (cont)
                                                 cont.call(this, text);

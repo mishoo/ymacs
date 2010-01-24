@@ -32,10 +32,16 @@
 .Ymacs-Theme-light .Ymacs_Overlay .selection { background: #88f; opacity: 0.8; }
 
 .Ymacs-Theme-light .Ymacs_Modeline {
+  background-color: #777;
+  color: #111;
+  border-top: 1px solid #999;
+  border-bottom: 1px solid #000;
+}
+
+.Ymacs-Theme-light .Ymacs_Frame-active .Ymacs_Modeline {
   background-color: #cbe;
   color: #000;
   border-top: 1px solid #fff;
-  border-bottom: 1px solid #000;
 }
 
 .Ymacs-Theme-light .Ymacs-line-numbers .Ymacs-frame-content div.line:before {
