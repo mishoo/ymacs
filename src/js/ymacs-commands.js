@@ -831,6 +831,13 @@ Ymacs_Buffer.newCommands({
                 this.whenYmacs("focusOtherFrame");
         }),
 
+        windmove: function(dir) {
+                this.whenYmacs(function(ymacs){
+                        var f = ymacs.getFrameInDirection(dir);
+                        if (f) f.focus();
+                });
+        },
+
         next_buffer: Ymacs_Interactive(function() {
                 this.whenYmacs("switchToNextBuffer", this.sameCommandCount() + 1);
         }),

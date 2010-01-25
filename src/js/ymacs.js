@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
+DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
         D.DEFAULT_EVENTS = [
                 "onBufferSwitch",
@@ -257,7 +257,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
         P.setActiveFrame = function(frame, nofocus) {
                 if (!frame.isMinibuffer) {
                         var old = this.getActiveFrame();
-                        if (old && !nofocus) {
+                        if (old) {
                                 old.delClass("Ymacs_Frame-active");
                         }
                         this.frames.remove(frame);
@@ -283,6 +283,68 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P){
                 themeId.foreach(function(themeId){
                         this.addClass("Ymacs-Theme-" + themeId);
                 }, this);
+        };
+
+        P.getFrameInDirection = function(dir, pos, frame) {
+                if (!frame)
+                        frame = this.getActiveFrame();
+                if (!pos)
+                        pos = DOM.getPos(frame.getCaretElement());
+                var byx = this.frames.mergeSort(function(a, b){ return a.getPos().x - b.getPos().x });
+                var byy = this.frames.mergeSort(function(a, b){ return a.getPos().y - b.getPos().y });
+                return this["_get_frameInDir_" + dir](byx, byy, pos, frame);
+        };
+
+        function selectClosestFrameX(byx, pos) {
+                if (byx.length > 0) {
+                        var x = byx.peek().getPos().x, a = [ byx.pop() ];
+                        while (byx.length > 0 && byx.peek().getPos().x == x)
+                                a.push(byx.pop());
+                        return a.minElement(function(f){
+                                return Math.abs(pos.y - f.getPos().y - f.getSize().y/2);
+                        });
+                }
+        };
+
+        function selectClosestFrameY(byy, pos) {
+                if (byy.length > 0) {
+                        var y = byy.peek().getPos().y, a = [ byy.pop() ];
+                        while (byy.length > 0 && byy.peek().getPos().y == y)
+                                a.push(byy.pop());
+                        return a.minElement(function(f){
+                                return Math.abs(pos.x - f.getPos().x - f.getSize().x/2);
+                        });
+                }
+        };
+
+        P._get_frameInDir_left = function(byx, byy, pos, frame) {
+                byx = byx.grep(function(f){
+                        return f !== frame && f.getPos().x < pos.x;
+                });
+                return selectClosestFrameX(byx, pos);
+        };
+
+        P._get_frameInDir_right = function(byx, byy, pos, frame) {
+                byx.reverse();
+                byx = byx.grep(function(f){
+                        return f !== frame && f.getPos().x > pos.x;
+                });
+                return selectClosestFrameX(byx, pos);
+        };
+
+        P._get_frameInDir_up = function(byx, byy, pos, frame) {
+                byy = byy.grep(function(f){
+                        return f !== frame && f.getPos().y < pos.y;
+                });
+                return selectClosestFrameY(byy, pos);
+        };
+
+        P._get_frameInDir_down = function(byx, byy, pos, frame) {
+                byy.reverse();
+                byy = byy.grep(function(f){
+                        return f !== frame && f.getPos().y > pos.y;
+                });
+                return selectClosestFrameY(byy, pos);
         };
 
         /* -----[ local storage ]----- */

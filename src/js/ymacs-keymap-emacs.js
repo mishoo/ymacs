@@ -195,6 +195,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "M-S-q"                                   : "fill_paragraph_no_prefix",
                 "C-M-|"                                   : "cperl_lineup",
                 "C-F4"                                    : "kill_buffer",
+                "M-ARROW_LEFT"                            : [ "windmove", "left" ],
+                "M-ARROW_RIGHT"                           : [ "windmove", "right" ],
+                "M-ARROW_UP"                              : [ "windmove", "up" ],
+                "M-ARROW_DOWN"                            : [ "windmove", "down" ],
 
                 // others
                 "C-x =": function() {
