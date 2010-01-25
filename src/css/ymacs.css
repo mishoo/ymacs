@@ -5,8 +5,14 @@
   white-space: pre;
   font-family: "Lucida Sans Typewriter",monospace;
   overflow: hidden;
-  /* font-size: 14px; */
 }
+
+/* .Ymacs_Frame { */
+/*   opacity: 0.8; */
+/* } */
+/* .Ymacs_Frame-active { */
+/*   opacity: 1; */
+/* } */
 
 .Ymacs-frame-overlays {
   overflow: auto;

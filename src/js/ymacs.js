@@ -319,7 +319,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
         P._get_frameInDir_left = function(byx, byy, pos, frame) {
                 byx = byx.grep(function(f){
-                        return f !== frame && f.getPos().x < pos.x;
+                        var p = f.getPos(), s = f.getSize();
+                        return (f !== frame) && (p.x < pos.x) && (p.y <= pos.y) && (p.y + s.y > pos.y);
                 });
                 return selectClosestFrameX(byx, pos);
         };
@@ -327,14 +328,16 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         P._get_frameInDir_right = function(byx, byy, pos, frame) {
                 byx.reverse();
                 byx = byx.grep(function(f){
-                        return f !== frame && f.getPos().x > pos.x;
+                        var p = f.getPos(), s = f.getSize();
+                        return (f !== frame) && (p.x > pos.x) && (p.y <= pos.y) && (p.y + s.y > pos.y);
                 });
                 return selectClosestFrameX(byx, pos);
         };
 
         P._get_frameInDir_up = function(byx, byy, pos, frame) {
                 byy = byy.grep(function(f){
-                        return f !== frame && f.getPos().y < pos.y;
+                        var p = f.getPos(), s = f.getSize();
+                        return (f !== frame) && (p.y < pos.y) && (p.x <= pos.x) && (p.x + s.x > pos.x);
                 });
                 return selectClosestFrameY(byy, pos);
         };
@@ -342,7 +345,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         P._get_frameInDir_down = function(byx, byy, pos, frame) {
                 byy.reverse();
                 byy = byy.grep(function(f){
-                        return f !== frame && f.getPos().y > pos.y;
+                        var p = f.getPos(), s = f.getSize();
+                        return (f !== frame) && (p.y > pos.y) && (p.x <= pos.x) && (p.x + s.x > pos.x);
                 });
                 return selectClosestFrameY(byy, pos);
         };
