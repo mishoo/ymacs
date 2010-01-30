@@ -575,6 +575,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_focus = function() {
+                this._on_blur.cancel();
                 window.focus();
                 // console.log("FOCUS for %s", this.buffer.name);
                 this.ymacs.setActiveFrame(this, true);
