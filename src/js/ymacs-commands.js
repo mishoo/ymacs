@@ -491,7 +491,8 @@ Ymacs_Buffer.newCommands({
                 this._killingAction(begin, end, false, true);
         }),
 
-        yank: Ymacs_Interactive("P", function(atStart){
+        yank: Ymacs_Interactive("^P", function(atStart){
+                this.deleteTransientRegion();
                 var point = this.point();
                 this._insertText(this.ymacs.killRingText());
                 this.cmd("set_mark_command", point);
