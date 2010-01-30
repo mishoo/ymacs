@@ -57,9 +57,32 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         D.CONSTRUCT = function() {
-                this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
                 this.__blinkCaret = this.__blinkCaret.$(this);
                 this.__caretId = Dynarch.ID();
+                this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
+
+                this.getElement().innerHTML = HTML;
+
+                this.addEventListener({
+                        onDestroy   : this._on_destroy,
+                        onFocus     : this._on_focus,
+                        onBlur      : this._on_blur,
+                        onMouseDown : this._on_mouseDown,
+                        onKeyDown   : this._on_keyDown,
+                        onKeyPress  : this._on_keyPress,
+                        onKeyUp     : this._on_keyUp,
+                        onResize    : this.centerOnCaret
+                });
+
+                this._dragSelectCaptures = {
+                        onMouseOver  : EX,
+                        onMouseOut   : EX,
+                        onMouseEnter : EX,
+                        onMouseLeave : EX,
+                        onMouseMove  : _dragSelect_onMouseMove.$(this),
+                        onMouseUp    : _dragSelect_onMouseUp.$(this)
+                };
+
                 this._bufferEvents = {
                         onLineChange             : this._on_bufferLineChange.$(this),
                         onInsertLine             : this._on_bufferInsertLine.$(this),
@@ -68,13 +91,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onResetCode              : this._on_bufferResetCode.$(this),
                         onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
                         onProgressChange         : this._on_bufferProgressChange.$(this),
-                        beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this)
+                        beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this),
+                        onOverlayDelete          : this._on_bufferOverlayDelete.$(this)
                 };
+
                 this._moreBufferEvents = {
                         onMessage       : this._on_bufferMessage.$(this),
-                        onOverlayChange : this._on_bufferOverlayChange.$(this),
-                        onOverlayDelete : this._on_bufferOverlayDelete.$(this)
+                        onOverlayChange : this._on_bufferOverlayChange.$(this)
                 };
+
                 var buffer = this.buffer;
                 this.buffer = null;
                 if (buffer)
@@ -89,29 +114,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 "</div>",
                 "<div class='Ymacs_Modeline'></div>"
         ).get();
-
-        P.initDOM = function() {
-                D.BASE.initDOM.apply(this, arguments);
-                this.getElement().innerHTML = HTML;
-                this.addEventListener({
-                        onDestroy   : this._on_destroy,
-                        onFocus     : this._on_focus,
-                        onBlur      : this._on_blur,
-                        onMouseDown : this._on_mouseDown,
-                        onKeyDown   : this._on_keyDown,
-                        onKeyPress  : this._on_keyPress,
-                        onKeyUp     : this._on_keyUp,
-                        onResize    : this.centerOnCaret
-                });
-                this._dragSelectCaptures = {
-                        onMouseOver  : EX,
-                        onMouseOut   : EX,
-                        onMouseEnter : EX,
-                        onMouseLeave : EX,
-                        onMouseMove  : _dragSelect_onMouseMove.$(this),
-                        onMouseUp    : _dragSelect_onMouseUp.$(this)
-                };
-        };
 
         P.focus = function(exitAllowed) {
                 D.BASE.focus.call(this);
@@ -575,7 +577,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_focus = function() {
-                this._on_blur.cancel();
                 window.focus();
                 // console.log("FOCUS for %s", this.buffer.name);
                 this.ymacs.setActiveFrame(this, true);
@@ -594,7 +595,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }
                 this.buffer.removeEventListener(this._moreBufferEvents);
                 this.__stopBlinking();
-        }.clearingTimeout(1);
+        };
 
         var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
         function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
