@@ -134,6 +134,9 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         // XXX: do we ever get here?
                         throw new Ymacs_Exception("Single completion");
                 }
+                else if (completions.length == 0) {
+                        throw new Ymacs_Exception("No completions");
+                }
                 else {
                         completions = completions.map(function(name){
                                 if (typeof dir[name] != "string")

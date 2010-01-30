@@ -375,7 +375,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 var info = this.ls_getFileDirectory(name), other = info.other, code;
                 if (other.length == 1) {
                         code = info.dir[other[0]];
-                } else if (!nothrow) {
+                }
+                if (code == null && !nothrow) {
                         throw new Ymacs_Exception("File not found");
                 }
                 return code;

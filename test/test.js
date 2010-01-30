@@ -141,6 +141,10 @@ to the current one.\n\
         var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ] });
         ymacs.setColorTheme([ "dark", "y" ]);
 
+        try {
+                ymacs.getActiveBuffer().cmd("eval_file", ".ymacs");
+        } catch(ex) {}
+
         var menu = new DlHMenu({});
         menu.setStyle({ marginLeft: 0, marginRight: 0 });
 

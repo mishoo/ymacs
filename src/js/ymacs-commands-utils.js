@@ -103,11 +103,15 @@ Ymacs_Buffer.newCommands({
 
         eval_string: Ymacs_Interactive("^MEval string: ", function(code){
                 try {
+                        var variables = [
+                                this,      // buffer
+                                this.ymacs // ymacs
+                        ];
                         code = new Function("buffer", "ymacs", code);
-                        code.call(this, this, this.ymacs);
+                        code.apply(this, variables);
                         this.clearTransientMark();
                 } catch(ex) {
-                        this.signalError(ex.name + ": " + ex.message);
+                        this.signalError(ex.type + ": " + ex.message);
                         if (window.console)
                                 console.log(ex);
                 }

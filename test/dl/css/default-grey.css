@@ -989,9 +989,9 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 .DlDialog .DlDialog-Dragging .DlDialog-Title { background-color: #000000; color: #888888; }
 
 
-.DlDialog-Maximized .DlDialog-Rel .Shadow { display: none; }
-.DlDialog-Maximized .DlDialog-Rel .ResizeHandle { display: none; }
-.DlDialog-Maximized .DlDialog-Title { border-width: 0; }
+.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.Shadow { display: none; }
+.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.ResizeHandle { display: none; }
+.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.DlDialog-Title { border-width: 0; }
 
 
 .IconCalendar { background-image: url("img/icons/calendar.png"); background-position: 1px 50%; }

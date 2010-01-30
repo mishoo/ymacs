@@ -496,8 +496,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.createDialog = function(args) {
-                if (!args.parent)
+                if (!args.parent) {
                         args.parent = this.getActiveFrame() && this.getActiveFrame().getParentDialog();
+                        if (!("noShadows" in args)) {
+                                args.noShadows = true;
+                        }
+                }
                 var dlg = new DlDialog(args);
                 this.whenActiveFrame(function(frame){
                         dlg.addEventListener("onDestroy", frame.focus.clearingTimeout(0, frame));

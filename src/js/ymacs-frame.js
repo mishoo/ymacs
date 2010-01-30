@@ -593,7 +593,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 }
                 this.buffer.removeEventListener(this._moreBufferEvents);
                 this.__stopBlinking();
-        };
+        }.clearingTimeout(1);
 
         var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
         function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
