@@ -552,20 +552,19 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_bufferOverlayChange = function(name, props, isNew) {
-                if (!isNew) {
-                        DOM.trash($(this.getOverlayId(name)));
-                }
                 var div = this.getOverlayHTML(name, props);
                 if (div) {
                         div = DOM.createFromHtml(div);
-                        this.getOverlaysContainer().appendChild(div);
-                        this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+                        var p = this.getOverlaysContainer(),
+                            old = !isNew && $(this.getOverlayId(name));
+                        old ? p.replaceChild(div, old) : p.appendChild(div);
+                        // this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
                 }
         };
 
         P._on_bufferOverlayDelete = function(name, props, isNew) {
                 DOM.trash($(this.getOverlayId(name)));
-                this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+                // this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         };
 
         /* -----[ self events ]----- */

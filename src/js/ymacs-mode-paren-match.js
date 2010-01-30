@@ -154,9 +154,11 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
         var keymap = Ymacs_Keymap_ParenMatch();
         this.pushKeymap(keymap);
 
-        var clearOvl = function() {
-                this.deleteOverlay("match-paren");
-        }.clearingTimeout(500, this);
+        var active = false,
+            clearOvl = function() {
+                    if (active)
+                            this.deleteOverlay("match-paren");
+            }.clearingTimeout(500, this);
 
         var events = {
                 beforeInteractiveCommand: function() {
@@ -169,6 +171,7 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
                                         var match = p.closed;
                                         if ((p.line == rc.row && p.col == rc.col) ||
                                             (match.line == rc.row && match.col == rc.col - 1)) {
+                                                active = true;
                                                 this.setOverlay("match-paren", {
                                                         line1: p.line, line2: match.line,
                                                         col1: p.col, col2: match.col + 1
