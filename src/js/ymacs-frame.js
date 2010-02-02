@@ -524,9 +524,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.getOverlayHTML = function(name, props) {
-                if (props.line1 == props.line2 && props.col1 == props.col2)
-                        // empty overlay, don't display
+                if (props.line1 == props.line2 && props.col1 == props.col2) {
+                        this._on_bufferOverlayDelete(name, props);
                         return null;
+                }
                 var p1 = this.coordinates(props.line1, props.col1);
                 var p2 = this.coordinates(props.line2, props.col2);
                 var p0 = this.__lineNumbers ? this.coordinates(props.line1, 0) : { x: 0, y: 0 };
