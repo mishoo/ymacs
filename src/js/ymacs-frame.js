@@ -231,47 +231,37 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.ymacs.keepOnlyFrame(this);
         };
 
+        P.deleteFrame = function() {
+                this.ymacs.deleteFrame(this);
+        };
+
         P.vsplit = function() {
-                var cont = this.parent;
-
-                // we need a new container for this frame (c1) and one for the sister frame (c2)
-                var c1 = new DlContainer({});
-                var c2 = new DlContainer({});
-                c1.appendWidget(this);
-
-                // clone the frame
-                var fr = this.ymacs.createFrame({ parent: c2, buffer: this.buffer });
-
-                // now create a layout, pack c1 and c2 and a resize bar
-                var layout = new DlLayout({ parent: cont });
-                layout.packWidget(c1, { pos: "top", fill: "50%" });
-                var rb = new DlResizeBar({ widget: c1, horiz: true, className: "Ymacs-splitbar-horiz" });
+                var cont   = this.parent,
+                    fr     = this.ymacs.createFrame({ buffer: this.buffer }),
+                    layout = new DlLayout(),
+                    rb     = new DlResizeBar({ widget: this, keepPercent: true, horiz: true, className: "Ymacs-splitbar-horiz" });
+                if (this._resizeBar)
+                        this._resizeBar._widget = layout;
+                this._resizeBar = rb;
+                cont.replaceWidget(this, layout);
+                layout.packWidget(this, { pos: "top", fill: "50%" });
                 layout.packWidget(rb, { pos: "top" });
-                layout.packWidget(c2, { pos: "top", fill: "*" });
-
-                // update dimensions
+                layout.packWidget(fr, { pos: "top", fill: "*" });
                 cont.__doLayout();
         };
 
         P.hsplit = function() {
-                var cont = this.parent;
-
-                // we need a new container for this frame (c1) and one for the sister frame (c2)
-                var c1 = new DlContainer({});
-                var c2 = new DlContainer({});
-                c1.appendWidget(this);
-
-                // clone the frame
-                var fr = this.ymacs.createFrame({ parent: c2, buffer: this.buffer });
-
-                // now create a layout, pack c1 and c2 and a resize bar
-                var layout = new DlLayout({ parent: cont });
-                layout.packWidget(c1, { pos: "left", fill: "50%" });
-                var rb = new DlResizeBar({ widget: c1, className: "Ymacs-splitbar-vert" });
+                var cont   = this.parent,
+                    fr     = this.ymacs.createFrame({ buffer: this.buffer }),
+                    layout = new DlLayout(),
+                    rb     = new DlResizeBar({ widget: this, keepPercent: true, className: "Ymacs-splitbar-vert" });
+                if (this._resizeBar)
+                        this._resizeBar._widget = layout;
+                this._resizeBar = rb;
+                cont.replaceWidget(this, layout);
+                layout.packWidget(this, { pos: "left", fill: "50%" });
                 layout.packWidget(rb, { pos: "left" });
-                layout.packWidget(c2, { pos: "left", fill: "*" });
-
-                // update dimensions
+                layout.packWidget(fr, { pos: "left", fill: "*" });
                 cont.__doLayout();
         };
 
@@ -459,6 +449,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P.setOuterSize = P.setSize = function(sz) {
                 DOM.setOuterSize(this.getOverlaysContainer(), sz.x, sz.y - this.getModelineElement().offsetHeight);
+                DOM.setOuterSize(this.getModelineElement(), sz.x);
         };
 
         P.redrawModeline = function(rc) {

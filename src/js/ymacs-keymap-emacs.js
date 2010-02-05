@@ -171,6 +171,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-x k"                                         : "kill_buffer",
 
                 // frames
+                "C-x 0"                                   : "delete_frame",
                 "C-x 1"                                   : "delete_other_frames",
                 "C-x 2"                                   : "split_frame_vertically",
                 "C-x 3"                                   : "split_frame_horizontally",

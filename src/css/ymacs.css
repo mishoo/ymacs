@@ -57,6 +57,7 @@
   font-family: "Lucida Sans Typewriter",monospace;
   white-space: pre;
   padding-bottom: 1px;
+  overflow: hidden;
 }
 
 .Ymacs_Modeline:after {

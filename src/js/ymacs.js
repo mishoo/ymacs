@@ -82,11 +82,10 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 if (this.buffers.length == 0)
                         this.createBuffer();
 
-                var topCont = this.topCont = new DlContainer({});
-                var frame = this.createFrame({ parent: topCont, buffer: this.buffers[0] });
+                var frame = this.createFrame({ buffer: this.buffers[0] });
 
                 this.packWidget(this.minibuffer_frame, { pos: "bottom" });
-                this.packWidget(topCont, { pos: "top", fill: "*" });
+                this.packWidget(frame, { pos: "top", fill: "*" });
 
                 // this.__activeFrameEvents = {
                 //         // onPointChange: this._on_activeFramePointChange.$(this)
@@ -236,12 +235,36 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
         P.keepOnlyFrame = function(frame) {
                 if (this.frames.length > 1) {
-                        frame.parent.removeWidget(frame);
-                        this.frames.remove(frame);
-                        this.topCont.destroyChildWidgets();
-                        this.topCont.appendWidget(frame);
-                        this.topCont.__doLayout();
+                        var p = frame.parent;
+                        while (p.parent != this)
+                                p = p.parent;
+                        this.replaceWidget(p, frame);
+                        p.destroy();
                         this.setActiveFrame(frame);
+                        this.doLayout();
+                }
+        };
+
+        P.deleteFrame = function(frame) {
+                if (this.frames.length > 1) {
+                        var p = frame.parent, other = p.children().grep_first(function(f){
+                                return f instanceof DlLayout || f instanceof Ymacs_Frame && f !== frame;
+                        });
+                        p.parent.replaceWidget(p, other);
+                        p.destroy();
+                        try {
+                                DOM.walk(other.getElement(), function(el){
+                                        el = DlWidget.getFromElement(el);
+                                        if (el && el instanceof Ymacs_Frame)
+                                                throw el;
+                                });
+                        } catch(ex) {
+                                if (!(ex instanceof Ymacs_Frame))
+                                        throw ex;
+                                other = ex;
+                        }
+                        this.setActiveFrame(other);
+                        this.doLayout();
                 }
         };
 

@@ -827,6 +827,10 @@ Ymacs_Buffer.newCommands({
                 this.whenActiveFrame("deleteOtherFrames");
         }),
 
+        delete_frame: Ymacs_Interactive(function() {
+                this.whenActiveFrame("deleteFrame");
+        }),
+
         other_frame: Ymacs_Interactive(function() {
                 this.whenYmacs("focusOtherFrame");
         }),
