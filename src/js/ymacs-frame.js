@@ -41,7 +41,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         var LINE_DIV = DOM.createElement("div", null, { className: "line", innerHTML: "<br/>" });
 
-        var BLINK_TIMEOUT = 200;
+        var BLINK_TIMEOUT = 225;
 
         D.DEFAULT_EVENTS = [ "onPointChange" ];
 
@@ -330,17 +330,18 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P.__restartBlinking = function() {
                 this.__stopBlinking();
                 if (this.focusInside()) {
-                        this.__caretTimer = setInterval(this.__blinkCaret, BLINK_TIMEOUT);
+                        this.__caretTimer = setTimeout(this.__blinkCaret, 2 * BLINK_TIMEOUT);
                 }
         };
 
         P.__stopBlinking = function() {
-                clearInterval(this.__caretTimer);
+                clearTimeout(this.__caretTimer);
                 this.__showCaret();
         };
 
         P.__blinkCaret = function() {
                 DOM.condClass(this.getCaretElement(), this.BLINKING = ! this.BLINKING, "Ymacs-caret");
+                this.__caretTimer = setTimeout(this.__blinkCaret, BLINK_TIMEOUT);
         };
 
         P.__showCaret = function() {

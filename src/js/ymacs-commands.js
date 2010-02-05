@@ -191,15 +191,14 @@ Ymacs_Buffer.newCommands({
                 this.cmd("insert", "\n".x(n));
         }),
 
-        newline_and_indent: Ymacs_Interactive("p", function(n){
-                if (n == null) n = 1;
-                n.times(function(i){
-                        if (i > 0)
-                                this.cmd("forward_line");
+        newline_and_indent: Ymacs_Interactive("^p", function(n){
+                if (n) {
+                        this.cmd("newline", n);
+                } else {
                         this.cmd("backward_delete_whitespace", true);
                         this.cmd("newline");
                         this.cmd("indent_line");
-                }, this);
+                }
         }),
 
         indent_line: Ymacs_Interactive("P", function(noEmpty) {

@@ -132,7 +132,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "BACKSPACE"                               : "backward_delete_char",
                 "DELETE && C-d"                           : "delete_char",
                 "ENTER && C-m"                            : "newline",
-                "M-d"                                     : "kill_word",
+                "M-d && C-DELETE"                         : "kill_word",
                 "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
                 "C-k"                                     : "kill_line",
                 "C-y && S-INSERT"                         : "yank",
@@ -162,7 +162,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-u"                                     : "universal_argument",
                 "M-g"                                     : "goto_line",
                 "C-x h"                                   : "mark_whole_buffer",
-                "C-g"                                     : Function.noop, // do nothing, still required so that we catch the binding.
+                "C-g"                                     : Ymacs_Interactive("^p", Function.noop), // do nothing, still required so that we catch the binding.
 
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
