@@ -162,7 +162,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-u"                                     : "universal_argument",
                 "M-g"                                     : "goto_line",
                 "C-x h"                                   : "mark_whole_buffer",
-                "C-g"                                     : Ymacs_Interactive("^p", Function.noop), // do nothing, still required so that we catch the binding.
+                "C-g"                                     : "keyboard_quit",
 
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",

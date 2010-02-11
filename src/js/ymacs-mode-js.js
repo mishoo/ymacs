@@ -325,7 +325,7 @@ parseInt undefined window document alert prototype constructor".qw();
 
                         if (row > 0) {
                                 var before = stream.textBefore();
-                                if (/\)\s*$/.test(before)) {
+                                if (/\)\s*$/.test(before) && $passedParens.length > 0) {
                                         // Ends in a paren, could be an if, while or for which demands smart
                                         // indentation on the current line, let's check it out.
 

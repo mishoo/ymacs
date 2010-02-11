@@ -2,7 +2,6 @@
 @import url("ymacs-light.css");
 
 .Ymacs_Frame {
-  white-space: pre;
   font-family: "DejaVu Sans Mono","Lucida Sans Typewriter",monospace;
   overflow: hidden;
 }

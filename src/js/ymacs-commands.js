@@ -451,6 +451,8 @@ Ymacs_Buffer.newCommands({
                 return this._insertText(Array.$(arguments).join(""));
         }),
 
+        keyboard_quit: Ymacs_Interactive("^p", Function.noop),
+
         buffer_substring: function(begin, end) {
                 if (arguments.length == 0) {
                         var r = this.getRegion();
@@ -524,6 +526,8 @@ Ymacs_Buffer.newCommands({
         },
 
         set_mark_command: Ymacs_Interactive("d", function(x){
+                if (this.currentCommand == "set_mark_command")
+                        this.signalInfo("Mark set", null, 1000);
                 this.markMarker.setPosition(x);
         }),
 

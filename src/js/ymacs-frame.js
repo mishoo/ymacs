@@ -248,6 +248,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 layout.packWidget(rb, { pos: "top" });
                 layout.packWidget(fr, { pos: "top", fill: "*" });
                 cont.__doLayout();
+                fr.centerOnCaret();
         };
 
         P.hsplit = function() {
@@ -263,6 +264,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 layout.packWidget(rb, { pos: "left" });
                 layout.packWidget(fr, { pos: "left", fill: "*" });
                 cont.__doLayout();
+                fr.centerOnCaret();
         };
 
         P.toggleLineNumbers = function() {
@@ -490,7 +492,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.condClass(om, "Ymacs-overwrite-mode");
         };
 
-        P._on_bufferMessage = function(type, text, html) {
+        P._on_bufferMessage = function(type, text, html, timeout) {
                 var anchor = this.isMinibuffer ? this.ymacs : this;
                 var popup = Ymacs_Message_Popup.get(0);
                 popup.popup({
@@ -499,7 +501,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         anchor  : anchor.getElement(),
                         align   : { prefer: "CC", fallX1: "CC", fallX2: "CC", fallY1: "CC", fallY2: "CC" }
                 });
-                popup.hide(5000);
+                popup.hide(timeout || 5000);
         };
 
         P._on_bufferBeforeInteractiveCommand = function() {
@@ -605,6 +607,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
                 buf.clearTransientMark();
                 buf.cmd("goto_char", buf._rowColToPosition(rc.row, rc.col));
+                buf.callInteractively("keyboard_quit");
                 if (CLICK_COUNT == 1) {
                         buf.ensureTransientMark();
                         DlEvent.captureGlobals(this._dragSelectCaptures);

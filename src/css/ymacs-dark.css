@@ -16,8 +16,8 @@
 }
 
 .Ymacs-Theme-dark .Ymacs_Frame-focus .Ymacs-caret {
-  background-color: #f51;
-  color: #324;
+  background-color: #f83;
+  color: #324 !important;
 }
 
 .Ymacs-Theme-dark .Ymacs_Frame-focus .Ymacs-current-line {

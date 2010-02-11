@@ -323,12 +323,12 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return Ymacs_Keymap_Emacs();
         };
 
-        P.signalError = function(text, html) {
-                this.callHooks("onMessage", "error", text, html);
+        P.signalError = function(text, html, timeout) {
+                this.callHooks("onMessage", "error", text, html, timeout);
         };
 
-        P.signalInfo = function(text, html) {
-                this.callHooks("onMessage", "info", text, html);
+        P.signalInfo = function(text, html, timeout) {
+                this.callHooks("onMessage", "info", text, html, timeout);
         };
 
         P.createMarker = function(pos, before, name) {
