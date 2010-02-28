@@ -211,8 +211,6 @@ Ymacs_Buffer.newCommands({
                                                 if (this._rowcol.col != indent) {
                                                         this.cmd("beginning_of_line");
                                                         this.cmd("delete_whitespace", true);
-                                                        // while (/^[ \t\xa0]$/.test(this.charAt()))
-                                                        //         this.cmd("delete_char");
                                                         this.cmd("insert", " ".x(indent));
                                                 }
                                                 return this.point();

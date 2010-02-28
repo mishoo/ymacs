@@ -80,6 +80,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 delete this[key];
                         else
                                 this[key] = val;
+                        if (val instanceof Function)
+                                val.ymacsCommand = key;
                         return val;
                 } else {
                         var changed = {};
@@ -128,12 +130,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         D.COMMANDS = P.COMMANDS = {};
 
-        D.newCommands = P.newCommands = function(cmds) {
-                for (var name in cmds) {
-                        var func = cmds[name];
-                        func.ymacsCommand = name;
-                        this.COMMANDS[name] = func;
-                }
+        D.newCommands = P.newCommands = function() {
+                return setq.apply(this.COMMANDS, arguments);
         };
 
         D.newMode = P.newMode = function(name, activate) {

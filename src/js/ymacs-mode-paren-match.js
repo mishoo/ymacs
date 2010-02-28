@@ -91,25 +91,31 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 }),
 
                 forward_sexp: Ymacs_Interactive(function() {
-                        var p = this.tokenizer.finishParsing(), rc = this._rowcol;
+                        var rc = this._rowcol, p = this.tokenizer.finishParsing();
                         if (p) {
                                 // find next paren
                                 var parens = p.context.passedParens.mergeSort(compareRowCol);
                                 var next = parens.foreach(function(p){
-                                        if (p.line > rc.row || (p.line == rc.row && p.col >= rc.col))
+                                        if (p.line > rc.row || (p.line == rc.row && p.col >= rc.col)) {
                                                 $RETURN(p);
+                                        }
                                 }, this);
                                 if (!next || !next.closed) {
                                         this.signalError("Balanced expression not found");
                                         return;
                                 }
-                                this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
+                                var start = this._rowColToPosition(next.line, next.col);
+                                if ((this._rowcol.row == next.line && this._rowcol.col == next.col)
+                                    || !/\S/.test(this._bufferSubstring(null, start)))
+                                        this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
+                                else
+                                        this.cmd("goto_char", start);
                                 return true;
                         }
                 }),
 
                 backward_sexp: Ymacs_Interactive(function() {
-                        var p = this.tokenizer.finishParsing(), rc = this._rowcol;
+                        var rc = this._rowcol, p = this.tokenizer.finishParsing();
                         if (p) {
                                 // find next paren
                                 var parens = p.context.passedParens.grep("closed").map("closed").mergeSort(compareRowCol);
