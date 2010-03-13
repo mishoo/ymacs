@@ -87,8 +87,14 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                                      this.cmd,
                                      this._isearchContext.forward ? "search_forward" : "search_backward",
                                      text);
-                if (found)
+                if (found) {
                         this.cmd("recenter_top_bottom");
+                        var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * text.length);
+                        this.setOverlay("isearch", {
+                                line1: rc_begin.row, line2: this._rowcol.row,
+                                col1: rc_begin.col, col2: this._rowcol.col
+                        });
+                }
                 return found;
         };
 
@@ -127,13 +133,19 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                 }),
 
                 isearch_yank_word_or_char: Ymacs_Interactive(function() {
-                        var pos = this.point();
-                        this.cmd("forward_word");
-                        var pos2 = this.point();
+                        var pos = this.point(),
+                            pos2 = this.cmd("save_excursion", function(){
+                                    this.cmd("forward_word");
+                                    return this.point();
+                            });
                         if (pos2 != pos) {
                                 var word = this._bufferSubstring(pos, pos2);
                                 this.getMinibuffer()._placeUndoBoundary();
                                 this.getMinibuffer().cmd("insert", word.toLowerCase());
+                                word = getText(this);
+                                if (this._isearchContext.forward)
+                                        this.cmd("goto_char", pos2 - word.length);
+                                doSearch.call(this, word);
                         }
                 }),
 
@@ -141,9 +153,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         var ev = this.interactiveEvent();
                         if (ev.charCode && !ev.ctrlKey && !ev.altKey) {
                                 this.getMinibuffer().cmd("self_insert_command");
-                                var text = getText(this);
                                 this.cmd("goto_char", this._isearchContext.point);
-                                doSearch.call(this, text);
+                                doSearch.call(this, getText(this));
                                 return ev.domStop = true;
                         } else if (ev.keyCode != 0 || ev.ctrlKey || ev.altKey) {
                                 this.cmd("isearch_abort");
@@ -160,6 +171,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                         this._isearchContext = null;
                         if (cancelled)
                                 this.cmd("exchange_point_and_mark");
+                        this.deleteOverlay("isearch");
+                        this.deleteOverlay("isearch-lazy");
                         return true;
                 })
 

@@ -31,6 +31,7 @@
 
 .Ymacs-Theme-dark .Ymacs_Overlay .match-paren { background: #8f8; }
 .Ymacs-Theme-dark .Ymacs_Overlay .selection { background: #ccf; }
+.Ymacs-Theme-dark .Ymacs_Overlay .isearch { background: #ffc; }
 
 .Ymacs-Theme-dark .Ymacs_Modeline {
   background-color: #777;
