@@ -42,6 +42,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "C-M-f && C-M-n" : "forward_sexp",
                 "C-M-b && C-M-p" : "backward_sexp",
                 "M-C-k"          : "kill_sexp",
+                "M-C-SPACE"      : "mark_sexp",
                 "M-C-t"          : "transpose_sexps"
         };
 
@@ -130,6 +131,13 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 this.cmd("goto_char", this._rowColToPosition(prev.opened.line, prev.opened.col));
                                 return true;
                         }
+                }),
+
+                mark_sexp: Ymacs_Interactive(function(){
+                        this.ensureTransientMark();
+                        this.cmd("forward_sexp");
+                        this.transientMarker.swap(this.caretMarker);
+                        this.ensureTransientMark();
                 }),
 
                 kill_sexp: Ymacs_Interactive(function() {
