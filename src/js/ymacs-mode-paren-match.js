@@ -43,7 +43,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "C-M-b && C-M-p" : "backward_sexp",
                 "M-C-k"          : "kill_sexp",
                 "M-C-SPACE"      : "mark_sexp",
-                "M-C-t"          : "transpose_sexps"
+                "M-C-t"          : "transpose_sexps",
+                "M-("            : [ "paredit_wrap_round", "(" ],
+                "M-["            : [ "paredit_wrap_round", "[" ],
+                "M-{"            : [ "paredit_wrap_round", "{" ],
+                'M-"'            : [ "paredit_wrap_round", '"' ],
+                "M-'"            : [ "paredit_wrap_round", "'" ]
         };
 
         /* -----[ new commands ]----- */
@@ -54,6 +59,14 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         : p1.line > p2.line
                         ? 1
                         : p1.col - p2.col;
+        };
+
+        var PARENS = {
+                "(" : ")",
+                "[" : "]",
+                "{" : "}",
+                '"' : { close: '"', backslash: /\x22/g },
+                "'" : { close: "'", backslash: /\x27/g }
         };
 
         Ymacs_Buffer.newCommands({
@@ -162,6 +175,35 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         this.cmd("backward_sexp"); a.push(this.point());
                         this.cmd("forward_sexp"); a.push(this.point());
                         this.cmd("goto_char", this._swapAreas(a));
+                }),
+
+                paredit_wrap_round: Ymacs_Interactive("^", function(paren){
+                        if (!paren)
+                                paren = "(";
+                        var closing = PARENS[paren],
+                            r = this.transientMarker
+                                ? this.getRegion()
+                                : this.cmd("save_excursion", function(){
+                                        var begin = this.point();
+                                        this.cmd("forward_sexp");
+                                        return { begin: begin, end: this.point() };
+                                }),
+                            txt = this._bufferSubstring(r.begin, r.end),
+                            before = this.point() < r.end;
+                        if (typeof closing != "string") {
+                                txt = txt.replace(closing.backslash, function(s){
+                                        return "\\" + s;
+                                });
+                                closing = closing.close;
+                        }
+                        var m = this.createMarker(r.end);
+                        this.cmd("save_excursion", function(){
+                                this._replaceText(r.begin, r.end, paren + txt + closing);
+                        }, before);
+                        this.cmd("forward_char", before ? 1 : -1);
+                        this.clearTransientMark();
+                        this.cmd("indent_region", r.begin, m.getPosition());
+                        m.destroy();
                 })
 
         });
