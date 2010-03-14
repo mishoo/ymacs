@@ -47,8 +47,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "M-("            : [ "paredit_wrap_round", "(" ],
                 "M-["            : [ "paredit_wrap_round", "[" ],
                 "M-{"            : [ "paredit_wrap_round", "{" ],
-                'M-"'            : [ "paredit_wrap_round", '"' ],
-                "M-'"            : [ "paredit_wrap_round", "'" ]
+                'M-"'            : [ "paredit_wrap_round", '"', true ],
+                "M-'"            : [ "paredit_wrap_round", "'", true ]
         };
 
         /* -----[ new commands ]----- */
@@ -177,7 +177,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         this.cmd("goto_char", this._swapAreas(a));
                 }),
 
-                paredit_wrap_round: Ymacs_Interactive("^", function(paren){
+                paredit_wrap_round: Ymacs_Interactive("^", function(paren, nosexp){
                         if (!paren)
                                 paren = "(";
                         var closing = PARENS[paren],
@@ -185,7 +185,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 ? this.getRegion()
                                 : this.cmd("save_excursion", function(){
                                         var begin = this.point();
-                                        this.cmd("forward_sexp");
+                                        if (!nosexp)
+                                                this.cmd("forward_sexp");
                                         return { begin: begin, end: this.point() };
                                 }),
                             txt = this._bufferSubstring(r.begin, r.end),
