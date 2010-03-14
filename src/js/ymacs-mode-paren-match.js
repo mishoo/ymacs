@@ -133,10 +133,15 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         }
                 }),
 
-                mark_sexp: Ymacs_Interactive(function(){
-                        this.ensureTransientMark();
-                        this.cmd("forward_sexp");
-                        this.transientMarker.swap(this.caretMarker);
+                mark_sexp: Ymacs_Interactive("^r", function(begin, end){
+                        this.cmd("save_excursion", function(){
+                                if (this.transientMarker)
+                                        this.cmd("goto_char", end);
+                                this.ensureTransientMark();
+                                this.cmd("forward_sexp");
+                                this.cmd("set_mark_command", this.point());
+                                this.transientMarker.swap(this.caretMarker);
+                        });
                         this.ensureTransientMark();
                 }),
 

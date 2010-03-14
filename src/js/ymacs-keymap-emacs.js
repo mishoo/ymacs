@@ -90,6 +90,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "<tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> $ch </tt></td></tr>",
                 "<tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> $code / 0x$codeHex </td></tr>",
                 "<tr><td style='text-align: right; font-weight: bold'>Position:</td><td> $point </td></tr>",
+                "<tr><td style='text-align: right; font-weight: bold'>Mark:</td><td> $mark </td></tr>",
                 "<tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> $sizeKB </td></tr>",
                 "</table>"
         );
@@ -215,6 +216,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                                 code    : ch.charCodeAt(0),
                                 codeHex : ch.charCodeAt().hex(),
                                 point   : this.point(),
+                                mark    : this.markMarker.getPosition(),
                                 size    : this.getCodeSize(),
                                 sizeKB  : this.getCodeSize().formatBytes(2)
                         }), true);
