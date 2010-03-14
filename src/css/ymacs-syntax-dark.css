@@ -8,9 +8,9 @@
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .variable-name   { color: rgb(238, 221, 130);  font-weight: bold; }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .constant   { color: rgb(127, 255, 212); font-style: normal;  }
 
-.Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .string { color: rgb(220, 160, 80); font-style: normal;  }
+.Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .string { color: rgb(250, 200, 80); font-style: normal;  }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .string-starter,
-.Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .string-stopper { color: #a56500; }
+.Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .string-stopper { color: #c59500; }
 
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .regexp { color: #d9f; font-style: normal;  }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .regexp-starter,
@@ -19,7 +19,7 @@
 
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .keyword   { color: rgb(0, 255, 255);  font-weight: bold; }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .comment,
-.Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .mcomment { color: #ff4500; font-style: normal; }
+.Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .mcomment { color: #45cc00; font-style: normal; }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .comment-starter,
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .mcomment-starter,
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .mcomment-stopper { color: #999; }
