@@ -219,6 +219,7 @@ to the current one.\n\
 
         [
                 "dark|y|Dark background (default)",
+                "dark|mishoo|>Mishoo's Emacs theme",
                 "dark|billw|>Billw",
                 "dark|charcoal-black|>Charcoal black",
                 "dark|clarity-and-beauty|>Clarity and beauty",
