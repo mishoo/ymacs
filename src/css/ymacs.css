@@ -14,7 +14,7 @@
 /* } */
 
 .Ymacs-frame-overlays {
-  overflow: auto;
+  overflow: hidden;
   position: relative;
 }
 
