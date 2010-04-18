@@ -41,6 +41,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "C-M-q"          : "indent_sexp",
                 "C-M-f && C-M-n" : "forward_sexp",
                 "C-M-b && C-M-p" : "backward_sexp",
+                "C-M-u"          : "backward_up_list",
+                "C-M-d"          : "down_list",
                 "M-C-k"          : "kill_sexp",
                 "M-C-SPACE"      : "mark_sexp",
                 "M-C-t"          : "transpose_sexps",
@@ -69,6 +71,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "'" : { close: "'", backslash: /\x27/g }
         };
 
+        function ERROR(o) {
+                throw new Ymacs_Exception("Balanced expression not found");
+        };
+
         Ymacs_Buffer.newCommands({
 
                 matching_paren: function() {
@@ -91,7 +97,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         if (pos != null) {
                                 this.cmd("indent_region", this.point(), pos);
                         } else {
-                                this.signalError("Balanced expression not found");
+                                ERROR(this);
                         }
                 }),
 
@@ -113,9 +119,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         if (p.line > rc.row || (p.line == rc.row && p.col >= rc.col)) {
                                                 $RETURN(p);
                                         }
-                                }, this);
+                                });
                                 if (!next || !next.closed) {
-                                        this.signalError("Balanced expression not found");
+                                        ERROR(this);
                                         return;
                                 }
                                 var start = this._rowColToPosition(next.line, next.col);
@@ -136,9 +142,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 var prev = parens.r_foreach(function(p){
                                         if (p.line < rc.row || (p.line == rc.row && p.col < rc.col))
                                                 $RETURN(p);
-                                }, this);
+                                });
                                 if (!prev) {
-                                        this.signalError("Balanced expression not found");
+                                        ERROR(this);
                                         return;
                                 }
                                 this.cmd("goto_char", this._rowColToPosition(prev.opened.line, prev.opened.col));
@@ -205,6 +211,39 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         this.clearTransientMark();
                         this.cmd("indent_region", r.begin, m.getPosition());
                         m.destroy();
+                }),
+
+                down_list: Ymacs_Interactive(function(){
+                        var rc = this._rowcol, p = this.tokenizer.finishParsing();
+                        if (p) {
+                                var lc = { line: rc.row, col: rc.col };
+                                p = p.context.passedParens.grep("closed").mergeSort(compareRowCol).grep_first(function(p){
+                                        return compareRowCol(p, lc) >= 0;
+                                });
+                                if (p != null)
+                                        this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + 1);
+                                else
+                                        ERROR(this);
+                        }
+                }),
+
+                backward_up_list: Ymacs_Interactive(function(){
+                        var rc = this._rowcol, p = this.tokenizer.finishParsing();
+                        if (p) {
+                                var lc = { line: rc.row, col: rc.col };
+                                p = p.context.passedParens.grep("closed").mergeSort(compareRowCol).grep_last(function(p){
+                                        return compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0;
+                                });
+                                if (p != null)
+                                        this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
+                                else
+                                        ERROR(this);
+                        }
+                }),
+
+                up_list: Ymacs_Interactive(function(){
+                        this.cmd("backward_up_list");
+                        this.cmd("forward_sexp");
                 })
 
         });
