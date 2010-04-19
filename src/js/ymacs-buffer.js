@@ -586,8 +586,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P.redrawDirtyLines = function() {
                 this.__dirtyLines.foreach(function(draw, row){
-                        if (draw)
+                        if (draw) {
                                 this.callHooks("onLineChange", row);
+                        }
                 }, this);
                 this.__dirtyLines = [];
         };
@@ -794,7 +795,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 var drawIt = this.__preventUpdates == 0;
                 this.callHooks("onInsertLine", row, drawIt);
                 if (!drawIt) {
-                        this.__dirtyLines.splice(row, 0, true);
+                        if (this.__dirtyLines.length <= row)
+                                this.__dirtyLines[row] = true;
+                        else
+                                this.__dirtyLines.splice(row, 0, true);
                 }
         };
 
@@ -1050,7 +1054,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P._on_textPropertiesChange = function(row) {
-                this.lastColoredLine = row;
                 if (this.__preventUpdates == 0) {
                         this.callHooks("onLineChange", row);
                 } else {
