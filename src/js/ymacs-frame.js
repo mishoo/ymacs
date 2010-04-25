@@ -97,7 +97,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
                         onProgressChange         : this._on_bufferProgressChange.$(this),
                         beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this),
-                        onOverlayDelete          : this._on_bufferOverlayDelete.$(this)
+                        onOverlayDelete          : this._on_bufferOverlayDelete.$(this),
+                        afterRedraw              : this._on_bufferAfterRedraw.$(this)
                 };
 
                 this._moreBufferEvents = {
@@ -273,24 +274,20 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 if (pos == null)
                         pos = "center";
                 var ov_cont = this.getOverlaysContainer(), self = this;
-                // function doit() {
-                        self._ensure_line_in_dom(row);
-                        var div = self.getLineDivElement(row);
-                        switch (pos) {
-                            case "center":
-                                ov_cont.scrollTop = Math.round(div.offsetTop - ov_cont.clientHeight / 2 + div.offsetHeight / 2);
-                                break;
-                            case "top":
-                                ov_cont.scrollTop = div.offsetTop;
-                                break;
-                            case "bottom":
-                                ov_cont.scrollTop = div.offsetTop + div.offsetHeight - ov_cont.clientHeight;
-                                break;
-                        }
-                        self._refill_dom();
-                // };
-                // doit();
-                // doit();
+                self._ensure_line_in_dom(row);
+                var div = self.getLineDivElement(row);
+                switch (pos) {
+                    case "center":
+                        ov_cont.scrollTop = Math.round(div.offsetTop - ov_cont.clientHeight / 2 + div.offsetHeight / 2);
+                        break;
+                    case "top":
+                        ov_cont.scrollTop = div.offsetTop;
+                        break;
+                    case "bottom":
+                        ov_cont.scrollTop = div.offsetTop + div.offsetHeight - ov_cont.clientHeight;
+                        break;
+                }
+                self._refill_dom();
         };
 
         P.setModelineContent = function(html) {
@@ -649,6 +646,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_bufferAfterInteractiveCommand = function() {
                 this.ensureCaretVisible(true);
+        };
+
+        P._on_bufferAfterRedraw = function() {
+                this._refill_dom();
         };
 
         P._on_bufferProgressChange = function() {

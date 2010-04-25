@@ -47,6 +47,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 "onOverlayDelete",
                 "beforeInteractiveCommand",
                 "afterInteractiveCommand",
+                "beforeRedraw",
+                "afterRedraw",
                 "finishedEvent",
                 "onProgressChange",
                 "onTextInsert",
@@ -588,12 +590,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.redrawDirtyLines = function() {
+                this.callHooks("beforeRedraw");
                 this.__dirtyLines.foreach(function(draw, row){
                         if (draw) {
                                 this.callHooks("onLineChange", row);
                         }
                 }, this);
                 this.__dirtyLines = [];
+                this.callHooks("afterRedraw");
         };
 
         P.getOverlays = function() {
