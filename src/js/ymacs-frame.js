@@ -43,6 +43,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         var BLINK_TIMEOUT = 225;
 
+        var MAX_LINES_IN_DOM = 100;
+        var ADD_LINES_IN_DOM = 40;
+        var MIN_LINES_IN_DOM = 5;
+
         D.DEFAULT_EVENTS = [ "onPointChange" ];
 
         D.DEFAULT_ARGS = {
@@ -60,6 +64,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.__blinkCaret = this.__blinkCaret.$(this);
                 this.__caretId = Dynarch.ID();
                 this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
+                //this.redrawModelineWithTimer = this.redrawModeline;
 
                 this.getElement().innerHTML = HTML;
 
@@ -71,7 +76,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onKeyDown   : this._on_keyDown,
                         onKeyPress  : this._on_keyPress,
                         onKeyUp     : this._on_keyUp,
-                        onResize    : this.centerOnCaret
+                        onResize    : this._on_resize
                 });
 
                 this._dragSelectCaptures = {
@@ -87,7 +92,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onLineChange             : this._on_bufferLineChange.$(this),
                         onInsertLine             : this._on_bufferInsertLine.$(this),
                         onDeleteLine             : this._on_bufferDeleteLine.$(this),
-                        onPointChange            : this._on_bufferPointChange.$(this),
+                        //onPointChange            : this._on_bufferPointChange.$(this),
                         onResetCode              : this._on_bufferResetCode.$(this),
                         onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
                         onProgressChange         : this._on_bufferProgressChange.$(this),
@@ -96,8 +101,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 };
 
                 this._moreBufferEvents = {
-                        onMessage       : this._on_bufferMessage.$(this),
-                        onOverlayChange : this._on_bufferOverlayChange.$(this)
+                        onOverlayChange          : this._on_bufferOverlayChange.clearingTimeout(10, this),
+                        afterInteractiveCommand  : this._on_bufferAfterInteractiveCommand.$(this),
+                        onMessage                : this._on_bufferMessage.$(this)
                 };
 
                 var buffer = this.buffer;
@@ -152,16 +158,50 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.getLineDivElement = function(row) {
-                return this.getContentElement().childNodes[row] || null;
+                var a = this.getContentElement().childNodes;
+                row -= this._firstLineInDOM;
+                if (row >= 0 && row < a.length)
+                        return a[row];
         };
 
-        P.ensureCaretVisible = function() {
+        P.firstLineVisible = function() {
+                var ov_cont = this.getOverlaysContainer();
+                var top = ov_cont.scrollTop;
+                var line = this._firstLineInDOM;
+                for (var i = this.getContentElement().firstChild; i; i = i.nextSibling) {
+                        if (i.offsetTop >= top)
+                                return line;
+                        line++;
+                }
+        };
+
+        P.lastLineVisible = function() {
+                var ov_cont = this.getOverlaysContainer();
+                var bottom = ov_cont.scrollTop + ov_cont.clientHeight;
+                var line = this._lastLineInDOM;
+                for (var i = this.getContentElement().lastChild; i; i = i.previousSibling) {
+                        if (i.offsetTop + i.offsetHeight <= bottom)
+                                return line;
+                        line--;
+                }
+        };
+
+        P.isLineVisible = function(line) {
+                return line >= this.firstLineVisible() && line < this.lastLineVisible();
+        };
+
+        P.ensureCaretVisible = function(reset) {
+                if (reset)
+                        this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
+                var line = this.caretMarker.getRowCol().row;
+                this._ensure_line_in_dom(line);
                 this._redrawCaret();
 
                 var caret = this.getCaretElement();
                 if (!caret)
                         return;
-                var div = this.getOverlaysContainer(), line = this.getLineDivElement(this.buffer._rowcol.row);
+                var div = this.getOverlaysContainer();
+                line = this.getLineDivElement(line);
 
                 // vertical
                 var diff = line.offsetTop + line.offsetHeight - (div.scrollTop + div.clientHeight);
@@ -185,6 +225,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         if (diff < 0)
                                 div.scrollLeft += diff;
                 }
+
+                this._refill_dom();
         };
 
         P.setBuffer = function(buffer) {
@@ -214,13 +256,41 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.centerOnCaret = function() {
-                this.centerOnLine(this.buffer._rowcol.row);
+                this.centerOnLine(this.caretMarker.getRowCol().row);
         };
 
-        P.centerOnLine = function(row) {
-                var line = this.getLineDivElement(row), div = this.getOverlaysContainer();
-                div.scrollTop = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
-                // this._redrawBuffer();
+        P.centerOnCaretIfNotVisible = function() {
+                // <XXX>: sucky.  We should refactor somehow such that
+                // the active frame's caret is ALWAYS in sync with the buffer.
+                this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
+                // </XXX>
+                var line = this.caretMarker.getRowCol().row;
+                if (!this.isLineVisible(line))
+                        this.centerOnLine(line);
+        };
+
+        P.centerOnLine = function(row, pos) {
+                if (pos == null)
+                        pos = "center";
+                var ov_cont = this.getOverlaysContainer(), self = this;
+                // function doit() {
+                        self._ensure_line_in_dom(row);
+                        var div = self.getLineDivElement(row);
+                        switch (pos) {
+                            case "center":
+                                ov_cont.scrollTop = Math.round(div.offsetTop - ov_cont.clientHeight / 2 + div.offsetHeight / 2);
+                                break;
+                            case "top":
+                                ov_cont.scrollTop = div.offsetTop;
+                                break;
+                            case "bottom":
+                                ov_cont.scrollTop = div.offsetTop + div.offsetHeight - ov_cont.clientHeight;
+                                break;
+                        }
+                        self._refill_dom();
+                // };
+                // doit();
+                // doit();
         };
 
         P.setModelineContent = function(html) {
@@ -352,10 +422,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 if (!force && !isActive)
                         return;
 
-                if (isActive && !this.isMinibuffer)
-                        this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
-
-                var rc = this.buffer._rowcol;
+                var rc = this.caretMarker.getRowCol();
 
                 if (this.highlightCurrentLine) {
                         this._unhoverLine();
@@ -399,10 +466,60 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 return html;
         };
 
+        P._getCodeSlice = function(min, max) {
+                var len = this.buffer.code.length;
+                min = Math.min(Math.max(min, 0), len);
+                max = Math.min(max, len);
+                return { first: min, last: max, code: max > min ? this.buffer.code.slice(min, max) : null };
+        };
+
+        P._getHTMLSlice = function(min, max) {
+                var slice = this._getCodeSlice(min, max), html = null;
+                if (slice.code) {
+                        var buf = String.buffer();
+                        (slice.last - slice.first).times(function(i){
+                                buf("<div class='line'>", this._getLineHTML(slice.first + i), "</div>");
+                        }, this);
+                        html = buf.get();
+                }
+                return {
+                        first : slice.first,
+                        last  : slice.last,
+                        html  : html
+                };
+        };
+
+        // XXX: this is probably not optimal
+        P._getDFSlice = function(min, max) {
+                var slice = this._getHTMLSlice(min, max);
+                var df = null;
+                if (slice.html) {
+                        var div = DOM.createFromHtml("<div>" + slice.html + "</div>");
+                        df = document.createDocumentFragment();
+                        while (div.firstChild)
+                                df.appendChild(div.firstChild);
+                        DOM.trash(div);
+                }
+                slice.df = df;
+                return slice;
+        };
+
+        P._resetFirstLineInDOM = function(line) {
+                this._firstLineInDOM = line;
+                var div = this.getContentElement().firstChild;
+                if (div)
+                        div.style.counterReset = "ymacs-line " + line;
+        };
+
+        P._resetLastLineInDOM = function(line) {
+                this._lastLineInDOM = line;
+        };
+
         P._redrawBuffer = function() {
-                this.setContent(this.buffer.code.map(function(line, i){
-                        return this._getLineHTML(i).htmlEmbed("div", "line");
-                }, this).join(""));
+                var slice = this._getHTMLSlice(0, MAX_LINES_IN_DOM);
+                this._resetFirstLineInDOM(slice.first);
+                this._resetLastLineInDOM(slice.last);
+                this.setContent(slice.html);
         };
 
         P.coordinatesToRowCol = function(x, y) {
@@ -432,7 +549,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         return col;
                 };
                 var self = this,
-                    row = findLine(0, this.buffer.code.length - 1),
+                    row = findLine(this._firstLineInDOM, this._lastLineInDOM - 1),
                     col = findCol(0, this.buffer.code[row].length);
                 return { row: row, col: col };
         };
@@ -446,10 +563,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.heightInLines = function() {
-                return Math.floor(this.getOverlaysContainer().clientHeight / this.getCaretElement().offsetHeight);
+                return Math.floor(this.getOverlaysContainer().clientHeight / this.getContentElement().firstChild.offsetHeight);
         };
 
         P.setOuterSize = P.setSize = function(sz) {
+                D.BASE.setOuterSize.apply(this, arguments);
                 DOM.setOuterSize(this.getOverlaysContainer(), sz.x, sz.y - this.getModelineElement().offsetHeight);
                 DOM.setOuterSize(this.getModelineElement(), sz.x);
         };
@@ -463,21 +581,41 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P._on_bufferLineChange = function(row) {
                 var div = this.getLineDivElement(row);
                 if (div) {
-                        //console.log("Redrawing line %d [%s]", row, this.buffer.code[row]);
                         div.innerHTML = this._getLineHTML(row);
                 }
         };
 
         P._on_bufferInsertLine = function(row, drawIt) {
-                var div = LINE_DIV.cloneNode(true);
-                this.getContentElement().insertBefore(div, this.getLineDivElement(row));
-                if (drawIt) {
-                        div.innerHTML = this._getLineHTML(row);
+                var inserted = row >= this._firstLineInDOM && row <= this._lastLineInDOM;
+                if (inserted) {
+                        var div = LINE_DIV.cloneNode(true);
+                        this.getContentElement().insertBefore(div, this.getLineDivElement(row));
+                        if (drawIt) {
+                                div.innerHTML = this._getLineHTML(row);
+                        }
                 }
+                if (row < this._firstLineInDOM)
+                        this._resetFirstLineInDOM(this._firstLineInDOM + 1);
+                if (row <= this._lastLineInDOM) {
+                        //this._resetLastLineInDOM(this._lastLineInDOM + 1);
+                        DOM.trash(this.getContentElement().lastChild);
+                }
+                //this._refill_dom();
         };
 
         P._on_bufferDeleteLine = function(row) {
-                DOM.trash(this.getLineDivElement(row));
+                var div = this.getLineDivElement(row);
+                if (div && this.getContentElement().childNodes.length > 1) {
+                        DOM.trash(div);
+                        if (row < this._firstLineInDOM)
+                                this._resetFirstLineInDOM(this._firstLineInDOM - 1);
+                        if (row < this._lastLineInDOM)
+                                this._resetLastLineInDOM(this._lastLineInDOM - 1);
+                        // if (this._firstLineInDOM == this._lastLineInDOM) {
+                        //         // no more lines
+                        //         this._firstLineInDOM--;
+                        // }
+                }
         };
 
         P._on_bufferPointChange = function(rc, pos) {
@@ -509,6 +647,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 Ymacs_Message_Popup.clearAll();
         };
 
+        P._on_bufferAfterInteractiveCommand = function() {
+                this.ensureCaretVisible(true);
+        };
+
         P._on_bufferProgressChange = function() {
                 this.redrawModelineWithTimer(null);
         };
@@ -522,6 +664,16 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this._on_bufferOverlayDelete(name, props);
                         return null;
                 }
+                // <hacks>
+                if (props.line2 < this._firstLineInDOM || props.line1 >= this._lastLineInDOM) {
+                        // totally out of sight
+                        this._on_bufferOverlayDelete(name, props);
+                        return null;
+                }
+                props = Object.makeCopy(props);
+                props.line1 = Math.max(props.line1, this._firstLineInDOM);
+                props.line2 = Math.min(props.line2, this._lastLineInDOM - 1);
+                // </hacks>
                 var p1 = this.coordinates(props.line1, props.col1);
                 var p2 = this.coordinates(props.line2, props.col2);
                 var p0 = this.__lineNumbers ? this.coordinates(props.line1, 0) : { x: 0, y: 0 };
@@ -573,7 +725,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_focus = function() {
                 window.focus();
-                // console.log("FOCUS for %s", this.buffer.name);
                 this.ymacs.setActiveFrame(this, true);
                 this.addClass("Ymacs_Frame-active");
                 if (!this.isMinibuffer) {
@@ -584,7 +735,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_blur = function() {
-                // console.log("BLUR for %s", this.buffer.name);
                 if (!this.isMinibuffer) {
                         this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
                 }
@@ -635,7 +785,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                     rc = this.coordinatesToRowCol(pos.x, pos.y);
                 this.buffer.cmd("goto_char", this.buffer._rowColToPosition(rc.row, rc.col));
                 this.buffer.ensureTransientMark();
-                this.ensureCaretVisible();
+                this.ensureCaretVisible(true);
         };
 
         function _dragSelect_onMouseUp(ev) {
@@ -666,6 +816,125 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_keyUp = function(ev) {
+        };
+
+        P._on_resize = function() {
+                this.centerOnCaret.delayed(1, this);
+        };
+
+        P._ensure_line_in_dom = function(line) {
+                var first_dom = this._firstLineInDOM,
+                    last_dom = this._lastLineInDOM,
+                    cont = this.getContentElement(), slice;
+                // // case 1.
+                // if (this.getLineDivElement(line))
+                //         return;
+                // case 2.
+                if (Math.abs(line - first_dom) < MIN_LINES_IN_DOM) {
+                        slice = this._getDFSlice(first_dom - ADD_LINES_IN_DOM, first_dom);
+                        if (slice.df) {
+                                // must add lines at TOP; this WILL scroll.
+                                var ovc = this.getOverlaysContainer(),
+                                    first = this.getLineDivElement(this.firstLineVisible()),
+                                    scrollDiff = first.offsetTop - ovc.scrollTop;
+                                cont.insertBefore(slice.df, cont.firstChild);
+                                this._resetFirstLineInDOM(slice.first);
+                                ovc.scrollTop = first.offsetTop - scrollDiff;
+                        }
+                }
+                // case 3.
+                else if (Math.abs(line - last_dom) < MIN_LINES_IN_DOM) {
+                        slice = this._getDFSlice(last_dom, last_dom + ADD_LINES_IN_DOM);
+                        if (slice.df) {
+                                // must add lines at BOTTOM
+                                cont.appendChild(slice.df);
+                                this._resetLastLineInDOM(slice.last);
+                        }
+                }
+                // case 4.
+                else if (line < first_dom || line >= last_dom) {
+                        // redraw the whole block where that line falls into the center
+                        slice = this._getHTMLSlice(line - ADD_LINES_IN_DOM,
+                                                   line + ADD_LINES_IN_DOM);
+                        this._resetFirstLineInDOM(slice.first);
+                        this._resetLastLineInDOM(slice.last);
+                        this.setContent(slice.html);
+                }
+        };
+
+        P._refill_dom = function() {
+                this._refill_dom_top();
+                this._refill_dom_bottom();
+        };
+
+        P._refill_dom_top = function() {
+                var first_visible = this.firstLineVisible(),
+                    first_dom = this._firstLineInDOM,
+                    diff = first_visible - first_dom,
+                    cont = this.getContentElement(),
+                    ovc = this.getOverlaysContainer(),
+                    first = this.getLineDivElement(first_visible),
+                    scrollDiff = first.offsetTop - ovc.scrollTop;
+                if (diff < ADD_LINES_IN_DOM && diff >= 0) {
+                        // should add some
+                        var slice = this._getDFSlice(first_dom - ADD_LINES_IN_DOM, first_dom);
+                        if (slice.df) {
+                                // this WILL scroll
+                                cont.insertBefore(slice.df, cont.firstChild);
+                                this._resetFirstLineInDOM(slice.first);
+                        }
+                }
+                else if (diff > MAX_LINES_IN_DOM) {
+                        // should remove some
+                        var div = this.getLineDivElement(first_visible - ADD_LINES_IN_DOM);
+                        while (div) {
+                                var prev = div.previousSibling;
+                                DOM.trash(div);
+                                div = prev;
+                                this._resetFirstLineInDOM(this._firstLineInDOM + 1);
+                        }
+                }
+                ovc.scrollTop = first.offsetTop - scrollDiff;
+        };
+
+        P._refill_dom_bottom = function() {
+                var last_visible = this.lastLineVisible(),
+                    last_dom = this._lastLineInDOM,
+                    diff = last_dom - last_visible,
+                    cont = this.getContentElement();
+                if (diff < ADD_LINES_IN_DOM && diff >= 0) {
+                        // should add some more
+                        var slice = this._getDFSlice(last_dom, last_dom + ADD_LINES_IN_DOM);
+                        if (slice.df) {
+                                cont.appendChild(slice.df);
+                                this._resetLastLineInDOM(slice.last);
+                        }
+                }
+                else if (diff > MAX_LINES_IN_DOM) {
+                        // should remove some
+                        var div = this.getLineDivElement(last_visible + ADD_LINES_IN_DOM);
+                        while (div) {
+                                var next = div.nextSibling;
+                                DOM.trash(div);
+                                div = next;
+                                this._resetLastLineInDOM(this._lastLineInDOM - 1);
+                        }
+                }
+        };
+
+        var TMPL_STATS = String.template(
+                "DOM: $first_dom -> $last_dom, VISIBLE: $first -> $last, WEIGHT: $weight, LEN: $len"
+        );
+
+        P._fill_stats = function() {
+                return TMPL_STATS({
+                        first_dom : this._firstLineInDOM,
+                        first     : this.firstLineVisible(),
+                        last_dom  : this._lastLineInDOM,
+                        last      : this.lastLineVisible(),
+                        weight    : this.getContentElement().childNodes.length,
+                        len       : this.buffer.code.length
+                });
         };
 
 });

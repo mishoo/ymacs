@@ -103,11 +103,7 @@
                                         collect = [];
                                         return execute.call(this);
                                 };
-                        } else {
-                                func.ymacsCallInteractively = func;
                         }
-                } else {
-                        func.ymacsCallInteractively = func;
                 }
                 return func;
         };

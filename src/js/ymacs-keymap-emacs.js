@@ -219,6 +219,14 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                                 size    : this.getCodeSize(),
                                 sizeKB  : this.getCodeSize().formatBytes(2)
                         }), true);
+                },
+
+                // DEBUG
+
+                "C-x +": function() {
+                        this.whenActiveFrame(function(frame){
+                                this.signalInfo(frame._fill_stats());
+                        });
                 }
         };
 

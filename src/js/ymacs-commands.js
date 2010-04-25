@@ -541,9 +541,22 @@ Ymacs_Buffer.newCommands({
                 this.ensureTransientMark();
         }),
 
+        // <XXX>: the following two kind of suck
+
         recenter_top_bottom: Ymacs_Interactive(function() {
-                this._centerOnCaret();
+                this.whenActiveFrame(function(frame){
+                        frame.ensureCaretVisible(true);
+                        frame.centerOnCaret();
+                });
         }),
+
+        ensure_caret_visible: Ymacs_Interactive(function() {
+                this.whenActiveFrame(function(frame){
+                        frame.centerOnCaretIfNotVisible();
+                });
+        }),
+
+        // </XXX>
 
         /* -----[ paragraphs ]----- */
 

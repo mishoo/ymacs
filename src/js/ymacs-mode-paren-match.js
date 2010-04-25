@@ -68,8 +68,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "(" : ")",
                 "[" : "]",
                 "{" : "}",
-                '"' : { close: '"', backslash: /\x22/g },
-                "'" : { close: "'", backslash: /\x27/g }
+                '"' : { close: '"', backslash: /[\x22\\]/g },
+                "'" : { close: "'", backslash: /[\x27\\]/g }
         };
 
         function ERROR(o) {
@@ -106,7 +106,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         var pos = this.cmd("matching_paren");
                         if (pos != null) {
                                 this.cmd("goto_char", pos);
-                                this.cmd("recenter_top_bottom");
+                                //this.cmd("ensure_caret_visible");
                                 return true;
                         }
                 }),
@@ -131,6 +131,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
                                 else
                                         this.cmd("goto_char", start);
+                                //this.cmd("ensure_caret_visible");
                                 return true;
                         }
                 }),
@@ -149,6 +150,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         return;
                                 }
                                 this.cmd("goto_char", this._rowColToPosition(prev.opened.line, prev.opened.col));
+                                //this.cmd("ensure_caret_visible");
                                 return true;
                         }
                 }),
@@ -221,10 +223,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 p = p.context.passedParens.grep("closed").mergeSort(compareRowCol).grep_first(function(p){
                                         return compareRowCol(p, lc) >= 0;
                                 });
-                                if (p != null)
+                                if (p != null) {
                                         this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + 1);
-                                else
+                                        //this.cmd("ensure_caret_visible");
+                                } else {
                                         ERROR(this);
+                                }
                         }
                 }),
 
@@ -235,10 +239,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 p = p.context.passedParens.grep("closed").mergeSort(compareRowCol).grep_last(function(p){
                                         return compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0;
                                 });
-                                if (p != null)
+                                if (p != null) {
                                         this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
-                                else
+                                        //this.cmd("ensure_caret_visible");
+                                } else {
                                         ERROR(this);
+                                }
                         }
                 }),
 
