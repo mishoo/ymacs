@@ -671,8 +671,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         return null;
                 }
                 props = Object.makeCopy(props);
-                props.line1 = Math.max(props.line1, this._firstLineInDOM);
-                props.line2 = Math.min(props.line2, this._lastLineInDOM - 1);
+                if (props.line1 < this._firstLineInDOM) {
+                        props.line1 = this._firstLineInDOM;
+                        props.col1 = 0;
+                }
+                if (props.line2 >= this._lastLineInDOM) {
+                        props.line2 = this._lastLineInDOM - 1;
+                        props.col2 = 0;
+                }
                 // </hacks>
                 var p1 = this.coordinates(props.line1, props.col1);
                 var p2 = this.coordinates(props.line2, props.col2);
