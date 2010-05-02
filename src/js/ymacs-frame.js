@@ -503,9 +503,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._resetFirstLineInDOM = function(line) {
                 this._firstLineInDOM = line;
-                var div = this.getContentElement().firstChild;
-                if (div)
-                        div.style.counterReset = "ymacs-line " + line;
+                if (!this.isMinibuffer) {
+                        var div = this.getContentElement().firstChild;
+                        if (div) {
+                                div.style.counterReset = "ymacs-line " + line;
+                        }
+                }
         };
 
         P._resetLastLineInDOM = function(line) {
@@ -514,9 +517,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._redrawBuffer = function() {
                 var slice = this._getHTMLSlice(0, MAX_LINES_IN_DOM);
+                this.setContent(slice.html);
                 this._resetFirstLineInDOM(slice.first);
                 this._resetLastLineInDOM(slice.last);
-                this.setContent(slice.html);
         };
 
         P.coordinatesToRowCol = function(x, y) {
@@ -583,35 +586,28 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_bufferInsertLine = function(row, drawIt) {
-                var inserted = row >= this._firstLineInDOM && row <= this._lastLineInDOM;
-                if (inserted) {
+                if (row < this._firstLineInDOM) {
+                        this._resetFirstLineInDOM(this._firstLineInDOM + 1);
+                        this._resetLastLineInDOM(this._lastLineInDOM + 1);
+                }
+                else if (row < this._lastLineInDOM) {
                         var div = LINE_DIV.cloneNode(true);
                         this.getContentElement().insertBefore(div, this.getLineDivElement(row));
                         if (drawIt) {
                                 div.innerHTML = this._getLineHTML(row);
                         }
-                }
-                if (row < this._firstLineInDOM)
-                        this._resetFirstLineInDOM(this._firstLineInDOM + 1);
-                if (row <= this._lastLineInDOM) {
-                        //this._resetLastLineInDOM(this._lastLineInDOM + 1);
                         DOM.trash(this.getContentElement().lastChild);
                 }
-                //this._refill_dom();
         };
 
         P._on_bufferDeleteLine = function(row) {
-                var div = this.getLineDivElement(row);
-                if (div && this.getContentElement().childNodes.length > 1) {
-                        DOM.trash(div);
-                        if (row < this._firstLineInDOM)
-                                this._resetFirstLineInDOM(this._firstLineInDOM - 1);
-                        if (row < this._lastLineInDOM)
-                                this._resetLastLineInDOM(this._lastLineInDOM - 1);
-                        // if (this._firstLineInDOM == this._lastLineInDOM) {
-                        //         // no more lines
-                        //         this._firstLineInDOM--;
-                        // }
+                if (row < this._firstLineInDOM) {
+                        this._resetFirstLineInDOM(this._firstLineInDOM - 1);
+                        this._resetLastLineInDOM(this._lastLineInDOM - 1);
+                }
+                else if (row < this._lastLineInDOM) {
+                        DOM.trash(this.getLineDivElement(row));
+                        this._resetLastLineInDOM(this._lastLineInDOM - 1);
                 }
         };
 
@@ -826,7 +822,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_resize = function() {
-                this.centerOnCaret.delayed(1, this);
+                this.centerOnCaretIfNotVisible.delayed(1, this);
         };
 
         P._ensure_line_in_dom = function(line) {
@@ -863,15 +859,26 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         // redraw the whole block where that line falls into the center
                         slice = this._getHTMLSlice(line - ADD_LINES_IN_DOM,
                                                    line + ADD_LINES_IN_DOM);
+                        this.setContent(slice.html);
                         this._resetFirstLineInDOM(slice.first);
                         this._resetLastLineInDOM(slice.last);
-                        this.setContent(slice.html);
                 }
         };
 
         P._refill_dom = function() {
-                this._refill_dom_top();
-                this._refill_dom_bottom();
+                if (this.firstLineVisible() == null) {
+                        // no visible line; this is a case that
+                        // can happen when you delete a big region.
+                        var slice = this._getHTMLSlice(this._firstLineInDOM - ADD_LINES_IN_DOM,
+                                                       this._firstLineInDOM + ADD_LINES_IN_DOM);
+                        this._resetFirstLineInDOM(slice.first);
+                        this._resetLastLineInDOM(slice.last);
+                        this.setContent(slice.html);
+                        this.centerOnCaret();
+                } else {
+                        this._refill_dom_bottom();
+                        this._refill_dom_top();
+                }
         };
 
         P._refill_dom_top = function() {
@@ -894,12 +901,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 else if (diff > MAX_LINES_IN_DOM) {
                         // should remove some
                         var div = this.getLineDivElement(first_visible - ADD_LINES_IN_DOM);
+                        diff = 0;
                         while (div) {
                                 var prev = div.previousSibling;
                                 DOM.trash(div);
                                 div = prev;
-                                this._resetFirstLineInDOM(this._firstLineInDOM + 1);
+                                ++diff;
                         }
+                        this._resetFirstLineInDOM(this._firstLineInDOM + diff);
                 }
                 ovc.scrollTop = first.offsetTop - scrollDiff;
         };
@@ -920,12 +929,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 else if (diff > MAX_LINES_IN_DOM) {
                         // should remove some
                         var div = this.getLineDivElement(last_visible + ADD_LINES_IN_DOM);
+                        diff = 0;
                         while (div) {
                                 var next = div.nextSibling;
                                 DOM.trash(div);
                                 div = next;
-                                this._resetLastLineInDOM(this._lastLineInDOM - 1);
+                                --diff;
                         }
+                        this._resetLastLineInDOM(this._lastLineInDOM - diff);
                 }
         };
 
