@@ -43,8 +43,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         var BLINK_TIMEOUT = 225;
 
-        var MAX_LINES_IN_DOM = 100;
-        var ADD_LINES_IN_DOM = 40;
+        var MAX_LINES_IN_DOM = 10000;
+        var ADD_LINES_IN_DOM = 10000;
         var MIN_LINES_IN_DOM = 5;
 
         D.DEFAULT_EVENTS = [ "onPointChange" ];
@@ -504,10 +504,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P._resetFirstLineInDOM = function(line) {
                 this._firstLineInDOM = line;
                 if (!this.isMinibuffer) {
-                        var div = this.getContentElement().firstChild;
-                        if (div) {
-                                div.style.counterReset = "ymacs-line " + line;
-                        }
+                        this.getContentElement().style.counterReset = "ymacs-line " + line;
                 }
         };
 
