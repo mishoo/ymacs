@@ -176,7 +176,8 @@ div.DlButton-Label { display: inline; }
 .DlEntry-ValidationError input, .DlEntry-ValidationError textarea { background-color: #ffccd9; }
 .DlEntry-Readonly .DlEntry-cell { background-color: #cde6ff; border-bottom-color: #dee9ff; border-right-color: #dee9ff; }
 .DlEntry-Readonly input, .DlEntry-Readonly textarea { background-color: #cde6ff; }
-.DlEntry-empty input, .DlEntry-empty textarea { color: #8a96ac; font-style: italic; }
+.DlEntry-emptyText { display: none; position: absolute; left: 3px; top: 1px; color: #8a96ac; font-style: italic; cursor: text; }
+.DlEntry-empty .DlEntry-emptyText { display: block; }
 
 .DlEntry-dropDownBtn {
   line-height: 20px;
@@ -186,6 +187,26 @@ div.DlButton-Label { display: inline; }
 
 .DlEntry-dropDownBtn-hover { background-color: #ffffff; }
 .DlEntry-dropDownBtn-active { background-color: #4497c1; }
+
+.DlEntry-invalidIcon {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 1px;
+  top: 50%;
+  margin-top: -8px;
+  background-image: url("img/entry-warning.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  opacity: 0.6;
+  display: none;
+}
+
+div.DlEntry-invalidIcon:hover { opacity: 1; }
+
+.DlEntry-ValidationError .DlEntry-invalidIcon {
+  display: block;
+}
 
 
 
@@ -849,8 +870,8 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 }
 
 .DlDialog .DlWM-modalStopper {
-  -moz-border-radius: 0 0 4px 4px;
-  -webkit-border-radius: 0 0 4px 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
 }
 
 .DlWM-hasModals { width: 100%; height: 100%; }

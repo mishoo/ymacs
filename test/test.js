@@ -138,7 +138,7 @@ to the current one.\n\
         var layout = new DlLayout({ parent: dlg });
 
         var empty = new Ymacs_Buffer({ name: "empty" });
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ] });
+        var ymacs = window.ymacs = new Ymacs({ buffers: [ empty, javascript, xml, lisp, markdown, txt, keys ] });
         ymacs.setColorTheme([ "dark", "y" ]);
 
         try {

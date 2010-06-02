@@ -71,7 +71,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onKeyDown   : this._on_keyDown,
                         onKeyPress  : this._on_keyPress,
                         onKeyUp     : this._on_keyUp,
-                        onResize    : this.centerOnCaret
+                        onResize    : this._on_resize
                 });
 
                 this._dragSelectCaptures = {
@@ -92,12 +92,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
                         onProgressChange         : this._on_bufferProgressChange.$(this),
                         beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this),
+                        afterInteractiveCommand  : this._on_bufferAfterInteractiveCommand.$(this),
                         onOverlayDelete          : this._on_bufferOverlayDelete.$(this)
                 };
 
                 this._moreBufferEvents = {
-                        onMessage       : this._on_bufferMessage.$(this),
-                        onOverlayChange : this._on_bufferOverlayChange.$(this)
+                        onMessage               : this._on_bufferMessage.$(this),
+                        onOverlayChange         : this._on_bufferOverlayChange.$(this),
+                        afterInteractiveCommand : this.ensureCaretVisible.$(this)
                 };
 
                 var buffer = this.buffer;
@@ -446,10 +448,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.heightInLines = function() {
-                return Math.floor(this.getOverlaysContainer().clientHeight / this.getCaretElement().offsetHeight);
+                return Math.floor(this.getOverlaysContainer().clientHeight / this.getContentElement().firstChild.offsetHeight);
         };
 
         P.setOuterSize = P.setSize = function(sz) {
+                D.BASE.setOuterSize.apply(this, arguments);
                 DOM.setOuterSize(this.getOverlaysContainer(), sz.x, sz.y - this.getModelineElement().offsetHeight);
                 DOM.setOuterSize(this.getModelineElement(), sz.x);
         };
@@ -508,6 +511,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this._unhoverLine();
                 Ymacs_Message_Popup.clearAll();
         };
+
+        P._on_bufferAfterInteractiveCommand = function() {};
 
         P._on_bufferProgressChange = function() {
                 this.redrawModelineWithTimer(null);
@@ -666,6 +671,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_keyUp = function(ev) {
+        };
+
+        P._on_resize = function() {
+                this.centerOnCaret.delayed(1, this);
         };
 
 });

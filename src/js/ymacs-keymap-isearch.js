@@ -88,7 +88,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                                      this._isearchContext.forward ? "search_forward" : "search_backward",
                                      text);
                 if (found) {
-                        this.cmd("recenter_top_bottom");
+                        this.cmd("ensure_caret_visible");
                         var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * text.length);
                         this.setOverlay("isearch", {
                                 line1: rc_begin.row, line2: this._rowcol.row,
