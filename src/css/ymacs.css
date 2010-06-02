@@ -20,6 +20,7 @@
 
 .Ymacs-frame-content {
   white-space: pre;
+  padding-bottom: 1000px;
 }
 
 .Ymacs-caret {
@@ -34,6 +35,10 @@
 .Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; }
 
 .Ymacs_Minibuffer .Ymacs_Modeline { display: none; }
+
+.Ymacs_Minibuffer .Ymacs-frame-content {
+  padding-bottom: 0;
+}
 
 /* .Ymacs_Frame-hasOverlays .Ymacs-current-line { */
 /*   background: transparent !important; */

@@ -106,7 +106,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         var pos = this.cmd("matching_paren");
                         if (pos != null) {
                                 this.cmd("goto_char", pos);
-                                //this.cmd("ensure_caret_visible");
                                 return true;
                         }
                 }),
@@ -131,7 +130,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
                                 else
                                         this.cmd("goto_char", start);
-                                //this.cmd("ensure_caret_visible");
                                 return true;
                         }
                 }),
@@ -150,7 +148,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                         return;
                                 }
                                 this.cmd("goto_char", this._rowColToPosition(prev.opened.line, prev.opened.col));
-                                //this.cmd("ensure_caret_visible");
                                 return true;
                         }
                 }),
@@ -225,7 +222,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 });
                                 if (p != null) {
                                         this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + 1);
-                                        //this.cmd("ensure_caret_visible");
                                 } else {
                                         ERROR(this);
                                 }
@@ -241,7 +237,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 });
                                 if (p != null) {
                                         this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
-                                        //this.cmd("ensure_caret_visible");
                                 } else {
                                         ERROR(this);
                                 }
