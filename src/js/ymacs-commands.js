@@ -552,7 +552,9 @@ Ymacs_Buffer.newCommands({
 
         ensure_caret_visible: Ymacs_Interactive(function() {
                 this.whenActiveFrame(function(frame){
-                        frame.centerOnCaretIfNotVisible();
+                        // frame.centerOnCaretIfNotVisible();
+                        frame.ensureCaretVisible(true);
+                        frame.centerOnCaret();
                 });
         }),
 
