@@ -39,8 +39,8 @@ form { padding: 0; margin: 0; }
   width: 1px;
   height: 1px;
   overflow: hidden;
-  left: -32000;
-  top: -32000;
+  left: -32000px;
+  top: -32000px;
   display: none;                /* XXX: why didn't we have this before? */
 }
 
@@ -379,8 +379,8 @@ table.DlCalendar {
 .DlPopup {
   position: absolute;
   z-index: 100;
-  left: -30000;
-  top: -30000;
+  left: -30000px;
+  top: -30000px;
 }
 
 .DlPopup-scrollArea {
@@ -1046,7 +1046,7 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 .IconCalendar { background-image: url("img/icons/calendar.png"); background-position: 1px 50%; }
 .IconColors { background-image: url("img/icons/colors.png"); background-position: 1px 50%; }
 .IconChardev { background-image: url("img/icons/gnome-fs-chardev.png"); background-position: 1px 50%; }
-.IconDynarch { background-image: url("img/icons/dynarch-small.png"); background-image: 1px 50%; }
+.IconDynarch { background-image: url("img/icons/dynarch-small.png"); background-position: 1px 50%; }
 
 
 
