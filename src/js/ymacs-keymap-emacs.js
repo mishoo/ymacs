@@ -165,6 +165,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-x h"                                   : "mark_whole_buffer",
                 "C-g"                                     : "keyboard_quit",
 
+                // vertical editing
+                "C-x r t"                                 : "string_rectangle",
+                "C-x r c"                                 : "clear_rectangle",
+                "C-x r k"                                 : "kill_rectangle",
+                "C-x r y"                                 : "yank_rectangle",
+
                 // buffers
                 "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
                 "C-x C-ARROW_LEFT && C-x ARROW_LEFT && C-S-TAB" : "previous_buffer",
@@ -192,6 +198,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-c /"                                   : "close_last_xml_tag",
                 "S-BACKSPACE"                             : "backward_delete_whitespace",
                 "S-DELETE"                                : "delete_whitespace",
+                "C-M-d"                                   : "delete_region_or_line",
                 "M-ENTER"                                 : "start_next_paragraph",
                 "M-S-q"                                   : "fill_paragraph_no_prefix",
                 "C-M-|"                                   : "cperl_lineup",

@@ -118,6 +118,15 @@ Ymacs_Buffer.newCommands({
                 return this.point() == 0;
         },
 
+        eol_p: function() {
+                var rc = this._positionToRowCol(this.point());
+                return rc.col == this.code[rc.line].length;
+        },
+
+        bol_p: function() {
+                return this._positionToRowCol(this.point()).col == 0;
+        },
+
         backward_delete_char: Ymacs_Interactive("^p", function(n){
                 if (!this.deleteTransientRegion()) {
                         if (n == null) n = 1;
@@ -439,6 +448,21 @@ Ymacs_Buffer.newCommands({
         goto_line: Ymacs_Interactive("NGoto line: ", function(row){
                 var pos = this._rowColToPosition(row - 1, 0);
                 return this.cmd("goto_char", pos);
+        }),
+
+        move_to_column: Ymacs_Interactive("NMove to column: ", function(col, force){
+                var rc = this._positionToRowCol(this.point());
+                var text = this.code[rc.row];
+                if (text.length < col) {
+                        if (force) {
+                                this.cmd("end_of_line");
+                                this.cmd("insert", " ".x(col - text.length));
+                        } else {
+                                this.cmd("end_of_line");
+                        }
+                } else {
+                        this.cmd("goto_char", this._rowColToPosition(rc.row, col));
+                }
         }),
 
         delete_region: Ymacs_Interactive("r", function(begin, end){
@@ -962,6 +986,95 @@ Ymacs_Buffer.newCommands({
         })
 
 });
+
+/* -----[ rectangle functions (vertical editing) ]----- */
+
+(function(){
+
+        function apply_on_rectangle(buffer, begin, end, func) {
+                buffer.cmd("save_excursion", function(){
+                        var p1 = this._positionToRowCol(begin),
+                            p2 = this._positionToRowCol(end),
+                            width = Math.abs(p2.col - p1.col);
+                        for (var line = p1.row; line <= p2.row; ++line) {
+                                this.cmd("goto_char", this._rowColToPosition(line, 0));
+                                var text = this.code[line],
+                                    c1 = p1.col,
+                                    c2 = p2.col,
+                                    p = this.point(), ws = 0;
+                                if (c1 > c2) {
+                                        var tmp = c1;
+                                        c1 = c2;
+                                        c2 = tmp;
+                                }
+                                if (c1 > text.length) {
+                                        ws = c1 - text.length;
+                                        c1 = text.length;
+                                }
+                                if (c2 > text.length) {
+                                        c2 = text.length;
+                                }
+                                func.call(this, p + c1, p + c2, ws, width);
+                        }
+                }, begin == buffer.point());
+        };
+
+        Ymacs_Buffer.newCommands({
+
+                string_rectangle: Ymacs_Interactive("r\nsString rectangle: ", function(begin, end, string) {
+                        apply_on_rectangle(this, begin, end, function(c1, c2, ws){
+                                if (ws > 0) {
+                                        this._insertText(" ".x(ws), c1);
+                                } else {
+                                        this._deleteText(c1, c2);
+                                }
+                                this._insertText(string, c1 + ws);
+                        });
+                }),
+
+                kill_rectangle: Ymacs_Interactive("r", function(begin, end){
+                        var text = [];
+                        apply_on_rectangle(this, begin, end, function(c1, c2, ws, width){
+                                var str = this._bufferSubstring(c1, c2);
+                                if (c2 - c1 < width)
+                                        str += " ".x(width - c2 + c1);
+                                text.push(str);
+                                this._deleteText(c1, c2);
+                        });
+                        this.setq("killed_rectangle", text);
+                }),
+
+                clear_rectangle: Ymacs_Interactive("r", function(begin, end){
+                        this.cmd("string_rectangle", begin, end,
+                                 " ".x(Math.abs(this._positionToRowCol(end).col -
+                                                this._positionToRowCol(begin).col)));
+                }),
+
+                insert_rectangle: function(point, rect) {
+                        var col = this._positionToRowCol(point).col;
+                        this.cmd("set_mark_command", point);
+                        rect.foreach(function(text, i){
+                                if (i > 0) {
+                                        if (!this.cmd("forward_line")) {
+                                                this.cmd("end_of_line");
+                                                this.cmd("newline");
+                                        }
+                                        this.cmd("move_to_column", col, true);
+                                }
+                                this.cmd("insert", text);
+                        }, this);
+                },
+
+                yank_rectangle: Ymacs_Interactive("d", function(point){
+                        var kr = this.getq("killed_rectangle");
+                        if (kr == null)
+                                throw new Ymacs_Exception("No killed rectangle");
+                        this.cmd("insert_rectangle", point, kr);
+                })
+
+        });
+
+})();
 
 /* -----[ commands to help using the system clipboard ]----- */
 

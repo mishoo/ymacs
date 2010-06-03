@@ -43,7 +43,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "C-M-b && C-M-p" : "backward_sexp",
                 "C-M-u && M-a"   : "backward_up_list",
                 "M-e"            : "up_list",
-                "C-M-d"          : "down_list",
+                // "C-M-d"          : "down_list",
                 "M-C-k"          : "kill_sexp",
                 "M-C-SPACE"      : "mark_sexp",
                 "M-C-t"          : "transpose_sexps",
