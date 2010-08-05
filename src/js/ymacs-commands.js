@@ -212,7 +212,7 @@ Ymacs_Buffer.newCommands({
 
         indent_line: Ymacs_Interactive("P", function(noEmpty) {
                 if (this.tokenizer) {
-                        var indent = this.tokenizer.getIndentation(this._rowcol.row);
+                        var indent = this.tokenizer.getIndentation(this._rowcol.row, this);
                         if (indent != null) {
                                 if (!noEmpty || /\S/.test(this.getLine())) {
                                         var pos = this.cmd("save_excursion", function(){

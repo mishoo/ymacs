@@ -76,12 +76,17 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 throw new Ymacs_Exception("Balanced expression not found");
         };
 
+        function getPP(p) {
+                var pp = p.context.passedParens;
+                return pp instanceof Function ? pp() : pp;
+        };
+
         Ymacs_Buffer.newCommands({
 
                 matching_paren: function() {
                         var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                         if (p) {
-                                var parens = p.context.passedParens;
+                                var parens = getPP(p);
                                 return parens.foreach(function(p){
                                         var match = p.closed;
                                         if (p.line == rc.row && p.col == rc.col) {
@@ -114,7 +119,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         var rc = this._rowcol, p = this.tokenizer.finishParsing();
                         if (p) {
                                 // find next paren
-                                var parens = p.context.passedParens.mergeSort(compareRowCol);
+                                var parens = getPP(p).mergeSort(compareRowCol);
                                 var next = parens.foreach(function(p){
                                         if (p.line > rc.row || (p.line == rc.row && p.col >= rc.col)) {
                                                 $RETURN(p);
@@ -138,7 +143,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         var rc = this._rowcol, p = this.tokenizer.finishParsing();
                         if (p) {
                                 // find next paren
-                                var parens = p.context.passedParens.grep("closed").map("closed").mergeSort(compareRowCol);
+                                var parens = getPP(p).grep("closed").map("closed").mergeSort(compareRowCol);
                                 var prev = parens.r_foreach(function(p){
                                         if (p.line < rc.row || (p.line == rc.row && p.col < rc.col))
                                                 $RETURN(p);
@@ -217,7 +222,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         var rc = this._rowcol, p = this.tokenizer.finishParsing();
                         if (p) {
                                 var lc = { line: rc.row, col: rc.col };
-                                p = p.context.passedParens.grep("closed").mergeSort(compareRowCol).grep_first(function(p){
+                                p = getPP(p).grep("closed").mergeSort(compareRowCol).grep_first(function(p){
                                         return compareRowCol(p, lc) >= 0;
                                 });
                                 if (p != null) {
@@ -232,7 +237,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         var rc = this._rowcol, p = this.tokenizer.finishParsing();
                         if (p) {
                                 var lc = { line: rc.row, col: rc.col };
-                                p = p.context.passedParens.grep("closed").mergeSort(compareRowCol).grep_last(function(p){
+                                p = getPP(p).grep("closed").mergeSort(compareRowCol).grep_last(function(p){
                                         return compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0;
                                 });
                                 if (p != null) {
@@ -250,47 +255,47 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
         });
 
-});
+        Ymacs_Buffer.newMode("paren_match_mode", function(){
 
-Ymacs_Buffer.newMode("paren_match_mode", function(){
+                var keymap = Ymacs_Keymap_ParenMatch();
+                this.pushKeymap(keymap);
 
-        var keymap = Ymacs_Keymap_ParenMatch();
-        this.pushKeymap(keymap);
+                var active = false,
+                    clearOvl = function() {
+                            if (active)
+                                    this.deleteOverlay("match-paren");
+                    }.clearingTimeout(500, this);
 
-        var active = false,
-            clearOvl = function() {
-                    if (active)
-                            this.deleteOverlay("match-paren");
-            }.clearingTimeout(500, this);
+                var events = {
+                        beforeInteractiveCommand: function() {
+                                clearOvl.doItNow();
+                        },
+                        afterInteractiveCommand: function() {
+                                var p = this.tokenizer.getLastParser(), rc = this._rowcol;
+                                if (p) {
+                                        getPP(p).foreach(function(p){
+                                                var match = p.closed;
+                                                if ((p.line == rc.row && p.col == rc.col) ||
+                                                    (match.line == rc.row && match.col == rc.col - 1)) {
+                                                        active = true;
+                                                        this.setOverlay("match-paren", {
+                                                                line1: p.line, line2: match.line,
+                                                                col1: p.col, col2: match.col + 1
+                                                        });
+                                                        clearOvl();
+                                                }
+                                        }, this);
+                                }
+                        }.clearingTimeout(100)
+                };
+                this.addEventListener(events);
 
-        var events = {
-                beforeInteractiveCommand: function() {
+                return function() {
                         clearOvl.doItNow();
-                },
-                afterInteractiveCommand: function() {
-                        var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-                        if (p) {
-                                p.context.passedParens.foreach(function(p){
-                                        var match = p.closed;
-                                        if ((p.line == rc.row && p.col == rc.col) ||
-                                            (match.line == rc.row && match.col == rc.col - 1)) {
-                                                active = true;
-                                                this.setOverlay("match-paren", {
-                                                        line1: p.line, line2: match.line,
-                                                        col1: p.col, col2: match.col + 1
-                                                });
-                                                clearOvl();
-                                        }
-                                }, this);
-                        }
-                }.clearingTimeout(100)
-        };
-        this.addEventListener(events);
+                        this.popKeymap(keymap);
+                        this.removeEventListener(events);
+                };
 
-        return function() {
-                clearOvl.doItNow();
-                this.popKeymap(keymap);
-                this.removeEventListener(events);
-        };
+        });
 
 });

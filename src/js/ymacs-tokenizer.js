@@ -203,6 +203,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 this.quickUpdate(0);
         };
 
+        P.getLanguage = function(name) {
+                return LANGUAGES[name](this.stream, this);
+        };
+
         P.showProgress = function(p) {
                 if (p != null) {
                         p = Math.round(p / this.stream.length() * 100) + "%";
@@ -322,10 +326,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 return this.parsers.peek();
         };
 
-        P.getIndentation = function(row) {
+        P.getIndentation = function(row, buffer) {
                 var p = this.getParserForLine(row);
                 if (p && p.indentation instanceof Function)
-                        return p.indentation();
+                        return p.indentation(buffer);
         };
 
 });
