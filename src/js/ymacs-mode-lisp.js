@@ -78,7 +78,7 @@
         var SPECIAL_FORMS = "\
 deftype defstruct defclass \
 defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
-when cond \
+when cond unless etypecase typecase ctypecase \
 lambda let load-time-value quote macrolet \
 progn prog1 prog2 progv go flet the \
 if throw eval-when multiple-value-prog1 unwind-protect let* \
