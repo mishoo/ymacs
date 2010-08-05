@@ -147,6 +147,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         P.renameBuffer = function(buf, name) {
                 buf = this.getBuffer(buf);
                 buf.name = name;
+                buf.callHooks("onProgressChange");
         };
 
         P._do_switchToBuffer = function(buf) {
