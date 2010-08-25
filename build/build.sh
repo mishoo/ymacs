@@ -1,8 +1,7 @@
 #! /bin/bash
 
-# make sure the "yuicompressor" program exists and is in $PATH for
-# minification to work.  That can be a little shell script that calls
-# the YUI Compressor, or whatever.
+# make sure the "uglifyjs" program exists and is in $PATH for
+# minification to work.
 
 TEMPDIR=`mktemp -d`
 YEMPDIR="$TEMPDIR/Ymacs"
@@ -19,7 +18,7 @@ rm loadfiles.txt
 mkdir ../js-minified
 cat $JSFILES > ../js-minified/all.js
 cd ../js-minified
-yuicompressor all.js > ymacs-min.js
+uglifyjs < all.js > ymacs-min.js
 rm all.js
 
 cd $TEMPDIR

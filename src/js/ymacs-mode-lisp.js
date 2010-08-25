@@ -109,6 +109,7 @@ return return-from setq multiple-value-call".qw().toHash();
         var FORM_ARGS = {
                 "if"         : "3+",
                 "when"       : "1*",
+                "lambda"     : "1*",
                 "unless"     : "1*",
                 "defun"      : "2*",
                 "defgeneric" : "2*",

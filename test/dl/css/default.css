@@ -44,7 +44,7 @@ form { padding: 0; margin: 0; }
   display: none;                /* XXX: why didn't we have this before? */
 }
 
-.DYNARCH-FAKE-FOCUS { z-index: -10000; position: absolute; left: 0; top: 0; }
+.DYNARCH-FAKE-FOCUS { z-index: -10000; position: absolute; left: -2000px; top: 0; }
 
 .CURSOR-DRAGGING   { cursor: move !important; }
 .CURSOR-RESIZE-E   { cursor: e-resize !important; }
