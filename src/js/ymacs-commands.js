@@ -798,11 +798,12 @@ Ymacs_Buffer.newCommands({
                         this.cmd("goto_char", ctx.lastSearch);
                         // console.log("last at: %d", ctx.lastSearch);
                         if (!ctx.forward) {
-                                while (this.cmd("search_backward", ctx.search))
+                                while (this.cmd("search_backward", ctx.search)) {
                                         if (!word.test(this.charAt(-1))) {
                                                 found = true;
                                                 break;
                                         }
+                                }
                                 if (found) {
                                         p1 = this.point();
                                         ctx.lastSearch = p1;
@@ -843,7 +844,7 @@ Ymacs_Buffer.newCommands({
                                         syntax_word: this.getq("syntax_word_dabbrev")
                                 }, "forward_word");
                                 expansion = this.cmd("buffer_substring", p1, this.point());
-                                if (expansion in ctx.encountered)
+                                if (Object.HOP(ctx.encountered, expansion))
                                         repeat.call(this);
                         }
                 });
