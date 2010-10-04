@@ -18,7 +18,7 @@ rm loadfiles.txt
 mkdir ../js-minified
 cat $JSFILES > ../js-minified/all.js
 cd ../js-minified
-uglifyjs < all.js > ymacs-min.js
+uglifyjs $* < all.js > ymacs-min.js
 rm all.js
 
 cd $TEMPDIR
