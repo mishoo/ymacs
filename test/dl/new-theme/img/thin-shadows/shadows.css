@@ -1,0 +1,222 @@
+T { left: 10px; right: 9px; top: -7px; background: url("T.png") repeat-x 0 0; height: 7px; }
+B { left: 10px; right: 9px; background: url("B.png") repeat-x 0 0; bottom: -11px; height: 11px; }
+TL { left: -7px; width: 17px; top: -7px; background: url("TL.png") no-repeat 0 0; height: 20px; }
+BR { width: 20px; right: -11px; background: url("BR.png") no-repeat 0 0; bottom: -11px; height: 20px; }
+R { width: 11px; right: -11px; top: 13px; background: url("R.png") repeat-y 0 0; bottom: 9px; }
+TR { width: 20px; right: -11px; top: -7px; background: url("TR.png") no-repeat 0 0; height: 20px; }
+BL { left: -7px; width: 17px; background: url("BL.png") no-repeat 0 0; bottom: -11px; height: 20px; }
+L { left: -7px; width: 7px; top: 13px; background: url("L.png") repeat-y 0 0; bottom: 9px; }
+
+
+/*
+$VAR1 = {
+          'T' => {
+                   'css' => {
+                              'left' => '10px',
+                              'right' => '9px',
+                              'top' => '-7px',
+                              'background' => 'url("T.png") repeat-x 0 0',
+                              'height' => '7px'
+                            },
+                   'origsize' => {
+                                   'y' => 20,
+                                   'x' => 280
+                                 },
+                   'cut' => {
+                              'x' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 7,
+                                    'x' => 16
+                                  },
+                   'diff' => 13,
+                   'sel' => [
+                              17,
+                              0,
+                              280,
+                              20
+                            ],
+                   'name' => 'T.png'
+                 },
+          'B' => {
+                   'css' => {
+                              'left' => '10px',
+                              'right' => '9px',
+                              'background' => 'url("B.png") repeat-x 0 0',
+                              'bottom' => '-11px',
+                              'height' => '11px'
+                            },
+                   'origsize' => {
+                                   'y' => 20,
+                                   'x' => 280
+                                 },
+                   'cut' => {
+                              'x' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 11,
+                                    'x' => 16
+                                  },
+                   'diff' => 9,
+                   'sel' => [
+                              17,
+                              206,
+                              280,
+                              20
+                            ],
+                   'name' => 'B.png'
+                 },
+          'TL' => {
+                    'css' => {
+                               'left' => '-7px',
+                               'width' => '17px',
+                               'top' => '-7px',
+                               'background' => 'url("TL.png") no-repeat 0 0',
+                               'height' => '20px'
+                             },
+                    'origsize' => {
+                                    'y' => 20,
+                                    'x' => 17
+                                  },
+                    'finalsize' => {
+                                     'y' => 20,
+                                     'x' => 17
+                                   },
+                    'sel' => [
+                               0,
+                               0,
+                               17,
+                               20
+                             ],
+                    'name' => 'TL.png'
+                  },
+          'BR' => {
+                    'css' => {
+                               'width' => '20px',
+                               'right' => '-11px',
+                               'background' => 'url("BR.png") no-repeat 0 0',
+                               'bottom' => '-11px',
+                               'height' => '20px'
+                             },
+                    'origsize' => {
+                                    'y' => 20,
+                                    'x' => 20
+                                  },
+                    'finalsize' => {
+                                     'y' => 20,
+                                     'x' => 20
+                                   },
+                    'sel' => [
+                               297,
+                               206,
+                               20,
+                               20
+                             ],
+                    'name' => 'BR.png'
+                  },
+          'R' => {
+                   'css' => {
+                              'width' => '11px',
+                              'right' => '-11px',
+                              'top' => '13px',
+                              'background' => 'url("R.png") repeat-y 0 0',
+                              'bottom' => '9px'
+                            },
+                   'origsize' => {
+                                   'y' => 186,
+                                   'x' => 20
+                                 },
+                   'cut' => {
+                              'y' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 16,
+                                    'x' => 11
+                                  },
+                   'diff' => 9,
+                   'sel' => [
+                              297,
+                              20,
+                              20,
+                              186
+                            ],
+                   'name' => 'R.png'
+                 },
+          'TR' => {
+                    'css' => {
+                               'width' => '20px',
+                               'right' => '-11px',
+                               'top' => '-7px',
+                               'background' => 'url("TR.png") no-repeat 0 0',
+                               'height' => '20px'
+                             },
+                    'origsize' => {
+                                    'y' => 20,
+                                    'x' => 20
+                                  },
+                    'finalsize' => {
+                                     'y' => 20,
+                                     'x' => 20
+                                   },
+                    'sel' => [
+                               297,
+                               0,
+                               20,
+                               20
+                             ],
+                    'name' => 'TR.png'
+                  },
+          'BL' => {
+                    'css' => {
+                               'left' => '-7px',
+                               'width' => '17px',
+                               'background' => 'url("BL.png") no-repeat 0 0',
+                               'bottom' => '-11px',
+                               'height' => '20px'
+                             },
+                    'origsize' => {
+                                    'y' => 20,
+                                    'x' => 17
+                                  },
+                    'finalsize' => {
+                                     'y' => 20,
+                                     'x' => 17
+                                   },
+                    'sel' => [
+                               0,
+                               206,
+                               17,
+                               20
+                             ],
+                    'name' => 'BL.png'
+                  },
+          'L' => {
+                   'css' => {
+                              'left' => '-7px',
+                              'width' => '7px',
+                              'top' => '13px',
+                              'background' => 'url("L.png") repeat-y 0 0',
+                              'bottom' => '9px'
+                            },
+                   'origsize' => {
+                                   'y' => 186,
+                                   'x' => 17
+                                 },
+                   'cut' => {
+                              'y' => 16
+                            },
+                   'finalsize' => {
+                                    'y' => 16,
+                                    'x' => 7
+                                  },
+                   'diff' => 10,
+                   'sel' => [
+                              0,
+                              20,
+                              17,
+                              186
+                            ],
+                   'name' => 'L.png'
+                 }
+        };
+*/

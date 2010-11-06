@@ -1,0 +1,66 @@
+/* Part of DynarchLIB
+   Copyright (c) Dynarch.com 2005-2009.  All rights reserved.
+   See http://www.dynarchlib.com/licensing for details. */
+
+// BEGIN: Main colors (SASS)
+$mainFg: #000;
+$mainBg: #c8c8d8;
+$focusBorder: #e8a850;
+$focusBg: #fff8dd;
+$disabledColor: #88888f;
+$selectionBg: #80b9ff;
+$selectionFg: #000;
+$errorBg: #ff2600;
+$errorBgL2: lighten($errorBg, 30%);
+$errorBgL3: lighten($errorBg, 40%);
+$errorFg: #fff;
+$mainBgL1: lighten($mainBg, 5%);
+$mainBgL2: lighten($mainBg, 10%);
+$mainBgL3: lighten($mainBg, 20%);
+$mainBgD1: darken($mainBg, 5%);
+$mainBgD2: darken($mainBg, 15%);
+$mainBgD3: darken($mainBg, 30%);
+$mainBgD4: darken($mainBg, 40%);
+$readOnlyBg: $mainBgL1;
+$hoverBg: $mainBgL2;
+$hoverColor: $mainFg;
+$activeBg: $selectionBg;
+$activeColor: #000;
+$activeBg2: #222;
+$activeColor2: #fff;
+$dialogBg: $mainBgL1;
+$linkHoverFg: darken($selectionBg, 20%);
+$importantFg: #dd2200;
+// END: main colors
+
+// BEGIN: defs
+@mixin base-font {
+  font: 12px "Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif;
+}
+@mixin outset-border1 {
+ border-color: $mainBgD2 $mainBgD3 $mainBgD3 $mainBgD2;
+}
+@mixin outset-border2 {
+  border-color: $mainBgL3 $mainBgD2 $mainBgD2 $mainBgL3;
+}
+@mixin inset-border1 {
+  border-color: $mainBgD3 $mainBgD2 $mainBgD2 $mainBgD3;
+}
+@mixin inset-border2 {
+  border-color: $mainBgD1 $mainBgL3 $mainBgL3 $mainBgD1;
+}
+@mixin pressed-border1 {
+ border-color: $mainBgD3 $mainBgD2 $mainBgD2 $mainBgD3;
+}
+@mixin pressed-border2 {
+  border-color: $mainBgD1 $mainBgL1 $mainBgL1 $mainBgD1;
+}
+@mixin focus-border1 {
+  border-color: $mainBgD3 $mainBgD4 $mainBgD4 $mainBgD3;
+}
+@mixin focus-outline {
+  outline: 1px solid $focusBorder;
+  -moz-outline-radius: 2px;
+  -webkit-outline-radius: 2px;
+}
+// END: defs

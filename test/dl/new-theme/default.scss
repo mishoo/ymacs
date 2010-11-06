@@ -1,0 +1,1312 @@
+/* Part of DynarchLIB
+   Copyright (c) Dynarch.com 2005-2009.  All rights reserved.
+   See http://www.dynarchlib.com/licensing for details. */
+
+@import "basedefs.scss";
+
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body { z-index: 0; background-color: #fff; }
+form { padding: 0; margin: 0; }
+
+.DYNARCH-GET-PADDING-AND-BORDER {
+  overflow:    hidden  !important;
+  font-size:   1px     !important;
+  line-height: 1px     !important;
+  width:       1px     !important;
+  height:      1px     !important;
+}
+
+.DYNARCH-GET-ABSOLUTE-POSITION {
+  position: absolute !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.DYNARCH-EVENT-STOPPER {
+  position: absolute !important;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 30000;
+}
+
+.DYNARCH-GARBAGE-COLLECTOR {
+  position: absolute;
+  z-index: -10000;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  left: -32000px;
+  top: -32000px;
+  display: none;                /* XXX: why didn't we have this before? */
+}
+
+.DYNARCH-FAKE-FOCUS { z-index: -10000; position: absolute; left: -2000px; top: 0; }
+
+.CURSOR-DRAGGING   { cursor: move !important; }
+.CURSOR-RESIZE-E   { cursor: e-resize !important; }
+.CURSOR-RESIZE-W   { cursor: w-resize !important; }
+.CURSOR-RESIZE-S   { cursor: s-resize !important; }
+.CURSOR-RESIZE-N   { cursor: n-resize !important; }
+.CURSOR-FORBIDDEN  { cursor: not-allowed !important; }
+.CURSOR-NO-DROP    { cursor: no-drop !important; }
+.CURSOR-DROP       { cursor: pointer !important; }
+.CURSOR-RESIZE-COL { cursor: col-resize !important; }
+
+/* Generic */
+
+.DlWidget {
+  @include base-font;
+  table, input, select, button, textarea {
+    @include base-font;
+  }
+}
+
+.DlWidget {
+  cursor: default;
+  color: $mainFg;
+  zoom: 1; /* force hasLayout in IE */
+}
+
+.DlWidget-3D {
+  background-color: $mainBg;
+  color: $mainFg;
+}
+
+/* .DlWidget-disabled, .DlWidget-disabled * { color: #768 !important; } */
+/* .DlWidget-dragging, .DlWidget-dragging * { color: #768 !important; } */
+
+.DlWidget-dragged-clone {
+  position: absolute !important;
+  z-index: 10000;
+}
+
+/* Base button class */
+
+.DlAbstractButton { white-space: nowrap; }
+
+/* Button */
+
+.DlButton {
+  border: 1px solid;
+  @include outset-border1;
+  background-color: $mainBg;
+  text-align: center;
+  .DlButton-inner {
+    border: 1px solid;
+    @include outset-border2;
+    padding: 2px 4px;
+    div {
+      min-height: 16px; // XXX: for 16x16 icons; I'm not happy with this solution.
+    }
+  }
+}
+
+.DlButton-hover {
+  border-color: $mainBgD3 $mainBgD4 $mainBgD4 $mainBgD3;
+  background-color: $hoverBg;
+}
+
+.DlButton-focus {
+  @include focus-border1;
+  @include focus-outline;
+  div.DlButton-Label {
+    display: block;
+    border: 1px dotted black;
+    margin: -1px -2px;
+    padding: 0 1px;
+  }
+}
+
+.DlButton-active {
+  @include pressed-border1;
+  background-color: $activeBg;
+  .DlButton-inner {
+    padding: 3px 3px 1px 5px;
+    @include pressed-border2;
+  }
+}
+.DlButton-1 { @include inset-border1; background-color: $mainBgD1; }
+.DlButton-1 .DlButton-inner { @include inset-border2; }
+
+.DlAbstractButton-withIcon, .DlButton-withIcon {
+  padding-left: 22px;
+  background-repeat: no-repeat !important;
+  background-position: 0 50%;
+}
+
+.DlButton-empty .DlButton-inner { padding: 2px; }
+.DlButton-empty .DlButton-withIcon {
+  padding: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.DlButton-disabled .DlButton-inner,
+.DlWidget-disabled .DlButton .DlButton-inner { border-color: $mainBg; opacity: 0.6; filter: alpha(opacity=60); }
+.DlButton-disabled, .DlWidget-disabled .DlButton { border-color: $mainBgL2 $mainBgD2 $mainBgD2 $mainBgL2; }
+
+div.DlButton-Label { display: inline; }
+
+/* Checkbox */
+
+.DlWidget-disabled.DlCheckbox-0 { color: $disabledColor; background-image: url("img/new-checkradio/check-normal-insensitive.png"); }
+.DlWidget-disabled.DlCheckbox-1 { color: $disabledColor; background-image: url("img/new-checkradio/check-mark-insensitive.png"); }
+
+.DlCheckbox { padding: 2px 5px 2px 20px; -moz-border-radius: 3px; background-position: 4px 50%; background-repeat: no-repeat; }
+.DlCheckbox-0 { background-image: url("img/new-checkradio/check-normal.png"); }
+.DlCheckbox-1 { background-image: url("img/new-checkradio/check-mark.png"); }
+.DlCheckbox-hover { background-color: $hoverBg; }
+.DlCheckbox-hover.DlCheckbox-0 { background-image: url("img/new-checkradio/check-normal-prelight.png"); }
+.DlCheckbox-hover.DlCheckbox-1 { background-image: url("img/new-checkradio/check-mark-prelight.png"); }
+.DlCheckbox-active { background-color: $activeBg; background-image: url("img/new-checkradio/check-mark-active.png") !important; }
+.DlCheckbox-empty { height: 15px; padding-left: 15px; width: 1px; }
+
+.DlCheckbox-focus div.DlButton-Label { display: block; border: 1px dotted black; margin: -1px -2px; padding: 0 1px; }
+
+/* RadioButton */
+
+.DlWidget-disabled.DlRadioButton-0 { color: $disabledColor; background-image: url("img/new-checkradio/opt-normal-insensitive.png"); }
+.DlWidget-disabled.DlRadioButton-1 { color: $disabledColor; background-image: url("img/new-checkradio/opt-mark-insensitive.png"); }
+
+.DlRadioButton { padding: 2px 5px 2px 20px; -moz-border-radius: 3px; background-position: 4px 50%; background-repeat: no-repeat; }
+.DlRadioButton-0 { background-image: url("img/new-checkradio/opt-normal.png"); }
+.DlRadioButton-1 { background-image: url("img/new-checkradio/opt-mark.png"); }
+.DlRadioButton-hover { background-color: $hoverBg; }
+.DlRadioButton-hover.DlRadioButton-0 { background-image: url("img/new-checkradio/opt-normal-prelight.png"); }
+.DlRadioButton-hover.DlRadioButton-1 { background-image: url("img/new-checkradio/opt-mark-prelight.png"); }
+.DlRadioButton-active { background-color: $activeBg; background-image: url("img/new-checkradio/opt-mark-active.png") !important; }
+.DlRadioButton-empty { height: 15px; padding-left: 15px; width: 1px; }
+
+.DlRadioButton-focus div.DlButton-Label { display: block; border: 1px dotted black; margin: -1px -2px; padding: 0 1px; }
+
+.DlPopupMenu {
+  .DlRadioButton, .DlCheckbox {
+    -moz-border-radius: 0;
+  }
+}
+
+/* Entry */
+
+.DlEntry {
+  border: 1px solid $mainBgD2;
+  .DlEntry-cell {
+    border: 1px solid $mainBgL3;
+    background-color: $mainBgL2;
+  }
+  input, textarea {
+    margin: 0;
+    border: none !important;
+    border-width: 0px !important;
+    background: $mainBgL3;
+    color: #000;
+    padding: 1px 2px 2px 2px !important;
+/*  font-family: "Bitstream Vera Sans Mono",monospace; height: 1.3em; */
+    resize: none;
+  }
+  input::-moz-selection, textarea::-moz-selection {
+    background-color: $selectionBg !important; color: $selectionFg !important;
+  }
+}
+.DlEntry-Focus {
+  @include focus-border1;
+  @include focus-outline;
+  .DlEntry-cell, input, textarea {
+    background-color: $focusBg;
+  }
+}
+
+.DlEntry-ValidationError {
+  border-color: $errorBg;
+  .DlEntry-cell { border-color: $errorBg; }
+  .DlEntry-cell, input, textarea { background-color: $errorBgL3; }
+}
+
+.DlEntry-Readonly {
+  .DlEntry-cell {
+    border-color: $mainBgL2;
+  }
+  .DlEntry-cell, input, textarea {
+    background-color: $readOnlyBg;
+  }
+}
+.DlEntry-emptyText {
+  display: none;
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  color: $disabledColor;
+  font-style: italic;
+  cursor: text;
+}
+.DlEntry-empty .DlEntry-emptyText {
+  display: block;
+}
+
+.DlEntry-dropDownBtn {
+  line-height: 20px;
+  border-left: 1px solid $mainBgD2;
+  padding-left: 4px; padding-right: 4px;
+}
+
+.DlEntry-Focus .DlEntry-dropDownBtn { border-color: $mainBgD3; }
+
+.DlEntry-dropDownBtn-hover { background-color: $hoverBg; }
+.DlEntry-dropDownBtn-active { background-color: $activeBg; }
+
+.DlEntry-invalidIcon {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  right: 1px;
+  top: 50%;
+  margin-top: -8px;
+  background-image: url("img/entry-warning.png");
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  opacity: 0.6;
+  display: none;
+}
+
+div.DlEntry-invalidIcon:hover { opacity: 1; }
+
+.DlEntry-ValidationError .DlEntry-invalidIcon {
+  display: block;
+}
+
+/* CompletionEntry */
+
+.DlCompletionEntry-busy input {
+  background-image: url("img/busy1.gif");
+  background-position: 100% 50%;
+  background-repeat: no-repeat;
+}
+
+.DlCompletionEntry-rightAligned input {
+  background-position: 0 50%;
+  text-align: right;
+}
+
+/* ComboBox */
+
+.DlComboBox-dropDownBtn {
+  background: $mainBg url("img/arrows/dropdown.png") no-repeat 50% 50%;
+  width: 11px;
+  height: 20px;
+  border-left: 1px solid $mainBgD2;
+}
+
+.DlEntry-Focus .DlComboBox-dropDownBtn { border-color: $mainBgD3; }
+
+.DlComboBox-dropDownBtn-hover { background-color: $hoverBg; }
+.DlComboBox-dropDownBtn-active { background-color: $activeBg; }
+
+/* Spinner */
+
+.DlSpinner { background-color: yellow; width: 1em; }
+.DlSpinner .DlSpinner-Button { height: 50%; }
+.DlSpinner input { text-align: right; }
+.DlSpinner .DlSpinner-Button .DlButton-inner { width: 5px; }
+.DlSpinner .DlSpinner-Button .DlButton-inner div { min-height: 0; }
+.DlSpinner .DlSpinner-Button-Up .DlButton-inner { height: 2px; background: url("img/spinner-up.gif") no-repeat 50% 50%; }
+.DlSpinner .DlSpinner-Button-Down .DlButton-inner { height: 2px; background: url("img/spinner-down.gif") no-repeat 50% 50%; }
+
+/* ProgressBar */
+
+.DlProgressBar { position: relative; border: 1px solid #98c; background: #f0e6ff; }
+.DlProgressBar-label { text-align: center; position: relative; padding: 2px 0; }
+.DlProgressBar-fill { position: absolute; left: 0; top: 0; width: 50%; height: 100%; background-color: #c0b6ff; }
+
+/* ButtonMenu */
+
+.DlButtonMenu .MenuArrow .DlButton-inner { padding-left: 0; padding-right: 0; }
+.DlButtonMenu .MenuArrow-inner {
+  padding: 0 1px;
+  border-left: none;
+  width: 7px; overflow: visible; background-image: url("img/menu/darrow-small.gif");
+  background-repeat: no-repeat;
+  background-position: 1px 50%;
+}
+.DlButtonMenu .LabelPart { border-right: none; }
+.DlButtonMenu .LabelPart .DlButton-inner { border-right: none; }
+
+/* ButtonColorPicker */
+
+.DlButtonColorPicker table { border-collapse: collapse; }
+.DlButtonColorPicker .DlButton-inner .ColorPart { border: 1px solid; @include inset-border1;
+ width: 10px; height: 10px; overflow: hidden; min-height: 0; margin-top: 1px; }
+.DlButtonColorPicker .Label { padding-left: 5px; }
+.DlButtonColorPicker .EmptyLabel { width: 1px; overflow: hidden; height: 1em; }
+
+/* Calendar */
+
+.DlCalendar {
+  background-color: $mainBgL3;
+}
+.DlCalendar-disabled { background-color: $mainBgL1; }
+table.DlCalendar {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11px;
+  font-family: tahoma,verdana,sans-serif;
+  border: 1px solid $mainBgD2;
+}
+.DlCalendar {
+  $weekendBg: #c62;
+  $todayFg: blue;
+  tr.DlCalendar-Navigation {
+    td { text-align: center; border-bottom: 1px solid $mainBgD2; background-color: $mainBg; padding: 2px 0; }
+    td.PrevMonth, td.PrevYear { border-right: 1px solid $mainBgD2; font-weight: bold; }
+    td.NextMonth, td.NextYear { border-left: 1px solid $mainBgD2; font-weight: bold; }
+    td.NextMonth { background-image: url("img/arrows/nav-right.gif"); background-repeat: no-repeat; background-position: 50% 50%; }
+    td.PrevMonth { background-image: url("img/arrows/nav-left.gif"); background-repeat: no-repeat; background-position: 50% 50%; }
+    td.NextYear { background-image: url("img/arrows/nav-right-x2.gif"); background-repeat: no-repeat; background-position: 50% 50%; }
+    td.PrevYear { background-image: url("img/arrows/nav-left-x2.gif"); background-repeat: no-repeat; background-position: 50% 50%; }
+    td.hover { background-color: $hoverBg; color: $hoverColor; }
+    td.rolling { background-color: $activeBg; }
+  }
+  tr.DlCalendar-DayNames {
+    td { width: 20px; text-align: right; padding-right: 3px; border-bottom: 1px solid $mainBgD2; background-color: $mainBgL1; }
+    /* td.Today { font-weight: bold; } */
+    td.WeekNumber { border-right-color: $mainBgD2; }
+    td.hover { background-color: $hoverBg; color: $hoverColor; }
+    td.WeekEnd { color: $weekendBg; }
+  }
+  tr.Dates {
+    td { text-align: right; padding: 2px 3px 2px 2px; }
+    td.OtherMonth { color: lighten($mainFg, 30%); }
+    td.Today { color: $todayFg; }
+    td.DlCalendar-infoDay { font-weight: bold; background: url("img/tmpcal.gif") no-repeat 100% 100%; }
+    td.Selected { border: 1px solid $mainBgD2; background-color: $selectionBg; padding: 1px 2px 1px 1px; }
+    td.hover { border: 1px solid $mainBgD1; padding: 1px 2px 1px 1px; background-color: $hoverBg !important; }
+  }
+  td.WeekNumber { border-right: 1px solid $mainBgD2; color: lighten($mainFg, 30%); background-color: $mainBg; }
+  tr.Selected td { border-bottom: 1px solid $mainBgD1; border-top: 1px solid $mainBgD1; padding-top: 1px; padding-bottom: 1px; }
+
+  /* weekends */
+  td.WeekEnd { color: $weekendBg; }
+  td.OtherMonth.WeekEnd { color: lighten($weekendBg, 20%); }
+}
+
+/* ResizeBar */
+
+.DlResizeBar { font-size: 1px; line-height: 1px; }
+.DlResizeBar-Horizontal {
+  height: 5px; cursor: s-resize; background: url("img/resizebar-horiz2.png") no-repeat 50% 50%; }
+.DlResizeBar-Vertical { width: 5px; cursor: e-resize; background: url("img/resizebar-vert2.png") no-repeat 50% 50%; }
+.DlResizeBar-DraggingLine {
+  position: absolute;
+/*  background-image: url("img/resizebg.gif"); */
+  background-color: $focusBorder; opacity: 0.6; filter: alpha(opacity=60);
+  z-index: 10000;
+}
+
+/* UploadEntry */
+
+.DlUploadEntry { height: 22px; }
+.DlUploadEntry iframe { background: transparent; width: 80px; height: 22px; display: block; }
+
+/* CONTAINERS */
+
+.DlContainer { position: relative; } /* WARNING: this is probably NOT GOOD!
+                                        but it happens to fix some atrocious bugs in IE
+                                        (randomly disappearing elements on hover).
+                                        XXX: make sure it doesn't break anything!
+                                        */
+
+.DlContainer-Hidden { position: absolute; left: -30000px; top: -30000px; visibility: hidden; }
+
+// XXX: WHAT's this?
+// .DlContainer-pad-sep-left { padding: 5px; border-left: 1px solid #a9d; }
+// .DlContainer-pad-sep-right { padding: 5px; border-right: 1px solid #a9d; }
+
+.DlLayout { position: relative; }
+.DlLayout-positioned { position: absolute; }
+
+.DlGridLayout-table { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.DlGridLayout-tr-minHeight td { height: 2px; }
+.DlGridLayout-td-minWidth { width: 2px; white-space: nowrap; }
+.DlGridLayout-td-minHeight { height: 2px; }
+
+/*
+   .DlGridLayout-table { background-color: #f00; }
+   .DlGridLayout-table td { background-color: #fff; }
+/* ^^^ DEBUG */
+
+
+.DlDesktop { position: fixed; left: 0; top: 0; overflow: hidden; }
+
+.DlFieldset { border: 2px groove $mainBgL2; margin-top: 1em;
+  -moz-border-top-colors: $mainBgD2 $mainBgL2;
+  -moz-border-bottom-colors: $mainBgL2 $mainBgD2;
+  -moz-border-left-colors: $mainBgD2 $mainBgL2;
+  -moz-border-right-colors: $mainBgL2 $mainBgD2;
+}
+.DlFieldset-label {
+  position: relative; top: -0.75em; left: 5px;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  font-weight: bold;
+  background-color: $mainBg;
+  padding: 1px 7px;
+}
+.DlFieldset-content {
+  padding: 10px 10px 10px 10px; margin-top: -1em;
+}
+
+.DlPopup {
+  position: fixed;
+  z-index: 100;
+  left: -30000px;
+  top: -30000px;
+}
+
+.DlPopup-scrollArea {
+  overflow: hidden;
+  position: relative; /* -- IE is unbelievable */
+  z-index: 10;
+}
+
+.DlPopup-scrollUp, .DlPopup-scrollDown {
+  height: 10px; overflow: hidden;
+  background-position: 50% 1px;
+  background-repeat: no-repeat;
+}
+
+.DlPopup-scrollUp { border-bottom: 1px solid $mainBgD1; }
+.DlPopup-scrollDown { border-top: 1px solid $mainBgD1; }
+
+.DlPopup-scrollUp { background-image: url("img/arrows/scroll-up.gif"); }
+.DlPopup-scrollUp-hover { background-image: url("img/arrows/scroll-up-hover.gif"); background-color: $hoverBg; }
+.DlPopup-scrollUp-disabled { background-image: url("img/arrows/scroll-up-disabled.gif"); }
+.DlPopup-scrollDown { background-image: url("img/arrows/scroll-down.gif"); }
+.DlPopup-scrollDown-hover { background-image: url("img/arrows/scroll-down-hover.gif"); background-color: $hoverBg; }
+.DlPopup-scrollDown-disabled { background-image: url("img/arrows/scroll-down-disabled.gif"); }
+
+.DlCompletionPopup { border: 1px solid $mainBgD1; background-color: $mainBgL3; }
+.DlCompletionPopup .DlMenuItem .div2 { font-size: 90%; padding: 1px 5px; }
+.DlCompletionPopup .DlVMenu { border: none; }
+
+.DlTooltip {
+  background-color: #fffee0;
+  font-family: arial,helvetica,sans-serif;
+  padding: 4px 7px;
+  color: #333210;
+}
+
+.DlTooltip-noShadow { border: 1px solid #000; }
+
+.DlDialogPopup {
+  background-color: $mainBgL3;
+  border: 1px solid $mainBgD1;
+}
+
+.DlPopupMenu {
+  background-color: $mainBgL3;
+  border: 1px solid $mainBgD1;
+}
+.DlPopupMenu-noShadow { border: 1px solid $mainBgD1; }
+
+.DlPopupMenu .DlCalendar {
+  border: 1px solid;
+  @include outset-border1;
+}
+.DlCalendar-borderless { border-width: 0 !important; }
+
+.DlVMenu, .DlHMenu {
+  border-collapse: collapse;
+  background-color: $mainBgL3;
+}
+
+.DlVMenu-noShadow, .DlHMenu-noShadow {
+  border: 1px solid;
+  @include outset-border1;
+}
+
+.DlVMenu { margin: 4px 0; }
+
+.DlHMenu {
+  margin: 0 2px;
+}
+
+.DlHMenu div.DlHMenu-separator {
+  overflow: hidden;
+  height: 16px;
+  width: 1px;
+  margin-left: 3px; margin-right: 2px;
+  border-left: 1px solid #ccc;
+  background-color: #fff;
+}
+
+div.DlVMenu-separator {
+  margin: 4px 0 3px 0;
+  background-color: #ccc;
+  border-bottom: 1px solid #fff;
+
+  height: 1px;
+  overflow: hidden;
+  font-size: 1px;
+  line-height: 1px;
+}
+
+.DlMenuItem { /* background: transparent; background-color: none; /* XXX: do we need this? */ }
+.DlMenuItem .div2 { padding: 2px 5px; }
+.DlMenuItem-popped { background-color: $activeBg; color: $activeColor; }
+.DlMenuItem-hover { background-color: $activeBg; color: $activeColor; }
+.DlMenuItem-active { background-color: $activeBg2; color: $activeColor2; }
+.DlMenuItem .DlMenuItem-withIcon {
+  padding-left: 26px;
+  background-repeat: no-repeat;
+  background-position: 5px 50%;
+}
+.DlVMenu .DlMenuItem .DlMenuItem-withPopup {
+  margin-right: 3px;
+  padding-right: 12px;
+  background-image: url("img/menu/rarrow.gif");
+  background-repeat: no-repeat !important;
+  background-position: 100% 50%;
+}
+.DlVMenu .DlMenuItem-hover .DlMenuItem-withPopup {
+  background-image: url("img/menu/rarrow-hover.gif") !important;
+}
+.DlWidget-disabled .DlMenuItem, .DlMenuItem-disabled { opacity: 0.6; filter: alpha(opacity=60); }
+
+.DlVMenu .DlCheckbox-hover,
+.DlHMenu .DlCheckbox-hover,
+.DlVMenu .DlRadioButton-hover,
+.DlHMenu .DlRadioButton-hover { background-color: $activeBg; color: $activeColor; }
+
+.DlVMenu .DlCheckbox-active,
+.DlHMenu .DlCheckbox-active,
+.DlVMenu .DlRadioButton-active,
+.DlHMenu .DlRadioButton-active { background-color: $activeBg2; color: $activeColor2; }
+
+/*
+.DlPopupMenu .DlCheckbox-hover,
+.DlPopupMenu .DlRadioButton-hover { background-color: #76c; color: #fff; }
+
+.DlPopupMenu .DlCheckbox-active,
+.DlPopupMenu .DlRadioButton-active { background-color: #cbf; color: #000; }
+*/
+
+/* Notebook */
+
+/* .DlNotebook { background-color: $mainBgL1; } */
+
+/* Tabs */
+
+.DlTabs .TabBar { z-index: 10; position: relative; }
+.DlTabs .TabBar .DlButton { border-color: $mainBgD3; }
+.DlTabs .TabBar .DlButton-1 { background-color: $mainBgL1; }
+.DlTabs .TabBar .DlButton-1 .DlButton-inner { padding-top: 3px; padding-bottom: 3px; border-color: $mainBgD1; }
+
+.DocTabBar { width: 100%; }
+.DocTabBar td { width: 33.3333%; }
+
+.DlTabs-top .TabBar { top: 1px; }
+.DlTabs-top .TabBar .DlButton-1, .DlTabs-top .TabBar .DlButton-1 .DlButton-inner { border-bottom: none; }
+
+.DlTabs-bottom .TabBar { top: -1px; }
+.DlTabs-bottom .TabBar .DlButton-1, .DlTabs-bottom .TabBar .DlButton-1 .DlButton-inner { border-top: none; }
+
+.DlTabs .TabContent, .DlTabs .TabContent .DlNotebook { background-color: $mainBgL1; }
+.DlTabs .TabContent { border: 1px solid $mainBgD3; }
+.DlTabs .TabContent .TabContent-inner { padding: 5px; }
+.DlTabs .TabContent-inner { position: relative; overflow: hidden; border: 1px solid $mainBgD1; }
+
+.DlTabs-top .TabContent .TabContent-inner { border-top: none; }
+.DlTabs-bottom .TabContent .TabContent-inner { border-bottom: none; }
+
+/* MacBar */
+
+.DlMacHBar, .DlMacVBar {
+  background-color: $mainBgD1;
+  border: 1px solid $mainBgD3;
+  padding: 2px;
+}
+.DlMacBarIcon { display: inline; }
+.DlMacBarIcon img { vertical-align: middle; padding: 5px; }
+.DlMacBarIcon-1 img { border: 1px solid #769; -moz-border-radius: 15px; padding: 4px; background-color: #edf; }
+.DlMacBarIcon-active { opacity: 0.6; /* filter: alpha(opacity=60); /* IE sucks. */ }
+.DlMacHBar div.DlMacHBar-separator {
+  overflow: hidden;
+  height: 16px;
+  width: 1px;
+  border-left: 1px solid #98c;
+  background-color: #edf;
+}
+
+.DlMacVBar div.DlMacVBar-separator {
+  overflow: hidden;
+  height: 1px;
+  font-size: 1px;
+  line-height: 1px;
+  border-top: 1px solid #98c;
+  background-color: #edf;
+}
+
+/* Hbox */
+
+table.DlHbox { border-collapse: separate; }
+.DlHbox td.cell { padding: 0; }
+.DlHbox div.DlHbox-separator, div.Dl-Vertical-Separator {
+  overflow: hidden;
+  height: 16px;
+  width: 1px;
+  border-left: 1px dotted $mainBgD3;
+  background-color: $mainBgL2;
+/*  margin-left: 3px; margin-right: 2px; */
+}
+
+.DlHbox div.wide-separator, div.Dl-Vertical-Separator.wide-separator { margin-left: 4px; margin-right: 4px; }
+
+.DlHbox div.DlHbox-spacer {
+  overflow: hidden;
+  width: 4px;
+}
+
+table.DlHbox-hasFiller { width: 100%; }
+.DlHbox-filler { width: 100%; }
+
+/* Vbox */
+
+table.DlVbox { border-collapse: separate; }
+.DlVbox td.cell { padding: 0; }
+.DlVbox div.DlVbox-separator, div.Dl-Horizontal-Separator {
+  overflow: hidden;
+  height: 1px;
+  font-size: 1px;
+  line-height: 1px;
+  border-top: 1px dotted $mainBgD3;
+  background-color: $mainBgL2;
+/*  margin-top: 3px; margin-bottom: 2px; */
+}
+
+.DlVbox div.wide-separator, div.Dl-Horizontal-Separator.wide-separator { margin-top: 5px; margin-bottom: 4px; }
+
+.DlVbox div.DlVbox-spacer {
+  overflow: hidden;
+  height: 4px;
+  line-height: 1px;
+  font-size: 1px;
+}
+
+/* ButtonBox */
+
+table.DlButtonBox { width: 100%; }
+table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
+.DlButtonBox div.DlButtonBox-separator {
+  overflow: hidden;
+  height: 16px;
+  width: 1px;
+  border-left: 1px solid $mainBgD2;
+  background-color: $mainBgL2;
+  margin-left: 3px; margin-right: 2px;
+}
+
+.DlWidget-disabled div.DlVbox-separator, .DlWidget-disabled div.DlHbox-separator { border-color: $mainBgD1; background-color: $mainBgL2; }
+
+/* Select */
+
+.DlRadioSelect .LabelPart { text-align: left; }
+
+.DlSelect-menu .DlRadioButton { padding-right: 18px; }
+.DlSelect-menu .DlRadioButton-0 { background-image: none; }
+.DlSelect-menu .DlRadioButton-1 { background-image: url("img/mark.gif"); background-color: $mainBg; color: #000; }
+.DlSelect-menu .DlRadioButton-active { background-image: url("img/mark-2.gif") !important; }
+
+/* Toolbar (no special widget) */
+
+/* BEGIN: CRAPPY CODE, PLEASE REVISIT */
+
+.DlToolbar {
+  border: 1px solid;
+  @include outset-border1;
+  background-color: $mainBg;
+  padding: 1px;
+
+  .DlButton { border: none; background-color: transparent; }
+  .DlButton-inner { border: none; padding: 3px; }
+  .DlButton-hover { border: 1px solid; @include outset-border2; background-color: $hoverBg; }
+  .DlButton-hover .DlButton-inner { padding: 2px; }
+  .DlButton-1 { border: 1px solid; @include inset-border2; background-color: $activeBg; }
+  .DlButton-1 .DlButton-inner { padding: 2px; }
+  .DlButton-active { border: 1px solid; @include inset-border1; background-color: $activeBg; }
+  .DlButton-active .DlButton-inner { padding: 2px; }
+  .DlButton-disabled { opacity: 0.7; filter: alpha(opacity=70); }
+
+  .DlButtonMenu * { border: none; }
+  .DlButtonMenu .DlButton-inner { border: 1px solid; @include outset-border2; padding: 2px; }
+  .DlButtonMenu .MenuArrow .DlButton-inner { padding-left: 0; padding-right: 0; }
+  .DlButtonMenu .DlButton-active .DlButton-inner { @include inset-border1; }
+  .DlButtonMenu .DlButton-1 .DlButton-inner { @include inset-border1; }
+
+  .DlButtonMenu .DlButton-hover .MenuArrow-inner { padding-left: 1px !important; padding-right: 1px !important; background-position: 1px 50%; }
+  .DlButtonMenu .DlButton-active .MenuArrow-inner { padding-left: 1px !important; padding-right: 1px !important; background-position: 1px 50%; }
+  .DlButtonMenu .DlButton-1 .MenuArrow-inner { padding-left: 1px !important; padding-right: 1px !important; background-position: 1px 50%; }
+  .DlButtonMenu .MenuArrow .DlButton-inner { padding-left: 0 !important; padding-right: 0 !important; }
+
+  .DlLabel { background: inherit; }
+
+  div.DlHbox-separator {
+    border-left-color: $mainBgD2;
+    background-color: $mainBgL2;
+  }
+}
+
+/*
+.DlToolbar .DlButtonMenu .DlButton-hover .DlButton-inner { border-color: #659; }
+.DlToolbar .DlButtonMenu .LabelPart.DlButton-hover .DlButton-inner { padding-right: 3px; border-right: none; }
+*/
+
+.DlToolbar-Light { background: $mainBgL1; }
+
+/* END: CRAPPY CODE */
+
+/* Table */
+
+.DlTable-RowSeparator td { height: 7px; }
+.DlTable-RowSeparator td div { line-height: 1px; font-size: 1px; height: 1px; overflow: hidden;
+  border-top: 1px solid $mainBgD2;
+  background-color: $mainBgL2;
+  margin-top: 3px; margin-bottom: 2px;
+}
+
+/* Tree */
+
+.DlTree-separator {
+  margin-top: 3px; margin-bottom: 4px;
+  border-top: 1px dotted $mainBgD2;
+  line-height: 1px; font-size: 1px; overflow: hidden;
+}
+.DlTree-IconWidth { width: 19px !important; }
+.DlTreeItem .DlTreeItem-Expander { width: 19px; }
+.DlTreeItem .DlTreeItem-Icon {
+  width: 19px;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+}
+
+.DlTreeItem .DlTreeItem-Label { padding-left: 3px; padding-top: 1px; padding-bottom: 1px; }
+
+.DlTreeItem-withRadio {
+  .DlTreeItem-Label { padding-left: 0; }
+  .DlTreeItem-Table {
+    .DlLabel { padding: 0 2px; }
+    .DlRadioButton { padding: 0 2px; background-image: none !important; cursor: pointer; }
+    .DlRadioButton-hover { background: none; color: $linkHoverFg; text-decoration: underline; }
+    .DlRadioButton-1 { background-color: $activeBg; color: $activeColor; }
+  }
+}
+
+.DlTreeItem-withCheck {
+  .DlTreeItem-Label { padding-left: 0; }
+  .DlTreeItem-Table {
+    .DlLabel { padding: 0 2px; }
+    .DlCheckbox { padding: 0 2px; background-image: none !important; cursor: pointer; }
+    .DlCheckbox-hover { background: none; color: $linkHoverFg; text-decoration: underline; }
+    .DlCheckbox-1 { background-color: $activeBg; color: $activeColor; }
+  }
+}
+
+/* .DlTreeItem-Table { table-layout: fixed; border-collapse: collapse; } */
+.DlTreeItem-Table td { vertical-align: middle; height: 16px; }
+
+/* BEGIN: tree lines, don't touch this or else. */
+.DlTree-withLines .DlTreeItem { background-image: url("img/tree/lines-v.gif"); background-repeat: repeat-y; background-position: 9px 50%; }
+/* .DlTree-withLines .DlTreeItem-div { background-image: url("img/tree/lines-v.gif"); background-repeat: repeat-y; background-position: 9px 50%; } */
+
+.DlTree-withLines .DlTreeItem-Last { background-image: none; }
+/* .DlTree-withLines .DlTreeItem-Last .DlTreeItem-div { background-image: none; } */
+
+.DlTree-withLines .DlTreeItem .DlTreeItem-Expander { background: transparent url("img/tree/lines-c.gif") no-repeat 50% 50%; }
+.DlTreeItem-hasSubtree .DlTreeItem-Expander { background: transparent url("img/tree/lines-c.gif") no-repeat 50% 50%; }
+.DlTree-withLines table.DlTreeItem-Last .DlTreeItem-Expander { background: transparent url("img/tree/lines-b.gif") no-repeat 50% 50%; }
+/* END: tree lines */
+
+.DlTreeItem-Subtree { padding-left: 19px; }
+.DlTreeItem-Arrow-Expanded { background: transparent url("img/tree/minus.gif") no-repeat 50% 40%; width: 19px; height: 100%; }
+.DlTreeItem-Arrow-Expanded:hover { background: transparent url("img/tree/minus-hover.gif") no-repeat 50% 40%; width: 19px; height: 100%; }
+.DlTreeItem-Arrow-Collapsed { background: transparent url("img/tree/plus.gif") no-repeat 50% 40%; width: 19px; height: 100%; }
+.DlTreeItem-Arrow-Collapsed:hover { background: transparent url("img/tree/plus-hover.gif") no-repeat 50% 40%; width: 19px; height: 100%; }
+
+.DlWidget-disabled .DlTreeItem-Arrow-Expanded,
+.DlWidget-disabled .DlTreeItem-Arrow-Collapsed,
+.DlWidget-disabled .DlTreeItem-Icon { opacity: 0.6; filter: alpha(opacity=60); }
+
+.DlTreeItem-dropTarget > .DlTreeItem-div .DlTreeItem-Expander div { background: url("img/tree-drop-here.gif") no-repeat 50% 50%; }
+.DlTreeItem-dropTarget-upper > .DlTreeItem-div .DlTreeItem-Expander div { background: url("img/tree-drop-here-upper.gif") no-repeat 50% 50%; }
+.DlTreeItem-dropTarget-lower > .DlTreeItem-div .DlTreeItem-Expander div { background: url("img/tree-drop-here-lower.gif") no-repeat 50% 50%; }
+.DlTreeItem-dropTarget-upper > .DlTreeItem-div > table { border-top: 1px solid $mainBgD2; }
+.DlTreeItem-dropTarget-lower > .DlTreeItem-div > table { border-bottom: 1px solid $mainBgD2; }
+
+.DlTreeItem-div-focus { @include focus-outline; }
+
+/* ColorPicker */
+
+.DlColorPickerHSV { border: 1px solid #000; background-color: #e4dcec; }
+.DlColorPickerHSV td { width: 8px; height: 10px; padding: 1px; }
+.DlColorPickerHSV td.DlColorPickerHSV-Sep { background-color: #000; width: 1px; padding: 0; }
+.DlColorPickerHSV td.DlColorPickerHSV-HSV {
+  overflow: visible; vertical-align: top;
+  background: url("img/color/hue.png") repeat-x 0 0; width: 15px; padding: 0; }
+.DlColorPickerHSV td.hover1 { padding: 0; border: 1px solid #fff !important; }
+.DlColorPickerHSV td.hover2 { padding: 0; border: 1px solid #000 !important; }
+.DlColorPickerHSV .DlColorPickerHSV-HSV-bar { height: 1px; left: 0px;
+  font-size: 1px; line-height: 1px; left: -2px; margin-right: -3px;
+  background-color: #000; overflow: hidden; position: relative; }
+.DlColorPickerHSV .DlColorPickerHSV-HSV-bar2 { background-color: #fff; }
+
+/* RteFrame */
+
+.DlRteFrame { border: 1px solid; border-color: $mainBgD2; }
+/* .DlRteFrame-focus { border-color: #659; outline: 1px solid #98b; -moz-outline-radius: 2px; } */
+.DlRteFrame iframe { border: 1px solid; @include inset-border1; }
+
+/* Grid */
+
+.DlDataGrid { position: relative; background-color: $mainBgL3; border: 1px solid $mainBgD3; }
+.DlDataGrid.DlWidget-disabled { background-color: $mainBgL2; }
+.DlDataGrid-rowTable { table-layout: fixed; width: 10px; border-collapse: collapse; border-spacing: 0; }
+.DlDataGrid-rowTable td { overflow: hidden; white-space: nowrap; border-right: 1px solid #e0e0e0; }
+.DlDataGrid-Headers { overflow: hidden; background-color: $mainBg; position: relative; width: 5px; }
+.DlDataGrid-Body { overflow: auto; }
+.DlDataGrid-cellData { overflow: hidden; white-space: nowrap; }
+.DlDataGrid-Body td { padding: 2px 0; text-indent: 5px; /* the "LOL" way to add horizontal padding. :-p */}
+
+.DlDataGrid-Body .DlDataGrid-rowTable {
+  border-bottom: 1px solid darken($mainBgL3, 5%);
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.DlDataGrid-resizeHandle {
+  width: 7px; position: absolute; top: 0;
+  margin-left: -4px;
+  cursor: e-resize;
+  z-index: 30000;
+  height: 100%;
+  background-color: #f00; opacity: 0.01; filter: alpha(opacity=1);
+}
+
+.DlDataGrid-align-left { text-align: left; }
+.DlDataGrid-align-center { text-align: center; }
+.DlDataGrid-align-right { text-align: right; }
+
+.DlDataGrid .DlDataGridRow-selected { background-color: #ccc; }
+.DlDataGrid .DlDataGridRow-selected table td { color: #000; }
+.DlDataGrid-focus { @include focus-outline; }
+.DlDataGrid-focus .DlDataGridRow-selected { background-color: $selectionBg; }
+.DlDataGrid-focus .DlDataGridRow-selected table td { color: $selectionFg; }
+
+.DlDataGrid-align-right .DlButton-inner { background-position: 0 50%; }
+
+.DlDataGridHeadLabel { border-width: 0 1px 1px 0; }
+.DlDataGridHeadLabel .DlButton-inner { border: none; padding-top: 3px; padding-bottom: 3px; }
+.DlDataGridHeadLabel-hover { background-color: $hoverBg; }
+.DlDataGridHeadLabel-active { background-color: $activeBg; }
+.DlDataGridHeadLabel-active .DlButton-inner { padding-top: 4px; padding-bottom: 2px; }
+.DlDataGridHeadLabel-resizing { background-color: $activeBg; }
+.DlDataGridHeadLabel-empty .DlButton-inner { padding-left: 0; padding-right: 0; }
+.DlDataGridHeadLabel-empty .DlButton-withIcon { background-position: 50% 50%; }
+
+.DlDataGridHeadLabel-sort-up { border-bottom: 2px solid #000; }
+.DlDataGridHeadLabel-sort-down { border-bottom: 2px solid #000; }
+
+.DlDataGridHeadLabel-sort-up .DlButton-inner {
+  background-image: url("img/arrows/sort-ascending.gif"); background-repeat: no-repeat; background-position: 100% 50%;
+  padding-bottom: 2px;
+}
+.DlDataGridHeadLabel-sort-down .DlButton-inner {
+  background-image: url("img/arrows/sort-descending.gif"); background-repeat: no-repeat; background-position: 100% 50%;
+  padding-bottom: 2px;
+}
+
+.DlDataGridHeadLabel-sort-up.DlDataGridHeadLabel-active .DlButton-inner { padding-bottom: 1px; }
+.DlDataGridHeadLabel-sort-down.DlDataGridHeadLabel-active .DlButton-inner { padding-bottom: 1px; }
+
+.DlDataGrid-drop-col {
+  position: fixed;
+  background: url("img/grid-drop-col.gif") no-repeat 0 0;
+  width: 11px; height: 11px;
+  margin-left: -5px;
+  z-index: 10000;
+}
+
+/* IconListView */
+// <XXX>: do we still keep this widget?
+.DlIconListView { background-color: #d8c8f8; border: 1px solid #bae; }
+.DlIconListItem { border-collapse: collapse; }
+.DlIconListItem-labelCell { text-align: center; }
+.DlIconListItem-labelDiv { overflow: hidden; white-space: normal; font-size: 90%; }
+.DlIconListItem-iconCell { background-position: 50% 50%; background-repeat: no-repeat; }
+
+/* .DlIconListItem-hover .DlIconListItem-iconCell { opacity: 0.7; filter: alpha(opacity=70); } */
+.DlIconListItem { cursor: pointer; float: left; }
+.DlIconListItem-hover { background-color: #dcf; }
+.DlIconListItem-hover .DlIconListItem-labelCell { color: #00f; text-decoration: underline; }
+.DlIconListItem-1 { background-color: #b8b0c0; }
+.DlDialog-Active .DlIconListItem-1 { background-color: #76c; }
+.DlDialog-Active .DlIconListItem-1 .DlIconListItem-labelCell { color: #fff; }
+
+.DlIconListItem-focus .DlIconListItem-labelCell { text-decoration: underline; }
+// </XXX>
+
+/* Dialog */
+
+.DlWM {
+  position: absolute;
+  left: 0; top: 0;
+  width: 0; height: 0;
+  overflow: visible;
+  z-index: 300;
+}
+
+/* .DlWM-container { */
+/*   position: relative; */
+/*   width: 0; height: 0; */
+/*   overflow: visible; */
+/* } */
+
+.DlWM-modalStopper {
+  z-index: 800; cursor: not-allowed;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+/*  background: url("img/modalbg.gif"); */
+  filter: alpha(opacity=50);
+  opacity: 0.5;
+  background-color: #444;
+  display: none;
+}
+
+.DlDialog .DlWM-modalStopper {
+  -moz-border-radius: 0 0 4px 4px;
+  -webkit-border-radius: 0 0 4px 4px;
+}
+
+.DlDialog .DlDialog-noShadows .DlWM-modalStopper,
+.DlDialog-Maximized .DlWM-modalStopper {
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+}
+
+.DlWM-hasModals { width: 100%; height: 100%; }
+.DlWM-hasModals .DlWM-modalStopper { display: block; }
+
+.DlDialog { position: absolute; }
+.DlDialog-Rel { padding: 0; }
+.DlDialog-Content { background-color: $dialogBg; position: relative; }
+/* .DlDialog>.DlDialog-Rel { position: relative; } /* HACK-IE6 */
+.Shadow { position: absolute; font-size: 1px; line-height: 1px; }
+.DlDialog-Rel .Shadow { z-index: 10; }
+
+.DlDialog-WAIT { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+  background-image: url("img/modalbg.gif"); }
+
+.DlDialog-Rel .ResizeHandle {
+  cursor: se-resize;
+  position: absolute;
+/*  right: 0; bottom: 0; */
+  left: 100%;
+  top: 100%;
+  margin-left: -11px;
+  margin-top: -11px;
+  padding: 5px;
+  background: url("img/resize.gif") no-repeat 0 0; width: 10px; height: 10px; z-index: 350;
+}
+
+/* OPACITY for inactive dialogs */
+/*
+.DlDialog { opacity: 0.8; }
+.DlDialog-Active { opacity: 1; }
+*/
+
+.DlDialog-Rel {
+  .Shadow-T { left: 18px; right: 15px; top: -14px; background: url("img/shadows/dlg-inactive/T.png") repeat-x 0 0; height: 14px; }
+  .Shadow-B { left: 18px; right: 15px; background: url("img/shadows/dlg-inactive/B.png") repeat-x 0 0; bottom: -16px; height: 16px; }
+  .Shadow-TL { left: -14px; width: 32px; top: -13px; background: url("img/shadows/dlg-inactive/TL.png") no-repeat 0 0; height: 23px; }
+  .Shadow-BR { width: 31px; right: -16px; background: url("img/shadows/dlg-inactive/BR.png") no-repeat 0 0; bottom: -15px; height: 21px; }
+  .Shadow-R { width: 16px; right: -16px; top: 10px; background: url("img/shadows/dlg-inactive/R.png") repeat-y 0 0; bottom: 6px; }
+  .Shadow-TR { width: 31px; right: -16px; top: -13px; background: url("img/shadows/dlg-inactive/TR.png") no-repeat 0 0; height: 23px; }
+  .Shadow-BL { left: -14px; width: 32px; background: url("img/shadows/dlg-inactive/BL.png") no-repeat 0 0; bottom: -15px; height: 21px; }
+  .Shadow-L { left: -14px; width: 14px; top: 10px; background: url("img/shadows/dlg-inactive/L.png") repeat-y 0 0; bottom: 6px; }
+}
+
+.DlDialog-Active .DlDialog-Rel {
+  .Shadow-T { left: 18px; right: 15px; top: -14px; background: url("img/shadows/dlg-active/T.png") repeat-x 0 0; height: 14px; }
+  .Shadow-B { left: 18px; right: 15px; background: url("img/shadows/dlg-active/B.png") repeat-x 0 0; bottom: -16px; height: 16px; }
+  .Shadow-TL { left: -14px; width: 32px; top: -13px; background: url("img/shadows/dlg-active/TL.png") no-repeat 0 0; height: 23px; }
+  .Shadow-BR { width: 31px; right: -16px; background: url("img/shadows/dlg-active/BR.png") no-repeat 0 0; bottom: -15px; height: 21px; }
+  .Shadow-R { width: 16px; right: -16px; top: 10px; background: url("img/shadows/dlg-active/R.png") repeat-y 0 0; bottom: 6px; }
+  .Shadow-TR { width: 31px; right: -16px; top: -13px; background: url("img/shadows/dlg-active/TR.png") no-repeat 0 0; height: 23px; }
+  .Shadow-BL { left: -14px; width: 32px; background: url("img/shadows/dlg-active/BL.png") no-repeat 0 0; bottom: -15px; height: 21px; }
+  .Shadow-L { left: -14px; width: 14px; top: 10px; background: url("img/shadows/dlg-active/L.png") repeat-y 0 0; bottom: 6px; }
+}
+
+/* that's for the crappin' IE6: */
+.DlDialog-noShadows { border: 2px solid #879; }
+.DlDialog-Active .DlDialog-noShadows { border-color: #000; }
+
+/*
+.DlDialog-Rel .Shadow-...
+.DlDialog-Active .DlDialog-Rel .Shadow-...
+.DlDialog-Dragging .DlDialog-Rel .Shadow-...
+*/
+
+.DlDialog-Title {
+  opacity: 0.9; filter: alpha(opacity=90);
+  overflow: hidden; white-space: nowrap;
+  font: bold 100% "Lucida Grande",verdana,tahoma,sans-serif; letter-spacing: -1px;
+  background: desaturate(darken($activeBg, 25%), 60%) url("img/titlebg.png") repeat-x 0 50%; color: #333; padding: 0 10px;
+  border-bottom: 2px solid #9e9e9e;
+}
+.DlDialog-Title div { padding-top: 3px; padding-bottom: 3px; }
+.DlDialog-Active .DlDialog-Title { background-color: darken($activeBg, 25%); color: #fff; border-color: #fff;
+  opacity: 1; filter: none;
+  text-shadow: 1px 1px 3px #000;
+}
+
+.DlDialog-Title-withIcon {
+  padding-left: 21px;
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+}
+
+.DlDialog-WindowButtons {
+  height: 0;
+  overflow: visible;
+  position: absolute;
+  right: 11px;
+  top: 0;
+  z-index: 10;
+  opacity: 0.6; /* filter: alpha(opacity=60); /* IE hides them completely, ignoring the overflow: visible spec. */
+}
+
+.DlDialog-Active .DlDialog-WindowButtons { opacity: 1; filter: none; }
+
+.DlDialog-WindowButtons div {
+  float: right;
+  width: 27px;
+  height: 16px;
+  background-repeat: no-repeat;
+  margin-right: -1px;
+  background-image: url("img/dialog/buttons.png");
+}
+
+.DlDialog-QuitBtn { background-position: 0 0; }
+.DlDialog-QuitBtn-hover { background-position: -27px 0; }
+.DlDialog-QuitBtn-active { background-position: -54px 0; }
+
+.DlDialog-MaximizeBtn { background-position: 0 -16px; }
+.DlDialog-MaximizeBtn-hover { background-position: -27px -16px; }
+.DlDialog-MaximizeBtn-active { background-position: -54px -16px; }
+.DlDialog-MaximizeBtn-1 { background-position: -54px -16px; }
+
+.DlDialog-MinimizeBtn { background-position: 0 -32px; }
+.DlDialog-MinimizeBtn-hover { background-position: -27px -32px; }
+.DlDialog-MinimizeBtn-active { background-position: -54px -32px; }
+.DlDialog-MinimizeBtn-1 { background-position: -54px -32px; }
+
+.DlDialog-Dragging .DlDialog-Title { background-color: #000; color: #3d4; }
+.DlDialog-Dragging .DlDialog-Rel { border-color: #000; }
+
+/* .DlDialog-Dragging .DlDialog-Content { opacity: 0.6; } */
+/* .DlDialog-Dragging .DlDialog-Content * { display: none; } /* Good speed-up in Linux! */
+
+.DlDialog .DlHMenu {
+  border: none;
+  border-bottom: 1px solid $mainBgD2;
+}
+
+
+.DlDialog .DlDialog .DlDialog-Rel {
+  outline: 1px solid #fff;
+  -moz-outline: 1px solid #fff;
+  -webkit-outline: 1px solid #fff;
+  -opera-outline: 1px solid #fff;
+  border: 0;
+}
+.DlDialog-noShadows>.ResizeHandle { margin-left: -10px; margin-top: -10px; }
+.DlDialog .DlDialog .DlDialog-Title {
+  background-color: #fff; color: #000; /* padding: 0px 2px; */
+  border-bottom: 1px solid #888;
+}
+.DlDialog .DlDialog .DlDialog-Title div { padding-top: 1px; padding-bottom: 1px; }
+.DlDialog .DlDialog-Active .DlDialog-Title { background-color: #5e5868; color: #fff; border-color: #fff; }
+.DlDialog .DlDialog-Dragging .DlDialog-Title { background-color: #000; color: #3d4; }
+
+/* maximized dialogs are not resizable */
+.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.Shadow { display: none; }
+.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.ResizeHandle { display: none; }
+.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.DlDialog-Title { border-width: 0; }
+
+.DlLiteTree {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  .hidden { display: none }
+  ul {
+    margin: 0; padding: 0; display: block;
+    li {
+      display: block;
+      .item-label { padding: 1px 0; white-space: nowrap; }
+      .expander {
+        background-position: 0 50%;
+        background-repeat: no-repeat;
+        padding-left: 15px;
+        margin-right: 1px;
+      }
+      .item-label:hover {
+        color: $hoverColor;
+        background-color: $hoverBg;
+      }
+      .item-label.selected {
+        background-color: #ccc;
+        color: #000;
+      }
+    }
+    .item-label.collapsed>.expander {
+      background-image: url("img/tree/plus.png");
+      background-position: 3px 50%;
+      cursor: pointer;
+      &:hover {
+        background-color: $focusBorder;
+      }
+    }
+    .item-label.expanded>.expander {
+      background-image: url("img/tree/minus.png");
+      background-position: 3px 50%;
+      cursor: pointer;
+      &:hover {
+        background-color: $focusBorder;
+      }
+    }
+    span.dim { color: $mainBgD3 }
+    ul {
+      .expander { margin-left: 16px }
+      ul {
+        .expander { margin-left: 32px }
+        ul {
+          .expander { margin-left: 48px }
+          ul {
+            .expander { margin-left: 64px }
+            ul {
+              .expander { margin-left: 80px }
+              ul {
+                .expander { margin-left: 96px }
+                ul {
+                  .expander { margin-left: 112px }
+                  ul {
+                    .expander { margin-left: 128px }
+                    ul {
+                      .expander { margin-left: 144px }
+                      ul {
+                        .expander { margin-left: 160px }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.DlLiteTree-focus {
+  @include focus-border1;
+  @include focus-outline;
+  ul {
+    li {
+      .item-label.selected {
+        background-color: $selectionBg;
+        color: $selectionFg;
+      }
+    }
+  }
+}
+
+/* ICONS */
+.IconCalendar { background-image: url("img/icons/calendar.png"); background-position: 1px 50%; }
+.IconColors { background-image: url("img/icons/colors.png"); background-position: 1px 50%; }
+.IconChardev { background-image: url("img/icons/gnome-fs-chardev.png"); background-position: 1px 50%; }
+.IconDynarch { background-image: url("img/icons/dynarch-small.png"); background-position: 1px 50%; }
+
+
+
+
+
+/* MISC */
+
+/* Hint for the browser that it's allowed to break line at this span;
+ideally it should be invisible.  The UTF8 character doesn't work in
+all browsers :(( */
+span.BreakPoint {
+  width: 1px;
+  font-size: 1px;
+  line-height: 1px;
+  overflow: hidden;
+}
+
+.SmallerButtons .DlButton-inner { padding: 1px 3px; }
+.SmallerButtons .DlButton-active .DlButton-inner { padding: 2px 2px 0px 4px; }
+
+.Dl-StatusBar { border: 1px solid; @include inset-border1; padding: 1px 4px; background-color: $mainBg; }
+
+.Dl-ResizeRect { z-index: 5000;
+  font: 13px tahoma,"Trebuchet MS",Tahoma,Verdana,sans-serif;
+  position: fixed; top: 0; left: 0; border: 1px dashed #000;
+/*  background: url("img/modalbg.gif"); */
+  background: #fff; opacity: 0.4; filter: alpha(opacity=40);
+/*  background-color: #000; opacity: 0.5; filter: alpha(opacity=50); */
+  border: 1px dashed #f00;
+}
+
+.Dl-ResizeRect { color: red; }
+.Dl-ResizeRect .Title { font-weight: bold; }
+
+.Dl-ResizeRect-moving {
+  border-color: #000;
+/*  background: url("img/resizebg.gif"); */
+  /* background: #000; */
+}
+
+.DlAlign-left { text-align: left; }
+.DlAlign-right { text-align: right; }
+.DlAlign-center { text-align: center; }
+
+.Dl-3D-Border-Outside { border: 1px solid; @incude outset-border1 }
+.Dl-3D-Border-Inside { border: 1px solid; @include outset-border2 }
+.Dl-3D-Border-Dark { border: 1px solid $mainBgD2; }
+
+/* BUGS */
+/* Gecko bugs are marked with class "Gecko-bug" *and* "Gecko-bug-######" (bug number) */
+
+.Gecko-Bug-226933 { position: relative; overflow: auto; }
+
+.undefined { border: 5px solid red; } /* this sucks */
+
+/* thin shadows */
+
+.ThinShadows .Shadow-T { left: 10px; right: 9px; top: -7px; background: url("img/thin-shadows/T.png") repeat-x 0 0; height: 7px; }
+.ThinShadows .Shadow-B { left: 10px; right: 9px; background: url("img/thin-shadows/B.png") repeat-x 0 0; bottom: -11px; height: 11px; }
+.ThinShadows .Shadow-TL { left: -7px; width: 17px; top: -7px; background: url("img/thin-shadows/TL.png") no-repeat 0 0; height: 20px; }
+.ThinShadows .Shadow-BR { width: 20px; right: -11px; background: url("img/thin-shadows/BR.png") no-repeat 0 0; bottom: -11px; height: 20px; }
+.ThinShadows .Shadow-R { width: 11px; right: -11px; top: 13px; background: url("img/thin-shadows/R.png") repeat-y 0 0; bottom: 9px; }
+.ThinShadows .Shadow-TR { width: 20px; right: -11px; top: -7px; background: url("img/thin-shadows/TR.png") no-repeat 0 0; height: 20px; }
+.ThinShadows .Shadow-BL { left: -7px; width: 17px; background: url("img/thin-shadows/BL.png") no-repeat 0 0; bottom: -11px; height: 20px; }
+.ThinShadows .Shadow-L { left: -7px; width: 7px; top: 13px; background: url("img/thin-shadows/L.png") repeat-y 0 0; bottom: 9px; }
+
+.ThinRoundShadows .Shadow-T { left: 8px; right: 6px; top: -6px; background: url("img/thin-shadows1/T.png") repeat-x 0 0; height: 6px; }
+.ThinRoundShadows .Shadow-B { left: 8px; right: 6px; background: url("img/thin-shadows1/B.png") repeat-x 0 0; bottom: -10px; height: 10px; }
+.ThinRoundShadows .Shadow-TL { left: -6px; width: 14px; top: -6px; background: url("img/thin-shadows1/TL.png") no-repeat 0 0; height: 15px; }
+.ThinRoundShadows .Shadow-BR { width: 16px; right: -10px; background: url("img/thin-shadows1/BR.png") no-repeat 0 0; bottom: -10px; height: 16px; }
+.ThinRoundShadows .Shadow-R { width: 10px; right: -10px; top: 9px; background: url("img/thin-shadows1/R.png") repeat-y 0 0; bottom: 6px; }
+.ThinRoundShadows .Shadow-TR { width: 16px; right: -10px; top: -6px; background: url("img/thin-shadows1/TR.png") no-repeat 0 0; height: 15px; }
+.ThinRoundShadows .Shadow-BL { left: -6px; width: 14px; background: url("img/thin-shadows1/BL.png") no-repeat 0 0; bottom: -10px; height: 16px; }
+.ThinRoundShadows .Shadow-L { left: -6px; width: 6px; top: 9px; background: url("img/thin-shadows1/L.png") repeat-y 0 0; bottom: 6px; }
