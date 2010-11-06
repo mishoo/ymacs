@@ -237,7 +237,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.ymacs.deleteFrame(this);
         };
 
-        P.vsplit = function() {
+        P.vsplit = function(percent) {
+                if (percent == null) percent = "50%";
                 var cont   = this.parent,
                     fr     = this.ymacs.createFrame({ buffer: this.buffer }),
                     layout = new DlLayout(),
@@ -246,14 +247,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this._resizeBar._widget = layout;
                 this._resizeBar = rb;
                 cont.replaceWidget(this, layout);
-                layout.packWidget(this, { pos: "top", fill: "50%" });
+                layout.packWidget(this, { pos: "top", fill: percent });
                 layout.packWidget(rb, { pos: "top" });
                 layout.packWidget(fr, { pos: "top", fill: "*" });
                 cont.__doLayout();
                 fr.centerOnCaret();
         };
 
-        P.hsplit = function() {
+        P.hsplit = function(percent) {
+                if (percent == null) percent = "50%";
                 var cont   = this.parent,
                     fr     = this.ymacs.createFrame({ buffer: this.buffer }),
                     layout = new DlLayout(),
@@ -262,7 +264,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this._resizeBar._widget = layout;
                 this._resizeBar = rb;
                 cont.replaceWidget(this, layout);
-                layout.packWidget(this, { pos: "left", fill: "50%" });
+                layout.packWidget(this, { pos: "left", fill: percent });
                 layout.packWidget(rb, { pos: "left" });
                 layout.packWidget(fr, { pos: "left", fill: "*" });
                 cont.__doLayout();

@@ -554,6 +554,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
+        P.forAllFrames = function(cont) {
+                this.ymacs.getBufferFrames(this).foreach(cont);
+        };
+
         P.whenYmacs = function() {
                 var a = Array.$(arguments);
                 a.unshift("ymacs");

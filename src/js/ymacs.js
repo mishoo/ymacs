@@ -197,6 +197,13 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 return a[a.rotateIndex(a.find(buf) - n)];
         };
 
+        P.getBufferFrames = function(buf) {
+                buf = this.getBuffer(buf);
+                return this.frames.grep(function(f){
+                        return f.buffer === buf;
+                });
+        };
+
         P.createBuffer = function(args) {
                 if (!args) args = {};
                 Object.merge(args, { ymacs: this });

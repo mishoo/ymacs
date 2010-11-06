@@ -857,12 +857,16 @@ Ymacs_Buffer.newCommands({
 
         /* -----[ frames and buffers ]----- */
 
-        split_frame_vertically: Ymacs_Interactive(function() {
-                this.whenActiveFrame("vsplit");
+        split_frame_vertically: Ymacs_Interactive("p", function(percent) {
+                if (percent == null) percent = "50%";
+                else percent += "%";
+                this.whenActiveFrame("vsplit", percent);
         }),
 
-        split_frame_horizontally: Ymacs_Interactive(function() {
-                this.whenActiveFrame("hsplit");
+        split_frame_horizontally: Ymacs_Interactive("p", function(percent) {
+                if (percent == null) percent = "50%";
+                else percent += "%";
+                this.whenActiveFrame("hsplit", percent);
         }),
 
         delete_other_frames: Ymacs_Interactive(function() {
