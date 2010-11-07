@@ -565,12 +565,9 @@ Ymacs_Buffer.newCommands({
                 this.ensureTransientMark();
         }),
 
-        // <XXX>: the following two kind of suck
-
         recenter_top_bottom: Ymacs_Interactive(function() {
                 this.whenActiveFrame(function(frame){
-                        if (frame.ensureCaretVisible())
-                                frame.centerOnCaret();
+                        frame.centerOnCaret();
                 });
         }),
 
@@ -580,8 +577,6 @@ Ymacs_Buffer.newCommands({
                                 frame.centerOnCaret();
                 });
         }),
-
-        // </XXX>
 
         /* -----[ paragraphs ]----- */
 
