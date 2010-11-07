@@ -164,6 +164,14 @@ Ymacs_Buffer.newCommands({
                 }
         }),
 
+        delete_indentation: Ymacs_Interactive("P", function(nextLine) {
+                if (nextLine)
+                        this.cmd("forward_line");
+                this.cmd("back_to_indentation");
+                this.cmd("backward_delete_whitespace");
+                this.cmd("insert", " ");
+        }),
+
         universal_argument: Ymacs_Interactive("^", function(){
                 this.pushKeymap(Ymacs_Keymap_UniversalArgument());
                 if (!this.isMinibuffer)
