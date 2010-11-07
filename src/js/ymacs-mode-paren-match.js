@@ -37,21 +37,21 @@
 DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
         D.KEYS = {
-                "C-c \\"              : "goto_matching_paren",
-                "C-M-q"               : "indent_sexp",
-                "C-M-f && C-M-n"      : "forward_sexp",
-                "C-M-b && C-M-p"      : "backward_sexp",
-                "C-M-u && M-a"        : "backward_up_list",
-                "M-e && C-M-ARROW_UP" : "up_list",
-                "C-M-ARROW_DOWN"      : "down_list",
-                "M-C-k"               : "kill_sexp",
-                "M-C-SPACE"           : "mark_sexp",
-                "M-C-t"               : "transpose_sexps",
-                "M-("                 : [ "paredit_wrap_round", "(" ],
-                "M-["                 : [ "paredit_wrap_round", "[" ],
-                "M-{"                 : [ "paredit_wrap_round", "{" ],
-                'M-"'                 : [ "paredit_wrap_round", '"', true ],
-                "M-'"                 : [ "paredit_wrap_round", "'", true ]
+                "C-c \\"                       : "goto_matching_paren",
+                "C-M-q"                        : "indent_sexp",
+                "C-M-f && C-M-n"               : "forward_sexp",
+                "C-M-b && C-M-p"               : "backward_sexp",
+                "C-M-u && M-a && C-M-ARROW_UP" : "backward_up_list",
+                "M-e"                          : "up_list",
+                "C-M-ARROW_DOWN"               : "down_list",
+                "M-C-k"                        : "kill_sexp",
+                "M-C-SPACE"                    : "mark_sexp",
+                "M-C-t"                        : "transpose_sexps",
+                "M-("                          : [ "paredit_wrap_round", "(" ],
+                "M-["                          : [ "paredit_wrap_round", "[" ],
+                "M-{"                          : [ "paredit_wrap_round", "{" ],
+                'M-"'                          : [ "paredit_wrap_round", '"', true ],
+                "M-'"                          : [ "paredit_wrap_round", "'", true ]
         };
 
         /* -----[ new commands ]----- */
