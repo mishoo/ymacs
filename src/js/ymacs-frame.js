@@ -158,21 +158,26 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.ensureCaretVisible = function() {
+                // return true if the scroll position was changed (that is, if
+                // the caren't wasn't visible before the call).
                 this._redrawCaret();
+                var ret = false;
 
                 var caret = this.getCaretElement();
                 if (!caret)
-                        return;
+                        return ret;
                 var div = this.getOverlaysContainer(), line = this.getLineDivElement(this.buffer._rowcol.row);
 
                 // vertical
                 var diff = line.offsetTop + line.offsetHeight - (div.scrollTop + div.clientHeight);
                 if (diff > 0) {
                         div.scrollTop += diff;
+                        ret = true;
                 } else {
                         diff = line.offsetTop - div.scrollTop;
                         if (diff < 0) {
                                 div.scrollTop += diff;
+                                ret = true;
                         }
                 }
 
@@ -182,11 +187,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 //         div.scrollLeft = 0;
                 if (diff > 0) {
                         div.scrollLeft += diff;
+                        ret = true;
                 } else {
                         diff = caret.offsetLeft - div.scrollLeft;
-                        if (diff < 0)
+                        if (diff < 0) {
                                 div.scrollLeft += diff;
+                                ret = true;
+                        }
                 }
+                return ret;
         };
 
         P.setBuffer = function(buffer) {

@@ -72,10 +72,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
                 this._isearchContext.forward = fw;
                 this._isearchContext.point = this.point();
                 var text = getText(this);
-                if (!/\S/.test(text) && this._isearchLastText) {
+                if (!/\S/.test(text) && this.getq("isearch_last_text")) {
                         this.getMinibuffer()._placeUndoBoundary();
-                        this.getMinibuffer().cmd("insert", this._isearchLastText);
-                        text = this._isearchLastText;
+                        this.getMinibuffer().cmd("insert", this.getq("isearch_last_text"));
+                        text = this.getq("isearch_last_text");
                 }
                 return doSearch.call(this, text);
         };
@@ -164,7 +164,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
                 isearch_abort: Ymacs_Interactive(function(cancelled) {
                         if (!cancelled)
-                                this._isearchLastText = getText(this);
+                                this.setGlobal("isearch_last_text", getText(this));
                         this.setMinibuffer("");
                         this.popKeymap(Ymacs_Keymap_ISearch());
                         this._isearchContext.mbMark.destroy();

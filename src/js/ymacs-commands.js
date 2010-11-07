@@ -569,16 +569,15 @@ Ymacs_Buffer.newCommands({
 
         recenter_top_bottom: Ymacs_Interactive(function() {
                 this.whenActiveFrame(function(frame){
-                        frame.ensureCaretVisible(true);
-                        frame.centerOnCaret();
+                        if (frame.ensureCaretVisible())
+                                frame.centerOnCaret();
                 });
         }),
 
         ensure_caret_visible: Ymacs_Interactive(function() {
                 this.whenActiveFrame(function(frame){
-                        // frame.centerOnCaretIfNotVisible();
-                        frame.ensureCaretVisible(true);
-                        frame.centerOnCaret();
+                        if (frame.ensureCaretVisible())
+                                frame.centerOnCaret();
                 });
         }),
 
