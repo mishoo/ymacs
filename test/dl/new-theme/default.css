@@ -83,9 +83,9 @@ form {
 
 /* Generic */
 .DlWidget {
-  font: 12px "Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif; }
+  font: 12px "Droid Sans","Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif; }
   .DlWidget table, .DlWidget input, .DlWidget select, .DlWidget button, .DlWidget textarea {
-    font: 12px "Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif; }
+    font: 12px "Droid Sans","Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif; }
 
 .DlWidget {
   cursor: default;

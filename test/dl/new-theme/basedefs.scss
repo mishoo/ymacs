@@ -35,7 +35,7 @@ $importantFg: #dd2200;
 
 // BEGIN: defs
 @mixin base-font {
-  font: 12px "Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif;
+  font: 12px "Droid Sans","Lucida Grande",Tahoma,"Lucida Sans","Trebuchet MS",Tahoma,Verdana,sans-serif;
 }
 @mixin outset-border1 {
  border-color: $mainBgD2 $mainBgD3 $mainBgD3 $mainBgD2;
