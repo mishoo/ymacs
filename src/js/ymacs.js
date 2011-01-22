@@ -60,6 +60,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         D.CONSTRUCT = function() {
                 this.buffers.foreach(function(b){
                         b.ymacs = this;
+                        this._addBufferListeners(b);
                 }, this);
 
                 /* -----[ variables ]----- */
@@ -93,6 +94,26 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
                 this.setActiveFrame(frame);
                 frame._redrawCaret();
+        };
+
+        P._addBufferListeners = function(buf) {
+                var self = this;
+                buf.addEventListener("onDestroy", function(){
+                        var fr = self.getActiveFrame();
+                        self.getBufferFrames(buf).foreach(function(f){
+                                if (f !== fr) {
+                                        self.deleteFrame(f);
+                                }
+                        });
+                        if (self.buffers.length > 1) {
+                                if (self.getActiveBuffer() === buf)
+                                        self.switchToNextBuffer();
+                        } else {
+                                // make a brand new buffer
+                                self.switchToBuffer(self.createBuffer());
+                        }
+                        self.buffers.remove(buf);
+                });
         };
 
         P.pushToKillRing = function(text, prepend) {
@@ -133,14 +154,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         P.killBuffer = function(buf) {
                 buf = this.getBuffer(buf);
                 this.callHooks("onDeleteBuffer", buf);
-                if (this.buffers.length > 1) {
-                        if (this.getActiveBuffer() === buf)
-                                this.switchToNextBuffer();
-                } else {
-                        // make a brand new buffer
-                        this.switchToBuffer(this.createBuffer());
-                }
-                this.buffers.remove(buf);
                 buf.destroy();
         };
 
@@ -208,24 +221,10 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 if (!args) args = {};
                 Object.merge(args, { ymacs: this });
                 var buf = new Ymacs_Buffer(args);
+                this._addBufferListeners(buf);
                 if (!args.hidden)
                         this.buffers.push(buf);
-                //
-                // XXX: although this seems the right way to do it,
-                //      instead of doing it in killBuffer, for some
-                //      reason we never get this event.  Should
-                //      investigate.
-                //
-                // buf.addEventListener("onDestroy", function(buf){
-                //         console.log("got here, %s, %s", this.getActiveBuffer().name, buf.name);
-                //         if (this.getActiveBuffer() === buf)
-                //                 this.switchToPreviousBuffer();
-                //         this.buffers.remove(buf);
-                // }.$(this, buf));
-                //
-
                 this.callHooks("onCreateBuffer", buf);
-
                 return buf;
         };
 

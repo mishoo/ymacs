@@ -71,7 +71,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         onKeyDown   : this._on_keyDown,
                         onKeyPress  : this._on_keyPress,
                         onKeyUp     : this._on_keyUp,
-                        onResize    : this._on_resize
+                        onResize    : this._on_resize.clearingTimeout(5)
                 });
 
                 this._dragSelectCaptures = {
@@ -685,7 +685,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_resize = function() {
-                this.centerOnCaret.delayed(1, this);
+                if (!this.destroyed)
+                        this.centerOnCaret();
         };
 
 });
