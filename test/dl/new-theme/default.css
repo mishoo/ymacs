@@ -1839,7 +1839,8 @@ table.DlButtonBox .DlButtonBox-spacer {
       display: block; }
       .DlLiteTree ul li .item-label {
         padding: 1px 0;
-        white-space: nowrap; }
+        white-space: nowrap;
+        position: relative; }
       .DlLiteTree ul li .expander {
         background-position: 0 50%;
         background-repeat: no-repeat;

@@ -1152,7 +1152,7 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
     margin: 0; padding: 0; display: block;
     li {
       display: block;
-      .item-label { padding: 1px 0; white-space: nowrap; }
+      .item-label { padding: 1px 0; white-space: nowrap; position: relative; }
       .expander {
         background-position: 0 50%;
         background-repeat: no-repeat;

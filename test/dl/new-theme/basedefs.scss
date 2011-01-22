@@ -58,6 +58,13 @@ $importantFg: #dd2200;
 @mixin focus-border1 {
   border-color: $mainBgD3 $mainBgD4 $mainBgD4 $mainBgD3;
 }
+@mixin border-radius($radius) {
+  -moz-border-radius: $radius;
+  -webkit-border-radius: $radius;
+  -khtml-border-radius: $radius;
+  -opera-border-radius: $radius;
+  border-radius: $radius;
+}
 @mixin focus-outline {
   outline: 1px solid $focusBorder;
   -moz-outline-radius: 2px;
