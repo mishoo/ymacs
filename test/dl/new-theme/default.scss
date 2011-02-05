@@ -876,6 +876,9 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 .DlDataGrid-Body { overflow: auto; }
 .DlDataGrid-cellData { overflow: hidden; white-space: nowrap; }
 .DlDataGrid-Body td { padding: 2px 0; text-indent: 5px; /* the "LOL" way to add horizontal padding. :-p */}
+.DlDataGrid-noIndent .DlDataGrid-Body td { text-indent: 0; }
+.DlDataGrid-valignTop .DlDataGrid-Body td { vertical-align: top; }
+.DlDataGrid-valignBottom .DlDataGrid-Body td { vertical-align: bottom; }
 
 .DlDataGrid-Body .DlDataGrid-rowTable {
   border-bottom: 1px solid darken($mainBgL3, 5%);

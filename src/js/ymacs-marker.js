@@ -1,7 +1,7 @@
 //> This file is part of Ymacs, an Emacs-like editor for the Web
 //> http://www.ymacs.org/
 //>
-//> Copyright (c) 2009-2010, Mihai Bazon, Dynarch.com.  All rights reserved.
+//> Copyright (c) 2009-2011, Mihai Bazon, Dynarch.com.  All rights reserved.
 //>
 //> Redistribution and use in source and binary forms, with or without
 //> modification, are permitted provided that the following conditions are
