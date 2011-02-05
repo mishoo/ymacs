@@ -252,8 +252,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                     fr     = this.ymacs.createFrame({ buffer: this.buffer }),
                     layout = new DlLayout(),
                     rb     = new DlResizeBar({ widget: this, keepPercent: true, horiz: true, className: "Ymacs-splitbar-horiz" });
-                if (this._resizeBar)
+                if (this._resizeBar) {
                         this._resizeBar._widget = layout;
+                        layout._resizeBar = this._resizeBar;
+                }
                 this._resizeBar = rb;
                 cont.replaceWidget(this, layout);
                 layout.packWidget(this, { pos: "top", fill: percent });
@@ -269,8 +271,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                     fr     = this.ymacs.createFrame({ buffer: this.buffer }),
                     layout = new DlLayout(),
                     rb     = new DlResizeBar({ widget: this, keepPercent: true, className: "Ymacs-splitbar-vert" });
-                if (this._resizeBar)
+                if (this._resizeBar) {
                         this._resizeBar._widget = layout;
+                        layout._resizeBar = this._resizeBar;
+                }
                 this._resizeBar = rb;
                 cont.replaceWidget(this, layout);
                 layout.packWidget(this, { pos: "left", fill: percent });

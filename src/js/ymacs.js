@@ -257,6 +257,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                         var p = frame.parent, other = p.children().grep_first(function(f){
                                 return f instanceof DlLayout || f instanceof Ymacs_Frame && f !== frame;
                         });
+                        if (p._resizeBar) p._resizeBar._widget = other;
                         p.parent.replaceWidget(p, other);
                         p.destroy();
                         try {
