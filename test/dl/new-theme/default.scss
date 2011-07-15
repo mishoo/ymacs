@@ -99,7 +99,7 @@ form { padding: 0; margin: 0; }
     @include outset-border2;
     padding: 2px 4px;
     div {
-      min-height: 16px; // XXX: for 16x16 icons; I'm not happy with this solution.
+      min-height: 16px; /* XXX: for 16x16 icons; I'm not happy with this solution. */
     }
   }
 }
@@ -205,6 +205,7 @@ div.DlButton-Label { display: inline; }
     padding: 1px 2px 2px 2px !important;
 /*  font-family: "Bitstream Vera Sans Mono",monospace; height: 1.3em; */
     resize: none;
+    outline: none;
   }
   input::-moz-selection, textarea::-moz-selection {
     background-color: $selectionBg !important; color: $selectionFg !important;
@@ -224,7 +225,7 @@ div.DlButton-Label { display: inline; }
   .DlEntry-cell, input, textarea { background-color: $errorBgL3; }
 }
 
-.DlEntry-Readonly {
+.DlEntry-Readonly, .DlEntry.DlWidget-disabled {
   .DlEntry-cell {
     border-color: $mainBgL2;
   }
@@ -418,9 +419,10 @@ table.DlCalendar {
 
 .DlContainer-Hidden { position: absolute; left: -30000px; top: -30000px; visibility: hidden; }
 
-// XXX: WHAT's this?
+/* XXX: WHAT's this?
 // .DlContainer-pad-sep-left { padding: 5px; border-left: 1px solid #a9d; }
 // .DlContainer-pad-sep-right { padding: 5px; border-right: 1px solid #a9d; }
+*/
 
 .DlLayout { position: relative; }
 .DlLayout-positioned { position: absolute; }
@@ -462,6 +464,7 @@ table.DlCalendar {
   z-index: 100;
   left: -30000px;
   top: -30000px;
+  box-shadow: 1px 1px 4px #000;
 }
 
 .DlPopup-scrollArea {
@@ -486,7 +489,7 @@ table.DlCalendar {
 .DlPopup-scrollDown-hover { background-image: url("img/arrows/scroll-down-hover.gif"); background-color: $hoverBg; }
 .DlPopup-scrollDown-disabled { background-image: url("img/arrows/scroll-down-disabled.gif"); }
 
-.DlCompletionPopup { border: 1px solid $mainBgD1; background-color: $mainBgL3; }
+.DlCompletionPopup { background-color: $mainBgL3; }
 .DlCompletionPopup .DlMenuItem .div2 { font-size: 90%; padding: 1px 5px; }
 .DlCompletionPopup .DlVMenu { border: none; }
 
@@ -506,13 +509,11 @@ table.DlCalendar {
 
 .DlPopupMenu {
   background-color: $mainBgL3;
-  border: 1px solid $mainBgD1;
 }
 .DlPopupMenu-noShadow { border: 1px solid $mainBgD1; }
 
 .DlPopupMenu .DlCalendar {
   border: 1px solid;
-  @include outset-border1;
 }
 .DlCalendar-borderless { border-width: 0 !important; }
 

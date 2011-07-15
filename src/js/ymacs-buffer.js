@@ -357,6 +357,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.callHooks("onResetCode", this.code);
                 this.caretMarker.setPosition(0, false, true);
                 this.markMarker.setPosition(0, true);
+                this.forAllFrames(function(frame){
+                        frame.ensureCaretVisible();
+                        frame.redrawModeline();
+                });
         };
 
         P.setTokenizer = function(tok) {
@@ -555,7 +559,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         };
 
         P.forAllFrames = function(cont) {
-                this.ymacs.getBufferFrames(this).foreach(cont);
+                if (this.ymacs)
+                        this.ymacs.getBufferFrames(this).foreach(cont);
         };
 
         P.whenYmacs = function() {

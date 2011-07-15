@@ -19,7 +19,7 @@
 }
 
 .Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #fdb;
+  background-color: #def;
 }
 
 .Ymacs-Theme-light .Ymacs-overwrite-mode .Ymacs-caret {
@@ -47,10 +47,11 @@
 
 .Ymacs-Theme-light .Ymacs-line-numbers .Ymacs-frame-content div.line:before {
   border-right: 1px dotted #888;
-  background-color: #edc;
+  color: #777;
+  background-color: #eee;
 }
 
 .Ymacs-Theme-light .Ymacs-line-numbers .Ymacs-frame-content div.Ymacs-current-line:before {
-  background-color: #fdb;
   color: #000;
+  background-color: #def;
 }

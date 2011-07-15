@@ -112,6 +112,7 @@ return return-from setq multiple-value-call".qw().toHash();
                 "lambda"     : "1*",
                 "unless"     : "1*",
                 "defun"      : "2*",
+                "defpackage" : "1*",
                 "defgeneric" : "2*",
                 "defmethod"  : "2*",
                 "defclass"   : "2*",
@@ -119,7 +120,9 @@ return return-from setq multiple-value-call".qw().toHash();
                 "progn"      : "0*",
                 "prog1"      : "0*",
                 "prog2"      : "0*",
-                "let"        : "1*"
+                "let"        : "1*",
+                "labels"     : "1*",
+                "flet"       : "1*"
         };
 
         function isOpenParen(ch) {

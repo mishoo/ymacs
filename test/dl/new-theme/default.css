@@ -118,7 +118,8 @@ form {
     border-color: white #9b9bb8 #9b9bb8 white;
     padding: 2px 4px; }
     .DlButton .DlButton-inner div {
-      min-height: 16px; }
+      min-height: 16px;
+      /* XXX: for 16x16 icons; I'm not happy with this solution. */ }
 
 .DlButton-hover {
   border-color: #6e6e99 #58587c #58587c #6e6e99;
@@ -281,7 +282,8 @@ div.DlButton-Label {
     color: #000;
     padding: 1px 2px 2px 2px !important;
     /*  font-family: "Bitstream Vera Sans Mono",monospace; height: 1.3em; */
-    resize: none; }
+    resize: none;
+    outline: none; }
   .DlEntry input::-moz-selection, .DlEntry textarea::-moz-selection {
     background-color: #80b9ff !important;
     color: black !important; }
@@ -301,9 +303,9 @@ div.DlButton-Label {
   .DlEntry-ValidationError .DlEntry-cell, .DlEntry-ValidationError input, .DlEntry-ValidationError textarea {
     background-color: #ffd4cc; }
 
-.DlEntry-Readonly .DlEntry-cell {
+.DlEntry-Readonly .DlEntry-cell, .DlEntry.DlWidget-disabled .DlEntry-cell {
   border-color: #e6e6ed; }
-.DlEntry-Readonly .DlEntry-cell, .DlEntry-Readonly input, .DlEntry-Readonly textarea {
+.DlEntry-Readonly .DlEntry-cell, .DlEntry-Readonly input, .DlEntry-Readonly textarea, .DlEntry.DlWidget-disabled .DlEntry-cell, .DlEntry.DlWidget-disabled input, .DlEntry.DlWidget-disabled textarea {
   background-color: #d7d7e3; }
 
 .DlEntry-emptyText {
@@ -666,7 +668,8 @@ table.DlCalendar {
   position: fixed;
   z-index: 100;
   left: -30000px;
-  top: -30000px; }
+  top: -30000px;
+  box-shadow: 1px 1px 4px #000; }
 
 .DlPopup-scrollArea {
   overflow: hidden;
@@ -707,7 +710,6 @@ table.DlCalendar {
   background-image: url("img/arrows/scroll-down-disabled.gif"); }
 
 .DlCompletionPopup {
-  border: 1px solid #b9b9cd;
   background-color: white; }
 
 .DlCompletionPopup .DlMenuItem .div2 {
@@ -731,15 +733,13 @@ table.DlCalendar {
   border: 1px solid #b9b9cd; }
 
 .DlPopupMenu {
-  background-color: white;
-  border: 1px solid #b9b9cd; }
+  background-color: white; }
 
 .DlPopupMenu-noShadow {
   border: 1px solid #b9b9cd; }
 
 .DlPopupMenu .DlCalendar {
-  border: 1px solid;
-  border-color: #9b9bb8 #6e6e99 #6e6e99 #9b9bb8; }
+  border: 1px solid; }
 
 .DlCalendar-borderless {
   border-width: 0 !important; }
