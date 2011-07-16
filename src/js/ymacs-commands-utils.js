@@ -39,6 +39,17 @@ Ymacs_Buffer.newCommands({
                 return this.getRegion();
         },
 
+        figure_out_mode: function(code) {
+                var lines = code.split(/\n/);
+                if (lines.length > 4)
+                        lines.splice(2, lines.length - 4);
+                return lines.foreach(function(line, m){
+                        if ((m = /-\*-\s*(.*?)\s*-\*-/i.exec(line))) {
+                                $RETURN(m[1]);
+                        }
+                });
+        },
+
         cperl_lineup: Ymacs_Interactive("r", function(begin, end){
                 this.cmd("save_excursion", function(){
                         var rcend = this._positionToRowCol(end), max = 0, lines = [];
@@ -141,6 +152,14 @@ Ymacs_Buffer.newCommands({
                 var buffer = this.ymacs.createBuffer({ name: name });
                 buffer.setCode(code);
                 this.cmd("switch_to_buffer", name);
+                var mode = this.cmd("figure_out_mode", code);
+                if (mode) {
+                        if (Object.HOP(buffer.COMMANDS, mode)) {
+                                buffer.cmd(mode);
+                        } else if (Object.HOP(buffer.COMMANDS, mode + "_mode")) {
+                                buffer.cmd(mode + "_mode");
+                        }
+                }
         }),
 
         delete_file: Ymacs_Interactive("fDelete file: ", function(name){
