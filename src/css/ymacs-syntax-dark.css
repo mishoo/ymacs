@@ -56,3 +56,6 @@
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .markdown-blockquote2 { color: #88f; }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .markdown-blockquote3 { color: #f8f; }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .markdown-blockquote { color: #aaa; }
+
+.Ymacs-Theme-dark .open-paren { color: #9a7 }
+.Ymacs-Theme-dark .close-paren { color: #9a7 }

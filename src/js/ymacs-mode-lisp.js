@@ -76,7 +76,7 @@
         // the duplicate code.
 
         var SPECIAL_FORMS = "\
-deftype defstruct defclass \
+defvar defparameter deftype defstruct defclass destructuring-bind \
 defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond unless etypecase typecase ctypecase \
 lambda let load-time-value quote macrolet \
@@ -102,28 +102,35 @@ return return-from setq multiple-value-call".qw().toHash();
                 "]" : "["
         };
 
-        var DEFINES_FUNCTION = "defun defgeneric defmethod".qw().toHash();
+        var DEFINES_FUNCTION = "defun defmacro defgeneric defmethod".qw().toHash();
 
         var DEFINES_TYPE = "deftype defclass defstruct".qw().toHash();
 
         var FORM_ARGS = {
-                "if"         : "3+",
-                "when"       : "1*",
-                "lambda"     : "1*",
-                "unless"     : "1*",
-                "defun"      : "2*",
-                "defpackage" : "1*",
-                "defgeneric" : "2*",
-                "defmethod"  : "2*",
-                "defclass"   : "2*",
-                "defmacro"   : "2*",
-                "progn"      : "0*",
-                "prog1"      : "0*",
-                "prog2"      : "0*",
-                "let"        : "1*",
-                "labels"     : "1*",
-                "flet"       : "1*"
+                "if"                  : "3+",
+                "when"                : "1*",
+                "lambda"              : "1*",
+                "unless"              : "1*",
+                "defun"               : "2*",
+                "defpackage"          : "1*",
+                "defgeneric"          : "2*",
+                "defmethod"           : "2*",
+                "defclass"            : "2*",
+                "defmacro"            : "2*",
+                "progn"               : "0*",
+                "prog1"               : "0*",
+                "prog2"               : "0*",
+                "let"                 : "1*",
+                "labels"              : "1*",
+                "flet"                : "1*",
+                "macrolet"            : "1*",
+                "destructuring-bind"  : "2*",
+                "unwind-protect"      : "1*",
+                "case"                : "1*",
+                "ecase"               : "1*"
         };
+
+        var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();
 
         function isOpenParen(ch) {
                 return OPEN_PAREN[ch];
@@ -139,7 +146,8 @@ return return-from setq multiple-value-call".qw().toHash();
         };
 
         function isConstituentStart(ch) {
-                return ch != "#" && isConstituent(ch);
+                //return ch != "#" && isConstituent(ch);
+                return isConstituent(ch);
         };
 
         // the tokenizer function
@@ -304,6 +312,8 @@ return return-from setq multiple-value-call".qw().toHash();
                         }
                         else if (isConstituentStart(ch) && (tmp = readName())) {
                                 var type = ch == ":" ? "lisp-keyword"
+                                        : ch == "&" ? "type"
+                                        : /^#:/.test(tmp.id) ? "constant"
                                         : tmp.id in SPECIAL_FORMS ? "keyword"
                                         : tmp.id in COMMON_MACROS ? "builtin"
                                         : tmp.id in CONSTANTS ? "constant"
@@ -361,6 +371,15 @@ return return-from setq multiple-value-call".qw().toHash();
                                                         // "with" macros usually take one argument, then &body
                                                         formArgs = "1*";
                                                 }
+                                                if (!formArgs && /^def/.test(currentForm)) {
+                                                        // "with" macros usually take one argument, then &body
+                                                        formArgs = "2*";
+                                                }
+                                                if (!formArgs) try {
+                                                        if (Object.HOP(LOCAL_BODYDEF, $backList[$backList.length - 2][0].id)) {
+                                                                formArgs = "1*";
+                                                        }
+                                                } catch(ex){}
                                                 if (!formArgs) {
                                                         formArgs = "1+"; // kind of sucky now
                                                 }
@@ -392,10 +411,10 @@ return return-from setq multiple-value-call".qw().toHash();
 DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
 
         D.KEYS = {
-                "ENTER"            : "newline_and_indent",
-                "("                : [ "lisp_open_paren", "(" ],
-                ")"                : [ "lisp_close_paren", ")" ],
-                "C-c ] && C-c C-]" : "lisp_close_all_parens"
+                "ENTER && C-j && C-m"  : "newline_and_indent",
+                "("                    : [ "lisp_open_paren", "(" ],
+                ")"                    : [ "lisp_close_paren", ")" ],
+                "C-c ] && C-c C-]"     : "lisp_close_all_parens"
         };
 
 });

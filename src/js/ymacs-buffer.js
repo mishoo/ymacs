@@ -711,12 +711,17 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         P.renderModelineContent = function(rc) {
                 var ml = String.buffer("-- <b>", this.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
+                var custom = this.getq("modeline_custom_handler");
+                if (custom) {
+                        custom = custom.call(this, this, rc);
+                        if (custom) ml("[", custom, "] ");
+                }
                 var pr = [];
                 for (var i in this.progress) {
                         pr.push(i + ": " + this.progress[i]);
                 }
                 if (pr.length > 0) {
-                        ml("[", pr.join(", "), "]");
+                        ml("{", pr.join(", "), "}");
                 }
                 return ml.get();
         };
