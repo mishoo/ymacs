@@ -6,6 +6,9 @@
 $mainFg: #000;
 $mainBg: #c8c8d8;
 $focusBorder: #e8a850;
+$focusBorderD1: darken($focusBorder, 10%);
+$focusBorderD2: darken($focusBorder, 20%);
+$focusBorderD3: darken($focusBorder, 30%);
 $focusBg: #fff8dd;
 $disabledColor: #88888f;
 $selectionBg: #80b9ff;
@@ -25,12 +28,14 @@ $readOnlyBg: $mainBgL1;
 $hoverBg: $mainBgL2;
 $hoverColor: $mainFg;
 $activeBg: $selectionBg;
+$activeBgS1: saturate($activeBg, 30%);
 $activeColor: #000;
 $activeBg2: #222;
 $activeColor2: #fff;
 $dialogBg: $mainBgL1;
 $linkHoverFg: darken($selectionBg, 20%);
 $importantFg: #dd2200;
+$btnOnBg: #fcb587;
 // END: main colors
 
 // BEGIN: defs
@@ -50,7 +55,7 @@ $importantFg: #dd2200;
   border-color: $mainBgD1 $mainBgL3 $mainBgL3 $mainBgD1;
 }
 @mixin pressed-border1 {
- border-color: $mainBgD3 $mainBgD2 $mainBgD2 $mainBgD3;
+  border-color: $mainBgD3 $mainBgD2 $mainBgD2 $mainBgD3;
 }
 @mixin pressed-border2 {
   border-color: $mainBgD1 $mainBgL1 $mainBgL1 $mainBgD1;
@@ -61,13 +66,30 @@ $importantFg: #dd2200;
 @mixin border-radius($radius) {
   -moz-border-radius: $radius;
   -webkit-border-radius: $radius;
-  -khtml-border-radius: $radius;
   -opera-border-radius: $radius;
+  -khtml-border-radius: $radius;
+  -ms-border-radius: $radius;
   border-radius: $radius;
 }
+@mixin outline-radius($radius) {
+  -moz-outline-radius: $radius;
+  -webkit-outline-radius: $radius;
+  -opera-outline-radius: $radius;
+  -khtml-outline-radius: $radius;
+  -ms-outline-radius: $radius;
+  outline-radius: $radius;
+}
+@mixin box-shadow($def) {
+  -moz-box-shadow: $def;
+  -webkit-box-shadow: $def;
+  -opera-box-shadow: $def;
+  -khtml-box-shadow: $def;
+  -ms-box-shadow: $def;
+  box-shadow: $def;
+}
 @mixin focus-outline {
-  outline: 1px solid $focusBorder;
-  -moz-outline-radius: 2px;
-  -webkit-outline-radius: 2px;
+  /* outline: 1px solid $focusBorder; */
+  /* @include outline-radius(2px); */
+  @include box-shadow(0px 0px 4px $focusBorder);
 }
 // END: defs

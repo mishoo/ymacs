@@ -116,10 +116,11 @@ form {
   .DlButton .DlButton-inner {
     border: 1px solid;
     border-color: white #9b9bb8 #9b9bb8 white;
-    padding: 2px 4px; }
+    padding: 2px 5px; }
     .DlButton .DlButton-inner div {
-      min-height: 16px;
-      /* XXX: for 16x16 icons; I'm not happy with this solution. */ }
+      line-height: 16px;
+      /* XXX: for 16x16 icons; I'm not happy with this solution. */
+      min-height: 16px; }
 
 .DlButton-hover {
   border-color: #6e6e99 #58587c #58587c #6e6e99;
@@ -127,9 +128,14 @@ form {
 
 .DlButton-focus {
   border-color: #6e6e99 #58587c #58587c #6e6e99;
-  outline: 1px solid #e8a850;
-  -moz-outline-radius: 2px;
-  -webkit-outline-radius: 2px; }
+  /* outline: 1px solid $focusBorder; */
+  /* @include outline-radius(2px); */
+  -moz-box-shadow: 0px 0px 4px #e8a850;
+  -webkit-box-shadow: 0px 0px 4px #e8a850;
+  -opera-box-shadow: 0px 0px 4px #e8a850;
+  -khtml-box-shadow: 0px 0px 4px #e8a850;
+  -ms-box-shadow: 0px 0px 4px #e8a850;
+  box-shadow: 0px 0px 4px #e8a850; }
   .DlButton-focus div.DlButton-Label {
     display: block;
     border: 1px dotted black;
@@ -140,18 +146,18 @@ form {
   border-color: #6e6e99 #9b9bb8 #9b9bb8 #6e6e99;
   background-color: #80b9ff; }
   .DlButton-active .DlButton-inner {
-    padding: 3px 3px 1px 5px;
+    padding: 3px 4px 1px 6px;
     border-color: #b9b9cd #d7d7e3 #d7d7e3 #b9b9cd; }
 
 .DlButton-1 {
   border-color: #6e6e99 #9b9bb8 #9b9bb8 #6e6e99;
-  background-color: #b9b9cd; }
+  background-color: #fcb587; }
 
 .DlButton-1 .DlButton-inner {
   border-color: #b9b9cd white white #b9b9cd; }
 
 .DlAbstractButton-withIcon, .DlButton-withIcon {
-  padding-left: 22px;
+  padding-left: 20px;
   background-repeat: no-repeat !important;
   background-position: 0 50%; }
 
@@ -187,6 +193,11 @@ div.DlButton-Label {
 .DlCheckbox {
   padding: 2px 5px 2px 20px;
   -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -opera-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -ms-border-radius: 3px;
+  border-radius: 3px;
   background-position: 4px 50%;
   background-repeat: no-repeat; }
 
@@ -232,6 +243,11 @@ div.DlButton-Label {
 .DlRadioButton {
   padding: 2px 5px 2px 20px;
   -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -opera-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -ms-border-radius: 3px;
+  border-radius: 3px;
   background-position: 4px 50%;
   background-repeat: no-repeat; }
 
@@ -266,13 +282,17 @@ div.DlButton-Label {
   padding: 0 1px; }
 
 .DlPopupMenu .DlRadioButton, .DlPopupMenu .DlCheckbox {
-  -moz-border-radius: 0; }
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  -opera-border-radius: 0;
+  -khtml-border-radius: 0;
+  -ms-border-radius: 0;
+  border-radius: 0; }
 
 /* Entry */
 .DlEntry {
   border: 1px solid #9b9bb8; }
   .DlEntry .DlEntry-cell {
-    border: 1px solid white;
     background-color: #e6e6ed; }
   .DlEntry input, .DlEntry textarea {
     margin: 0;
@@ -280,7 +300,7 @@ div.DlButton-Label {
     border-width: 0px !important;
     background: white;
     color: #000;
-    padding: 1px 2px 2px 2px !important;
+    padding: 2px 3px !important;
     /*  font-family: "Bitstream Vera Sans Mono",monospace; height: 1.3em; */
     resize: none;
     outline: none; }
@@ -290,11 +310,22 @@ div.DlButton-Label {
 
 .DlEntry-Focus {
   border-color: #6e6e99 #58587c #58587c #6e6e99;
-  outline: 1px solid #e8a850;
-  -moz-outline-radius: 2px;
-  -webkit-outline-radius: 2px; }
+  /* outline: 1px solid $focusBorder; */
+  /* @include outline-radius(2px); */
+  -moz-box-shadow: 0px 0px 4px #e8a850;
+  -webkit-box-shadow: 0px 0px 4px #e8a850;
+  -opera-box-shadow: 0px 0px 4px #e8a850;
+  -khtml-box-shadow: 0px 0px 4px #e8a850;
+  -ms-box-shadow: 0px 0px 4px #e8a850;
+  box-shadow: 0px 0px 4px #e8a850; }
   .DlEntry-Focus .DlEntry-cell, .DlEntry-Focus input, .DlEntry-Focus textarea {
-    background-color: #fff8dd; }
+    background-color: #fff8dd;
+    -moz-box-shadow: inset 0 0 2px #22cc22;
+    -webkit-box-shadow: inset 0 0 2px #22cc22;
+    -opera-box-shadow: inset 0 0 2px #22cc22;
+    -khtml-box-shadow: inset 0 0 2px #22cc22;
+    -ms-box-shadow: inset 0 0 2px #22cc22;
+    box-shadow: inset 0 0 2px #22cc22; }
 
 .DlEntry-ValidationError {
   border-color: #ff2600; }
@@ -669,7 +700,12 @@ table.DlCalendar {
   z-index: 100;
   left: -30000px;
   top: -30000px;
-  box-shadow: 1px 1px 4px #000; }
+  -moz-box-shadow: 1px 1px 4px black;
+  -webkit-box-shadow: 1px 1px 4px black;
+  -opera-box-shadow: 1px 1px 4px black;
+  -khtml-box-shadow: 1px 1px 4px black;
+  -ms-box-shadow: 1px 1px 4px black;
+  box-shadow: 1px 1px 4px black; }
 
 .DlPopup-scrollArea {
   overflow: hidden;
@@ -906,6 +942,11 @@ div.DlVMenu-separator {
 .DlMacBarIcon-1 img {
   border: 1px solid #769;
   -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+  -opera-border-radius: 15px;
+  -khtml-border-radius: 15px;
+  -ms-border-radius: 15px;
+  border-radius: 15px;
   padding: 4px;
   background-color: #edf; }
 
@@ -1030,28 +1071,28 @@ table.DlButtonBox .DlButtonBox-spacer {
   padding: 1px; }
   .DlToolbar .DlButton {
     border: none;
-    background-color: transparent; }
+    background: transparent; }
   .DlToolbar .DlButton-inner {
     border: none;
-    padding: 3px; }
+    padding: 3px 4px; }
   .DlToolbar .DlButton-hover {
     border: 1px solid;
     border-color: white #9b9bb8 #9b9bb8 white;
-    background-color: #e6e6ed; }
+    background: #e6e6ed; }
   .DlToolbar .DlButton-hover .DlButton-inner {
-    padding: 2px; }
+    padding: 2px 3px; }
   .DlToolbar .DlButton-1 {
     border: 1px solid;
     border-color: #b9b9cd white white #b9b9cd;
-    background-color: #80b9ff; }
+    background: #fcb587; }
   .DlToolbar .DlButton-1 .DlButton-inner {
-    padding: 2px; }
+    padding: 2px 3px; }
   .DlToolbar .DlButton-active {
     border: 1px solid;
     border-color: #6e6e99 #9b9bb8 #9b9bb8 #6e6e99;
-    background-color: #80b9ff; }
+    background: #80b9ff; }
   .DlToolbar .DlButton-active .DlButton-inner {
-    padding: 2px; }
+    padding: 2px 3px; }
   .DlToolbar .DlButton-disabled {
     opacity: 0.7;
     filter: alpha(opacity=70); }
@@ -1239,9 +1280,14 @@ table.DlButtonBox .DlButtonBox-spacer {
   border-bottom: 1px solid #9b9bb8; }
 
 .DlTreeItem-div-focus {
-  outline: 1px solid #e8a850;
-  -moz-outline-radius: 2px;
-  -webkit-outline-radius: 2px; }
+  /* outline: 1px solid $focusBorder; */
+  /* @include outline-radius(2px); */
+  -moz-box-shadow: 0px 0px 4px #e8a850;
+  -webkit-box-shadow: 0px 0px 4px #e8a850;
+  -opera-box-shadow: 0px 0px 4px #e8a850;
+  -khtml-box-shadow: 0px 0px 4px #e8a850;
+  -ms-box-shadow: 0px 0px 4px #e8a850;
+  box-shadow: 0px 0px 4px #e8a850; }
 
 /* ColorPicker */
 .DlColorPickerHSV {
@@ -1378,9 +1424,14 @@ table.DlButtonBox .DlButtonBox-spacer {
   color: #000; }
 
 .DlDataGrid-focus {
-  outline: 1px solid #e8a850;
-  -moz-outline-radius: 2px;
-  -webkit-outline-radius: 2px; }
+  /* outline: 1px solid $focusBorder; */
+  /* @include outline-radius(2px); */
+  -moz-box-shadow: 0px 0px 4px #e8a850;
+  -webkit-box-shadow: 0px 0px 4px #e8a850;
+  -opera-box-shadow: 0px 0px 4px #e8a850;
+  -khtml-box-shadow: 0px 0px 4px #e8a850;
+  -ms-box-shadow: 0px 0px 4px #e8a850;
+  box-shadow: 0px 0px 4px #e8a850; }
 
 .DlDataGrid-focus .DlDataGridRow-selected {
   background-color: #80b9ff; }
@@ -1505,6 +1556,9 @@ table.DlButtonBox .DlButtonBox-spacer {
   overflow: visible;
   z-index: 300; }
 
+.DlTopWindowManager {
+  z-index: 500; }
+
 /* .DlWM-container { */
 /*   position: relative; */
 /*   width: 0; height: 0; */
@@ -1526,12 +1580,20 @@ table.DlButtonBox .DlButtonBox-spacer {
 
 .DlDialog .DlWM-modalStopper {
   -moz-border-radius: 0 0 4px 4px;
-  -webkit-border-radius: 0 0 4px 4px; }
+  -webkit-border-radius: 0 0 4px 4px;
+  -opera-border-radius: 0 0 4px 4px;
+  -khtml-border-radius: 0 0 4px 4px;
+  -ms-border-radius: 0 0 4px 4px;
+  border-radius: 0 0 4px 4px; }
 
 .DlDialog .DlDialog-noShadows .DlWM-modalStopper,
 .DlDialog-Maximized .DlWM-modalStopper {
   -moz-border-radius: 0;
-  -webkit-border-radius: 0; }
+  -webkit-border-radius: 0;
+  -opera-border-radius: 0;
+  -khtml-border-radius: 0;
+  -ms-border-radius: 0;
+  border-radius: 0; }
 
 .DlWM-hasModals {
   width: 100%;
@@ -1898,9 +1960,14 @@ table.DlButtonBox .DlButtonBox-spacer {
 
 .DlLiteTree-focus {
   border-color: #6e6e99 #58587c #58587c #6e6e99;
-  outline: 1px solid #e8a850;
-  -moz-outline-radius: 2px;
-  -webkit-outline-radius: 2px; }
+  /* outline: 1px solid $focusBorder; */
+  /* @include outline-radius(2px); */
+  -moz-box-shadow: 0px 0px 4px #e8a850;
+  -webkit-box-shadow: 0px 0px 4px #e8a850;
+  -opera-box-shadow: 0px 0px 4px #e8a850;
+  -khtml-box-shadow: 0px 0px 4px #e8a850;
+  -ms-box-shadow: 0px 0px 4px #e8a850;
+  box-shadow: 0px 0px 4px #e8a850; }
   .DlLiteTree-focus ul li .item-label.selected {
     background-color: #80b9ff;
     color: black; }
