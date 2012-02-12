@@ -99,5 +99,5 @@
           for faces = (cdr i)
           do
           (insert ".Ymacs-Theme-NONAME .Ymacs_Frame ." class " {")
-          (ymacs-face-css faces)
+          (ymacs-face-css faces t)
           (insert " }\n"))))

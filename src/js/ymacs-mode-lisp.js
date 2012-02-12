@@ -263,9 +263,17 @@ return return-from setq multiple-value-call".qw().toHash();
                         if ($cont.length > 0)
                                 return $cont.peek()();
                         var ch = stream.peek(), tmp;
-                        if ((tmp = stream.lookingAt(/^#\\(Space|Newline|.?)/i))) {
+                        if ((tmp = stream.lookingAt(/^#\\[a-z0-9_-]*/i))) {
                                 newArg();
                                 foundToken(stream.col, stream.col += tmp[0].length, "constant");
+                        }
+                        else if ((tmp = stream.lookingAt(/^#\x2f((\\.|[^\x2f])*)\x2f([igsm]*)/))) {
+                                newArg();
+                                foundToken(stream.col, stream.col += 2, "regexp-starter");
+                                foundToken(stream.col, stream.col += tmp[1].length, "regexp");
+                                foundToken(stream.col, stream.col += 1, "regexp-stopper");
+                                if (tmp[3])
+                                        foundToken(stream.col, stream.col += tmp[3].length, "regexp-modifier");
                         }
                         else if (stream.lookingAt(/^#\x27[^(]/)) {
                                 newArg();
