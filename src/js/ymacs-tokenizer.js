@@ -226,7 +226,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 var first = true;
                 var doit = function() {
                         this.buffer.preventUpdates();
-                        n = first ? 3 : 20;
+                        n = 100;
                         if (++iteration > 10)
                                 this.showProgress(this.stream.line);
                         while (true) {
@@ -239,7 +239,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                                                 s.nextLine();
                                                 if  (--n == 0) {
                                                         this.buffer.resumeUpdates();
-                                                        this.timerUpdate = setTimeout(doit, first ? 500 : 50);
+                                                        this.timerUpdate = setTimeout(doit, 25);
                                                         first = false;
                                                         return;
                                                 }
