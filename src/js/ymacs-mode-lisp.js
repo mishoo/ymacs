@@ -76,15 +76,15 @@
         // the duplicate code.
 
         var SPECIAL_FORMS = "\
-defvar defparameter deftype defstruct defclass destructuring-bind \
+defvar defparameter deftype defstruct defclass defsetf destructuring-bind \
 defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond unless etypecase typecase ctypecase \
 lambda let load-time-value quote macrolet \
 progn prog1 prog2 progv go flet the \
 if throw eval-when multiple-value-prog1 unwind-protect let* \
-ignore-errors handler-case case \
+ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind case \
 labels function symbol-macrolet block tagbody catch locally \
-return return-from setq multiple-value-call".qw().toHash();
+return return-from setq setf multiple-value-call".qw().toHash();
 
         var COMMON_MACROS = "loop do while".qw().toHash();
 
@@ -117,17 +117,25 @@ return return-from setq multiple-value-call".qw().toHash();
                 "defmethod"           : "2*",
                 "defclass"            : "2*",
                 "defmacro"            : "2*",
-                "progn"               : "0*",
-                "prog1"               : "0*",
-                "prog2"               : "0*",
+                "progn"               : "0+",
+                "prog1"               : "1*",
+                "prog2"               : "2*",
                 "let"                 : "1*",
                 "labels"              : "1*",
                 "flet"                : "1*",
                 "macrolet"            : "1*",
                 "destructuring-bind"  : "2*",
                 "unwind-protect"      : "1*",
+                "catch"               : "1*",
                 "case"                : "1*",
-                "ecase"               : "1*"
+                "ecase"               : "1*",
+                "cond"                : "0+",
+                "handler-bind"        : "1*",
+                "handler-case"        : "1*",
+                "restart-bind"        : "1*",
+                "restart-case"        : "1*",
+                "return-from"         : "1*",
+                "block"               : "1*"
         };
 
         var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();
@@ -263,7 +271,7 @@ return return-from setq multiple-value-call".qw().toHash();
                         if ($cont.length > 0)
                                 return $cont.peek()();
                         var ch = stream.peek(), tmp;
-                        if ((tmp = stream.lookingAt(/^#\\[a-z0-9_-]*/i))) {
+                        if ((tmp = stream.lookingAt(/^#\\.[a-z0-9_-]*/i))) {
                                 newArg();
                                 foundToken(stream.col, stream.col += tmp[0].length, "constant");
                         }
@@ -348,29 +356,31 @@ return return-from setq multiple-value-call".qw().toHash();
                 };
 
                 function indentation() {
-                        // no indentation for continued strings
-                        if ($inString)
-                                return 0;
-
                         var currentLine = stream.lineText();
+                        if ($inString) {
+                                return Math.max(0, currentLine.search(/[^\s\t\n]/));
+                        }
                         var indent = 0;
+
+                        // XXX: rewrite this mess.
 
                         var p = $parens.peek();
                         if (p) {
                                 var line = stream.lineText(p.line);
                                 indent = p.col + 1;
+                                if (/[\#\']/.test(line.charAt(p.col - 1))) {
+                                        return indent;
+                                }
                                 var nextNonSpace;
                                 if (isConstituentStart(line.charAt(indent))) {
-                                        indent = p.col + INDENT_LEVEL();
                                         var re = /\s\S/g;
                                         re.lastIndex = p.col;
                                         nextNonSpace = re.exec(line);
                                         if (nextNonSpace) {
-                                                nextNonSpace = nextNonSpace.index + 1;
+                                                indent = nextNonSpace = nextNonSpace.index + 1;
                                         }
                                 }
                                 if ($list && $list.length) {
-                                        // console.log($list);
                                         var currentForm = isForm();
                                         if (currentForm) {
                                                 currentForm = currentForm.replace(/\*$/, "");
@@ -380,23 +390,26 @@ return return-from setq multiple-value-call".qw().toHash();
                                                         formArgs = "1*";
                                                 }
                                                 if (!formArgs && /^def/.test(currentForm)) {
-                                                        // "with" macros usually take one argument, then &body
-                                                        formArgs = "2*";
+                                                        // definitions usually take two arguments, then &body
+                                                        if (nextNonSpace && /[\(\[\{]/.test(line.charAt(nextNonSpace)))
+                                                                formArgs = "1*";
+                                                        else
+                                                                formArgs = "2*";
                                                 }
                                                 if (!formArgs) try {
                                                         if (Object.HOP(LOCAL_BODYDEF, $backList[$backList.length - 2][0].id)) {
                                                                 formArgs = "1*";
                                                         }
                                                 } catch(ex){}
-                                                if (!formArgs) {
-                                                        formArgs = "1+"; // kind of sucky now
-                                                }
                                                 if (formArgs) {
                                                         var n = parseInt(formArgs, 10);
-                                                        var hasRest = /\+$/.test(formArgs);
-                                                        var hasBody =/\*$/.test(formArgs);
-                                                        // console.log("Expecting %d arguments, got %d already (rest=%o, body=%o)", n, $list.length - 1, hasRest, hasBody);
-                                                        if ($list.length - 1 < n || hasRest) {
+                                                        var hasRest = /\+/.test(formArgs);
+                                                        var hasBody =/\*/.test(formArgs);
+                                                        indent = p.col + INDENT_LEVEL();
+                                                        if (hasRest && nextNonSpace) {
+                                                                indent = nextNonSpace;
+                                                        }
+                                                        else if ((n > 0 && $list.length - 1 < n)) {
                                                                 // still in the arguments
                                                                 if (nextNonSpace)
                                                                         indent = nextNonSpace;
