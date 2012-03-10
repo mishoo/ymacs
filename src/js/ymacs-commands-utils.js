@@ -141,9 +141,7 @@ Ymacs_Buffer.newCommands({
         }),
 
         save_file: Ymacs_Interactive("FWrite file: ", function(name){
-                var files = this.ymacs.ls_getFileDirectory(name, "file");
-                files.dir[files.other[0]] = this.getCode();
-                this.ymacs.ls_set(files.store);
+                this.ymacs.ls_setFileContents(name, this.getCode());
                 this.signalInfo("Saved in local storage");
         }),
 

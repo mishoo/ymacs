@@ -343,7 +343,7 @@ return return-from setq setf multiple-value-call".qw().toHash();
                                                 type = "type";
                                         }
                                         // there are a lot of macros starting with "with-", so let's highlight this
-                                        else if (/^with[-\x2f]|:with[-\x2f]/i.test(tmp.id)) {
+                                        else if (/^with(out)?[-\x2f]|:with(out)?[-\x2f]/i.test(tmp.id)) {
                                                 type = "builtin";
                                         }
                                 }
@@ -387,7 +387,7 @@ return return-from setq setf multiple-value-call".qw().toHash();
                                                 var formArgs = FORM_ARGS[currentForm];
                                                 if (!formArgs && /^with|:with/.test(currentForm)) {
                                                         // "with" macros usually take one argument, then &body
-                                                        formArgs = "1*";
+                                                        formArgs = "0*";
                                                 }
                                                 if (!formArgs && /^def/.test(currentForm)) {
                                                         // definitions usually take two arguments, then &body

@@ -413,6 +413,12 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 return code;
         };
 
+        P.ls_setFileContents = function(name, content) {
+                var files = this.ls_getFileDirectory(name, "file");
+                files.dir[files.other[0]] = content;
+                this.ls_set(files.store);
+        };
+
         P.ls_getFileDirectory = function(name, create) {
                 var store, dir = store = this.ls_get();
                 name = name.replace(/^[~\x2f]+/, "").split(/\x2f+/);
