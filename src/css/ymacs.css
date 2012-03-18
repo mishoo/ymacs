@@ -45,7 +45,7 @@
 /* } */
 
 .Ymacs-overwrite-mode .Ymacs-caret {
-  -moz-border-radius: 15px;
+  border-radius: 15px;
 }
 
 .Ymacs_Overlay { position: absolute; right: 0; opacity: 0.5; filter: alpha(opacity=50); }

@@ -1,41 +1,41 @@
 .Ymacs-Theme-standard .Ymacs_Frame { color: #000000; background-color: #ffffff; }
 .Ymacs-Theme-standard .Ymacs_Frame .type { color: #228b22; }
-.Ymacs-Theme-standard .Ymacs_Frame .builtin { color: #da70d6; }
+.Ymacs-Theme-standard .Ymacs_Frame .builtin { color: #483d8b; }
 .Ymacs-Theme-standard .Ymacs_Frame .function-name { color: #0000ff; }
-.Ymacs-Theme-standard .Ymacs_Frame .variable-name { color: #b8860b; }
-.Ymacs-Theme-standard .Ymacs_Frame .constant { color: #5f9ea0; }
-.Ymacs-Theme-standard .Ymacs_Frame .string { color: #bc8f8f; }
-.Ymacs-Theme-standard .Ymacs_Frame .string-starter { color: #bc8f8f; }
-.Ymacs-Theme-standard .Ymacs_Frame .string-stopper { color: #bc8f8f; }
-.Ymacs-Theme-standard .Ymacs_Frame .regexp { color: #bc8f8f; }
-.Ymacs-Theme-standard .Ymacs_Frame .regexp-starter { color: #bc8f8f; }
-.Ymacs-Theme-standard .Ymacs_Frame .regexp-stopper { color: #bc8f8f; }
-.Ymacs-Theme-standard .Ymacs_Frame .regexp-modifier { color: #bc8f8f; }
+.Ymacs-Theme-standard .Ymacs_Frame .variable-name { color: #a0522d; }
+.Ymacs-Theme-standard .Ymacs_Frame .constant { color: #008b8b; }
+.Ymacs-Theme-standard .Ymacs_Frame .string { color: #8b2252; }
+.Ymacs-Theme-standard .Ymacs_Frame .string-starter { color: #8b2252; }
+.Ymacs-Theme-standard .Ymacs_Frame .string-stopper { color: #8b2252; }
+.Ymacs-Theme-standard .Ymacs_Frame .regexp { color: #8b2252; }
+.Ymacs-Theme-standard .Ymacs_Frame .regexp-starter { color: #8b2252; }
+.Ymacs-Theme-standard .Ymacs_Frame .regexp-stopper { color: #8b2252; }
+.Ymacs-Theme-standard .Ymacs_Frame .regexp-modifier { color: #8b2252; }
 .Ymacs-Theme-standard .Ymacs_Frame .keyword { color: #a020f0; }
 .Ymacs-Theme-standard .Ymacs_Frame .comment { color: #b22222; }
 .Ymacs-Theme-standard .Ymacs_Frame .mcomment { color: #b22222; }
 .Ymacs-Theme-standard .Ymacs_Frame .comment-starter { color: #b22222; }
 .Ymacs-Theme-standard .Ymacs_Frame .mcomment-starter { color: #b22222; }
 .Ymacs-Theme-standard .Ymacs_Frame .mcomment-stopper { color: #b22222; }
-.Ymacs-Theme-standard .Ymacs_Frame .number { color: #5f9ea0; }
+.Ymacs-Theme-standard .Ymacs_Frame .number { color: #008b8b; }
 .Ymacs-Theme-standard .Ymacs_Frame .operator { }
 .Ymacs-Theme-standard .Ymacs_Frame .error { color: #ff0000; font-weight: bold; }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-open-tag { color: #0000ff; }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-close-tag { color: #0000ff; }
-.Ymacs-Theme-standard .Ymacs_Frame .xml-attribute { color: #b8860b; }
-.Ymacs-Theme-standard .Ymacs_Frame .xml-entity-starter { color: #5f9ea0; }
-.Ymacs-Theme-standard .Ymacs_Frame .xml-entity-stopper { color: #5f9ea0; }
-.Ymacs-Theme-standard .Ymacs_Frame .xml-entity { color: #5f9ea0; }
+.Ymacs-Theme-standard .Ymacs_Frame .xml-attribute { color: #a0522d; }
+.Ymacs-Theme-standard .Ymacs_Frame .xml-entity-starter { color: #008b8b; }
+.Ymacs-Theme-standard .Ymacs_Frame .xml-entity-stopper { color: #008b8b; }
+.Ymacs-Theme-standard .Ymacs_Frame .xml-entity { color: #008b8b; }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-open-bracket { }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-close-bracket { }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-closetag-slash { }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-cdata { color: #b22222; }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-cdata-starter { color: #b22222; }
 .Ymacs-Theme-standard .Ymacs_Frame .xml-cdata-stopper { color: #b22222; }
-.Ymacs-Theme-standard .Ymacs_Frame .lisp-keyword { color: #5f9ea0; }
-.Ymacs-Theme-standard .Ymacs_Frame .markdown-heading1 { font-size: 1.717em; }
-.Ymacs-Theme-standard .Ymacs_Frame .markdown-heading2 { font-size: 1.400em; }
-.Ymacs-Theme-standard .Ymacs_Frame .markdown-heading3 { font-size: 1.175em; }
+.Ymacs-Theme-standard .Ymacs_Frame .lisp-keyword { color: #008b8b; }
+.Ymacs-Theme-standard .Ymacs_Frame .markdown-heading1 { font-weight: bold; }
+.Ymacs-Theme-standard .Ymacs_Frame .markdown-heading2 { font-weight: bold; }
+.Ymacs-Theme-standard .Ymacs_Frame .markdown-heading3 { font-weight: bold; }
 .Ymacs-Theme-standard .Ymacs_Frame .markdown-heading4 { font-weight: bold; }
 .Ymacs-Theme-standard .Ymacs_Frame .markdown-heading5 { font-weight: bold; }
 .Ymacs-Theme-standard .Ymacs_Frame .markdown-heading6 { font-weight: bold; }

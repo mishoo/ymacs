@@ -60,7 +60,7 @@
                 [ 48, 41 ]
         ];
 
-        var digits = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57 ].toHash(function(k, i) {
+        var digits = [ 49, 50, 51, 52, 53, 54, 55, 56, 57, 48 ].toHash(function(k, i) {
                 return digit_charcodes[i];
         });
 

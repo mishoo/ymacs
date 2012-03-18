@@ -135,7 +135,8 @@ return return-from setq setf multiple-value-call".qw().toHash();
                 "restart-bind"        : "1*",
                 "restart-case"        : "1*",
                 "return-from"         : "1*",
-                "block"               : "1*"
+                "block"               : "1*",
+                "dotimes"             : "1*"
         };
 
         var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();

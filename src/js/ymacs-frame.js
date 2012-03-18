@@ -263,6 +263,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 layout.packWidget(fr, { pos: "top", fill: "*" });
                 cont.__doLayout();
                 fr.centerOnCaret();
+                return fr;
         };
 
         P.hsplit = function(percent) {
@@ -282,6 +283,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 layout.packWidget(fr, { pos: "left", fill: "*" });
                 cont.__doLayout();
                 fr.centerOnCaret();
+                return fr;
         };
 
         P.toggleLineNumbers = function() {
@@ -380,6 +382,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.__hoverLine = rc.row;
                 }
 
+                // hide stale carets :-\
+                // mess everywhere.
+                Array.$(this.getElement().querySelectorAll(".Ymacs-caret, #" + this.__caretId)).foreach(function(el){
+                        el.id = "";
+                        el.className = "";
+                });
+
                 // redraw the line where the caret was previously, so that it disappears from there
                 if (this.__prevCaretLine != null) {
                         this._on_bufferLineChange(this.__prevCaretLine);
@@ -390,11 +399,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.__prevCaretLine = rc.row;
                         this._on_bufferLineChange(rc.row);
                 }
-
-                // var caret = this.getCaretElement();
-                // if (caret)
-                //         DOM.strip(caret);
-                // this._on_bufferLineChange(rc.row);
 
                 if (isActive)
                         this.__restartBlinking();
@@ -665,7 +669,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P._on_keyDown = function(ev) {
                 if (!is_gecko) {
                         var ki = window.KEYBOARD_INSANITY, code = ev.keyCode;
-                        if (code in ki.modifiers)
+                        if (code == 0 || code in ki.modifiers)
                                 EX();
                         if ((code in ki.letters || code in ki.digits || code in ki.symbols) && !(ev.ctrlKey || ev.altKey)) {
                                 return; // to be handled by the upcoming keypress event

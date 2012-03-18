@@ -8,9 +8,13 @@
 @import url("themes/emacs-scintilla.css");
 @import url("themes/emacs-vim-colors.css");
 @import url("themes/emacs-standard.css");
+@import url("themes/emacs-tango.css");
+@import url("themes/emacs-adwaita.css");
+@import url("themes/emacs-whiteboard.css");
 
 .Ymacs-Theme-light .Ymacs-caret {
   background-color: #888;
+  color: #222;
 }
 
 .Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-caret {
@@ -19,7 +23,7 @@
 }
 
 .Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #def;
+  background-color: #eda;
 }
 
 .Ymacs-Theme-light .Ymacs-overwrite-mode .Ymacs-caret {
