@@ -35,7 +35,218 @@
 
 (function(){
 
+        function QuickParser(buffer, pos) {
+                var input = new Ymacs_Simple_Stream({ buffer: buffer, pos: pos });
+                function peek() { return input.peek() };
+                function next() { return input.next() };
+                function skip_ws() { return input.skip_ws() };
+                function skip(ch) { next() };
+                function read_while(pred) { return input.read_while(pred) };
+                function read_escaped(start, end, inces) {
+                        skip(start);
+                        var escaped = false;
+                        var str = "";
+                        while (peek()) {
+                                var ch = next();
+                                if (escaped) {
+                                        str += ch;
+                                        escaped = false;
+                                } else if (ch == "\\") {
+                                        if (inces) str += ch;
+                                        escaped = true;
+                                } else if (ch == end) {
+                                        break;
+                                } else {
+                                        str += ch;
+                                }
+                        }
+                        return str;
+                };
+                function read_comment() {
+                        return read_while(function(ch){ return ch && ch != "\n" });
+                };
+                function read_string() {
+                        return read_escaped("\"", "\"");
+                };
+                function read_list() {
+                        var save_list_index = list_index;
+                        list_index = 0;
+                        try {
+                                var ret = [], p;
+                                skip("(");
+                                out: while (true) {
+                                        skip_ws();
+                                        switch (peek()) {
+                                            case ")": break out;
+                                            case null: return ret;
+                                            default:
+                                                ret.push(read_token());
+                                                ++list_index;
+                                        }
+                                }
+                                skip(")");
+                                return ret;
+                        } finally {
+                                list_index = save_list_index;
+                        }
+                };
+                function read_regexp() {
+                        var str = read_escaped("/", "/", true);
+                        var mods = read_while(function(ch){
+                                switch (ch.toLowerCase()) {
+                                    case "y":
+                                    case "m":
+                                    case "g":
+                                    case "i":
+                                        return true;
+                                }
+                        }).toLowerCase();
+                        return { pattern: str, modifiers: mods };
+                };
+                function read_symbol() {
+                        return read_while(function(ch){
+                                switch (ch) {
+                                    case null:
+                                    case "(":
+                                    case ")":
+                                    case "#":
+                                    case ";":
+                                    case "`":
+                                    case "'":
+                                    case "\"":
+                                    case "|":
+                                    case " ":
+                                    case "\n":
+                                    case "\t":
+                                    case "\x0C":
+                                    case "\u2028":
+                                    case "\u2029":
+                                    case "\xA0":
+                                        return false;
+                                };
+                                return true;
+                        });
+                };
+                function read_char() {
+                        return read_symbol();
+                };
+                function read_sharp() {
+                        skip("#");
+                        switch (peek()) {
+                            case "\\": next(); return token("char", read_char);
+                            case "/": return token("regexp", read_regexp);
+                            case "(": return token("vector", read_list);
+                            case "'": next(); return token("function", read_symbol);
+                            default:
+                                return token("unknown", read_token);
+                        }
+                };
+                function read_token() {
+                        skip_ws();
+                        switch (peek()) {
+                            case ";"  : return token("comment", read_comment);
+                            case "\"" : return token("string", read_string);
+                            case "("  : return token("list", read_list);
+                            case "#"  : return token("sharp", read_sharp);
+                            case "`"  : next(); return token("qq", read_token);
+                            case ","  : next(); return token("comma", read_token);
+                            case "'"  : next(); return token("quote", read_token);
+                            case ")"  : return false;
+                            case null : return false; // EOF
+                        }
+                        return token("symbol", read_symbol);
+                };
+                function read_all() {
+                        var ret = [];
+                        while (peek() != null) {
+                                ret.push(read_token());
+                                ++list_index;
+                        }
+                        return ret;
+                };
+                var list_index = 0;
+                var caret = null;
+                var parent = null;
+                var next_exp = null;
+                var prev_exp = null;
+                var cont_exp = null;
+                function token(type, reader) {
+                        var save_parent = parent;
+                        try {
+                                var tok = {
+                                        index  : list_index,
+                                        type   : type,
+                                        start  : input.pos,
+                                        parent : parent
+                                };
+                                parent = tok;
+                                tok.value = reader();
+                                tok.end = input.pos;
+                                if (caret != null) {
+                                        if (tok.start >= caret) {
+                                                if (!next_exp) next_exp = tok;
+                                        } else if (tok.end <= caret) {
+                                                prev_exp = tok;
+                                        }
+                                        if (tok.start <= caret && tok.end >= caret && !cont_exp)
+                                                cont_exp = tok;
+                                }
+                                return tok;
+                        } finally {
+                                parent = save_parent;
+                        }
+                };
+                return {
+                        parse: function(pos) {
+                                caret = pos;
+                                return token("list", read_all);
+                        },
+                        read: function() {
+                                return read_token();
+                        },
+                        prev_exp: function() {
+                                return prev_exp;
+                        },
+                        list: function() {
+                                var tok = cont_exp || prev_exp || next_exp;
+                                tok = tok.parent;
+                                while (tok.type != "list") tok = tok.parent;
+                                return tok;
+                        }
+                };
+        };
+
         Ymacs_Buffer.newCommands({
+
+                test_lisp_parse: Ymacs_Interactive(function(){
+                        try {
+                                var p = QuickParser(this);
+                                var ast = p.parse(this.point());
+                                // console.log(ast);
+                        } catch(ex) {
+                                console.log(ex);
+                        }
+                }),
+
+                lisp_forward_sexp: Ymacs_Interactive(function(){
+                        var p = QuickParser(this, this.point());
+                        var tok = p.read();
+                        if (tok) this.cmd("goto_char", tok.end);
+                }),
+
+                lisp_backward_sexp: Ymacs_Interactive(function(){
+                        var p = QuickParser(this);
+                        p.parse(this.point());
+                        var tok = p.prev_exp();
+                        if (tok) this.cmd("goto_char", tok.start);
+                }),
+
+                lisp_backward_up_list: Ymacs_Interactive(function(){
+                        var p = QuickParser(this);
+                        p.parse(this.point());
+                        var list = p.list();
+                        if (list) this.cmd("goto_char", list.start);
+                }),
 
                 lisp_open_paren: Ymacs_Interactive(function(what) {
                         if (what == null)
@@ -136,7 +347,8 @@ return return-from setq setf multiple-value-call".qw().toHash();
                 "restart-case"        : "1*",
                 "return-from"         : "1*",
                 "block"               : "1*",
-                "dotimes"             : "1*"
+                "dotimes"             : "1*",
+                "dolist"              : "1*"
         };
 
         var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();
@@ -446,11 +658,39 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         var tok = this.tokenizer;
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "lisp" }));
         var changed_vars = this.setq({
-                indent_level: 2
+                indent_level: 2,
+                syntax_word_dabbrev: {
+                        test: function(c) {
+                                if (c) {
+                                        var code = c.charCodeAt(0);
+                                        return ((code >= 48 && code <= 57) || c.toUpperCase() != c.toLowerCase()
+                                                || c == "-"
+                                                || c == "*"
+                                                || c == "%"
+                                                || c == "+"
+                                                || c == "/"
+                                                || c == "@"
+                                                || c == "&"
+                                                || c == "$"
+                                                || c == "."
+                                                || c == "="
+                                                || c == "~");
+                                }
+                        }
+                }
         });
         var keymap = Ymacs_Keymap_LispMode();
         this.pushKeymap(keymap);
         var was_paren_match = this.cmd("paren_match_mode", true);
+
+        this.COMMANDS = Object.makeCopy(this.COMMANDS);
+        Object.foreach({
+                "forward_sexp"            : "lisp_forward_sexp",
+                "backward_sexp"           : "lisp_backward_sexp",
+                "backward_up_list"        : "lisp_backward_up_list"
+        }, function(val, key){
+                this[key] = this[val];
+        }, this.COMMANDS);
 
         return function() {
                 this.setTokenizer(tok);

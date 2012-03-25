@@ -192,7 +192,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 // necessary evil
                 "C-S-y"                                   : "yank_from_operating_system",
                 "M-S-w"                                   : "copy_for_operating_system",
-                "C-S-w"                                   : "kill_for_operating_system",
 
                 // my stuff, sorry if these have different meanings in the standard Emacs keys
                 "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift

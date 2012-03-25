@@ -1090,8 +1090,8 @@ Ymacs_Buffer.newCommands({
         // <XXX>
         // this should be moved some level up if it proves to be more
         // generally useful
-        function modalTextarea(event, title, text, cont) {
-                var dlg = this.createDialog({
+        function modalTextarea(buffer, type, title, text, cont) {
+                var dlg = buffer.createDialog({
                         title     : title,
                         quitBtn   : "destroy",
                         modal     : true
@@ -1099,16 +1099,19 @@ Ymacs_Buffer.newCommands({
                 var layout = new DlLayout({ parent: dlg, outerSpace: 5 });
                 var entry = new DlEntry({ type: "textarea", fillParent: true, value: text });
                 dlg._focusedWidget = entry;
-                entry.addEventListener(event, function(ev){
-                        // var code = entry.getValue().replace(/\t/g, "        ");
-                        var code = entry.getValue();
-                        dlg.destroy();
-                        cont.delayed(0, this, code);
-                        // XXX Without a delay here, be it zero, stars will align in such a way that
-                        // yank_from_operating_system will move the caret in some bizarre position after
-                        // inserting the pasted text.
-                        // cont.call(this, code);
-                }.clearingTimeout(0, this));
+                if (type == "copy") {
+                        entry.addEventListener("onCopy", function(ev){
+                                dlg.destroy();
+                                cont();
+                        }.clearingTimeout(0));
+                } else if (type == "paste") {
+                        entry.addEventListener("onPaste", function(ev){
+                                // var code = entry.getValue().replace(/\t/g, "        ");
+                                var code = entry.getValue();
+                                dlg.destroy();
+                                cont(code);
+                        }.clearingTimeout(0));
+                }
                 layout.packWidget(entry, { pos: "top", fill: "*" });
                 layout.setSize({ x: 350, y: 250 });
                 dlg.show(true);
@@ -1119,22 +1122,18 @@ Ymacs_Buffer.newCommands({
         Ymacs_Buffer.newCommands({
 
                 yank_from_operating_system: Ymacs_Interactive(function() {
-                        modalTextarea.call(this, "onPaste", "Paste below (press CTRL-V)", null, function(code){
-                                this._saveKilledText(code);
-                                this.cmd("yank");
-                                this.cmd("recenter_top_bottom");
+                        var self = this;
+                        modalTextarea(self, "paste", "Paste below (press CTRL-V)", null, function(code){
+                                self._saveKilledText(code);
+                                self.cmd("yank");
+                                self.cmd("recenter_top_bottom");
                         });
                 }),
 
                 copy_for_operating_system: Ymacs_Interactive("r", function(begin, end) {
-                        modalTextarea.call(this, "onCopy", "Press CTRL-C", this.cmd("buffer_substring"), function(){
-                                this.cmd("copy_region_as_kill", begin, end);
-                        });
-                }),
-
-                kill_for_operating_system: Ymacs_Interactive("r", function(begin, end) {
-                        modalTextarea.call(this, [ "onCut", "onCopy" ], "Press CTRL-C or CTRL-X", this.cmd("buffer_substring"), function(){
-                                this.cmd("kill_region", begin, end);
+                        var self = this;
+                        modalTextarea(self, "copy", "Press CTRL-C to copy", self.cmd("buffer_substring"), function(){
+                                self.cmd("copy_region_as_kill", begin, end);
                         });
                 })
 

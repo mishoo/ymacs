@@ -143,10 +143,66 @@ DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
                 if (this.eol()) throw this.EOL;
         };
 
-        P.EOL = new (function(){});
+        P.EOL = {};
 
-        P.EOF = new (function(){});
+        P.EOF = {};
 
+});
+
+DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
+        D.DEFAULT_ARGS = {
+                buffer : [ "buffer" , null ],
+                line   : [ "line"   , 0 ],
+                col    : [ "col"    , 0 ],
+                pos    : [ "pos"    , null ]
+        };
+        D.CONSTRUCT = function() {
+                if (this.pos == null)
+                        this.pos = this.buffer._rowColToPosition(this.line, this.col);
+                else {
+                        var rc = this.buffer._positionToRowCol(this.pos);
+                        this.line = rc.row;
+                        this.col = rc.col;
+                }
+        };
+        P.peek = function() {
+                var a = this.buffer.code;
+                var line = a[this.line];
+                if (line == null) return null;
+                if (this.col == line.length)
+                        return this.line == a.length - 1 ? null : "\n";
+                return line.charAt(this.col);
+        };
+        P.next = function() {
+                var ch = this.peek();
+                ++this.pos;
+                ++this.col;
+                if (this.col > this.buffer.code[this.line].length) {
+                        this.col = 0;
+                        ++this.line;
+                }
+                return ch;
+        };
+        P.read_while = function(pred) {
+                var ret = "";
+                while (pred(this.peek()))
+                        ret += this.next();
+                return ret;
+        };
+        P.skip_ws = function() {
+                return this.read_while(function(ch){
+                        switch (ch) {
+                            case " ":
+                            case "\n":
+                            case "\t":
+                            case "\x0C":
+                            case "\u2028":
+                            case "\u2029":
+                            case "\xA0":
+                                return true;
+                        }
+                });
+        };
 });
 
 DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){

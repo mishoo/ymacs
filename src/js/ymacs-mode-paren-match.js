@@ -50,8 +50,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "M-("                          : [ "paredit_wrap_round", "(" ],
                 "M-["                          : [ "paredit_wrap_round", "[" ],
                 "M-{"                          : [ "paredit_wrap_round", "{" ],
-                'M-"'                          : [ "paredit_wrap_round", '"', true ],
-                "M-'"                          : [ "paredit_wrap_round", "'", true ]
+                'M-"'                          : [ "paredit_wrap_round", '"' ],
+                "M-'"                          : [ "paredit_wrap_round", "'" ],
+                "M-r"                          : "paredit_raise_sexp",
+                "M-s"                          : "paredit_splice_sexp"
         };
 
         /* -----[ new commands ]----- */
@@ -192,7 +194,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         if (!paren)
                                 paren = "(";
                         var closing = PARENS[paren],
-                            r = this.transientMarker
+                        r = this.transientMarker
                                 ? this.getRegion()
                                 : this.cmd("save_excursion", function(){
                                         var begin = this.point();
@@ -200,8 +202,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                                 this.cmd("forward_sexp");
                                         return { begin: begin, end: this.point() };
                                 }),
-                            txt = this._bufferSubstring(r.begin, r.end),
-                            before = this.point() < r.end;
+                        txt = this._bufferSubstring(r.begin, r.end),
+                        before = this.point() < r.end;
                         if (typeof closing != "string") {
                                 txt = txt.replace(closing.backslash, function(s){
                                         return "\\" + s;
@@ -251,6 +253,34 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 up_list: Ymacs_Interactive(function(){
                         this.cmd("backward_up_list");
                         this.cmd("forward_sexp");
+                }),
+
+                paredit_raise_sexp: Ymacs_Interactive(function(){
+                        this.cmd("forward_sexp");
+                        var end = this.point();
+                        this.cmd("backward_sexp");
+                        var start = this.point();
+                        this.cmd("backward_up_list");
+                        var kstart = this.point();
+                        this.cmd("forward_sexp");
+                        var kend = this.point();
+                        var sexp = this.cmd("buffer_substring", start, end);
+                        this._replaceText(kstart, kend, sexp);
+                        this.cmd("goto_char", kstart);
+                        this.cmd("indent_region", kstart, kstart + sexp.length);
+                }),
+
+                paredit_splice_sexp: Ymacs_Interactive(function(){
+                        this.cmd("save_excursion", function(){
+                                this.cmd("backward_up_list");
+                                var start = this.point();
+                                this.cmd("forward_sexp");
+                                this.cmd("backward_delete_char");
+                                var end = this.point();
+                                this.cmd("goto_char", start);
+                                this.cmd("delete_char");
+                                this.cmd("indent_region", start, end - 1);
+                        });
                 })
 
         });
