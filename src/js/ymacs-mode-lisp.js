@@ -39,7 +39,12 @@
                 var input = new Ymacs_Simple_Stream({ buffer: buffer, pos: pos });
                 function peek() { return input.peek() };
                 function next() { return input.next() };
-                function skip_ws() { return input.skip_ws() };
+                function skip_ws() {
+                        return input.read_while(function(ch){
+                                if (!caret_token && caret != null && input.pos == caret) return false;
+                                return input.is_whitespace(ch);
+                        });
+                };
                 function skip(ch) { next() };
                 function read_while(pred) { return input.read_while(pred) };
                 function read_escaped(start, end, inces) {
@@ -128,7 +133,12 @@
                         });
                 };
                 function read_char() {
-                        return read_symbol();
+                        return next() + read_while(function(ch){
+                                return (ch >= "a" && ch <= "z") ||
+                                        (ch >= "A" && ch <= "z") ||
+                                        (ch >= "0" && ch <= "9") ||
+                                        ch == "-" || ch == "_";
+                        });
                 };
                 function read_sharp() {
                         skip("#");
@@ -143,14 +153,17 @@
                 };
                 function read_token() {
                         skip_ws();
+                        if (!caret_token && caret != null && input.pos == caret) {
+                                return caret_token = token("caret");
+                        }
                         switch (peek()) {
                             case ";"  : return token("comment", read_comment);
                             case "\"" : return token("string", read_string);
                             case "("  : return token("list", read_list);
                             case "#"  : return token("sharp", read_sharp);
-                            case "`"  : next(); return token("qq", read_token);
-                            case ","  : next(); return token("comma", read_token);
-                            case "'"  : next(); return token("quote", read_token);
+                            case "`"  : next(); return token("qq", read_token, -1);
+                            case ","  : next(); return token("comma", read_token, -1);
+                            case "'"  : next(); return token("quote", read_token, -1);
                             case ")"  : return false;
                             case null : return false; // EOF
                         }
@@ -164,32 +177,30 @@
                         }
                         return ret;
                 };
+                var IGNORED = "qq comma quote char regexp vector function unknown sharp".qw().toHash(true);
+                var caret_token = null;
                 var list_index = 0;
                 var caret = null;
                 var parent = null;
-                var next_exp = null;
-                var prev_exp = null;
                 var cont_exp = null;
-                function token(type, reader) {
+                function token(type, reader, adjust_start) {
+                        if (adjust_start == null) adjust_start = 0;
                         var save_parent = parent;
                         try {
                                 var tok = {
                                         index  : list_index,
                                         type   : type,
-                                        start  : input.pos,
-                                        parent : parent
+                                        start  : input.pos + adjust_start,
+                                        parent : parent,
+                                        depth  : parent ? parent.depth + 1 : 0
                                 };
                                 parent = tok;
-                                tok.value = reader();
+                                tok.value = reader ? reader() : null;
                                 tok.end = input.pos;
                                 if (caret != null) {
-                                        if (tok.start >= caret) {
-                                                if (!next_exp) next_exp = tok;
-                                        } else if (tok.end <= caret) {
-                                                prev_exp = tok;
+                                        if (tok.start <= caret && tok.end >= caret) {
+                                                if (!cont_exp) cont_exp = tok;
                                         }
-                                        if (tok.start <= caret && tok.end >= caret && !cont_exp)
-                                                cont_exp = tok;
                                 }
                                 return tok;
                         } finally {
@@ -205,10 +216,17 @@
                                 return read_token();
                         },
                         prev_exp: function() {
-                                return prev_exp;
+                                if (caret_token) {
+                                        return caret_token.parent.value[caret_token.index - 1];
+                                } else {
+                                        var exp = cont_exp;
+                                        while (exp.parent && Object.HOP(IGNORED, exp.parent.type))
+                                                exp = exp.parent;
+                                        return exp;
+                                }
                         },
                         list: function() {
-                                var tok = cont_exp || prev_exp || next_exp;
+                                var tok = cont_exp;
                                 tok = tok.parent;
                                 while (tok.type != "list") tok = tok.parent;
                                 return tok;
@@ -222,7 +240,7 @@
                         try {
                                 var p = QuickParser(this);
                                 var ast = p.parse(this.point());
-                                // console.log(ast);
+                                console.log(ast);
                         } catch(ex) {
                                 console.log(ex);
                         }
@@ -683,18 +701,16 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         this.pushKeymap(keymap);
         var was_paren_match = this.cmd("paren_match_mode", true);
 
-        this.COMMANDS = Object.makeCopy(this.COMMANDS);
-        Object.foreach({
+        var changed_commands = this.replaceCommands({
                 "forward_sexp"            : "lisp_forward_sexp",
                 "backward_sexp"           : "lisp_backward_sexp",
                 "backward_up_list"        : "lisp_backward_up_list"
-        }, function(val, key){
-                this[key] = this[val];
-        }, this.COMMANDS);
+        });
 
         return function() {
                 this.setTokenizer(tok);
                 this.setq(changed_vars);
+                this.newCommands(changed_commands);
                 this.popKeymap(keymap);
                 if (!was_paren_match)
                         this.cmd("paren_match_mode", false);

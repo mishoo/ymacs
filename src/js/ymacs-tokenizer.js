@@ -189,19 +189,20 @@ DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
                         ret += this.next();
                 return ret;
         };
+        P.is_whitespace = function(ch) {
+                switch (ch) {
+                    case " ":
+                    case "\n":
+                    case "\t":
+                    case "\x0C":
+                    case "\u2028":
+                    case "\u2029":
+                    case "\xA0":
+                        return true;
+                }
+        };
         P.skip_ws = function() {
-                return this.read_while(function(ch){
-                        switch (ch) {
-                            case " ":
-                            case "\n":
-                            case "\t":
-                            case "\x0C":
-                            case "\u2028":
-                            case "\u2029":
-                            case "\xA0":
-                                return true;
-                        }
-                });
+                return this.read_while(this.is_whitespace);
         };
 });
 

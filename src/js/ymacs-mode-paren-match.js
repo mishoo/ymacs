@@ -53,7 +53,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 'M-"'                          : [ "paredit_wrap_round", '"' ],
                 "M-'"                          : [ "paredit_wrap_round", "'" ],
                 "M-r"                          : "paredit_raise_sexp",
-                "M-s"                          : "paredit_splice_sexp"
+                "M-s"                          : "paredit_splice_sexp",
+                "BACKSPACE"                    : "paredit_backward_delete_char",
+                "DELETE && C-d"                : "paredit_delete_char"
         };
 
         /* -----[ new commands ]----- */
@@ -72,6 +74,13 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 "{" : "}",
                 '"' : { close: '"', backslash: /[\x22\\]/g },
                 "'" : { close: "'", backslash: /[\x27\\]/g }
+        };
+
+        var R_PARENS = {
+                ")" : "(",
+                "]" : "[",
+                "}" : "{",
+                '"' : '"'
         };
 
         function ERROR(o) {
@@ -257,9 +266,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 
                 paredit_raise_sexp: Ymacs_Interactive(function(){
                         this.cmd("forward_sexp");
-                        var end = this.point();
                         this.cmd("backward_sexp");
                         var start = this.point();
+                        this.cmd("forward_sexp");
+                        var end = this.point();
                         this.cmd("backward_up_list");
                         var kstart = this.point();
                         this.cmd("forward_sexp");
@@ -281,6 +291,41 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 this.cmd("delete_char");
                                 this.cmd("indent_region", start, end - 1);
                         });
+                }),
+
+                paredit_backward_delete_char: Ymacs_Interactive("^p", function(n){
+                        if (n != null) return this.cmd("backward_delete_char", n);
+                        if (!this.deleteTransientRegion()) {
+                                if (this.cmd("looking_back", /[\(\[\{\"]/g)) {
+                                        var close = PARENS[this.matchData[0]];
+                                        if (close) {
+                                                if (close.close) close = close.close;
+                                                var rx = new RegExp("\\s*\\" + close, "mg");
+                                                if (this.cmd("looking_at", rx)) this.cmd("save_excursion", function(){
+                                                        this.cmd("delete_whitespace");
+                                                        this.cmd("delete_char");
+                                                });
+                                        }
+                                }
+                                this.cmd("backward_delete_char");
+                        }
+                }),
+
+                paredit_delete_char: Ymacs_Interactive("^p", function(n){
+                        if (n != null) return this.cmd("delete_char", n);
+                        if (!this.deleteTransientRegion()) {
+                                if (this.cmd("looking_at", /[\]\}\)\"]/g)) {
+                                        var open = R_PARENS[this.matchData[0]];
+                                        if (open) {
+                                                var rx = new RegExp("\\" + open + "\\s*", "mg");
+                                                if (this.cmd("looking_back", rx)) this.cmd("save_excursion", function(){
+                                                        this.cmd("backward_delete_whitespace");
+                                                        this.cmd("backward_delete_char");
+                                                })
+                                        }
+                                }
+                                this.cmd("delete_char");
+                        }
                 })
 
         });

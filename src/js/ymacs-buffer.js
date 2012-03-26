@@ -136,6 +136,16 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 return setq.apply(this.COMMANDS, arguments);
         };
 
+        D.replaceCommands = P.replaceCommands = function(cmds) {
+                this.COMMANDS = Object.makeCopy(this.COMMANDS);
+                var replacements = {};
+                Object.foreach(cmds, function(newcmd, oldcmd){
+                        if (typeof newcmd == "string") newcmd = this[newcmd];
+                        replacements[oldcmd] = newcmd;
+                }, this.COMMANDS);
+                return this.newCommands(replacements);
+        };
+
         D.newMode = P.newMode = function(name, activate) {
                 var modevar = "*" + name + "*", hookvar = modevar + "hooks";
                 D.setGlobal(hookvar, []);
