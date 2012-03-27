@@ -990,6 +990,72 @@ Ymacs_Buffer.newCommands({
                                 }
                         }
                 );
+        }),
+
+        get_line_comment_syntax: function() {
+                var cstart = this.getq("syntax_comment_line");
+                if (!cstart) throw new Ymacs_Exception("Unknown comment syntax");
+                return cstart;
+        },
+
+        comment_region: Ymacs_Interactive("^r", function(begin, end){
+                var cstart = this.cmd("get_line_comment_syntax");
+                this.clearTransientMark();
+                this.cmd("save_excursion", function(){
+                        end = this.createMarker(end);
+                        this.cmd("goto_char", begin);
+                        var min = 100000;
+                        out: while (this.point() < end.getPosition()) {
+                                while (this.cmd("looking_at", /\s*$/mg)) {
+                                        if (!this.cmd("forward_line")) break out;
+                                }
+                                var col = this._rowcol.col;
+                                while (this.cmd("looking_at", /\s/g) && col < min) {
+                                        if (!this.cmd("forward_char")) break out;
+                                        ++col;
+                                }
+                                if (col < min) min = col;
+                                this.cmd("insert", cstart.ch, " ");
+                                this.cmd("beginning_of_line");
+                                if (!this.cmd("forward_line")) break out;
+                        }
+                        this.cmd("goto_char", end);
+                        if (this._rowcol.col > 0 && !this.cmd("looking_at", /\s*$/mg))
+                                this.cmd("newline_and_indent");
+                });
+        }),
+
+        uncomment_region: Ymacs_Interactive("r", function(begin, end){
+                var cstart = this.cmd("get_line_comment_syntax");
+                this.clearTransientMark();
+                this.cmd("save_excursion", function(){
+                        end = this.createMarker(end);
+                        this.cmd("goto_char", begin);
+                        while (this.point() < end.getPosition()) {
+                                this.cmd("forward_whitespace");
+                                if (this.cmd("looking_at", cstart.rx))
+                                        this.cmd("delete_char", this.matchData[0].length);
+                                if (!this.cmd("forward_line")) break;
+                        }
+                });
+        }),
+
+        comment_dwim: Ymacs_Interactive("^r", function(begin, end){
+                var cstart = this.cmd("get_line_comment_syntax");
+                if (this.transientMarker) {
+                        this.cmd("save_excursion", function(){
+                                this.cmd("goto_char", begin);
+                                var already_comment = this.cmd("looking_at", cstart.rx);
+                                if (already_comment)
+                                        this.cmd("uncomment_region", begin, end);
+                                else
+                                        this.cmd("comment_region", begin, end);
+                        });
+                } else {
+                        this.cmd("end_of_line");
+                        this.cmd("insert", " ", cstart.ch, " ");
+                        this.cmd("indent_line");
+                }
         })
 
 });

@@ -165,6 +165,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
                 "C-x h"                                   : "mark_whole_buffer",
                 "C-g"                                     : "keyboard_quit",
                 "M-^"                                     : "delete_indentation",
+                "M-;"                                     : "comment_dwim",
 
                 // vertical editing
                 "C-x r t"                                 : "string_rectangle",

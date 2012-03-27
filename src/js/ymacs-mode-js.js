@@ -396,6 +396,12 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
         this.pushKeymap(keymap);
         var was_paren_match = this.cmd("paren_match_mode", true);
+        var changed_vars = this.setq({
+                syntax_comment_line: {
+                        rx: /\s*\x2f+\s?/g,
+                        ch: "//"
+                }
+        });
 
         return function() {
                 this.setTokenizer(tok);
