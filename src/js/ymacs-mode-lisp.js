@@ -35,6 +35,10 @@
 
 (function(){
 
+        function Partial(value) {
+                this.value = value;
+        };
+
         function QuickParser(buffer, pos) {
                 var input = new Ymacs_Simple_Stream({ buffer: buffer, pos: pos });
                 function peek() { return input.peek() };
@@ -51,8 +55,9 @@
                         skip(start);
                         var escaped = false;
                         var str = "";
-                        while (peek()) {
+                        while (true) {
                                 var ch = next();
+                                if (!ch) throw new Partial(str);
                                 if (escaped) {
                                         str += ch;
                                         escaped = false;
@@ -83,7 +88,7 @@
                                         skip_ws();
                                         switch (peek()) {
                                             case ")": break out;
-                                            case null: return ret;
+                                            case null: throw new Partial(ret);
                                             default:
                                                 ret.push(read_token());
                                                 ++list_index;
@@ -195,14 +200,24 @@
                         var save_parent = parent;
                         try {
                                 var tok = {
-                                        index  : list_index,
-                                        type   : type,
-                                        start  : input.pos + adjust_start,
-                                        parent : parent,
-                                        depth  : parent ? parent.depth + 1 : 0
+                                        index   : list_index,
+                                        type    : type,
+                                        start   : input.pos + adjust_start,
+                                        parent  : parent,
+                                        depth   : parent ? parent.depth + 1 : 0,
+                                        partial : false
                                 };
                                 if (type == "list") parent = tok;
-                                tok.value = reader ? reader() : null;
+                                try {
+                                        tok.value = reader ? reader() : null;
+                                } catch(ex) {
+                                        if (ex instanceof Partial) {
+                                                tok.value = ex.value;
+                                                tok.partial = true;
+                                        } else {
+                                                throw ex;
+                                        }
+                                }
                                 tok.end = input.pos;
                                 if (caret != null) {
                                         if (tok.start <= caret && tok.end >= caret) {
@@ -226,6 +241,8 @@
                                 if (caret_token) {
                                         return caret_token.parent.value[caret_token.index - 1];
                                 } else {
+                                        if (cont_exp.type == "list" && cont_exp.end == caret + 1)
+                                                return cont_exp.value.peek();
                                         return cont_exp.parent.value[cont_exp.index];
                                 }
                         },
@@ -258,6 +275,12 @@
                                 console.log(ex);
                         }
                 }),
+
+                lisp_make_quick_parser: function() {
+                        var args = Array.$(arguments);
+                        args.unshift(this);
+                        return QuickParser.apply(this, args);
+                },
 
                 lisp_forward_sexp: Ymacs_Interactive(function(){
                         var p = QuickParser(this, this.point());
