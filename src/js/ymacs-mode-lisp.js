@@ -103,7 +103,7 @@
                 function read_regexp() {
                         var str = read_escaped("/", "/", true);
                         var mods = read_while(function(ch){
-                                switch (ch.toLowerCase()) {
+                                if (ch) switch (ch.toLowerCase()) {
                                     case "y":
                                     case "m":
                                     case "g":
