@@ -64,14 +64,15 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this.getElement().innerHTML = HTML;
 
                 this.addEventListener({
-                        onDestroy   : this._on_destroy,
-                        onFocus     : this._on_focus,
-                        onBlur      : this._on_blur,
-                        onMouseDown : this._on_mouseDown,
-                        onKeyDown   : this._on_keyDown,
-                        onKeyPress  : this._on_keyPress,
-                        onKeyUp     : this._on_keyUp,
-                        onResize    : this._on_resize.clearingTimeout(5)
+                        onDestroy    : this._on_destroy,
+                        onFocus      : this._on_focus,
+                        onBlur       : this._on_blur,
+                        onMouseDown  : this._on_mouseDown,
+                        onKeyDown    : this._on_keyDown,
+                        onKeyPress   : this._on_keyPress,
+                        onKeyUp      : this._on_keyUp,
+                        onResize     : this._on_resize.clearingTimeout(5),
+                        onMouseWheel : this._on_mouseWheel
                 });
 
                 this._dragSelectCaptures = {
@@ -99,7 +100,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 this._moreBufferEvents = {
                         onMessage               : this._on_bufferMessage.$(this),
                         onOverlayChange         : this._on_bufferOverlayChange.$(this),
-                        afterInteractiveCommand : this.ensureCaretVisible.$(this)
+                        afterInteractiveCommand : function(){
+                                if (this.__ensureCaretVisible)
+                                        this.ensureCaretVisible();
+                        }.$(this)
                 };
 
                 var buffer = this.buffer;
@@ -527,6 +531,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_bufferBeforeInteractiveCommand = function() {
+                this.__ensureCaretVisible = true;
                 this._unhoverLine();
                 Ymacs_Message_Popup.clearAll();
         };
@@ -695,6 +700,36 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         P._on_resize = function() {
                 if (!this.destroyed)
                         this.centerOnCaret();
+        };
+
+        P._on_mouseWheel = function(ev) {
+                this.buffer._handleKeyEvent(ev);
+        };
+
+        P.firstLineVisible = function() {
+                var div = this.getOverlaysContainer();
+                return this.coordinatesToRowCol(1, div.scrollTop + 1).row;
+        };
+
+        P.lastLineVisible = function() {
+                var div = this.getOverlaysContainer();
+                return this.coordinatesToRowCol(div.clientWidth - 2, div.scrollTop + div.clientHeight - 2).row;
+        };
+
+        P.scrollUp = function(lines) {
+                var div = this.getOverlaysContainer();
+                var line = Math.max(this.firstLineVisible() - lines, 0);
+                line = this.getLineDivElement(line);
+                div.scrollTop = line.offsetTop;
+                this.__ensureCaretVisible = false;
+        };
+
+        P.scrollDown = function(lines) {
+                var div = this.getOverlaysContainer();
+                var line = Math.min(this.firstLineVisible() + lines, this.buffer.code.length - 1);
+                line = this.getLineDivElement(line);
+                div.scrollTop = line.offsetTop;
+                this.__ensureCaretVisible = false;
         };
 
 });

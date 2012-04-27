@@ -58,7 +58,10 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 a.reverse();
                 a.foreach(function(c, i){
                         if (i == 0) {
-                                if (typeof DlKeyboard[c] == "number")
+                                if (c == "WHEEL_UP" || c == "WHEEL_DOWN") {
+                                        key.charCode = c;
+                                }
+                                else if (typeof DlKeyboard[c] == "number")
                                         key.keyCode = DlKeyboard[c];
                                 else {
                                         a[i] = c.toLowerCase();
@@ -81,7 +84,10 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
 
         D.unparseKey = function(ev) {
                 var key, modifiers = [];
-                if (ev.keyCode in REVERSE_KEYS)
+                if ("wheelDelta" in ev) {
+                        key = ev.wheelDelta > 0 ? "WHEEL_UP" : "WHEEL_DOWN";
+                }
+                else if (ev.keyCode in REVERSE_KEYS)
                         key = REVERSE_KEYS[ev.keyCode];
                 else if (ev.charCode) {
                         if (ev.charCode == 32)

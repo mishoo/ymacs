@@ -689,7 +689,7 @@ Ymacs_Buffer.newCommands({
                 };
         }),
 
-        scroll_down: Ymacs_Interactive_X(function() {
+        scroll_down_half: Ymacs_Interactive_X(function() {
                 this.whenActiveFrame(function(frame){
                         var hl = frame.heightInLines();
                         this.cmd("forward_line", Math.round(hl / 1.33));
@@ -697,11 +697,25 @@ Ymacs_Buffer.newCommands({
                 });
         }),
 
-        scroll_up: Ymacs_Interactive_X(function() {
+        scroll_up_half: Ymacs_Interactive_X(function() {
                 this.whenActiveFrame(function(frame){
                         var hl = frame.heightInLines();
                         this.cmd("backward_line", Math.round(hl / 1.33));
                         this.cmd("recenter_top_bottom");
+                });
+        }),
+
+        scroll_up: Ymacs_Interactive("p", function(arg){
+                if (arg == null) arg = 3;
+                this.whenActiveFrame(function(frame){
+                        frame.scrollUp(arg);
+                });
+        }),
+
+        scroll_down: Ymacs_Interactive("p", function(arg){
+                if (arg == null) arg = 3;
+                this.whenActiveFrame(function(frame){
+                        frame.scrollDown(arg);
                 });
         }),
 
