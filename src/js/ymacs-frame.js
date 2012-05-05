@@ -112,6 +112,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                         this.setBuffer(buffer);
                 if (!this.isMinibuffer && this.ymacs.cf_lineNumbers)
                         this.toggleLineNumbers();
+
+                this.getOverlaysContainer().onscroll = this._on_scroll.$(this);
         };
 
         var HTML = String.buffer(
@@ -481,7 +483,16 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P.redrawModeline = function(rc) {
-                this.setModelineContent(this.buffer.renderModelineContent(rc || this.caretMarker.getRowCol()));
+                if (!rc) rc = this.caretMarker.getRowCol();
+                var maxline = this.buffer.code.length - 1;
+                var firstline = this.firstLineVisible();
+                var lastline = this.lastLineVisible();
+                var percent = firstline == 0
+                        ? "Top"
+                        : lastline == maxline
+                        ? "Bot"
+                        : Math.round(lastline / maxline * 100) + "%";
+                this.setModelineContent(this.buffer.renderModelineContent(rc, percent));
         };
 
         /* -----[ event handlers ]----- */
@@ -698,8 +709,14 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_resize = function() {
-                if (!this.destroyed)
+                if (!this.destroyed) {
                         this.centerOnCaret();
+                        this.redrawModelineWithTimer();
+                }
+        };
+
+        P._on_scroll = function() {
+                this.redrawModelineWithTimer();
         };
 
         P._on_mouseWheel = function(ev) {

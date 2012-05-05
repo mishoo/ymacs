@@ -719,8 +719,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.callHooks("onProgressChange");
         };
 
-        P.renderModelineContent = function(rc) {
-                var ml = String.buffer("-- <b>", this.name.htmlEscape(), "</b> (", rc.row + 1, ",", rc.col, ") ");
+        P.renderModelineContent = function(rc, percent) {
+                var ml = String.buffer(
+                        "-- <b>",
+                        this.name.htmlEscape(),
+                        "</b>",
+                        "  ", percent, " of ", this.getCodeSize().formatBytes(2).toLowerCase(), "  ",
+                        "(", rc.row + 1, ",", rc.col, ") "
+                );
                 var custom = this.getq("modeline_custom_handler");
                 if (custom) {
                         custom = custom.call(this, this, rc);
