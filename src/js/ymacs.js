@@ -105,14 +105,9 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                                         self.deleteFrame(f);
                                 }
                         });
-                        if (self.buffers.length > 1) {
-                                if (self.getActiveBuffer() === buf)
-                                        self.switchToNextBuffer();
-                        } else {
-                                // make a brand new buffer
-                                self.switchToBuffer(self.createBuffer());
-                        }
                         self.buffers.remove(buf);
+                        if (self.getActiveBuffer() === buf)
+                                self.nextHiddenBuffer(buf);
                 });
         };
 
@@ -180,7 +175,24 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 return buf;
         };
 
-        P.switchToNextBuffer = function(n) {
+        P.nextHiddenBuffer = function(cur) {
+                var a = this.buffers.grep(function(buf){
+                        if (buf === cur) return false;
+                        var hidden = true;
+                        buf.forAllFrames(function(){ hidden = false });
+                        return hidden;
+                });
+                if (a.length > 0) {
+                        var buf = a[0];
+                        this.buffers.remove(buf);
+                        this.buffers.push(buf);
+                        this._do_switchToBuffer(buf);
+                } else {
+                        this.switchToBuffer("*scratch*");
+                }
+        };
+
+        P.switchToNextBuffer = function() {
                 var a = this.buffers;
                 if (a.length > 1) {
                         var buf = a.shift();
@@ -189,7 +201,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 }
         };
 
-        P.switchToPreviousBuffer = function(n) {
+        P.switchToPreviousBuffer = function() {
                 var a = this.buffers;
                 if (a.length > 1) {
                         var buf = a.pop();
