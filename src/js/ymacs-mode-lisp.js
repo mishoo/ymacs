@@ -333,6 +333,23 @@
                                         this.cmd("lisp_close_paren", isOpenParen(p.type));
                                 }, this);
                         }
+                }),
+
+                lisp_handle_string_quote: Ymacs_Interactive(function(){
+                        var p = QuickParser(this);
+                        p.parse(this.point());
+                        var tok = p.prev_exp();
+                        if (tok && tok.type == "string" && this.point() < tok.end) {
+                                if (this.cmd("looking_at", /\"/g))
+                                        this.cmd("forward_char");
+                                else if (!this.cmd("looking_back", /\\/g))
+                                        this.cmd("insert", "\\\"");
+                                else
+                                        this.cmd("insert", "\"");
+                        } else {
+                                this.cmd("insert", '""');
+                                this.cmd("backward_char");
+                        }
                 })
 
         });
@@ -702,6 +719,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
                 "ENTER && C-j && C-m"  : "newline_and_indent",
                 "("                    : [ "lisp_open_paren", "(" ],
                 ")"                    : [ "lisp_close_paren", ")" ],
+                '"'                    : [ "lisp_handle_string_quote" ],
                 "C-c ] && C-c C-]"     : "lisp_close_all_parens"
         };
 
