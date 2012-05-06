@@ -369,7 +369,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.markMarker.setPosition(0, true);
                 this.forAllFrames(function(frame){
                         frame.ensureCaretVisible();
-                        frame.redrawModeline();
+                        frame.redrawModelineWithTimer();
                 });
         };
 
