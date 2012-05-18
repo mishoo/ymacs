@@ -73,7 +73,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         };
 
         function isNameChar(ch) {
-                return ch && (isLetter(ch) || /^[0-9_-]$/.test(ch));
+                return ch && (isLetter(ch) || /^[0-9:_-]$/.test(ch));
         };
 
         function readName() {
