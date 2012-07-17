@@ -63,10 +63,11 @@ $btnOnBg: #fcb587;
 @mixin focus-border1 {
   border-color: $mainBgD3 $mainBgD4 $mainBgD4 $mainBgD3;
 }
+
 @mixin border-radius($radius) {
   -moz-border-radius: $radius;
   -webkit-border-radius: $radius;
-  -opera-border-radius: $radius;
+  -o-border-radius: $radius;
   -khtml-border-radius: $radius;
   -ms-border-radius: $radius;
   border-radius: $radius;
@@ -74,7 +75,7 @@ $btnOnBg: #fcb587;
 @mixin outline-radius($radius) {
   -moz-outline-radius: $radius;
   -webkit-outline-radius: $radius;
-  -opera-outline-radius: $radius;
+  -o-outline-radius: $radius;
   -khtml-outline-radius: $radius;
   -ms-outline-radius: $radius;
   outline-radius: $radius;
@@ -82,10 +83,42 @@ $btnOnBg: #fcb587;
 @mixin box-shadow($def) {
   -moz-box-shadow: $def;
   -webkit-box-shadow: $def;
-  -opera-box-shadow: $def;
+  -o-box-shadow: $def;
   -khtml-box-shadow: $def;
   -ms-box-shadow: $def;
   box-shadow: $def;
+}
+@mixin linear-gradient($pos, $from, $to) {
+  background: -moz-linear-gradient($pos, $from, $to);
+  background: -webkit-linear-gradient($pos, $from, $to);
+  background: -o-linear-gradient($pos, $from, $to);
+  background: -ms-linear-gradient($pos, $from, $to);
+  background: linear-gradient($pos, $from, $to);
+}
+@mixin text-shadow($def) {
+  -moz-text-shadow: $def;
+  -webkit-text-shadow: $def;
+  -o-text-shadow: $def;
+  -ms-text-shadow: $def;
+  text-shadow: $def;
+}
+@mixin rotate($angle) {
+  -webkit-transform: rotate($angle);
+  -moz-transform: rotate($angle);
+}
+@mixin transition-property($prop) {
+  -webkit-transition-property: -webkit- + $prop;
+  -moz-transition-property: -moz- + $prop;
+  -ms-transition-property: -ms- + $prop;
+  -o-transition-property: -o- + $prop;
+  transition-property: $prop;
+}
+@mixin transition-duration($time) {
+  -webkit-transition-duration: $time;
+  -moz-transition-duration: $time;
+  -ms-transition-duration: $time;
+  -o-transition-duration: $time;
+  transition-duration: $time;
 }
 @mixin focus-outline {
   /* outline: 1px solid $focusBorder; */

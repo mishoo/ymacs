@@ -1007,8 +1007,6 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 .DlDialog-Rel { padding: 0; }
 .DlDialog-Content { background-color: $dialogBg; position: relative; }
 /* .DlDialog>.DlDialog-Rel { position: relative; } /* HACK-IE6 */
-.Shadow { position: absolute; font-size: 1px; line-height: 1px; }
-.DlDialog-Rel .Shadow { z-index: 10; }
 
 .DlDialog-WAIT { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
   background-image: url("img/modalbg.gif"); }
@@ -1032,43 +1030,23 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 */
 
 .DlDialog-Rel {
-  .Shadow-T { left: 18px; right: 15px; top: -14px; background: url("img/shadows/dlg-inactive/T.png") repeat-x 0 0; height: 14px; }
-  .Shadow-B { left: 18px; right: 15px; background: url("img/shadows/dlg-inactive/B.png") repeat-x 0 0; bottom: -16px; height: 16px; }
-  .Shadow-TL { left: -14px; width: 32px; top: -13px; background: url("img/shadows/dlg-inactive/TL.png") no-repeat 0 0; height: 23px; }
-  .Shadow-BR { width: 31px; right: -16px; background: url("img/shadows/dlg-inactive/BR.png") no-repeat 0 0; bottom: -15px; height: 21px; }
-  .Shadow-R { width: 16px; right: -16px; top: 10px; background: url("img/shadows/dlg-inactive/R.png") repeat-y 0 0; bottom: 6px; }
-  .Shadow-TR { width: 31px; right: -16px; top: -13px; background: url("img/shadows/dlg-inactive/TR.png") no-repeat 0 0; height: 23px; }
-  .Shadow-BL { left: -14px; width: 32px; background: url("img/shadows/dlg-inactive/BL.png") no-repeat 0 0; bottom: -15px; height: 21px; }
-  .Shadow-L { left: -14px; width: 14px; top: 10px; background: url("img/shadows/dlg-inactive/L.png") repeat-y 0 0; bottom: 6px; }
+  @include box-shadow(2px 3px 10px #888);
 }
 
 .DlDialog-Active .DlDialog-Rel {
-  .Shadow-T { left: 18px; right: 15px; top: -14px; background: url("img/shadows/dlg-active/T.png") repeat-x 0 0; height: 14px; }
-  .Shadow-B { left: 18px; right: 15px; background: url("img/shadows/dlg-active/B.png") repeat-x 0 0; bottom: -16px; height: 16px; }
-  .Shadow-TL { left: -14px; width: 32px; top: -13px; background: url("img/shadows/dlg-active/TL.png") no-repeat 0 0; height: 23px; }
-  .Shadow-BR { width: 31px; right: -16px; background: url("img/shadows/dlg-active/BR.png") no-repeat 0 0; bottom: -15px; height: 21px; }
-  .Shadow-R { width: 16px; right: -16px; top: 10px; background: url("img/shadows/dlg-active/R.png") repeat-y 0 0; bottom: 6px; }
-  .Shadow-TR { width: 31px; right: -16px; top: -13px; background: url("img/shadows/dlg-active/TR.png") no-repeat 0 0; height: 23px; }
-  .Shadow-BL { left: -14px; width: 32px; background: url("img/shadows/dlg-active/BL.png") no-repeat 0 0; bottom: -15px; height: 21px; }
-  .Shadow-L { left: -14px; width: 14px; top: 10px; background: url("img/shadows/dlg-active/L.png") repeat-y 0 0; bottom: 6px; }
+  @include box-shadow(2px 3px 20px #000);
 }
 
 /* that's for the crappin' IE6: */
 .DlDialog-noShadows { border: 2px solid #879; }
 .DlDialog-Active .DlDialog-noShadows { border-color: #000; }
 
-/*
-.DlDialog-Rel .Shadow-...
-.DlDialog-Active .DlDialog-Rel .Shadow-...
-.DlDialog-Dragging .DlDialog-Rel .Shadow-...
-*/
-
 .DlDialog-Title {
   opacity: 0.9; filter: alpha(opacity=90);
   overflow: hidden; white-space: nowrap;
   font: bold 100% "Lucida Grande",verdana,tahoma,sans-serif; letter-spacing: -1px;
   background: desaturate(darken($activeBg, 25%), 60%) url("img/titlebg.png") repeat-x 0 50%; color: #333; padding: 0 10px;
-  border-bottom: 2px solid #9e9e9e;
+  border-bottom: 1px solid #9e9e9e;
 }
 .DlDialog-Title div { padding-top: 3px; padding-bottom: 3px; }
 .DlDialog-Active .DlDialog-Title { background-color: darken($activeBg, 25%); color: #fff; border-color: #fff;
@@ -1129,12 +1107,8 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 }
 
 
-.DlDialog .DlDialog .DlDialog-Rel {
-  outline: 1px solid #fff;
-  -moz-outline: 1px solid #fff;
-  -webkit-outline: 1px solid #fff;
-  -opera-outline: 1px solid #fff;
-  border: 0;
+.DlDialog .DlDialog-Rel {
+  border: 1px solid #fff;
 }
 .DlDialog-noShadows>.ResizeHandle { margin-left: -10px; margin-top: -10px; }
 .DlDialog .DlDialog .DlDialog-Title {
@@ -1146,9 +1120,9 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 .DlDialog .DlDialog-Dragging .DlDialog-Title { background-color: #000; color: #3d4; }
 
 /* maximized dialogs are not resizable */
-.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.Shadow { display: none; }
-.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.ResizeHandle { display: none; }
-.DlDialog-Maximized>table>tbody>tr>td>.DlDialog-Rel>.DlDialog-Title { border-width: 0; }
+.DlDialog-Maximized>.DlDialog-Rel { border: none; @include box-shadow(none) }
+.DlDialog-Maximized>.DlDialog-Rel>.ResizeHandle { display: none; }
+.DlDialog-Maximized>.DlDialog-Rel>.DlDialog-Title { border-width: 0; }
 
 .DlLiteTree {
   -moz-user-select: none;
@@ -1299,21 +1273,3 @@ span.BreakPoint {
 .undefined { border: 5px solid red; } /* this sucks */
 
 /* thin shadows */
-
-.ThinShadows .Shadow-T { left: 10px; right: 9px; top: -7px; background: url("img/thin-shadows/T.png") repeat-x 0 0; height: 7px; }
-.ThinShadows .Shadow-B { left: 10px; right: 9px; background: url("img/thin-shadows/B.png") repeat-x 0 0; bottom: -11px; height: 11px; }
-.ThinShadows .Shadow-TL { left: -7px; width: 17px; top: -7px; background: url("img/thin-shadows/TL.png") no-repeat 0 0; height: 20px; }
-.ThinShadows .Shadow-BR { width: 20px; right: -11px; background: url("img/thin-shadows/BR.png") no-repeat 0 0; bottom: -11px; height: 20px; }
-.ThinShadows .Shadow-R { width: 11px; right: -11px; top: 13px; background: url("img/thin-shadows/R.png") repeat-y 0 0; bottom: 9px; }
-.ThinShadows .Shadow-TR { width: 20px; right: -11px; top: -7px; background: url("img/thin-shadows/TR.png") no-repeat 0 0; height: 20px; }
-.ThinShadows .Shadow-BL { left: -7px; width: 17px; background: url("img/thin-shadows/BL.png") no-repeat 0 0; bottom: -11px; height: 20px; }
-.ThinShadows .Shadow-L { left: -7px; width: 7px; top: 13px; background: url("img/thin-shadows/L.png") repeat-y 0 0; bottom: 9px; }
-
-.ThinRoundShadows .Shadow-T { left: 8px; right: 6px; top: -6px; background: url("img/thin-shadows1/T.png") repeat-x 0 0; height: 6px; }
-.ThinRoundShadows .Shadow-B { left: 8px; right: 6px; background: url("img/thin-shadows1/B.png") repeat-x 0 0; bottom: -10px; height: 10px; }
-.ThinRoundShadows .Shadow-TL { left: -6px; width: 14px; top: -6px; background: url("img/thin-shadows1/TL.png") no-repeat 0 0; height: 15px; }
-.ThinRoundShadows .Shadow-BR { width: 16px; right: -10px; background: url("img/thin-shadows1/BR.png") no-repeat 0 0; bottom: -10px; height: 16px; }
-.ThinRoundShadows .Shadow-R { width: 10px; right: -10px; top: 9px; background: url("img/thin-shadows1/R.png") repeat-y 0 0; bottom: 6px; }
-.ThinRoundShadows .Shadow-TR { width: 16px; right: -10px; top: -6px; background: url("img/thin-shadows1/TR.png") no-repeat 0 0; height: 15px; }
-.ThinRoundShadows .Shadow-BL { left: -6px; width: 14px; background: url("img/thin-shadows1/BL.png") no-repeat 0 0; bottom: -10px; height: 16px; }
-.ThinRoundShadows .Shadow-L { left: -6px; width: 6px; top: 9px; background: url("img/thin-shadows1/L.png") repeat-y 0 0; bottom: 6px; }
