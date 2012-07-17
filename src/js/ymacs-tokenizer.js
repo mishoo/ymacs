@@ -64,6 +64,14 @@ DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
                 return this.buffer.code[this.line].charAt(this.col + n);
         };
 
+        P.next = function() {
+                var ch = this.peek();
+                this.nextCol();
+                if (this.col >= this.buffer.code[this.line].length)
+                        this.nextLine();
+                return ch;
+        };
+
         P.get = function() {
                 var ch = this.peek();
                 this.nextCol();
@@ -147,6 +155,11 @@ DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
 
         P.EOF = {};
 
+        P.skip_ws = function() {
+                while (Ymacs_Simple_Stream.is_whitespace(this.peek()))
+                        this.next();
+        };
+
 });
 
 DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
@@ -189,7 +202,7 @@ DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
                         ret += this.next();
                 return ret;
         };
-        P.is_whitespace = function(ch) {
+        P.is_whitespace = D.is_whitespace = function(ch) {
                 switch (ch) {
                     case " ":
                     case "\n":
@@ -203,6 +216,14 @@ DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
         };
         P.skip_ws = function() {
                 return this.read_while(this.is_whitespace);
+        };
+        P.looking_at = function(what) {
+                var line = this.buffer.code[this.line];
+                if (what instanceof RegExp) {
+                        return what.exec(line.substr(this.col));
+                } else {
+                        return line.substr(this.col, what.length) == what;
+                }
         };
 });
 
@@ -260,8 +281,8 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 this.quickUpdate(0);
         };
 
-        P.getLanguage = function(name) {
-                return LANGUAGES[name](this.stream, this);
+        P.getLanguage = function(name, options) {
+                return LANGUAGES[name](this.stream, this, options);
         };
 
         P.showProgress = function(p) {

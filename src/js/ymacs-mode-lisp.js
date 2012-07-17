@@ -75,6 +75,13 @@
                 function read_comment() {
                         return read_while(function(ch){ return ch && ch != "\n" });
                 };
+                function read_multiline_comment() {
+                        var comment = read_while(function(){
+                                return !input.looking_at("|#");
+                        });
+                        skip(); skip();
+                        return comment;
+                };
                 function read_string() {
                         return read_escaped("\"", "\"");
                 };
@@ -152,6 +159,7 @@
                             case "/": return token("regexp", read_regexp);
                             case "(": return token("vector", read_list);
                             case "'": next(); return token("function", read_symbol);
+                            case "|": next(); return token("comment", read_multiline_comment);
                             default:
                                 return token("unknown", read_token);
                         }
@@ -200,6 +208,7 @@
                         var save_parent = parent;
                         try {
                                 var tok = {
+                                        value   : null,
                                         index   : list_index,
                                         type    : type,
                                         start   : input.pos + adjust_start,
@@ -209,7 +218,13 @@
                                 };
                                 if (type == "list") parent = tok;
                                 try {
-                                        tok.value = reader ? reader() : null;
+                                        if (reader) {
+                                                tok.value = reader();
+                                                if (tok.value == "") {
+                                                        // couldn't figure this out, but let's not crash the browser.
+                                                        next();
+                                                }
+                                        }
                                 } catch(ex) {
                                         if (ex instanceof Partial) {
                                                 tok.value = ex.value;
@@ -432,18 +447,22 @@ return return-from setq setf multiple-value-call".qw().toHash();
                 return CLOSE_PAREN[ch];
         };
 
-        function isConstituent(ch) {
-                return ch.toLowerCase() != ch.toUpperCase() ||
-                        /^[-0-9!#$%&*+./:<=>?@\[\]\^_\{\}~]$/i.test(ch);
-        };
-
-        function isConstituentStart(ch) {
-                //return ch != "#" && isConstituent(ch);
-                return isConstituent(ch);
-        };
-
         // the tokenizer function
-        Ymacs_Tokenizer.define("lisp", function(stream, tok){
+        Ymacs_Tokenizer.define("lisp", function(stream, tok, options){
+
+                if (!options) options = {};
+
+                function isConstituent(ch) {
+                        if (options.rx_special && options.rx_special.test(ch))
+                                return false;
+                        return ch.toLowerCase() != ch.toUpperCase() ||
+                                /^[-|0-9!#$%&*+./:<=>?@\[\]\^_\{\}~]$/i.test(ch);
+                };
+
+                function isConstituentStart(ch) {
+                        //return ch != "#" && isConstituent(ch);
+                        return isConstituent(ch);
+                };
 
                 var $cont          = [],
                     $inString      = false,
@@ -502,7 +521,8 @@ return return-from setq setf multiple-value-call".qw().toHash();
                                 name += ch;
                                 stream.nextCol();
                         }
-                        return ch && { line: stream.line, c1: col, c2: stream.col, id: name.toLowerCase() };
+                        var tok = ch && { line: stream.line, c1: col, c2: stream.col, id: name.toLowerCase() };
+                        if (tok.c2 > tok.c1) return tok;
                 };
 
                 function readString(end, type) {
