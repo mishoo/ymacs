@@ -600,7 +600,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         };
 
         P._on_bufferOverlayDelete = function(name, props, isNew) {
-                DOM.trash($(this.getOverlayId(name)));
+                DOM.trash(document.getElementById(this.getOverlayId(name)));
                 // this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         };
 
