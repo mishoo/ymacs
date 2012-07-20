@@ -721,6 +721,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         P._on_mouseWheel = function(ev) {
                 this.buffer._handleKeyEvent(ev);
+                ev.domStop = true;
         };
 
         P.firstLineVisible = function() {
