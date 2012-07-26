@@ -1,0 +1,89 @@
+.Ymacs_Frame {
+  font-family: "DejaVu Sans Mono","Lucida Sans Typewriter",monospace;
+  overflow: hidden;
+}
+
+/* .Ymacs_Frame { */
+/*   opacity: 0.8; */
+/* } */
+/* .Ymacs_Frame-active { */
+/*   opacity: 1; */
+/* } */
+
+.Ymacs-frame-overlays {
+  overflow: hidden;
+  position: relative;
+}
+
+.Ymacs-frame-content {
+  white-space: pre;
+  padding-bottom: 1000px;
+}
+
+.Ymacs-caret {
+  margin: 0;
+  padding: 0;
+}
+
+.Ymacs_Frame-focus .Ymacs-caret {
+  opacity: 1;
+}
+
+.Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; }
+
+.Ymacs_Minibuffer .Ymacs_Modeline { display: none; }
+
+.Ymacs_Minibuffer .Ymacs-frame-content {
+  padding-bottom: 0;
+}
+
+/* .Ymacs_Frame-hasOverlays .Ymacs-current-line { */
+/*   background: transparent !important; */
+/* } */
+
+.Ymacs-overwrite-mode .Ymacs-caret {
+  border-radius: 15px;
+}
+
+.Ymacs_Overlay { position: absolute; right: 0; opacity: 0.5; filter: alpha(opacity=50); }
+.Ymacs_Overlay .match-paren { opacity: 0.4; filter: alpha(opacity=40); }
+.Ymacs_Overlay .selection { opacity: 0.7; filter: alpha(opacity=70); }
+
+.Ymacs_Message_Popup {
+  background-color: wheat;
+  padding: 10px;
+}
+
+.Ymacs_Modeline {
+  font-family: "Lucida Sans Typewriter",monospace;
+  white-space: pre;
+  padding-bottom: 1px;
+  overflow: hidden;
+}
+
+.Ymacs_Modeline:after {
+  content: "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
+}
+
+.Ymacs_Message_Popup {
+  background-color: wheat;
+  color: #000;
+  padding: 10px;
+}
+
+.Ymacs_Completion_Popup .DlMenuItem .div2 { font-size: 100%; }
+
+.Ymacs-line-numbers .Ymacs-frame-content { counter-reset: ymacs-line 0; }
+.Ymacs-line-numbers .Ymacs-frame-content div.line { counter-increment: ymacs-line; }
+.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
+  color: #888;
+  display: inline-block;
+  width: 3em;
+  padding-right: 0.5em;
+  margin-right: 0.5em;
+  content: counter(ymacs-line, decimal);
+  text-align: right;
+}
+
+.Ymacs-splitbar-horiz { border-bottom: 1px solid #000; }
+.Ymacs-splitbar-vert { border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000; }
