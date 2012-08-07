@@ -330,7 +330,7 @@ to the current one.\n\
         console.log(ex);
 }
 
-DynarchDomUtils.trash($("x-loading"));
+DynarchDomUtils.trash(document.getElementById("x-loading"));
 
 if (!is_gecko && !is_khtml) (function(){
 
@@ -342,7 +342,7 @@ if (!is_gecko && !is_khtml) (function(){
 
         var vbox = new DlVbox({ parent: dlg, borderSpacing: 5 });
         var tmp = new DlWidget({ parent: vbox });
-        tmp.getElement().appendChild($("browser-warning"));
+        tmp.getElement().appendChild(document.getElementById("browser-warning"));
         var ok = new DlButton({ parent: vbox, focusable: true, label: "OK, let's see it" });
         ok.addEventListener("onClick", dlg.destroy.$(dlg));
         dlg._focusedWidget = ok;

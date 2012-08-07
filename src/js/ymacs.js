@@ -311,7 +311,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         };
 
         P.getActiveFrame = function() {
-                return this.frames.peek();
+                var frame = this.frames.peek();
+                if (frame && frame.focusInside()) return frame;
         };
 
         P.getActiveBuffer = function() {
