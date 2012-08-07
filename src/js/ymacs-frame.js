@@ -377,7 +377,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
                 if (!force && !isActive)
                         return;
 
-                if (isActive && !this.isMinibuffer)
+                if (isActive && !this.isMinibuffer && this.focusInside())
                         this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
 
                 var rc = this.buffer._rowcol;
