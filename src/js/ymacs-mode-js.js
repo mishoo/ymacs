@@ -388,11 +388,13 @@ DEFINE_SINGLETON("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
 });
 
+DEFINE_SINGLETON("Ymacs_Keymap_JS", Ymacs_Keymap_CLanguages().constructor, function(D, P){});
+
 /* -----[ Mode entry point ]----- */
 
 Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         var tok = this.tokenizer;
-        var keymap = Ymacs_Keymap_CLanguages();
+        var keymap = Ymacs_Keymap_JS();
         this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
         this.pushKeymap(keymap);
         var was_paren_match = this.cmd("paren_match_mode", true);
