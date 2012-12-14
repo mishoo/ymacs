@@ -1068,7 +1068,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         cc.splice(0, cc.length);
                 }
 
-                if (this._lastCommandWasKill == lcwk && typeof handled != "object") {
+                if (this._lastCommandWasKill == lcwk && typeof handled != "object" && !this.__nextIsMeta) {
                         // selecting a prefix keymap shouldn't clear the killRing
                         this._lastCommandWasKill = 0;
                 }
