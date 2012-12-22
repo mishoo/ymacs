@@ -598,12 +598,20 @@ Ymacs_Buffer.newCommands({
                                 this.cmd("forward_char");
 
                         // identify the prefix to use for each line
-                        var prefix = "", del = false;
-                        if (this.cmd("looking_at", /\s*([-]|[0-9]+\.|\(?[a-z][\).])?\s+/ig)) {
+                        var prefix = "", del = /\s+/g;
+                        if (this.cmd("looking_at", /\s*\/\/+\s*/g)) {
+                                prefix = this.matchData[0];
+                                del = /\s*\/\/+\s*/g;
+                        }
+                        else if (this.cmd("looking_at", /\s*\/\*\s*/g)) {
+                                prefix = " ".x(this.matchData[0].length);
+                                del = /\s*\**\s*/g;
+                        }
+                        else if (this.cmd("looking_at", /\s*([-*]|[0-9]+\.|\(?[a-z][\).])?\s+/ig)) {
                                 prefix = " ".x(this.matchData[0].length);
                                 del = /\s*[#>;\s]*\s*/g;
                         }
-                        else if (this.cmd("looking_at", /\s*[#>;*\s]+\s*/g)) {
+                        else if (this.cmd("looking_at", /\s*[#>;\s]+\s*/g)) {
                                 prefix = this.matchData[0];
                                 del = /\s*[#>;\s]*\s*/g;
                         }
@@ -628,12 +636,14 @@ Ymacs_Buffer.newCommands({
                         this.cmd("beginning_of_line");
 
                         // main operation
+                        var max = 5000;
                         while (this.point() < eop.getPosition()) {
+                                if (--max == 0) break; // whatever is screwed, do not freeze.
                                 var p = this.point();
                                 if (!this.cmd("search_forward_regexp", /\s/g))
                                         break;
                                 if (this.point() > eop.getPosition()) {
-                                        this.cmd("goto_char", eop);
+                                        break;
                                 }
                                 if (this._rowcol.col > this.getq("fill_column")) {
                                         this.cmd("goto_char", p);
