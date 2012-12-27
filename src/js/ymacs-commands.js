@@ -758,13 +758,10 @@ Ymacs_Buffer.newCommands({
         },
 
         undo: Ymacs_Interactive_X(function() {
-                var q = this.__undoQueue;
-                this.__undoQueue = this.__redoQueue;
                 this._placeUndoBoundary();
-                if (!this._playbackUndo(q)) {
+                if (!this._playbackUndo()) {
                         this.signalError("No further undo information");
                 }
-                this.__undoQueue = q;
         }),
 
         center_line: Ymacs_Interactive("p", function(n){

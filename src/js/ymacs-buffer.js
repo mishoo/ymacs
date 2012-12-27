@@ -209,7 +209,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__undoInProgress = 0;
                 this.__dirtyLines = [];
                 this.__undoQueue = [];
-                this.__redoQueue = [];
+                this.__undoPointer = 0;
                 this.__overlays = {};
 
                 this.markers = [];
@@ -356,7 +356,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this.__code = code;
                 this.__size = code.length;
                 this.__undoQueue = [];
-                this.__redoQueue = [];
+                this.__undoPointer = 0;
                 this.__overlays = {};
                 this.markers.map("setPosition", 0, true, true);
                 this.code = code.split(/\n/);
@@ -446,12 +446,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         return func.ymacsCallInteractively.apply(this, args);
                 }
                 this.currentCommand = cmd;
-                // the amount of brain twisting to get
-                // this right is incredible. :-(  I give up.
-                if (cmd != "undo") {
-                        this.__undoQueue = this.__undoQueue.concat(this.__redoQueue);
-                        this.__redoQueue = [];
-                }
                 if (this.previousCommand != cmd) {
                         this.sameCommandCount(0);
                         if (cmd != "undo") {
@@ -475,6 +469,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                                 throw ex;
                         }
                 } finally {
+                        if (cmd != "undo") {
+                                this.__undoPointer = this.__undoQueue.length;
+                        }
                         this.resumeUpdates();
                         this.callHooks("afterInteractiveCommand", cmd, func);
                         this.previousCommand = cmd;
@@ -685,8 +682,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
         var $sameCommandCount = 0;
         P.sameCommandCount = function(diff) {
-                if (diff == null)
-                        return $sameCommandCount;
+                if (diff == null) return $sameCommandCount;
+                if (diff == 0) return $sameCommandCount = 0;
                 return $sameCommandCount += diff;
         };
 
@@ -760,8 +757,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
-        P._placeUndoBoundary = function(q) {
-                q = q || this.__undoQueue;
+        P._placeUndoBoundary = function() {
+                var q = this.__undoQueue;
                 var m = this.markers.map(function(m){
                         return [ m, m.getPosition() ];
                 });
@@ -773,19 +770,19 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 }
         };
 
-        P._playbackUndo = function(q) {
+        P._playbackUndo = function() {
+                var q = this.__undoQueue;
+                if (q.length == 0) return false;
                 ++this.__undoInProgress;
                 var didit = false, action;
-                while (q.length > 0 && q.peek().type == 3) {
-                        action = q.pop();
-                }
-                while (q.length > 0) {
-                        action = q.pop();
+                while (--this.__undoPointer >= 0) {
+                        action = q[this.__undoPointer];
                         if (action.type == 3) { // boundary
                                 // restore markers
                                 action.markers.foreach(function(m){
                                         m[0].setPosition(m[1]);
                                 });
+                                if (!didit) continue;
                                 break;
                         }
                         didit = true;
