@@ -32,5 +32,5 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 function Ymacs_Exception(why) {
-        this.message = why;
+    this.message = why;
 };

@@ -1,1 +1,1 @@
-((js-mode . ((js-indent-level . 8))))
+((js-mode . ((js-indent-level . 4))))
