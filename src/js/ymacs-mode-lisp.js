@@ -220,7 +220,7 @@
                                 try {
                                         if (reader) {
                                                 tok.value = reader();
-                                                if (tok.value == "") {
+                                                if (tok.value === "") {
                                                         // couldn't figure this out, but let's not crash the browser.
                                                         next();
                                                 }
