@@ -207,7 +207,12 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             indent = stream.lineIndentation($inComment.line) + INDENT_LEVEL();
         }
         else if ($inTag) {
-            indent = $inTag.c1 + $inTag.id.length + 1;
+            var txt = stream.lineText($inTag.line);
+            if (/^\s*$/.test(txt.substr(0, $inTag.c1 - 1))) {
+                indent = $inTag.c1 + $inTag.id.length + 1;
+            } else {
+                indent = stream.lineIndentation($inTag.line);
+            }
         }
         else if ((lastTag = $tags.peek())) {
             indent = stream.lineIndentation(lastTag.line) + INDENT_LEVEL();
