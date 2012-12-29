@@ -351,8 +351,20 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         return this.caretMarker.getPosition();
     };
 
+    P.dirty = function(dirty) {
+        if (arguments.length > 0) {
+            this.__isDirty = dirty;
+            this.__undoQueue.foreach(function(x){
+                if (x.type !== 3) x.dirty = true;
+            });
+            this.updateModeline();
+        }
+        return this.__isDirty;
+    };
+
     P.setCode = function(code) {
         // this.__code = code = code.replace(/\t/g, " ".x(this.getq("tab_width")));
+        this.__isDirty = false;
         this.__code = code;
         this.__size = code.length;
         this.__undoQueue = [];
@@ -716,9 +728,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         this.callHooks("onProgressChange");
     };
 
+    P.updateModeline = function() {
+        this.callHooks("onProgressChange");
+    };
+
     P.renderModelineContent = function(rc, percent) {
         var ml = String.buffer(
-            "-- <b>",
+            this.__isDirty ? "**" : "--",
+            " <b>",
             this.name.htmlEscape(),
             "</b>",
             "  ", percent, " of ", this.getCodeSize().formatBytes(2).toLowerCase(), "  ",
@@ -750,8 +767,10 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 type  : type,
                 pos   : pos,
                 len   : len,
-                text  : text
+                text  : text,
+                dirty : this.__isDirty
             });
+            this.__isDirty = true;
             if (q.length > MAX_UNDO_RECORDS)
                 q.shift();
         }
@@ -795,6 +814,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 this._insertText(action.text, pos);
                 break;
             }
+            this.__isDirty = action.dirty;
         }
         --this.__undoInProgress;
         return didit;
