@@ -215,7 +215,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         }
         this.buffer = buffer;
         if (buffer) {
-            this.buffer.addEventListener(this._bufferEvents);
+            buffer.addEventListener(this._bufferEvents);
             if (this.focusInside()) {
                 buffer.addEventListener(this._moreBufferEvents);
             }

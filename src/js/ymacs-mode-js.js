@@ -382,8 +382,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
         "ENTER"                                     : "newline_and_indent",
-        "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent"
-        // "{"                                      : "c_electric_block"
+        "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent",
+        "{"                                         : "c_electric_block"
     };
 
 });
