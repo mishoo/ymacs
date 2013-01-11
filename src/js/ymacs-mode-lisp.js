@@ -373,15 +373,15 @@
     // the duplicate code.
 
     var SPECIAL_FORMS = "\
-defvar defparameter deftype defstruct defclass defsetf destructuring-bind \
+define defvar defparameter deftype defstruct defclass defsetf destructuring-bind \
 defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond unless etypecase typecase ctypecase \
-lambda let load-time-value quote macrolet \
-progn prog1 prog2 progv go flet the \
+lambda λ let load-time-value quote macrolet \
+progn begin prog1 prog2 progv go flet the \
 if throw eval-when multiple-value-prog1 unwind-protect let* \
 ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind case \
 labels function symbol-macrolet block tagbody catch locally \
-return return-from setq setf multiple-value-call".qw().toHash();
+return return-from setq set! set-car! set-cdr! setf multiple-value-call".qw().toHash();
 
     var COMMON_MACROS = "loop do while".qw().toHash();
 
@@ -415,6 +415,7 @@ return return-from setq setf multiple-value-call".qw().toHash();
         "defclass"            : "2*",
         "defmacro"            : "2*",
         "progn"               : "0+",
+        "begin"               : "0+",
         "prog1"               : "1*",
         "prog2"               : "2*",
         "let"                 : "1*",
