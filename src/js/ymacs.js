@@ -515,24 +515,24 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     };
 
     P.stepMacro = function() {
-        if (this.__macro_step >= this.__running_macro.length) {
-            this.__macro_times--;
-            this.__macro_step = 0;
+        while (true) {
+            if (this.__macro_step >= this.__running_macro.length) {
+                this.__macro_times--;
+                this.__macro_step = 0;
+            }
+            if (this.__macro_times == 0 || this.__error_thrown) {
+                this.__macro_times = 0;
+                this.__macro_step = 0;
+                this.__running_macro = null;
+                return;
+            }
+            var ev = this.__running_macro[this.__macro_step];
+            this.processKeyEvent(ev, ev.wasKeypress);
+            this.__macro_step++;
         }
-        if (this.__macro_times == 0 || this.__error_thrown) {
-            this.__macro_times = 0;
-            this.__macro_step = 0;
-            this.__running_macro = null;
-            return;
-        }
-        var ev = this.__running_macro[this.__macro_step];
-        this.processKeyEvent(ev, ev.wasKeypress);
-        this.__macro_step++;
-        var self = this;
-        setTimeout(function() { self.stepMacro(); }, 0);
     };
 
-    P.runMacro = function(times,macro) {
+    P.runMacro = function(times, macro) {
         if (this.isRecordingMacro())
             return false;
         this.__error_thrown = false;
