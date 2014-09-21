@@ -156,7 +156,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
                 if (handler instanceof Array)
                     $BREAK();
             }
-            else if (handler) {
+            else {
                 handler = null;
                 $BREAK();
             }
