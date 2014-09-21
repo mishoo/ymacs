@@ -686,25 +686,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._on_keyDown = function(ev) {
-        if (!is_gecko) {
-            var ki = window.KEYBOARD_INSANITY, code = ev.keyCode;
-            if (code == 0 || code in ki.modifiers)
-                EX();
-            if ((code in ki.letters || code in ki.digits || code in ki.symbols) && !(ev.ctrlKey || ev.altKey)) {
-                return; // to be handled by the upcoming keypress event
-            }
-            ev.charCode = ki.getCharCode(code, ev.shiftKey);
-            if (ev.charCode)
-                ev.keyCode = 0;
-            if (this.buffer._handleKeyEvent(ev))
-                EX();
-        }
+        if (ymacs.processKeyEvent(ev, false))
+            EX();
     };
 
     P._on_keyPress = function(ev) {
-        if (!is_gecko)
-            ev.keyCode = 0;
-        if (this.buffer._handleKeyEvent(ev))
+        if (ymacs.processKeyEvent(ev, true))
             EX();
     };
 

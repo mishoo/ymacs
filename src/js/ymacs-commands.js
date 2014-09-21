@@ -1170,6 +1170,40 @@ Ymacs_Buffer.newCommands({
 
 })();
 
+(function(){
+    Ymacs_Buffer.newCommands({
+        kmacro_start_macro: Ymacs_Interactive("p", function(arg) {
+            if (this.ymacs.isRunningMacro()) {
+                return;
+            }
+            if (this.ymacs.isRecordingMacro()) {
+                this.signalError("Already defining keyboard macro.")
+                return;
+            }
+            this.ymacs.startMacro(arg !== null);
+        }),
+        kmacro_end_macro: Ymacs_Interactive(function() {
+            if (this.ymacs.isRunningMacro()) {
+                return;
+            }
+            if (!this.ymacs.isRecordingMacro()) {
+                this.signalInfo("not defining kbd macro");
+                return;
+            }
+            this.ymacs.stopMacro();
+        }),
+        kmacro_end_and_call_macro: Ymacs_Interactive("p", function(arg) {
+            this.ymacs.stopMacro();
+            if (arg === null)
+                arg = 1;
+            var macro = this.ymacs.getLastMacro();
+            console.log(macro);
+            this.interactiveEvent(null);
+            this.ymacs.runMacro(arg, macro);
+        })
+    });
+})();
+
 /* -----[ commands to help using the system clipboard ]----- */
 
 (function(){

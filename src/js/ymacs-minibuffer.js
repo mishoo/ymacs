@@ -156,6 +156,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         minibuffer_prompt: function(prompt, nofocus) {
             this.whenMinibuffer(function(mb){
                 var f = this.getMinibufferFrame();
+                console.log("Focus minibuffer", f.buffer);
+                this.ymacs.setInputFrame(f);
                 mb.setCode("");
                 mb.cmd("prevent_undo", function(){
                     mb.cmd("insert", prompt);
@@ -327,6 +329,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             this.whenMinibuffer(function(mb){
                 var text = this.cmd("minibuffer_contents");
                 mb.setCode("");
+                this.ymacs.setInputFrame(this.ymacs.getActiveFrame());
+                console.log("minibuffer quit to", this.ymacs.getActiveFrame());
                 this.ymacs.getActiveFrame().focus();
                 (function(text){
                     if (cont)

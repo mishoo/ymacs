@@ -334,6 +334,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     };
 
     P.signalError = function(text, html, timeout) {
+        // Terminates a running macro
+        this.ymacs.indicateError();
         this.callHooks("onMessage", "error", text, html, timeout);
     };
 

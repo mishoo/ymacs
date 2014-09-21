@@ -68,6 +68,26 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         this.killMasterOfRings = [];
         this.progress = {};
 
+        /* -----[ macro vars ]----- */
+        // If present, keystrokes are stored in this list.
+        this.__macro_recording = null;
+        // This is the macro executed by C-x e and named by
+        // name-last-kbd-macro.
+        this.__macro_finished = null;
+        // Set when any buffer does signalError.  Tells us when to abort
+        // running a macro.
+        this.__error_thrown = false;
+        // A list if we're executing a macro.
+        this.__running_macro = null;
+        // A number of times to execute the current macro.
+        this.__macro_times = 0;
+        // Macro current step
+        this.__macro_step = 0;
+        // Timer for the macro
+        this.__macro_timer = null;
+        // Unbiased active frame
+        this.__input_frame = null;
+
         /* -----[ minibuffer ]----- */
         this.minibuffer = this.createBuffer({ hidden: true, isMinibuffer: true });
         this.minibuffer.cmd("minibuffer_mode");
@@ -297,6 +317,10 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         this.frames.peek().focus();
     };
 
+    P.setInputFrame = function(frame) {
+        this.__input_frame = frame;
+    };
+
     P.setActiveFrame = function(frame, nofocus) {
         if (!frame.isMinibuffer) {
             var old = this.getActiveFrame();
@@ -306,6 +330,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             this.frames.remove(frame);
             this.frames.push(frame);
         }
+        this.__input_frame = frame;
         if (!nofocus)
             frame.focus();
     };
@@ -455,4 +480,101 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         return { store: store, dir: dir, path: path, other: other };
     };
 
+    P.isRunningMacro = function() {
+        return !!this.__running_macro;
+    };
+
+    P.isRecordingMacro = function() {
+        return !!this.__macro_recording;
+    };
+
+    P.indicateError = function() {
+        this.__error_thrown = true;
+    };
+
+    P.startMacro = function(do_append) {
+        if (this.isRecordingMacro())
+            return false;
+        if (do_append) {
+            this.__macro_recording = this.__macro_finished || [];
+            this.__macro_finished = null;
+        } else
+            this.__macro_recording = [];
+        return true;
+    };
+
+    P.stopMacro = function() {
+        if (this.__macro_recording) {
+            this.__macro_finished = this.__macro_recording;
+            this.__macro_recording = null;
+        }
+    };
+
+    P.getLastMacro = function() {
+        return this.__macro_finished;
+    };
+
+    P.stepMacro = function() {
+        if (this.__macro_step >= this.__running_macro.length) {
+            this.__macro_times--;
+            this.__macro_step = 0;
+        }
+        if (this.__macro_times == 0 || this.__error_thrown) {
+            this.__macro_times = 0;
+            this.__macro_step = 0;
+            this.__running_macro = null;
+            return;
+        }
+        var ev = this.__running_macro[this.__macro_step];
+        this.processKeyEvent(ev, ev.wasKeypress);
+        this.__macro_step++;
+        var self = this;
+        setTimeout(function() { self.stepMacro(); }, 0);
+    };
+
+    P.runMacro = function(times,macro) {
+        if (this.isRecordingMacro())
+            return false;
+        this.__error_thrown = false;
+        this.__running_macro = macro;
+        this.__macro_step = 0;
+        this.__macro_times = times;
+        var self = this;
+        setTimeout(function() { self.stepMacro(); }, 0);
+        return true;
+    };
+
+    P.processKeyEvent = function(ev,press) {
+        var frame = this.__input_frame;
+        var buffer = frame.buffer;
+
+        ev.wasKeypress = press;
+        if (!ev._keyCode)
+          ev._keyCode = ev.keyCode;
+
+        if (press) {
+            if (!is_gecko)
+                ev.keyCode = 0;
+            if (this.__macro_recording) {
+                this.__macro_recording.push(ev);
+            }
+            return buffer._handleKeyEvent(ev);
+        } else {
+            if (!is_gecko) {
+                var ki = window.KEYBOARD_INSANITY, code = ev.keyCode || ev._keyCode;
+                if (code == 0 || code in ki.modifiers)
+                    return false;
+                if ((code in ki.letters || code in ki.digits || code in ki.symbols) && !(ev.ctrlKey || ev.altKey)) {
+                    return false; // to be handled by the upcoming keypress event
+                }
+                ev.charCode = ki.getCharCode(code, ev.shiftKey);
+                if (ev.charCode)
+                    ev.keyCode = 0;
+                if (this.__macro_recording) {
+                    this.__macro_recording.push(ev);
+                }
+                return buffer._handleKeyEvent(ev);
+            }
+        }
+    };
 });

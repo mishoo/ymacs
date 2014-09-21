@@ -130,6 +130,7 @@
     };
 
     function read_function_name(arg, cont) {
+        console.log("read_function_name", arg);
         prompt.call(this, arg);
         this.cmd("minibuffer_read_function", cont);
         // XXX: enforce it!
