@@ -85,23 +85,23 @@
         function read_string() {
             return read_escaped("\"", "\"");
         };
-        function read_list() {
+        function read_list(beg, end) {
             var save_list_index = list_index;
             list_index = 0;
             try {
                 var ret = [], p;
-                skip("(");
+                skip(beg);
                 out: while (true) {
                     skip_ws();
                     switch (peek()) {
-                      case ")": break out;
+                      case end: break out;
                       case null: throw new Partial(ret);
                       default:
                         ret.push(read_token());
                         ++list_index;
                     }
                 }
-                skip(")");
+                skip(end);
                 return ret;
             } finally {
                 list_index = save_list_index;
@@ -126,6 +126,10 @@
                   case null:
                   case "(":
                   case ")":
+                  case "{":
+                  case "}":
+                  case "[":
+                  case "]":
                   case "#":
                   case ";":
                   case "`":
@@ -157,7 +161,7 @@
             switch (peek()) {
               case "\\": next(); return token("char", read_char);
               case "/": return token("regexp", read_regexp);
-              case "(": return token("vector", read_list);
+              case "(": return token("vector", read_list.$C("(", ")"));
               case "'": next(); return token("function", read_symbol);
               case "|": next(); return token("comment", read_multiline_comment);
               default:
@@ -172,7 +176,9 @@
             switch (peek()) {
               case ";"  : return token("comment", read_comment);
               case "\"" : return token("string", read_string);
-              case "("  : return token("list", read_list);
+              case "("  : return token("list", read_list.$C("(", ")"));
+              case "{"  : return token("list", read_list.$C("{", "}"));
+              case "["  : return token("list", read_list.$C("[", "]"));
               case "#"  : return token("sharp", read_sharp);
               case "`"  : next(); return token("qq", read_token, -1);
               case ","  :
@@ -372,18 +378,26 @@
     // XXX: much of the parser is actually copied from ymacs-mode-js.js.  I should somehow unify
     // the duplicate code.
 
-    var SPECIAL_FORMS = "\
+    function regexp_opt(x, mods) {
+        if (typeof x == "string") x = x.qw();
+        return new RegExp("^(" + x.join("|") + ")$", mods);
+    }
+
+    var SPECIAL_FORMS = regexp_opt("\
 define defvar defparameter deftype defstruct defclass defsetf destructuring-bind \
 defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond unless etypecase typecase ctypecase \
 lambda λ let load-time-value quote macrolet \
 progn begin prog1 prog2 progv go flet the \
-if throw eval-when multiple-value-prog1 unwind-protect let* \
+if throw eval-when multiple-value-prog1 unwind-protect let\\* \
 ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind case \
 labels function symbol-macrolet block tagbody catch locally \
-return return-from setq set! set-car! set-cdr! setf multiple-value-call".qw().toHash();
+inc! dec! cons c[ad]{1,4}r list and or not null null\\? \
+return return-from setq set! set-car! set-cdr! setf multiple-value-call", "i");
 
-    var COMMON_MACROS = "loop do while".qw().toHash();
+    var ERROR_FORMS = "error warn".qw().toHash();
+
+    var COMMON_MACROS = "loop do while dotimes".qw().toHash();
 
     var CONSTANTS = "t nil".qw().toHash();
 
@@ -457,7 +471,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call".qw().to
             if (options.rx_special && options.rx_special.test(ch))
                 return false;
             return ch.toLowerCase() != ch.toUpperCase() ||
-                /^[-|0-9!#$%&*+./:<=>?@\[\]\^_\{\}~]$/i.test(ch);
+                /^[-|0-9!#$%&*+./:<=>?@\^_~]$/i.test(ch);
         };
 
         function isConstituentStart(ch) {
@@ -635,7 +649,8 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call".qw().to
                 var type = ch == ":" ? "lisp-keyword"
                     : ch == "&" ? "type"
                     : /^#:/.test(tmp.id) ? "constant"
-                    : tmp.id in SPECIAL_FORMS ? "keyword"
+                    : SPECIAL_FORMS.test(tmp.id) ? "keyword"
+                    : tmp.id in ERROR_FORMS ? "error"
                     : tmp.id in COMMON_MACROS ? "builtin"
                     : tmp.id in CONSTANTS ? "constant"
                     : null;
