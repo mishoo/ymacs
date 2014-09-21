@@ -1180,6 +1180,7 @@ Ymacs_Buffer.newCommands({
                 this.signalError("Already defining keyboard macro.")
                 return;
             }
+            this.signalInfo("Defining keyboard macro");
             this.ymacs.startMacro(arg !== null);
         }),
         kmacro_end_macro: Ymacs_Interactive(function() {
@@ -1187,9 +1188,10 @@ Ymacs_Buffer.newCommands({
                 return;
             }
             if (!this.ymacs.isRecordingMacro()) {
-                this.signalInfo("not defining kbd macro");
+                this.signalInfo("Not defining kbd macro");
                 return;
             }
+            this.signalInfo("Keyboard macro defined");
             this.ymacs.stopMacro();
         }),
         kmacro_end_and_call_macro: Ymacs_Interactive("p", function(arg) {
@@ -1197,7 +1199,6 @@ Ymacs_Buffer.newCommands({
             if (arg === null)
                 arg = 1;
             var macro = this.ymacs.getLastMacro();
-            console.log(macro);
             this.interactiveEvent(null);
             this.ymacs.runMacro(arg, macro);
         })
