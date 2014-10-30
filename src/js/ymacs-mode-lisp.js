@@ -261,7 +261,7 @@
             prev_exp: function() {
                 if (caret_token) {
                     return caret_token.parent.value[caret_token.index - 1];
-                } else {
+                } else if (cont_exp) {
                     if (cont_exp.type == "list" && cont_exp.end == caret + 1)
                         return cont_exp.value.peek();
                     return cont_exp.parent.value[cont_exp.index];
