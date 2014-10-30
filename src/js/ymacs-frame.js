@@ -686,12 +686,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._on_keyDown = function(ev) {
-        if (ymacs.processKeyEvent(ev, false))
+        if (this.ymacs.processKeyEvent(ev, false))
             EX();
     };
 
     P._on_keyPress = function(ev) {
-        if (ymacs.processKeyEvent(ev, true))
+        if (this.ymacs.processKeyEvent(ev, true))
             EX();
     };
 
