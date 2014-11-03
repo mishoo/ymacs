@@ -92,12 +92,13 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         this.whenMinibuffer(function(mb){
             var changed_vars = mb.setq({
                 completion_list: completions,
-                minibuffer_validation: function(what){
+                minibuffer_validation: function(what, cont2){
                     if (what == null)
                         what = mb.cmd("minibuffer_contents");
                     if (validate)
-                        return validate.call(this, mb, what);
-                    return true; // accept anything by default
+                        validate.call(this, mb, what, cont2);
+                    else
+                        cont2(true); // accept anything by default
                 }.$(this),
                 minibuffer_continuation: function(what){
                     mb.setq(changed_vars);
@@ -108,47 +109,52 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         });
     };
 
-    function filename_completion(mb, str) {
-        var info = this.ymacs.ls_getFileDirectory(str),
-        dir = info.dir,
-        other = info.other,
-        path = info.path,
-        last = other[0];
-        if (other.length != 1)
-            throw new Ymacs_Exception("Not found");
-        if (typeof dir[last] == "string")
-            return [ path.concat([ last ]).join("/") ]; // fully completed
-        var completions = [];
-        for (var i in dir) {
-            if (i.indexOf(last) == 0) {
-                completions.push(i);
+    function filename_completion(mb, str, re, cont) {
+        var self = this;
+        self.ymacs.fs_getFileDirectory(str, false, function (info) {
+            dir = info.dir,
+            other = info.other,
+            path = info.path,
+            last = other[0];
+            if (other.length != 1)
+                mb.signalError("Not found");
+            else if (typeof dir[last] == "string")
+                cont([ path.concat([ last ]).join("/") ]); // fully completed
+            else {
+                var completions = [];
+                for (var i in dir) {
+                    if (i.indexOf(last) == 0) {
+                        completions.push(i);
+                    }
+                }
+                var prefix = completions.common_prefix();
+                if (prefix != last) {
+                    if (completions.length == 1 && typeof dir[prefix] != "string")
+                        prefix += "/";
+                    mb.cmd("minibuffer_replace_input", path.concat([ prefix ]).join("/"));
+                    cont(null);
+                }
+                else if (completions.length == 1) {
+                    // XXX: do we ever get here?
+                    mb.signalError("Single completion");
+                }
+                else if (completions.length == 0) {
+                    mb.signalError("No completions");
+                }
+                else {
+                    completions = completions.map(function(name){
+                        if (typeof dir[name] != "string")
+                            name += "/";
+                        return {
+                            label: name,
+                            completion: path.concat([ name ]).join("/")
+                        };
+                    });
+                    popupCompletionMenu(self.getMinibufferFrame(), completions);
+                    cont(null);
+                }
             }
-        }
-        var prefix = completions.common_prefix();
-        if (prefix != last) {
-            if (completions.length == 1 && typeof dir[prefix] != "string")
-                prefix += "/";
-            mb.cmd("minibuffer_replace_input", path.concat([ prefix ]).join("/"));
-        }
-        else if (completions.length == 1) {
-            // XXX: do we ever get here?
-            throw new Ymacs_Exception("Single completion");
-        }
-        else if (completions.length == 0) {
-            throw new Ymacs_Exception("No completions");
-        }
-        else {
-            completions = completions.map(function(name){
-                if (typeof dir[name] != "string")
-                    name += "/";
-                return {
-                    label: name,
-                    completion: path.concat([ name ]).join("/")
-                };
-            });
-            popupCompletionMenu(this.getMinibufferFrame(), completions);
-        }
-        return null;
+        });
     };
 
     Ymacs_Buffer.newCommands({
@@ -169,11 +175,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_read_number: function(cont) {
-            read_with_continuation.call(this, null, cont, function(mb, text){
+            read_with_continuation.call(this, null, cont, function(mb, text, cont2){
                 var n = parseInt(text, 10);
                 if (isNaN(n))
                     mb.signalError("Please enter a number");
-                return !isNaN(n);
+                cont2(!isNaN(n));
             });
         },
 
@@ -181,24 +187,24 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             var commandNames = Array.hashKeys(this.COMMANDS).grep(function(cmd){
                 return this.COMMANDS[cmd].ymacsInteractive;
             }, this).sort();
-            read_with_continuation.call(this, commandNames, cont, function(mb, name){
+            read_with_continuation.call(this, commandNames, cont, function(mb, name, cont2){
                 var cmd = this.COMMANDS[name],
                 ret = cmd && cmd.ymacsInteractive;
                 if (!ret) {
                     mb.signalError("No such command: " + name);
                 }
-                return ret;
+                cont2(ret);
             });
         },
 
         minibuffer_read_function: function(cont) {
             var commandNames = Array.hashKeys(this.COMMANDS).sort();
-            read_with_continuation.call(this, commandNames, cont, function(mb, name){
+            read_with_continuation.call(this, commandNames, cont, function(mb, name, cont2){
                 var cmd = this.COMMANDS[name],
                 ret = !!cmd;
                 if (!ret)
                     mb.signalError("No such function: " + name);
-                return ret;
+                cont2(ret);
             });
         },
 
@@ -234,33 +240,46 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_read_existing_file: function(cont) {
-            var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
-            if (dir) dir += "/";
-            this.cmd("minibuffer_replace_input", dir);
-            read_with_continuation.call(this, filename_completion, cont, function(mb, name){
-                var ret = this.ymacs.ls_getFileContents(name, true);
-                if (!ret)
-                    mb.signalError("No such file: " + name);
-                return ret;
+            var self = this;
+            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
+                var dir = info.path.join("/");
+                if (dir) dir += "/";
+                self.cmd("minibuffer_replace_input", dir);
+                read_with_continuation.call(self, filename_completion, cont, function(mb, name, cont2){
+                    self.ymacs.fs_getFileContents(name, true, function (ret) {
+                        if (!ret)
+                            mb.signalError("No such file: " + name);
+                        cont2(ret);
+                    });
+                });
             });
         },
 
         minibuffer_read_file: function(cont) {
-            var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
-            if (dir) dir += "/";
-            read_with_continuation.call(this, filename_completion, cont);
+            var self = this;
+            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
+                var dir = info.path.join("/");
+                if (dir) dir += "/";
+                read_with_continuation.call(self, filename_completion, cont);
+            });
         },
 
         minibuffer_read_file_or_directory: function(cont) {
-            var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
-            if (dir) dir += "/";
-            read_with_continuation.call(this, filename_completion, cont);
+            var self = this;
+            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
+                var dir = info.path.join("/");
+                if (dir) dir += "/";
+                read_with_continuation.call(self, filename_completion, cont);
+            });
         },
 
         minibuffer_read_directory: function(cont) {
-            var dir = this.ymacs.ls_getFileDirectory(this.name).path.join("/");
-            if (dir) dir += "/";
-            read_with_continuation.call(this, filename_completion, cont);
+            var self = this;
+            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
+                var dir = info.path.join("/");
+                if (dir) dir += "/";
+                read_with_continuation.call(self, filename_completion, cont);
+            });
         },
 
         minibuffer_prompt_end: function() {
@@ -283,44 +302,55 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_complete: function() {
-            this.whenMinibuffer(function(mb){
+            var self = this;
+            self.whenMinibuffer(function(mb){
+
+                function complete(a) {
+                    if (!a || a.length == 0) {
+                        mb.signalError("No completions");
+                    }
+                    else {
+                        var prefix = a.common_prefix();
+                        if (prefix != str) {
+                            mb.cmd("minibuffer_replace_input", prefix);
+                        }
+                        else if (a.length == 1) {
+                            mb.signalError("Sole completion");
+                        }
+                        else {
+                            popupCompletionMenu(self.getMinibufferFrame(), a);
+                        }
+                    }
+                }
+
                 var a = mb.getq("completion_list"),
                 str = mb.cmd("minibuffer_contents"),
                 re = str.replace(/([\[\]\(\)\{\}\.\*\+\?\|\\])/g, "\\$1").replace(/([_-])/g, "[^_-]*[_-]");
                 re = new RegExp("^" + re, "i");
                 if (a instanceof Function) {
-                    a = a.call(this, mb, str, re);
-                    if (!a)
-                        return;
+                    a.call(self, mb, str, re, function (a) {
+                        if (a)
+                            complete(a);
+                    });
                 }
                 else if (a && a.length > 0) {
                     a = a.grep(function(cmd){
                         return re.test(cmd);
                     });
+                    complete(a);
                 }
-                if (!a || a.length == 0) {
-                    mb.signalError("No completions");
-                }
-                else {
-                    var prefix = a.common_prefix();
-                    if (prefix != str) {
-                        mb.cmd("minibuffer_replace_input", prefix);
-                    }
-                    else if (a.length == 1) {
-                        mb.signalError("Sole completion");
-                    }
-                    else {
-                        popupCompletionMenu(this.getMinibufferFrame(), a);
-                    }
-                }
+                else
+                    complete(a);
             });
         },
 
         minibuffer_complete_and_exit: function() {
-            this.whenMinibuffer(function(mb){
-                if (mb.getq("minibuffer_validation").call(mb)) {
-                    mb.cmd("minibuffer_keyboard_quit", this.getq("minibuffer_continuation"));
-                }
+            var self = this;
+            self.whenMinibuffer(function(mb){
+                mb.getq("minibuffer_validation").call(mb, null, function (valid) {
+                    if (valid)
+                        mb.cmd("minibuffer_keyboard_quit", self.getq("minibuffer_continuation"));
+                });
             });
         },
 

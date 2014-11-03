@@ -161,14 +161,17 @@ Ymacs_Buffer.newCommands({
     }),
 
     delete_file: Ymacs_Interactive("fDelete file: ", function(name){
-        this.ymacs.ls_getFileContents(name);
-        var files = this.ymacs.ls_get();
-        delete files[name];
-        this.ymacs.ls_set(files);
+        var self = this;
+        self.ymacs.fs_deleteFile(name, function () {
+            self.signalInfo("Deleted "+name);
+        });
     }),
 
     eval_file: Ymacs_Interactive("fEval file: ", function(name){
-        this.cmd("eval_string", this.ymacs.ls_getFileContents(name));
+        var self = this;
+        self.ymacs.fs_getFileContents(name, false, function (code) {
+            self.cmd("eval_string", code);
+        });
     })
 
 });

@@ -480,6 +480,45 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         return { store: store, dir: dir, path: path, other: other };
     };
 
+    P.ls_deleteFile = function(name) {
+        this.ls_getFileContents(name);
+        var files = this.ls_get();
+        delete files[name];
+        this.ls_set(files);
+    };
+
+    /* -----[ filesystem operations ]----- */
+
+    P.fs_getFileContents = function(name, nothrow, cont) {
+        var self = this;
+//        setTimeout(function () { // uncomment to make it async, for testing
+        cont(self.ls_getFileContents(name, nothrow));
+//        }, 10);
+    };
+
+    P.fs_setFileContents = function(name, content, cont) {
+        var self = this;
+//        setTimeout(function () { // uncomment to make it async, for testing
+        self.ls_setFileContents(name, content);
+        cont();
+//        }, 10);
+    };
+
+    P.fs_getFileDirectory = function(name, create, cont) {
+        var self = this;
+//        setTimeout(function () { // uncomment to make it async, for testing
+        cont(self.ls_getFileDirectory(name, create));
+//        }, 10);
+    };
+
+    P.fs_deleteFile = function(name, cont) {
+        var self = this;
+//        setTimeout(function () { // uncomment to make it async, for testing
+        self.ls_deleteFile(name);
+        cont();
+//        }, 10);
+    };
+
     P.isRunningMacro = function() {
         return !!this.__running_macro;
     };
