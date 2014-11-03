@@ -160,6 +160,41 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
+    find_file: Ymacs_Interactive("FFind file: ", function(name) {
+        var self = this;
+        self.ymacs.fs_getFileContents(name, false, function (code) {
+            var buffer = self.ymacs.createBuffer({ name: name });
+            buffer.setCode(code);
+            self.cmd("switch_to_buffer", name);
+            var mode = self.cmd("figure_out_mode", code);
+            if (mode) {
+                if (Object.HOP(buffer.COMMANDS, mode)) {
+                    buffer.cmd(mode);
+                } else if (Object.HOP(buffer.COMMANDS, mode + "_mode")) {
+                    buffer.cmd(mode + "_mode");
+                }
+            }
+        });
+    }),
+
+    write_file: Ymacs_Interactive("FWrite file: ", function(name){
+        var self = this;
+        self.ymacs.fs_setFileContents(name, self.getCode(), function () {
+            self.cmd("rename_buffer", name);
+            self.dirty(false);
+            self.signalInfo("Wrote "+name);
+        });
+    }),
+
+    save_buffer: Ymacs_Interactive("", function(){
+        var self = this;
+        var name = self.name;
+        self.ymacs.fs_setFileContents(name, self.getCode(), function () {
+            self.dirty(false);
+            self.signalInfo("Wrote "+name);
+        });
+    }),
+
     delete_file: Ymacs_Interactive("fDelete file: ", function(name){
         var self = this;
         self.ymacs.fs_deleteFile(name, function () {

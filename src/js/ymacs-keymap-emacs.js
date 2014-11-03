@@ -214,7 +214,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "C-x e"                                   : "kmacro_end_and_call_macro",
         "C-x ("                                   : "kmacro_start_macro",
         "C-x )"                                   : "kmacro_end_macro",
-        
+
+        // file system commands
+        "C-x C-f"                                 : "find_file",
+        "C-x C-w"                                 : "write_file",
+        "C-x C-s"                                 : "save_buffer",
+
         // others
         "C-x =": function() {
             var ch = this.charAt(), chname = ch;
