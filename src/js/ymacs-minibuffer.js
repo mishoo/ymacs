@@ -86,6 +86,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             isContext: true
         });
         $popupActive = true;
+
+        handle_arrow_down.call(this); // autoselect the first one anyway
     };
 
     function read_with_continuation(completions, cont, validate) {
@@ -150,7 +152,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                             completion: path.concat([ name ]).join("/")
                         };
                     });
-                    popupCompletionMenu(self.getMinibufferFrame(), completions);
+                    popupCompletionMenu.call(self, self.getMinibufferFrame(), completions);
                     cont(null);
                 }
             }
@@ -318,7 +320,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                             mb.signalError("Sole completion");
                         }
                         else {
-                            popupCompletionMenu(self.getMinibufferFrame(), a);
+                            popupCompletionMenu.call(self, self.getMinibufferFrame(), a);
                         }
                     }
                 }
@@ -422,7 +424,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     function handle_tab() {
         if (!$popupActive)
             this.cmd("minibuffer_complete");
-        handle_arrow_down.call(this); // autoselect the first one anyway
+        else
+            handle_arrow_down.call(this);
     };
 
     function handle_s_tab() {
