@@ -40,6 +40,8 @@ Ymacs_Buffer.newCommands({
     },
 
     figure_out_mode: function(code) {
+        if (!code)
+            code = this.getCode();
         var lines = code.split(/\n/);
         if (lines.length > 4)
             lines.splice(2, lines.length - 4);
@@ -48,6 +50,43 @@ Ymacs_Buffer.newCommands({
                 $RETURN(m[1]);
             }
         });
+    },
+
+    mode_from_name: function(name) {
+
+        if (!name)
+            name = this.name;
+
+        var ext = (/\.[^.]+$/.exec(name) || [""])[0];
+
+        // TODO: the mapping from extension to mode should be defined
+        // with each mode.
+
+        switch (ext) {
+
+            case ".css":
+            return "css";
+
+            case ".js":
+            return "javascript";
+
+            case ".lisp": case ".scm":
+            return "lisp";
+        }
+
+        return null;
+    },
+
+    set_buffer_mode: function(mode) {
+        if (!mode)
+            mode = this.cmd("figure_out_mode") || this.cmd("mode_from_name");
+        if (mode) {
+            if (Object.HOP(this.COMMANDS, mode)) {
+                this.cmd(mode);
+            } else if (Object.HOP(this.COMMANDS, mode + "_mode")) {
+                this.cmd(mode + "_mode");
+            }
+        }
     },
 
     cperl_lineup: Ymacs_Interactive("r", function(begin, end){
@@ -149,49 +188,77 @@ Ymacs_Buffer.newCommands({
         var code = this.ymacs.ls_getFileContents(name);
         var buffer = this.ymacs.createBuffer({ name: name });
         buffer.setCode(code);
-        this.cmd("switch_to_buffer", name);
-        var mode = this.cmd("figure_out_mode", code);
-        if (mode) {
-            if (Object.HOP(buffer.COMMANDS, mode)) {
-                buffer.cmd(mode);
-            } else if (Object.HOP(buffer.COMMANDS, mode + "_mode")) {
-                buffer.cmd(mode + "_mode");
-            }
-        }
+        buffer.cmd("set_buffer_mode");
+        buffer.cmd("switch_to_buffer", name);
     }),
 
     find_file: Ymacs_Interactive("FFind file: ", function(name) {
         var self = this;
-        self.ymacs.fs_getFileContents(name, false, function (code) {
-            var buffer = self.ymacs.createBuffer({ name: name });
-            buffer.setCode(code);
-            self.cmd("switch_to_buffer", name);
-            var mode = self.cmd("figure_out_mode", code);
-            if (mode) {
-                if (Object.HOP(buffer.COMMANDS, mode)) {
-                    buffer.cmd(mode);
-                } else if (Object.HOP(buffer.COMMANDS, mode + "_mode")) {
-                    buffer.cmd(mode + "_mode");
+        self.ymacs.fs_getFileContents(name, true, function (code, stamp) {
+            var buffer = self.ymacs.getBuffer(name);
+
+            function find_file() {
+                buffer.setCode(code || "");
+                buffer.stamp = stamp;
+                buffer.dirty(false);
+                buffer.cmd("set_buffer_mode");
+                buffer.cmd("switch_to_buffer", name);
+            }
+
+            if (buffer) {
+                if (buffer.stamp == stamp) {
+                    buffer.cmd("switch_to_buffer", name);
+                } else {
+                    var msg = "File "+name+" changed on disk.  "+
+                              (buffer.dirty() ? "Discard your edits?"
+                                              : "Reread from disk?");
+                    buffer.cmd("minibuffer_yn", msg, function (yes) {
+                        if (yes)
+                            find_file();
+                    });
                 }
+            } else {
+                buffer = self.ymacs.createBuffer({ name: name, stamp: stamp });
+                if (code == null)
+                    self.signalInfo("New file");
+                find_file();
             }
         });
     }),
 
     write_file: Ymacs_Interactive("FWrite file: ", function(name){
         var self = this;
-        self.ymacs.fs_setFileContents(name, self.getCode(), function () {
-            self.cmd("rename_buffer", name);
-            self.dirty(false);
-            self.signalInfo("Wrote "+name);
-        });
+
+        function write_file() {
+            self.ymacs.fs_setFileContents(name, self.getCode(), function (stamp) {
+                self.cmd("rename_buffer", name);
+                self.dirty(false);
+                self.signalInfo("Wrote "+name);
+                self.stamp = stamp; // refresh stamp
+            });
+        }
+
+        var buffer = self.ymacs.getBuffer(name);
+        if (!buffer)
+            write_file();
+        else {
+            var msg = "A buffer is visiting "+name+"; proceed?";
+            buffer.cmd("minibuffer_yn", msg, function (yes) {
+                if (yes) {
+                    self.ymacs.killBuffer(buffer);
+                    write_file();
+                }
+            });
+        }
     }),
 
     save_buffer: Ymacs_Interactive("", function(){
         var self = this;
         var name = self.name;
-        self.ymacs.fs_setFileContents(name, self.getCode(), function () {
+        self.ymacs.fs_setFileContents(name, self.getCode(), function (stamp) {
             self.dirty(false);
             self.signalInfo("Wrote "+name);
+            self.stamp = stamp; // refresh stamp
         });
     }),
 
@@ -204,7 +271,7 @@ Ymacs_Buffer.newCommands({
 
     eval_file: Ymacs_Interactive("fEval file: ", function(name){
         var self = this;
-        self.ymacs.fs_getFileContents(name, false, function (code) {
+        self.ymacs.fs_getFileContents(name, false, function (code, stamp) {
             self.cmd("eval_string", code);
         });
     })

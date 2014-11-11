@@ -112,48 +112,43 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     };
 
     function filename_completion(mb, str, re, cont) {
+
         var self = this;
-        self.ymacs.fs_getFileDirectory(str, false, function (info) {
-            dir = info.dir,
-            other = info.other,
-            path = info.path,
-            last = other[0];
-            if (other.length != 1)
+        var lastslash = str.lastIndexOf("/");
+        var dir = str.slice(0, lastslash+1);
+        var partial = str.slice(lastslash+1);
+        self.ymacs.fs_getDirectory(dir, function (files) {
+
+            function add_trailing_slash_to_dir(name) {
+                return (files[name].type == "directory") ? name+"/" : name;
+            }
+
+            if (!files) {
                 mb.signalError("Not found");
-            else if (typeof dir[last] == "string")
-                cont([ path.concat([ last ]).join("/") ]); // fully completed
-            else {
+                cont(null);
+            } else {
                 var completions = [];
-                for (var i in dir) {
-                    if (i.indexOf(last) == 0) {
-                        completions.push(i);
+                for (var f in files) {
+                    if (f.indexOf(partial) == 0) {
+                        completions.push(add_trailing_slash_to_dir(f));
                     }
                 }
-                var prefix = completions.common_prefix();
-                if (prefix != last) {
-                    if (completions.length == 1 && typeof dir[prefix] != "string")
-                        prefix += "/";
-                    mb.cmd("minibuffer_replace_input", path.concat([ prefix ]).join("/"));
-                    cont(null);
-                }
-                else if (completions.length == 1) {
-                    // XXX: do we ever get here?
-                    mb.signalError("Single completion");
-                }
-                else if (completions.length == 0) {
-                    mb.signalError("No completions");
-                }
-                else {
-                    completions = completions.map(function(name){
-                        if (typeof dir[name] != "string")
-                            name += "/";
-                        return {
-                            label: name,
-                            completion: path.concat([ name ]).join("/")
-                        };
-                    });
-                    popupCompletionMenu.call(self, self.getMinibufferFrame(), completions);
-                    cont(null);
+                if (completions.length == 0) {
+                    cont([]);
+                } else {
+                    var prefix = completions.common_prefix();
+                    if (prefix != partial) {
+                        mb.cmd("minibuffer_replace_input", dir+prefix);
+                        cont(null);
+                    } else if (completions.length == 1) {
+                        cont([str]);
+                    } else {
+                        completions = completions.map(function(name){
+                            return {label: name, completion: dir+name};
+                        });
+                        popupCompletionMenu.call(self, self.getMinibufferFrame(), completions);
+                        cont(null);
+                    }
                 }
             }
         });
@@ -173,6 +168,22 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 f._redrawCaret(true);
                 if (!nofocus)
                     f.focus();
+            });
+        },
+
+        minibuffer_yn: function(prompt, cont) {
+            this.cmd("minibuffer_prompt", prompt + " (yes or no) ");
+            this.cmd("minibuffer_read_yn", function (text) {
+                cont(text == "yes");
+            });
+        },
+
+        minibuffer_read_yn: function(cont) {
+            read_with_continuation.call(this, null, cont, function(mb, text, cont2){
+                if (text == "yes" || text == "no")
+                    cont2(true);
+                else
+                    mb.signalError("Please enter yes or no");
             });
         },
 
@@ -243,12 +254,9 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
 
         minibuffer_read_existing_file: function(cont) {
             var self = this;
-            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
-                var dir = info.path.join("/");
-                if (dir) dir += "/";
-                self.cmd("minibuffer_replace_input", dir);
+            self.cmd("minibuffer_replace_input_by_current_dir", function () {
                 read_with_continuation.call(self, filename_completion, cont, function(mb, name, cont2){
-                    self.ymacs.fs_getFileContents(name, true, function (ret) {
+                    self.ymacs.fs_getFileContents(name, true, function (ret, stamp) {
                         if (!ret)
                             mb.signalError("No such file: " + name);
                         cont2(ret);
@@ -259,27 +267,21 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
 
         minibuffer_read_file: function(cont) {
             var self = this;
-            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
-                var dir = info.path.join("/");
-                if (dir) dir += "/";
+            self.cmd("minibuffer_replace_input_by_current_dir", function () {
                 read_with_continuation.call(self, filename_completion, cont);
             });
         },
 
         minibuffer_read_file_or_directory: function(cont) {
             var self = this;
-            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
-                var dir = info.path.join("/");
-                if (dir) dir += "/";
+            self.cmd("minibuffer_replace_input_by_current_dir", function () {
                 read_with_continuation.call(self, filename_completion, cont);
             });
         },
 
         minibuffer_read_directory: function(cont) {
             var self = this;
-            self.ymacs.fs_getFileDirectory(self.name, false, function (info) {
-                var dir = info.path.join("/");
-                if (dir) dir += "/";
+            self.cmd("minibuffer_replace_input_by_current_dir", function () {
                 read_with_continuation.call(self, filename_completion, cont);
             });
         },
@@ -300,6 +302,18 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             this.whenMinibuffer(function(mb){
                 mb._replaceText(mb.getq("minibuffer_end_marker"), mb.getCodeSize(), value);
                 this.getMinibufferFrame()._redrawCaret(true);
+            });
+        },
+
+        minibuffer_replace_input_by_current_dir: function (cont) {
+            this.whenYmacs(function(ymacs){
+                var self = this;
+                var name = ymacs.getActiveBuffer().name;
+                var dir = name.slice(0, name.lastIndexOf("/")+1);
+                ymacs.fs_remapDir(dir, function (dir) {
+                    self.cmd("minibuffer_replace_input", dir);
+                    cont();
+                });
             });
         },
 

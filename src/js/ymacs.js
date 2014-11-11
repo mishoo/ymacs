@@ -492,7 +492,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     P.fs_getFileContents = function(name, nothrow, cont) {
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
-        cont(self.ls_getFileContents(name, nothrow));
+        var code = self.ls_getFileContents(name, nothrow);
+        cont(code, code); // second parameter is file stamp, which should be last modification time
 //        }, 10);
     };
 
@@ -500,14 +501,29 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
         self.ls_setFileContents(name, content);
-        cont();
+        cont(content); // return content as stamp, should be last modification time
 //        }, 10);
     };
 
-    P.fs_getFileDirectory = function(name, create, cont) {
+    P.fs_getDirectory = function(name, cont) {
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
-        cont(self.ls_getFileDirectory(name, create));
+        var info = self.ls_getFileDirectory(name, false);
+        if (info) {
+            var files = {};
+            for (var f in info.dir) {
+                if (info.dir.hasOwnProperty(f)) {
+                    files[f] = { name:f,
+                                 path:name+f,
+                                 type: (typeof info.dir[f] == "string")
+                                       ? "regular"
+                                       : "directory"};
+                }
+            }
+            cont(files);
+        } else {
+            cont(null);
+        }
 //        }, 10);
     };
 
@@ -516,6 +532,12 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 //        setTimeout(function () { // uncomment to make it async, for testing
         self.ls_deleteFile(name);
         cont();
+//        }, 10);
+    };
+
+    P.fs_remapDir = function(dir, cont) {
+//        setTimeout(function () { // uncomment to make it async, for testing
+        cont(dir);
 //        }, 10);
     };
 
