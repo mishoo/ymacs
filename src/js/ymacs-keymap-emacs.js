@@ -219,6 +219,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "C-x C-f"                                 : "find_file",
         "C-x C-w"                                 : "write_file",
         "C-x C-s"                                 : "save_buffer",
+        "C-x s"                                   : "save_some_buffers",
 
         // others
         "C-x =": function() {

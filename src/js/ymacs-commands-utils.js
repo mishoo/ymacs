@@ -194,34 +194,40 @@ Ymacs_Buffer.newCommands({
 
     find_file: Ymacs_Interactive("FFind file: ", function(name) {
         var self = this;
-        self.ymacs.fs_getFileContents(name, true, function (code, stamp) {
-            var buffer = self.ymacs.getBuffer(name);
-
-            function find_file() {
-                buffer.setCode(code || "");
-                buffer.stamp = stamp;
-                buffer.dirty(false);
-                buffer.cmd("set_buffer_mode");
-                buffer.cmd("switch_to_buffer", name);
-            }
-
-            if (buffer) {
-                if (buffer.stamp == stamp) {
-                    buffer.cmd("switch_to_buffer", name);
-                } else {
-                    var msg = "File "+name+" changed on disk.  "+
-                              (buffer.dirty() ? "Discard your edits?"
-                                              : "Reread from disk?");
-                    buffer.cmd("minibuffer_yn", msg, function (yes) {
-                        if (yes)
-                            find_file();
-                    });
-                }
+        self.ymacs.fs_fileType(name, function (type) {
+            if (type === "directory") {
+                self.signalInfo("Can't open directory");
             } else {
-                buffer = self.ymacs.createBuffer({ name: name, stamp: stamp });
-                if (code == null)
-                    self.signalInfo("New file");
-                find_file();
+                self.ymacs.fs_getFileContents(name, true, function (code, stamp) {
+                    var buffer = self.ymacs.getBuffer(name);
+
+                    function find_file() {
+                        buffer.setCode(code || "");
+                        buffer.stamp = stamp;
+                        buffer.dirty(false);
+                        buffer.cmd("set_buffer_mode");
+                        buffer.cmd("switch_to_buffer", name);
+                    }
+
+                    if (buffer) {
+                        if (buffer.stamp == stamp) {
+                            buffer.cmd("switch_to_buffer", name);
+                        } else {
+                            var msg = "File "+name+" changed on disk.  "+
+                                       (buffer.dirty() ? "Discard your edits?"
+                                                       : "Reread from disk?");
+                            buffer.cmd("minibuffer_yn", msg, function (yes) {
+                                if (yes)
+                                    find_file();
+                            });
+                        }
+                    } else {
+                        buffer = self.ymacs.createBuffer({ name: name, stamp: stamp });
+                        if (code == null)
+                            self.signalInfo("New file");
+                        find_file();
+                    }
+                });
             }
         });
     }),
@@ -230,11 +236,11 @@ Ymacs_Buffer.newCommands({
         var self = this;
 
         function write_file() {
-            self.ymacs.fs_setFileContents(name, self.getCode(), function (stamp) {
+            self.ymacs.fs_setFileContents(name, self.getCode(), null, function (stamp) {
                 self.cmd("rename_buffer", name);
                 self.dirty(false);
-                self.signalInfo("Wrote "+name);
                 self.stamp = stamp; // refresh stamp
+                self.signalInfo("Wrote "+name);
             });
         }
 
@@ -252,14 +258,76 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
-    save_buffer: Ymacs_Interactive("", function(){
+    save_some_buffers: function () {
+        this.cmd("save_some_buffers_with_continuation", true, function () { });
+    },
+
+    save_some_buffers_with_continuation: function (ask, cont) {
+
+        var bufs = this.ymacs.buffers.slice(); // get copy of buffers
+
+        function loop(saved) {
+            if (bufs.length > 0)
+                bufs.shift().cmd("save_buffer_with_continuation", ask, loop);
+            else
+                cont();
+        }
+
+        loop(false);
+    },
+
+    save_buffer_with_continuation: function (ask, cont) {
+
         var self = this;
-        var name = self.name;
-        self.ymacs.fs_setFileContents(name, self.getCode(), function (stamp) {
+
+        function did_save(stamp) {
             self.dirty(false);
-            self.signalInfo("Wrote "+name);
             self.stamp = stamp; // refresh stamp
-        });
+            cont(true);
+        }
+
+        function do_save() {
+            self.ymacs.fs_setFileContents(self.name, self.getCode(), self.stamp, function (stamp) {
+                if (stamp != null) {
+                    did_save(stamp);
+                } else {
+                    self.cmd("minibuffer_yn", self.name + " has changed since visited or saved.  Save anyway?", function (yes) {
+                        if (!yes) {
+                            cont(false);
+                        } else {
+                            self.ymacs.fs_setFileContents(self.name, self.getCode(), null, function (stamp) {
+                                did_save(stamp);
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        if (!self.dirty() || (ask && self.name.match(/^\*.*\*$/))) {
+            cont(false);
+        } else if (!ask) {
+            do_save();
+        } else {
+            self.cmd("minibuffer_yn", "Save file " + self.name + "?", function (yes) {
+                if (!yes) {
+                    cont(false);
+                } else {
+                    do_save();
+                }
+            });
+        }
+    },
+
+    save_buffer: Ymacs_Interactive("", function () {
+        var self = this;
+        if (self.dirty())
+            self.cmd("save_buffer_with_continuation", false, function (saved) {
+                if (saved)
+                    self.signalInfo("Wrote "+self.name);
+            });
+        else
+            self.signalInfo("No changes need to be saved");
     }),
 
     delete_file: Ymacs_Interactive("fDelete file: ", function(name){

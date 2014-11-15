@@ -256,10 +256,13 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             var self = this;
             self.cmd("minibuffer_replace_input_by_current_dir", function () {
                 read_with_continuation.call(self, filename_completion, cont, function(mb, name, cont2){
-                    self.ymacs.fs_getFileContents(name, true, function (ret, stamp) {
-                        if (!ret)
+                    self.ymacs.fs_fileType(name, function (type) {
+                        if (type == null) {
                             mb.signalError("No such file: " + name);
-                        cont2(ret);
+                            cont2(false);
+                        } else {
+                            cont2(true);
+                        }
                     });
                 });
             });

@@ -489,19 +489,32 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
     /* -----[ filesystem operations ]----- */
 
+    P.fs_fileType = function(name, cont) {
+        var self = this;
+//        setTimeout(function () { // uncomment to make it async, for testing
+        var files = this.ls_getFileDirectory(name, false);
+        alert("path="+files.path+" other="+files.other);
+        cont(null);
+//        }, 10);
+    };
+
     P.fs_getFileContents = function(name, nothrow, cont) {
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
         var code = self.ls_getFileContents(name, nothrow);
-        cont(code, code); // second parameter is file stamp, which should be last modification time
+        cont(code, code); // second parameter is file stamp, on a real fs it should be last modification time
 //        }, 10);
     };
 
-    P.fs_setFileContents = function(name, content, cont) {
+    P.fs_setFileContents = function(name, content, stamp, cont) {
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
-        self.ls_setFileContents(name, content);
-        cont(content); // return content as stamp, should be last modification time
+        if (stamp && (self.ls_getFileContents(name, true) || "") != stamp) {
+            cont(null); // did not change file because stamp is wrong
+        } else {
+            self.ls_setFileContents(name, content);
+            cont(content); // return content as stamp, on a real fs it should be last modification time
+        }
 //        }, 10);
     };
 
