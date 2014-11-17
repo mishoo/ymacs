@@ -492,8 +492,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     P.fs_fileType = function(name, cont) {
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
-        var files = this.ls_getFileDirectory(name, false);
-        alert("path="+files.path+" other="+files.other);
         cont(null);
 //        }, 10);
     };
