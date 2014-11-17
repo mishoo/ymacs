@@ -500,7 +500,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         var self = this;
 //        setTimeout(function () { // uncomment to make it async, for testing
         var code = self.ls_getFileContents(name, nothrow);
-        cont(code, code); // second parameter is file stamp, on a real fs it should be last modification time
+        cont(code, null); // second parameter is file stamp, on a real fs it should be last modification time
 //        }, 10);
     };
 
@@ -511,7 +511,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             cont(null); // did not change file because stamp is wrong
         } else {
             self.ls_setFileContents(name, content);
-            cont(content); // return content as stamp, on a real fs it should be last modification time
+            cont(null); // no stamp on localStorage
         }
 //        }, 10);
     };

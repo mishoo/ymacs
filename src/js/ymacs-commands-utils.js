@@ -82,9 +82,9 @@ Ymacs_Buffer.newCommands({
             mode = this.cmd("figure_out_mode") || this.cmd("mode_from_name");
         if (mode) {
             if (Object.HOP(this.COMMANDS, mode)) {
-                this.cmd(mode);
+                this.cmd(mode, true);
             } else if (Object.HOP(this.COMMANDS, mode + "_mode")) {
-                this.cmd(mode + "_mode");
+                this.cmd(mode + "_mode", true);
             }
         }
     },
@@ -210,12 +210,13 @@ Ymacs_Buffer.newCommands({
                     }
 
                     if (buffer) {
-                        if (buffer.stamp == stamp) {
+                        if (stamp == null) {
+                            find_file();
+                        } else if (buffer.stamp == stamp) {
                             buffer.cmd("switch_to_buffer", name);
                         } else {
-                            var msg = "File "+name+" changed on disk.  "+
-                                       (buffer.dirty() ? "Discard your edits?"
-                                                       : "Reread from disk?");
+                            var msg = "File " + name + " changed on disk.  "
+                                + (buffer.dirty() ? "Discard your edits?" : "Reread from disk?");
                             buffer.cmd("minibuffer_yn", msg, function (yes) {
                                 if (yes)
                                     find_file();
