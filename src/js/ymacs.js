@@ -490,66 +490,49 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     /* -----[ filesystem operations ]----- */
 
     P.fs_fileType = function(name, cont) {
-        var self = this;
-//        setTimeout(function () { // uncomment to make it async, for testing
         cont(null);
-//        }, 10);
     };
 
     P.fs_getFileContents = function(name, nothrow, cont) {
-        var self = this;
-//        setTimeout(function () { // uncomment to make it async, for testing
-        var code = self.ls_getFileContents(name, nothrow);
+        var code = this.ls_getFileContents(name, nothrow);
         cont(code, null); // second parameter is file stamp, on a real fs it should be last modification time
-//        }, 10);
     };
 
     P.fs_setFileContents = function(name, content, stamp, cont) {
-        var self = this;
-//        setTimeout(function () { // uncomment to make it async, for testing
-        if (stamp && (self.ls_getFileContents(name, true) || "") != stamp) {
+        if (stamp && (this.ls_getFileContents(name, true) || "") != stamp) {
             cont(null); // did not change file because stamp is wrong
         } else {
-            self.ls_setFileContents(name, content);
+            this.ls_setFileContents(name, content);
             cont(null); // no stamp on localStorage
         }
-//        }, 10);
     };
 
     P.fs_getDirectory = function(name, cont) {
-        var self = this;
-//        setTimeout(function () { // uncomment to make it async, for testing
-        var info = self.ls_getFileDirectory(name, false);
+        var info = this.ls_getFileDirectory(name, false);
         if (info) {
             var files = {};
             for (var f in info.dir) {
-                if (info.dir.hasOwnProperty(f)) {
-                    files[f] = { name:f,
-                                 path:name+f,
-                                 type: (typeof info.dir[f] == "string")
-                                       ? "regular"
-                                       : "directory"};
+                if (Object.HOP(info.dir, f)) {
+                    files[f] = { name : f,
+                                 path : name + f,
+                                 type : (typeof info.dir[f] == "string"
+                                         ? "regular"
+                                         : "directory")};
                 }
             }
             cont(files);
         } else {
             cont(null);
         }
-//        }, 10);
     };
 
     P.fs_deleteFile = function(name, cont) {
-        var self = this;
-//        setTimeout(function () { // uncomment to make it async, for testing
-        self.ls_deleteFile(name);
+        this.ls_deleteFile(name);
         cont();
-//        }, 10);
     };
 
     P.fs_remapDir = function(dir, cont) {
-//        setTimeout(function () { // uncomment to make it async, for testing
         cont(dir);
-//        }, 10);
     };
 
     P.isRunningMacro = function() {
