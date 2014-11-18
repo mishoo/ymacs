@@ -45,6 +45,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
         // default options
         cf_lineNumbers: [ "lineNumbers", false ],
+        cf_frameStyle: [ "frameStyle", null ],
 
         // override in DlWidget
         _focusable : [ "focusable"  , true ]
@@ -55,6 +56,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             args.buffers = [];
         if (!args.frames)
             args.frames = [];
+        if (!args.cf_frameStyle)
+            args.cf_frameStyle = {};
     };
 
     D.CONSTRUCT = function() {
@@ -269,7 +272,20 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         frame.addEventListener("onDestroy", function(frame) {
             this.frames.remove(frame);
         }.$(this, frame));
+        frame.setStyle(this.cf_frameStyle);
         return frame;
+    };
+
+    P.setFrameStyle = function(style, reset) {
+        style = this.cf_frameStyle = reset
+            ? Object.makeCopy(style)
+            : Object.merge(this.cf_frameStyle, style);
+        [ this.minibuffer_frame ].concat(this.frames).foreach(function(frame){
+            frame.setStyle(style);
+            frame.setStyle("height", "");
+        });
+        this.minibuffer_frame.getOverlaysContainer().style.height = "";
+        this.doLayout();
     };
 
     P.keepOnlyFrame = function(frame) {
