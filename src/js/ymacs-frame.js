@@ -436,10 +436,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         function findLine(r1, r2) {
             if (r1 == r2)
                 return r1;
-            var row = Math.floor((r1 + r2) / 2),
-            div = self.getLineDivElement(row),
-            y1  = div.offsetTop,
-            y2  = y1 + div.offsetHeight - 1;
+            var row = Math.floor((r1 + r2) / 2);
+            if (row == 0) return 0;
+            var div = self.getLineDivElement(row);
+            var y1  = div.offsetTop;
+            var y2  = y1 + div.offsetHeight - 1;
             if (y2 < y)
                 return findLine(row + 1, r2);
             if (y < y1)
@@ -450,6 +451,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             if (c1 == c2)
                 return c1;
             var col = Math.floor((c1 + c2) / 2);
+            if (col == 0) return 0;
             var p1 = self.coordinates(row, col),
             p2 = self.coordinates(row, col + 1);
             if (p2.x < x)
