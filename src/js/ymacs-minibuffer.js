@@ -478,8 +478,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             "C-g"                                : "minibuffer_keyboard_quit",
             "TAB"                                : handle_tab,
             "S-TAB"                              : handle_s_tab,
-            "ARROW_DOWN && ARROW_RIGHT && C-f"   : handle_arrow_down,
-            "ARROW_UP && ARROW_LEFT && C-b"      : handle_arrow_up,
+            "ARROW_DOWN && ARROW_RIGHT && C-n && C-f": handle_arrow_down,
+            "ARROW_UP && ARROW_LEFT && C-p && C-b"   : handle_arrow_up,
             "ENTER"                              : handle_enter,
             "ESCAPE"                             : handle_escape
         };
