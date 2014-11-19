@@ -53,16 +53,31 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     var $popupActive = false;
     var $menu = null, $item = null;
     function popupCompletionMenu(frame, list) {
+        var self = this;        // minibuffer
         if ($menu)
             $menu.destroy();
         $menu = new DlVMenu({});
-        list.foreach(function(item){
+        list.foreach(function(item, index){
             var data = item;
             if (typeof item != "string") {
                 data = item.completion;
                 item = item.label;
             }
-            new DlMenuItem({ parent: $menu, label: item.htmlEscape(), data: data });
+            new DlMenuItem({ parent: $menu, label: item.htmlEscape(), data: data, name: index })
+                .addEventListener("onMouseEnter", function(){
+                    if ($item != index) {
+                        if ($item != null) {
+                            $menu.children($item).callHooks("onMouseLeave");
+                        }
+                        $item = index;
+                    }
+                });
+        });
+        $menu.addEventListener({
+            onSelect: function(index, item){
+                $item = index;
+                handle_enter.call(self);
+            }
         });
         var popup = Ymacs_Completion_Popup.get();
         popup.popup({
@@ -87,7 +102,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         });
         $popupActive = true;
 
-        handle_arrow_down.call(this); // autoselect the first one anyway
+        handle_arrow_down.call(self); // autoselect the first one anyway
     };
 
     function read_with_continuation(completions, cont, validate) {
