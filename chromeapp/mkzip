@@ -1,0 +1,19 @@
+#! /bin/sh
+
+devdir=`git rev-parse --show-toplevel`
+gitdir="${devdir}/.git"
+outfile="${HOME}/ymacs.zip"
+
+tmpdir=/tmp/mkzip.$$
+trap 'rm -rf ${tmpdir}' 0 1 2 3 15
+
+rm -f ${outfile}
+
+mkdir -p ${tmpdir}/ymacsapp
+
+( cd ${devdir} && tar -cf - `git --git-dir=${gitdir} ls-files` ) | \
+    tar -C ${tmpdir}/ymacsapp -xf -
+
+(cd ${tmpdir} && zip --quiet -r ${outfile} ymacsapp)
+ls -l ${outfile}
+

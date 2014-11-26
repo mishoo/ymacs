@@ -1,0 +1,38 @@
+The files in this directory allow ymacs to be packaged into a Chrome
+app, including support for the Chrome filesystem api.  The filesystem
+api is kind of clunky, but it is managable. 
+
+We also add experimental support for some additional commands.  We
+hope that as this generic code settles, it can migrate to the ymacs
+core.
+
+The commands we add or modify are:
+
+C-x C-f find_file
+C-x C-w write_file
+C-x C-s save_file
+C-x s save_some_buffers
+C-x C-d list_directory (dired-like)
+M-% query_replace
+C-x C-c safe_exit (offer to save modified buffers, then exit)
+C-h c help_c (display function assigned to key)
+C-h m help_m (display commands defined in current keymaps)
+
+[search for defineKeys to make sure this list is complete]
+
+You can download the packaged version from
+
+https://chrome.google.com/webstore/detail/emacs/pledjnbikkbieemanocnjeoacdcphlgf
+
+Or, you can run it locally as an "unpacked extension".  To do this,
+start chrome, open the menu, click "More tools", then "Extensions" (or
+open the url chrome://extensions ).  Then, click the button "Load
+unpacked extension..." and select your ymacs development directory
+(the parent of the directory where this README file appears).
+
+We are grateful to Mihai Bazon for ymacs, and hope that you like our
+additions.  We're working at https://github.com/pacew/ymacs and will
+be happy to consider pull requests.
+
+Pace Willisson <pace@alum.mit.edu>
+Eric Willisson <ericwillisson@gmail.com>

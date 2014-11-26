@@ -1,0 +1,24 @@
+{
+    "manifest_version": 2,
+
+    "name": "Emacs",
+    "short_name": "Emacs",
+    "version": "0.4",
+
+    "description": "Emacs editing from within Chrome, especially Chromebooks.  Works offline.  Based on ymacs.",
+
+    "app": {
+	"background": {
+	    "scripts": ["chromeapp/background.js"]
+	}
+    },
+    "icons": {
+	"128": "chromeapp/icon128.png",
+        "48": "chromeapp/icon48.png",
+	"16": "chromeapp/icon16.png"
+    },
+    "permissions": [
+	{"fileSystem": ["write", "directory"]}
+    ],
+    "offline_enabled": true
+}
