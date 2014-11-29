@@ -11,7 +11,6 @@
 */
 
 var desktop = new DlDesktop({});
-desktop.fullScreen();
 
 function print(obj) {
         var a = [], i;
@@ -38,8 +37,6 @@ var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sagi
 \n\
 Nullam vitae tellus enim, id suscipit nisl. Mauris elementum scelerisque lacus ac pellentesque. Donec rutrum tellus vel leo lacinia semper. Nulla porta, elit non vulputate pulvinar, eros lacus euismod libero, ut laoreet erat lacus a est. Nam quis mi nec nisl aliquam tempor eget vel massa. Sed justo ante, ornare ut tristique a, laoreet ac justo. Proin gravida cursus mauris a porttitor. Aliquam elit justo, euismod suscipit pharetra ut, placerat et dolor. Donec pulvinar elit nec ligula gravida scelerisque. Aenean rutrum tempus dui at volutpat. Maecenas a justo quis libero vehicula fermentum sit amet in augue. In ante nulla, fermentum at rutrum id, tincidunt ut massa. Vivamus quis justo ut quam tempor ultricies ultricies vitae tellus. Pellentesque lorem elit, convallis ut congue at, porta non nisi. Curabitur lectus tortor, elementum venenatis faucibus ut, vulputate vehicula dui. Fusce in dui id est lobortis venenatis eu ut dolor. Quisque vel diam diam. Nulla porttitor adipiscing nisi eget cursus. .\n\n".x(10);
 
-try {
-        var dlg = new DlDialog({ title: "Ymacs", resizable: true });
         var javascript = new Ymacs_Buffer({ name: "test.js" });
 
         javascript.setCode("\
@@ -135,10 +132,13 @@ to the current one.\n\
         var keys = new Ymacs_Buffer({ name: "keybindings.txt" });
         keys.setCode(info);
 
-        var layout = new DlLayout({ parent: dlg });
+        var layout = new DlLayout({ parent: desktop });
 
         var empty = new Ymacs_Buffer({ name: "empty" });
-        var ymacs = window.ymacs = new Ymacs({ buffers: [ javascript, xml, lisp, markdown, txt, keys ] });
+        var ymacs = window.ymacs = new Ymacs({
+                buffers: [ javascript, xml, lisp, markdown, txt, keys ],
+                className: "Ymacs-blinking-caret"
+        });
         ymacs.setColorTheme([ "dark", "y" ]);
 
         try {
@@ -252,6 +252,10 @@ to the current one.\n\
                 }
         });
 
+        function setFrameStyle(style) {
+                ymacs.setFrameStyle(style);
+        }
+
         /* -----[ font ]----- */
 
         var item = new DlMenuItem({ parent: menu, label: "Font family".makeLabel() });
@@ -260,7 +264,7 @@ to the current one.\n\
 
         item = new DlMenuItem({ parent: submenu, label: "Default from ymacs.css" });
         item.addEventListener("onSelect", function(){
-                ymacs.getActiveFrame().setStyle({ fontFamily: "" });
+                setFrameStyle({ fontFamily: "" });
         });
 
         submenu.addSeparator();
@@ -278,7 +282,7 @@ to the current one.\n\
         ].foreach(function(font){
                 item = new DlMenuItem({ parent: submenu, label: "<span style='font-family:" + font + "'>" + font + "</span>" });
                 item.addEventListener("onSelect", function(){
-                        ymacs.getActiveFrame().setStyle({ fontFamily: font });
+                        setFrameStyle({ fontFamily: font });
                 });
         });
 
@@ -292,7 +296,7 @@ to the current one.\n\
 
         item = new DlMenuItem({ parent: submenu, label: "Default from ymacs.css" });
         item.addEventListener("onSelect", function(){
-                ymacs.getActiveFrame().setStyle({ fontSize: "" });
+                setFrameStyle({ fontSize: "" });
         });
 
         submenu.addSeparator();
@@ -310,25 +314,15 @@ to the current one.\n\
         ].foreach(function(font){
                 item = new DlMenuItem({ parent: submenu, label: "<span style='font-size:" + font + "'>" + font + "</span>" });
                 item.addEventListener("onSelect", function(){
-                        ymacs.getActiveFrame().setStyle({ fontSize: font });
+                        setFrameStyle({ fontSize: font });
                 });
         });
 
         layout.packWidget(menu, { pos: "top" });
         layout.packWidget(ymacs, { pos: "bottom", fill: "*" });
 
-        dlg._focusedWidget = ymacs;
-        dlg.setSize({ x: 800, y: 600 });
-
-        // show two frames initially
-        // ymacs.getActiveFrame().hsplit();
-
-        dlg.show(true);
-        dlg.maximize(true);
-
-} catch(ex) {
-        console.log(ex);
-}
+        desktop.fullScreen();
+        desktop.callHooks("onResize");
 
 DynarchDomUtils.trash(document.getElementById("x-loading"));
 
