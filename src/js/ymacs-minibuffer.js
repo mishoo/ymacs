@@ -197,7 +197,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_read_yn: function(cont) {
-            read_with_continuation.call(this, null, cont, function(mb, text, cont2){
+            read_with_continuation.call(this, [ "yes", "no" ], cont, function(mb, text, cont2){
                 if (text == "yes" || text == "no")
                     cont2(true);
                 else
