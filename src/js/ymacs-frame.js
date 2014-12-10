@@ -294,6 +294,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
     P.toggleLineNumbers = function() {
         this.condClass(this.__lineNumbers =! this.__lineNumbers, "Ymacs-line-numbers");
+        if (this.buffer.transientMarker)
+            this.buffer.ensureTransientMark();
     };
 
     function insertInText(div, col, el) {
