@@ -375,6 +375,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._redrawCaret = function(force) {
+        if (this.isMinibuffer) force = true;
         var isActive = this.ymacs.getActiveFrame() === this;
         if (!force && !isActive)
             return;

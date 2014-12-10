@@ -94,6 +94,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             widget: frame,
             onHide: function() {
                 $popupActive = false;
+                self.popKeymap(KEYMAP_POPUP_ACTIVE);
                 // $menu.destroy();
                 $item = null;
                 $menu = null;
@@ -101,6 +102,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             isContext: true
         });
         $popupActive = true;
+        self.pushKeymap(KEYMAP_POPUP_ACTIVE);
 
         handle_arrow_down.call(self); // autoselect the first one anyway
     };
@@ -464,32 +466,45 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         handle_arrow_up.call(this);
     };
 
-    function handle_escape() {
-        if ($popupActive) {
-            DlPopup.clearAllPopups();
-        } else {
-            this.cmd("minibuffer_keyboard_quit");
-        }
+    function handle_home() {
+        this.cmd("goto_char", this.getq("minibuffer_end_marker"));
+    };
+
+    function handle_home_mark() {
+        this.ensureTransientMark();
+        this.cmd("goto_char", this.getq("minibuffer_end_marker"));
+        this.ensureTransientMark();
+    };
+
+    var DEFAULT_KEYS = {
+        "TAB"                                : handle_tab,
+        "ENTER"                              : handle_enter,
+        "HOME && C-a"                        : handle_home,
+        "S-HOME && S-C-a"                    : Ymacs_Interactive("^", handle_home_mark)
     };
 
     DEFINE_SINGLETON("Ymacs_Keymap_Minibuffer", Ymacs_Keymap, function(D, P){
+        D.KEYS = Object.merge({
+            "C-g && ESCAPE" : "minibuffer_keyboard_quit"
+        }, DEFAULT_KEYS);
+    });
 
-        D.KEYS = {
-            "C-g"                                : "minibuffer_keyboard_quit",
-            "TAB"                                : handle_tab,
-            "S-TAB"                              : handle_s_tab,
-            "ARROW_DOWN && ARROW_RIGHT && C-n && C-f": handle_arrow_down,
-            "ARROW_UP && ARROW_LEFT && C-p && C-b"   : handle_arrow_up,
-            "ENTER"                              : handle_enter,
-            "ESCAPE"                             : handle_escape
-        };
-
+    var KEYMAP_POPUP_ACTIVE = DEFINE_CLASS(null, Ymacs_Keymap, function(D, P){
+        D.KEYS = Object.merge({
+            "S-TAB"                                   : handle_s_tab,
+            "ARROW_DOWN && ARROW_RIGHT && C-n && C-f" : handle_arrow_down,
+            "ARROW_UP && ARROW_LEFT && C-p && C-b"    : handle_arrow_up,
+            "ESCAPE"                                  : function() {
+                DlPopup.clearAllPopups();
+            }
+        }, DEFAULT_KEYS);
         P.defaultHandler = [ function() {
             DlPopup.clearAllPopups();
             return false; // say it's not handled though
         } ];
-
     });
+
+    KEYMAP_POPUP_ACTIVE = new KEYMAP_POPUP_ACTIVE();
 
 })();
 
