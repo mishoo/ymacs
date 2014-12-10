@@ -87,3 +87,5 @@
 
 .Ymacs-splitbar-horiz { border-bottom: 1px solid #000; }
 .Ymacs-splitbar-vert { border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000; }
+
+.Ymacs_Frame .minibuffer-prompt { font-weight: bold }

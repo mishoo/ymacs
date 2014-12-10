@@ -182,6 +182,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                     mb.cmd("insert", prompt);
                 });
                 mb.getq("minibuffer_end_marker").setPosition(mb.point());
+                mb._textProperties.addLineProps(0, 0, mb.point(), "css", "minibuffer-prompt");
                 f._redrawCaret(true);
                 if (!nofocus)
                     f.focus();
