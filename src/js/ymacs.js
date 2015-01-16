@@ -512,7 +512,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
     P.fs_getFileContents = function(name, nothrow, cont) {
         var code = this.ls_getFileContents(name, nothrow);
-        cont(code, null); // second parameter is file stamp, on a real fs it should be last modification time
+        cont(code, code); // second parameter is file stamp, on a real fs it should be last modification time
     };
 
     P.fs_setFileContents = function(name, content, stamp, cont) {
@@ -520,7 +520,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             cont(null); // did not change file because stamp is wrong
         } else {
             this.ls_setFileContents(name, content);
-            cont(null); // no stamp on localStorage
+            cont(content);
         }
     };
 
