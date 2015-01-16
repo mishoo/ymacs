@@ -919,9 +919,13 @@ Ymacs_Buffer.newCommands({
         this.whenYmacs("switchToPreviousBuffer", this.sameCommandCount() + 1);
     }),
 
-    switch_to_buffer: Ymacs_Interactive("BSwitch to buffer: ", function(name) {
+    switch_to_buffer: Ymacs_Interactive("BSwitch to buffer: ", function(buffer) {
         this.whenYmacs(function(ymacs){
-            ymacs.switchToBuffer(name);
+            if (!/\S/.test(buffer)) {
+                if (ymacs.buffers.length < 2) return;
+                buffer = ymacs.buffers[1];
+            }
+            ymacs.switchToBuffer(buffer);
         });
     }),
 

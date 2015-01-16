@@ -163,7 +163,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         completions = completions.map(function(name){
                             return {label: name, completion: dir+name};
                         });
-                        popupCompletionMenu.call(self, self.getMinibufferFrame(), completions);
+                        popupCompletionMenu.call(mb, self.getMinibufferFrame(), completions);
                         cont(null);
                     }
                 }
@@ -244,7 +244,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 var bufferNames = ymacs.buffers.map("name");
                 bufferNames.push(bufferNames.shift());
                 read_with_continuation.call(this, bufferNames, cont);
-                handle_tab.call(this);
+                //handle_tab.call(this);
             });
         },
 
@@ -355,7 +355,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                             mb.signalError("Sole completion");
                         }
                         else {
-                            popupCompletionMenu.call(self, self.getMinibufferFrame(), a);
+                            popupCompletionMenu.call(mb, self.getMinibufferFrame(), a);
                         }
                     }
                 }
