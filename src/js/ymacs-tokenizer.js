@@ -188,17 +188,19 @@ DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
     };
     P.next = function() {
         var ch = this.peek();
-        ++this.pos;
-        ++this.col;
-        if (this.col > this.buffer.code[this.line].length) {
-            this.col = 0;
-            ++this.line;
+        if (ch) {
+            ++this.pos;
+            ++this.col;
+            if (this.col > this.buffer.code[this.line].length) {
+                this.col = 0;
+                ++this.line;
+            }
         }
         return ch;
     };
     P.read_while = function(pred) {
-        var ret = "";
-        while (pred(this.peek()))
+        var ret = "", ch;
+        while ((ch = this.peek()) && pred(ch))
             ret += this.next();
         return ret;
     };
