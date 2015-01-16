@@ -241,7 +241,7 @@
                 }
                 tok.end = input.pos;
                 if (caret != null) {
-                    if (tok.start <= caret && tok.end >= caret) {
+                    if (tok.type != "caret" && tok.start <= caret && tok.end >= caret) {
                         if (!cont_exp) cont_exp = tok;
                     }
                 }
@@ -389,11 +389,11 @@ defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readta
 when cond unless etypecase typecase ctypecase \
 lambda λ let load-time-value quote macrolet \
 progn begin prog1 prog2 progv go flet the \
-if throw eval-when multiple-value-prog1 unwind-protect let\\* \
+if throw eval-when multiple-value-prog1 multiple-value-bind unwind-protect let\\* \
 ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind case \
 labels function symbol-macrolet block tagbody catch locally \
 inc! dec! cons c[ad]{1,4}r list and or not null null\\? \
-return return-from setq set! set-car! set-cdr! setf multiple-value-call", "i");
+return return-from setq set! set-car! set-cdr! setf multiple-value-call values", "i");
 
     var ERROR_FORMS = "error warn".qw().toHash();
 
@@ -449,7 +449,8 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call", "i");
         "return-from"         : "1*",
         "block"               : "1*",
         "dotimes"             : "1*",
-        "dolist"              : "1*"
+        "dolist"              : "1*",
+        "multiple-value-bind" : "2*"
     };
 
     var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();
@@ -755,6 +756,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
         "ENTER && C-j && C-m"  : "newline_and_indent",
         "("                    : [ "lisp_open_paren", "(" ],
         ")"                    : [ "lisp_close_paren", ")" ],
+        "["                    : [ "lisp_open_paren", "[" ],
+        "]"                    : [ "lisp_close_paren", "]" ],
+        "{"                    : [ "lisp_open_paren", "{" ],
+        "}"                    : [ "lisp_close_paren", "}" ],
         '"'                    : [ "lisp_handle_string_quote" ],
         "C-c ] && C-c C-]"     : "lisp_close_all_parens"
     };
