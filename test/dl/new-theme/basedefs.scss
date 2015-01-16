@@ -20,6 +20,7 @@ $errorFg: #fff;
 $mainBgL1: lighten($mainBg, 5%);
 $mainBgL2: lighten($mainBg, 10%);
 $mainBgL3: lighten($mainBg, 20%);
+$mainBgL4: lighten($mainBg, 30%);
 $mainBgD1: darken($mainBg, 5%);
 $mainBgD2: darken($mainBg, 15%);
 $mainBgD3: darken($mainBg, 30%);
@@ -36,6 +37,8 @@ $dialogBg: $mainBgL1;
 $linkHoverFg: darken($selectionBg, 20%);
 $importantFg: #dd2200;
 $btnOnBg: #fcb587;
+$tooltipBg: #fffee0;
+$tooltipFg: #333210;
 // END: main colors
 
 // BEGIN: defs

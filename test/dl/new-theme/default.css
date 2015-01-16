@@ -50,9 +50,10 @@ form {
 
 .DYNARCH-FAKE-FOCUS {
   z-index: -10000;
-  position: absolute;
-  left: -2000px;
-  top: 0; }
+  position: fixed;
+  left: -100px;
+  top: 0;
+  opacity: 0; }
 
 .CURSOR-DRAGGING {
   cursor: move !important; }
@@ -89,13 +90,13 @@ form {
 
 .DlWidget {
   cursor: default;
-  color: black;
+  color: #000;
   zoom: 1;
   /* force hasLayout in IE */ }
 
 .DlWidget-3D {
   background-color: #c8c8d8;
-  color: black; }
+  color: #000; }
 
 /* .DlWidget-disabled, .DlWidget-disabled * { color: #768 !important; } */
 /* .DlWidget-dragging, .DlWidget-dragging * { color: #768 !important; } */
@@ -184,11 +185,11 @@ div.DlButton-Label {
 /* Checkbox */
 .DlWidget-disabled.DlCheckbox-0 {
   color: #88888f;
-  background-image: url("img/new-checkradio/check-normal-insensitive.png"); }
+  background-image: url("DLimg/new-checkradio/check-normal-insensitive.png"); }
 
 .DlWidget-disabled.DlCheckbox-1 {
   color: #88888f;
-  background-image: url("img/new-checkradio/check-mark-insensitive.png"); }
+  background-image: url("DLimg/new-checkradio/check-mark-insensitive.png"); }
 
 .DlCheckbox {
   padding: 2px 5px 2px 20px;
@@ -202,23 +203,23 @@ div.DlButton-Label {
   background-repeat: no-repeat; }
 
 .DlCheckbox-0 {
-  background-image: url("img/new-checkradio/check-normal.png"); }
+  background-image: url("DLimg/new-checkradio/check-normal.png"); }
 
 .DlCheckbox-1 {
-  background-image: url("img/new-checkradio/check-mark.png"); }
+  background-image: url("DLimg/new-checkradio/check-mark.png"); }
 
 .DlCheckbox-hover {
   background-color: #e6e6ed; }
 
 .DlCheckbox-hover.DlCheckbox-0 {
-  background-image: url("img/new-checkradio/check-normal-prelight.png"); }
+  background-image: url("DLimg/new-checkradio/check-normal-prelight.png"); }
 
 .DlCheckbox-hover.DlCheckbox-1 {
-  background-image: url("img/new-checkradio/check-mark-prelight.png"); }
+  background-image: url("DLimg/new-checkradio/check-mark-prelight.png"); }
 
 .DlCheckbox-active {
   background-color: #80b9ff;
-  background-image: url("img/new-checkradio/check-mark-active.png") !important; }
+  background-image: url("DLimg/new-checkradio/check-mark-active.png") !important; }
 
 .DlCheckbox-empty {
   height: 15px;
@@ -234,11 +235,11 @@ div.DlButton-Label {
 /* RadioButton */
 .DlWidget-disabled.DlRadioButton-0 {
   color: #88888f;
-  background-image: url("img/new-checkradio/opt-normal-insensitive.png"); }
+  background-image: url("DLimg/new-checkradio/opt-normal-insensitive.png"); }
 
 .DlWidget-disabled.DlRadioButton-1 {
   color: #88888f;
-  background-image: url("img/new-checkradio/opt-mark-insensitive.png"); }
+  background-image: url("DLimg/new-checkradio/opt-mark-insensitive.png"); }
 
 .DlRadioButton {
   padding: 2px 5px 2px 20px;
@@ -252,23 +253,23 @@ div.DlButton-Label {
   background-repeat: no-repeat; }
 
 .DlRadioButton-0 {
-  background-image: url("img/new-checkradio/opt-normal.png"); }
+  background-image: url("DLimg/new-checkradio/opt-normal.png"); }
 
 .DlRadioButton-1 {
-  background-image: url("img/new-checkradio/opt-mark.png"); }
+  background-image: url("DLimg/new-checkradio/opt-mark.png"); }
 
 .DlRadioButton-hover {
   background-color: #e6e6ed; }
 
 .DlRadioButton-hover.DlRadioButton-0 {
-  background-image: url("img/new-checkradio/opt-normal-prelight.png"); }
+  background-image: url("DLimg/new-checkradio/opt-normal-prelight.png"); }
 
 .DlRadioButton-hover.DlRadioButton-1 {
-  background-image: url("img/new-checkradio/opt-mark-prelight.png"); }
+  background-image: url("DLimg/new-checkradio/opt-mark-prelight.png"); }
 
 .DlRadioButton-active {
   background-color: #80b9ff;
-  background-image: url("img/new-checkradio/opt-mark-active.png") !important; }
+  background-image: url("DLimg/new-checkradio/opt-mark-active.png") !important; }
 
 .DlRadioButton-empty {
   height: 15px;
@@ -306,7 +307,7 @@ div.DlButton-Label {
     outline: none; }
   .DlEntry input::-moz-selection, .DlEntry textarea::-moz-selection {
     background-color: #80b9ff !important;
-    color: black !important; }
+    color: #000 !important; }
 
 .DlEntry-Focus {
   border-color: #6e6e99 #58587c #58587c #6e6e99;
@@ -320,12 +321,12 @@ div.DlButton-Label {
   box-shadow: 0px 0px 4px #e8a850; }
   .DlEntry-Focus .DlEntry-cell, .DlEntry-Focus input, .DlEntry-Focus textarea {
     background-color: #fff8dd;
-    -moz-box-shadow: inset 0 0 2px #22cc22;
-    -webkit-box-shadow: inset 0 0 2px #22cc22;
-    -o-box-shadow: inset 0 0 2px #22cc22;
-    -khtml-box-shadow: inset 0 0 2px #22cc22;
-    -ms-box-shadow: inset 0 0 2px #22cc22;
-    box-shadow: inset 0 0 2px #22cc22; }
+    -moz-box-shadow: inset 0 0 2px #2c2;
+    -webkit-box-shadow: inset 0 0 2px #2c2;
+    -o-box-shadow: inset 0 0 2px #2c2;
+    -khtml-box-shadow: inset 0 0 2px #2c2;
+    -ms-box-shadow: inset 0 0 2px #2c2;
+    box-shadow: inset 0 0 2px #2c2; }
 
 .DlEntry-ValidationError {
   border-color: #ff2600; }
@@ -373,7 +374,7 @@ div.DlButton-Label {
   right: 1px;
   top: 50%;
   margin-top: -8px;
-  background-image: url("img/entry-warning.png");
+  background-image: url("DLimg/entry-warning.png");
   background-repeat: no-repeat;
   background-position: 50% 50%;
   opacity: 0.6;
@@ -387,7 +388,7 @@ div.DlEntry-invalidIcon:hover {
 
 /* CompletionEntry */
 .DlCompletionEntry-busy input {
-  background-image: url("img/busy1.gif");
+  background-image: url("DLimg/busy1.gif");
   background-position: 100% 50%;
   background-repeat: no-repeat; }
 
@@ -397,7 +398,7 @@ div.DlEntry-invalidIcon:hover {
 
 /* ComboBox */
 .DlComboBox-dropDownBtn {
-  background: #c8c8d8 url("img/arrows/dropdown.png") no-repeat 50% 50%;
+  background: #c8c8d8 url("DLimg/arrows/dropdown.png") no-repeat 50% 50%;
   width: 11px;
   height: 20px;
   border-left: 1px solid #9b9bb8; }
@@ -430,11 +431,11 @@ div.DlEntry-invalidIcon:hover {
 
 .DlSpinner .DlSpinner-Button-Up .DlButton-inner {
   height: 2px;
-  background: url("img/spinner-up.gif") no-repeat 50% 50%; }
+  background: url("DLimg/spinner-up.gif") no-repeat 50% 50%; }
 
 .DlSpinner .DlSpinner-Button-Down .DlButton-inner {
   height: 2px;
-  background: url("img/spinner-down.gif") no-repeat 50% 50%; }
+  background: url("DLimg/spinner-down.gif") no-repeat 50% 50%; }
 
 /* ProgressBar */
 .DlProgressBar {
@@ -465,7 +466,7 @@ div.DlEntry-invalidIcon:hover {
   border-left: none;
   width: 7px;
   overflow: visible;
-  background-image: url("img/menu/darrow-small.gif");
+  background-image: url("DLimg/menu/darrow-small.gif");
   background-repeat: no-repeat;
   background-position: 1px 50%; }
 
@@ -524,24 +525,24 @@ table.DlCalendar {
     border-left: 1px solid #9b9bb8;
     font-weight: bold; }
   .DlCalendar tr.DlCalendar-Navigation td.NextMonth {
-    background-image: url("img/arrows/nav-right.gif");
+    background-image: url("DLimg/arrows/nav-right.gif");
     background-repeat: no-repeat;
     background-position: 50% 50%; }
   .DlCalendar tr.DlCalendar-Navigation td.PrevMonth {
-    background-image: url("img/arrows/nav-left.gif");
+    background-image: url("DLimg/arrows/nav-left.gif");
     background-repeat: no-repeat;
     background-position: 50% 50%; }
   .DlCalendar tr.DlCalendar-Navigation td.NextYear {
-    background-image: url("img/arrows/nav-right-x2.gif");
+    background-image: url("DLimg/arrows/nav-right-x2.gif");
     background-repeat: no-repeat;
     background-position: 50% 50%; }
   .DlCalendar tr.DlCalendar-Navigation td.PrevYear {
-    background-image: url("img/arrows/nav-left-x2.gif");
+    background-image: url("DLimg/arrows/nav-left-x2.gif");
     background-repeat: no-repeat;
     background-position: 50% 50%; }
   .DlCalendar tr.DlCalendar-Navigation td.hover {
     background-color: #e6e6ed;
-    color: black; }
+    color: #000; }
   .DlCalendar tr.DlCalendar-Navigation td.rolling {
     background-color: #80b9ff; }
   .DlCalendar tr.DlCalendar-DayNames {
@@ -556,9 +557,9 @@ table.DlCalendar {
       border-right-color: #9b9bb8; }
     .DlCalendar tr.DlCalendar-DayNames td.hover {
       background-color: #e6e6ed;
-      color: black; }
+      color: #000; }
     .DlCalendar tr.DlCalendar-DayNames td.WeekEnd {
-      color: #cc6622; }
+      color: #c62; }
   .DlCalendar tr.Dates td {
     text-align: right;
     padding: 2px 3px 2px 2px; }
@@ -568,7 +569,7 @@ table.DlCalendar {
     color: blue; }
   .DlCalendar tr.Dates td.DlCalendar-infoDay {
     font-weight: bold;
-    background: url("img/tmpcal.gif") no-repeat 100% 100%; }
+    background: url("DLimg/tmpcal.gif") no-repeat 100% 100%; }
   .DlCalendar tr.Dates td.Selected {
     border: 1px solid #9b9bb8;
     background-color: #80b9ff;
@@ -587,7 +588,7 @@ table.DlCalendar {
     padding-top: 1px;
     padding-bottom: 1px; }
   .DlCalendar td.WeekEnd {
-    color: #cc6622; }
+    color: #c62; }
   .DlCalendar td.OtherMonth.WeekEnd {
     color: #e79e6d; }
 
@@ -599,16 +600,16 @@ table.DlCalendar {
 .DlResizeBar-Horizontal {
   height: 5px;
   cursor: s-resize;
-  background: url("img/resizebar-horiz2.png") no-repeat 50% 50%; }
+  background: url("DLimg/resizebar-horiz2.png") no-repeat 50% 50%; }
 
 .DlResizeBar-Vertical {
   width: 5px;
   cursor: e-resize;
-  background: url("img/resizebar-vert2.png") no-repeat 50% 50%; }
+  background: url("DLimg/resizebar-vert2.png") no-repeat 50% 50%; }
 
 .DlResizeBar-DraggingLine {
-  position: absolute;
-  /*  background-image: url("img/resizebg.gif"); */
+  position: fixed;
+  /*  background-image: url("DLimg/resizebg.gif"); */
   background-color: #e8a850;
   opacity: 0.6;
   filter: alpha(opacity=60);
@@ -639,6 +640,10 @@ table.DlCalendar {
   top: -30000px;
   visibility: hidden; }
 
+/* XXX: WHAT's this?
+// .DlContainer-pad-sep-left { padding: 5px; border-left: 1px solid #a9d; }
+// .DlContainer-pad-sep-right { padding: 5px; border-right: 1px solid #a9d; }
+*/
 .DlLayout {
   position: relative; }
 
@@ -700,12 +705,12 @@ table.DlCalendar {
   z-index: 100;
   left: -30000px;
   top: -30000px;
-  -moz-box-shadow: 1px 1px 4px black;
-  -webkit-box-shadow: 1px 1px 4px black;
-  -o-box-shadow: 1px 1px 4px black;
-  -khtml-box-shadow: 1px 1px 4px black;
-  -ms-box-shadow: 1px 1px 4px black;
-  box-shadow: 1px 1px 4px black; }
+  -moz-box-shadow: 1px 1px 4px #000;
+  -webkit-box-shadow: 1px 1px 4px #000;
+  -o-box-shadow: 1px 1px 4px #000;
+  -khtml-box-shadow: 1px 1px 4px #000;
+  -ms-box-shadow: 1px 1px 4px #000;
+  box-shadow: 1px 1px 4px #000; }
 
 .DlPopup-scrollArea {
   overflow: hidden;
@@ -726,24 +731,24 @@ table.DlCalendar {
   border-top: 1px solid #b9b9cd; }
 
 .DlPopup-scrollUp {
-  background-image: url("img/arrows/scroll-up.gif"); }
+  background-image: url("DLimg/arrows/scroll-up.gif"); }
 
 .DlPopup-scrollUp-hover {
-  background-image: url("img/arrows/scroll-up-hover.gif");
+  background-image: url("DLimg/arrows/scroll-up-hover.gif");
   background-color: #e6e6ed; }
 
 .DlPopup-scrollUp-disabled {
-  background-image: url("img/arrows/scroll-up-disabled.gif"); }
+  background-image: url("DLimg/arrows/scroll-up-disabled.gif"); }
 
 .DlPopup-scrollDown {
-  background-image: url("img/arrows/scroll-down.gif"); }
+  background-image: url("DLimg/arrows/scroll-down.gif"); }
 
 .DlPopup-scrollDown-hover {
-  background-image: url("img/arrows/scroll-down-hover.gif");
+  background-image: url("DLimg/arrows/scroll-down-hover.gif");
   background-color: #e6e6ed; }
 
 .DlPopup-scrollDown-disabled {
-  background-image: url("img/arrows/scroll-down-disabled.gif"); }
+  background-image: url("DLimg/arrows/scroll-down-disabled.gif"); }
 
 .DlCompletionPopup {
   background-color: white; }
@@ -801,12 +806,12 @@ table.DlCalendar {
   margin-left: 3px;
   margin-right: 2px;
   border-left: 1px solid #ccc;
-  background-color: #fff; }
+  background-color: white; }
 
 div.DlVMenu-separator {
   margin: 4px 0 3px 0;
-  background-color: #ccc;
-  border-bottom: 1px solid #fff;
+  background-color: #c8c8d8;
+  border-bottom: 1px solid white;
   height: 1px;
   overflow: hidden;
   font-size: 1px;
@@ -820,15 +825,15 @@ div.DlVMenu-separator {
 
 .DlMenuItem-popped {
   background-color: #80b9ff;
-  color: black; }
+  color: #000; }
 
 .DlMenuItem-hover {
   background-color: #80b9ff;
-  color: black; }
+  color: #000; }
 
 .DlMenuItem-active {
-  background-color: #222222;
-  color: white; }
+  background-color: #222;
+  color: #fff; }
 
 .DlMenuItem .DlMenuItem-withIcon {
   padding-left: 26px;
@@ -838,12 +843,12 @@ div.DlVMenu-separator {
 .DlVMenu .DlMenuItem .DlMenuItem-withPopup {
   margin-right: 3px;
   padding-right: 12px;
-  background-image: url("img/menu/rarrow.gif");
+  background-image: url("DLimg/menu/rarrow.gif");
   background-repeat: no-repeat !important;
   background-position: 100% 50%; }
 
 .DlVMenu .DlMenuItem-hover .DlMenuItem-withPopup {
-  background-image: url("img/menu/rarrow-hover.gif") !important; }
+  background-image: url("DLimg/menu/rarrow-hover.gif") !important; }
 
 .DlWidget-disabled .DlMenuItem, .DlMenuItem-disabled {
   opacity: 0.6;
@@ -854,14 +859,14 @@ div.DlVMenu-separator {
 .DlVMenu .DlRadioButton-hover,
 .DlHMenu .DlRadioButton-hover {
   background-color: #80b9ff;
-  color: black; }
+  color: #000; }
 
 .DlVMenu .DlCheckbox-active,
 .DlHMenu .DlCheckbox-active,
 .DlVMenu .DlRadioButton-active,
 .DlHMenu .DlRadioButton-active {
-  background-color: #222222;
-  color: white; }
+  background-color: #222;
+  color: #fff; }
 
 /*
 .DlPopupMenu .DlCheckbox-hover,
@@ -1055,12 +1060,12 @@ table.DlButtonBox .DlButtonBox-spacer {
   background-image: none; }
 
 .DlSelect-menu .DlRadioButton-1 {
-  background-image: url("img/mark.gif");
+  background-image: url("DLimg/mark.gif");
   background-color: #c8c8d8;
   color: #000; }
 
 .DlSelect-menu .DlRadioButton-active {
-  background-image: url("img/mark-2.gif") !important; }
+  background-image: url("DLimg/mark-2.gif") !important; }
 
 /* Toolbar (no special widget) */
 /* BEGIN: CRAPPY CODE, PLEASE REVISIT */
@@ -1191,7 +1196,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   text-decoration: underline; }
 .DlTreeItem-withRadio .DlTreeItem-Table .DlRadioButton-1 {
   background-color: #80b9ff;
-  color: black; }
+  color: #000; }
 
 .DlTreeItem-withCheck .DlTreeItem-Label {
   padding-left: 0; }
@@ -1207,7 +1212,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   text-decoration: underline; }
 .DlTreeItem-withCheck .DlTreeItem-Table .DlCheckbox-1 {
   background-color: #80b9ff;
-  color: black; }
+  color: #000; }
 
 /* .DlTreeItem-Table { table-layout: fixed; border-collapse: collapse; } */
 .DlTreeItem-Table td {
@@ -1216,45 +1221,45 @@ table.DlButtonBox .DlButtonBox-spacer {
 
 /* BEGIN: tree lines, don't touch this or else. */
 .DlTree-withLines .DlTreeItem {
-  background-image: url("img/tree/lines-v.gif");
+  background-image: url("DLimg/tree/lines-v.gif");
   background-repeat: repeat-y;
   background-position: 9px 50%; }
 
-/* .DlTree-withLines .DlTreeItem-div { background-image: url("img/tree/lines-v.gif"); background-repeat: repeat-y; background-position: 9px 50%; } */
+/* .DlTree-withLines .DlTreeItem-div { background-image: url("DLimg/tree/lines-v.gif"); background-repeat: repeat-y; background-position: 9px 50%; } */
 .DlTree-withLines .DlTreeItem-Last {
   background-image: none; }
 
 /* .DlTree-withLines .DlTreeItem-Last .DlTreeItem-div { background-image: none; } */
 .DlTree-withLines .DlTreeItem .DlTreeItem-Expander {
-  background: transparent url("img/tree/lines-c.gif") no-repeat 50% 50%; }
+  background: transparent url("DLimg/tree/lines-c.gif") no-repeat 50% 50%; }
 
 .DlTreeItem-hasSubtree .DlTreeItem-Expander {
-  background: transparent url("img/tree/lines-c.gif") no-repeat 50% 50%; }
+  background: transparent url("DLimg/tree/lines-c.gif") no-repeat 50% 50%; }
 
 .DlTree-withLines table.DlTreeItem-Last .DlTreeItem-Expander {
-  background: transparent url("img/tree/lines-b.gif") no-repeat 50% 50%; }
+  background: transparent url("DLimg/tree/lines-b.gif") no-repeat 50% 50%; }
 
 /* END: tree lines */
 .DlTreeItem-Subtree {
   padding-left: 19px; }
 
 .DlTreeItem-Arrow-Expanded {
-  background: transparent url("img/tree/minus.gif") no-repeat 50% 40%;
+  background: transparent url("DLimg/tree/minus.gif") no-repeat 50% 40%;
   width: 19px;
   height: 100%; }
 
 .DlTreeItem-Arrow-Expanded:hover {
-  background: transparent url("img/tree/minus-hover.gif") no-repeat 50% 40%;
+  background: transparent url("DLimg/tree/minus-hover.gif") no-repeat 50% 40%;
   width: 19px;
   height: 100%; }
 
 .DlTreeItem-Arrow-Collapsed {
-  background: transparent url("img/tree/plus.gif") no-repeat 50% 40%;
+  background: transparent url("DLimg/tree/plus.gif") no-repeat 50% 40%;
   width: 19px;
   height: 100%; }
 
 .DlTreeItem-Arrow-Collapsed:hover {
-  background: transparent url("img/tree/plus-hover.gif") no-repeat 50% 40%;
+  background: transparent url("DLimg/tree/plus-hover.gif") no-repeat 50% 40%;
   width: 19px;
   height: 100%; }
 
@@ -1265,13 +1270,13 @@ table.DlButtonBox .DlButtonBox-spacer {
   filter: alpha(opacity=60); }
 
 .DlTreeItem-dropTarget > .DlTreeItem-div .DlTreeItem-Expander div {
-  background: url("img/tree-drop-here.gif") no-repeat 50% 50%; }
+  background: url("DLimg/tree-drop-here.gif") no-repeat 50% 50%; }
 
 .DlTreeItem-dropTarget-upper > .DlTreeItem-div .DlTreeItem-Expander div {
-  background: url("img/tree-drop-here-upper.gif") no-repeat 50% 50%; }
+  background: url("DLimg/tree-drop-here-upper.gif") no-repeat 50% 50%; }
 
 .DlTreeItem-dropTarget-lower > .DlTreeItem-div .DlTreeItem-Expander div {
-  background: url("img/tree-drop-here-lower.gif") no-repeat 50% 50%; }
+  background: url("DLimg/tree-drop-here-lower.gif") no-repeat 50% 50%; }
 
 .DlTreeItem-dropTarget-upper > .DlTreeItem-div > table {
   border-top: 1px solid #9b9bb8; }
@@ -1307,7 +1312,7 @@ table.DlButtonBox .DlButtonBox-spacer {
 .DlColorPickerHSV td.DlColorPickerHSV-HSV {
   overflow: visible;
   vertical-align: top;
-  background: url("img/color/hue.png") repeat-x 0 0;
+  background: url("DLimg/color/hue.png") repeat-x 0 0;
   width: 15px;
   padding: 0; }
 
@@ -1361,7 +1366,7 @@ table.DlButtonBox .DlButtonBox-spacer {
 .DlDataGrid-rowTable td {
   overflow: hidden;
   white-space: nowrap;
-  border-right: 1px solid #e0e0e0; }
+  border-right: 1px solid #e6e6ed; }
 
 .DlDataGrid-Headers {
   overflow: hidden;
@@ -1437,7 +1442,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   background-color: #80b9ff; }
 
 .DlDataGrid-focus .DlDataGridRow-selected table td {
-  color: black; }
+  color: #000; }
 
 .DlDataGrid-align-right .DlButton-inner {
   background-position: 0 50%; }
@@ -1477,13 +1482,13 @@ table.DlButtonBox .DlButtonBox-spacer {
   border-bottom: 2px solid #000; }
 
 .DlDataGridHeadLabel-sort-up .DlButton-inner {
-  background-image: url("img/arrows/sort-ascending.gif");
+  background-image: url("DLimg/arrows/sort-ascending.gif");
   background-repeat: no-repeat;
   background-position: 100% 50%;
   padding-bottom: 2px; }
 
 .DlDataGridHeadLabel-sort-down .DlButton-inner {
-  background-image: url("img/arrows/sort-descending.gif");
+  background-image: url("DLimg/arrows/sort-descending.gif");
   background-repeat: no-repeat;
   background-position: 100% 50%;
   padding-bottom: 2px; }
@@ -1496,7 +1501,7 @@ table.DlButtonBox .DlButtonBox-spacer {
 
 .DlDataGrid-drop-col {
   position: fixed;
-  background: url("img/grid-drop-col.gif") no-repeat 0 0;
+  background: url("DLimg/grid-drop-col.gif") no-repeat 0 0;
   width: 11px;
   height: 11px;
   margin-left: -5px;
@@ -1572,7 +1577,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   left: 0;
   width: 100%;
   height: 100%;
-  /*  background: url("img/modalbg.gif"); */
+  /*  background: url("DLimg/modalbg.gif"); */
   filter: alpha(opacity=50);
   opacity: 0.5;
   background-color: #444;
@@ -1620,7 +1625,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   width: 100%;
   height: 100%;
   z-index: 10;
-  background-image: url("img/modalbg.gif"); }
+  background-image: url("DLimg/modalbg.gif"); }
 
 .DlDialog-Rel .ResizeHandle {
   cursor: se-resize;
@@ -1631,7 +1636,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   margin-left: -11px;
   margin-top: -11px;
   padding: 5px;
-  background: url("img/resize.gif") no-repeat 0 0;
+  background: url("DLimg/resize.gif") no-repeat 0 0;
   width: 10px;
   height: 10px;
   z-index: 350; }
@@ -1642,20 +1647,20 @@ table.DlButtonBox .DlButtonBox-spacer {
 .DlDialog-Active { opacity: 1; }
 */
 .DlDialog-Rel {
-  -moz-box-shadow: 2px 3px 10px #888888;
-  -webkit-box-shadow: 2px 3px 10px #888888;
-  -o-box-shadow: 2px 3px 10px #888888;
-  -khtml-box-shadow: 2px 3px 10px #888888;
-  -ms-box-shadow: 2px 3px 10px #888888;
-  box-shadow: 2px 3px 10px #888888; }
+  -moz-box-shadow: 2px 3px 10px #888;
+  -webkit-box-shadow: 2px 3px 10px #888;
+  -o-box-shadow: 2px 3px 10px #888;
+  -khtml-box-shadow: 2px 3px 10px #888;
+  -ms-box-shadow: 2px 3px 10px #888;
+  box-shadow: 2px 3px 10px #888; }
 
 .DlDialog-Active .DlDialog-Rel {
-  -moz-box-shadow: 2px 3px 20px black;
-  -webkit-box-shadow: 2px 3px 20px black;
-  -o-box-shadow: 2px 3px 20px black;
-  -khtml-box-shadow: 2px 3px 20px black;
-  -ms-box-shadow: 2px 3px 20px black;
-  box-shadow: 2px 3px 20px black; }
+  -moz-box-shadow: 2px 3px 20px #000;
+  -webkit-box-shadow: 2px 3px 20px #000;
+  -o-box-shadow: 2px 3px 20px #000;
+  -khtml-box-shadow: 2px 3px 20px #000;
+  -ms-box-shadow: 2px 3px 20px #000;
+  box-shadow: 2px 3px 20px #000; }
 
 /* that's for the crappin' IE6: */
 .DlDialog-noShadows {
@@ -1671,7 +1676,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   white-space: nowrap;
   font: bold 100% "Lucida Grande",verdana,tahoma,sans-serif;
   letter-spacing: -1px;
-  background: #4d7bb3 url("img/titlebg.png") repeat-x 0 50%;
+  background: #4d7bb3 url("DLimg/titlebg.png") repeat-x 0 50%;
   color: #333;
   padding: 0 10px;
   border-bottom: 1px solid #9e9e9e; }
@@ -1713,7 +1718,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   height: 16px;
   background-repeat: no-repeat;
   margin-right: -1px;
-  background-image: url("img/dialog/buttons.png"); }
+  background-image: url("DLimg/dialog/buttons.png"); }
 
 .DlDialog-QuitBtn {
   background-position: 0 0; }
@@ -1825,19 +1830,19 @@ table.DlButtonBox .DlButtonBox-spacer {
         padding-left: 15px;
         margin-right: 1px; }
       .DlLiteTree ul li .item-label:hover {
-        color: black;
+        color: #000;
         background-color: #e6e6ed; }
       .DlLiteTree ul li .item-label.selected {
         background-color: #ccc;
         color: #000; }
     .DlLiteTree ul .item-label.collapsed > .expander {
-      background-image: url("img/tree/plus.png");
+      background-image: url("DLimg/tree/plus.png");
       background-position: 3px 50%;
       cursor: pointer; }
       .DlLiteTree ul .item-label.collapsed > .expander:hover {
         background-color: #e8a850; }
     .DlLiteTree ul .item-label.expanded > .expander {
-      background-image: url("img/tree/minus.png");
+      background-image: url("DLimg/tree/minus.png");
       background-position: 3px 50%;
       cursor: pointer; }
       .DlLiteTree ul .item-label.expanded > .expander:hover {
@@ -1877,23 +1882,23 @@ table.DlButtonBox .DlButtonBox-spacer {
   box-shadow: 0px 0px 4px #e8a850; }
   .DlLiteTree-focus ul li .item-label.selected {
     background-color: #80b9ff;
-    color: black; }
+    color: #000; }
 
 /* ICONS */
 .IconCalendar {
-  background-image: url("img/icons/calendar.png");
+  background-image: url("DLimg/icons/calendar.png");
   background-position: 1px 50%; }
 
 .IconColors {
-  background-image: url("img/icons/colors.png");
+  background-image: url("DLimg/icons/colors.png");
   background-position: 1px 50%; }
 
 .IconChardev {
-  background-image: url("img/icons/gnome-fs-chardev.png");
+  background-image: url("DLimg/icons/gnome-fs-chardev.png");
   background-position: 1px 50%; }
 
 .IconDynarch {
-  background-image: url("img/icons/dynarch-small.png");
+  background-image: url("DLimg/icons/dynarch-small.png");
   background-position: 1px 50%; }
 
 /* MISC */
@@ -1925,7 +1930,7 @@ span.BreakPoint {
   top: 0;
   left: 0;
   border: 1px dashed #000;
-  /*  background: url("img/modalbg.gif"); */
+  /*  background: url("DLimg/modalbg.gif"); */
   background: #fff;
   opacity: 0.4;
   filter: alpha(opacity=40);
@@ -1940,7 +1945,7 @@ span.BreakPoint {
 
 .Dl-ResizeRect-moving {
   border-color: #000;
-  /*  background: url("img/resizebg.gif"); */
+  /*  background: url("DLimg/resizebg.gif"); */
   /* background: #000; */ }
 
 .DlAlign-left {
@@ -1954,7 +1959,7 @@ span.BreakPoint {
 
 .Dl-3D-Border-Outside {
   border: 1px solid;
-@incude outset-border1; }
+  @incude outset-border1; }
 
 .Dl-3D-Border-Inside {
   border: 1px solid;
@@ -1974,3 +1979,5 @@ span.BreakPoint {
 
 /* this sucks */
 /* thin shadows */
+
+/*# sourceMappingURL=default.css.map */
