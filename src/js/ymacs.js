@@ -46,6 +46,7 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         // default options
         cf_lineNumbers: [ "lineNumbers", false ],
         cf_frameStyle: [ "frameStyle", null ],
+        cf_blinkCursor: [ "blinkCursor", true ],
 
         // override in DlWidget
         _focusable : [ "focusable"  , true ]

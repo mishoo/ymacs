@@ -347,15 +347,19 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P.__restartBlinking = function() {
-        this.__stopBlinking();
-        if (this.focusInside()) {
-            this.__caretTimer = setTimeout(this.__blinkCaret, 2 * BLINK_TIMEOUT);
+        if (this.ymacs.cf_blinkCursor) {
+            this.__stopBlinking();
+            if (this.focusInside()) {
+                this.__caretTimer = setTimeout(this.__blinkCaret, 2 * BLINK_TIMEOUT);
+            }
         }
     };
 
     P.__stopBlinking = function() {
-        clearTimeout(this.__caretTimer);
-        this.__showCaret();
+        if (this.ymacs.cf_blinkCursor) {
+            clearTimeout(this.__caretTimer);
+            this.__showCaret();
+        }
     };
 
     P.__blinkCaret = function() {
