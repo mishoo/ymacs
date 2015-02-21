@@ -195,6 +195,7 @@ Ymacs_Buffer.newCommands({
 
     find_file: Ymacs_Interactive("FFind file: ", function(name) {
         var self = this;
+        name = self.ymacs.fs_normalizePath(name);
         self.ymacs.fs_fileType(name, function (type) {
             if (type === "directory") {
                 self.signalInfo("Can't open directory");

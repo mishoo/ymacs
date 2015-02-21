@@ -474,19 +474,31 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     };
 
     P.ls_getFileDirectory = function(name, create) {
-        var store, dir = store = this.ls_get();
+        var store, dir = store = this.ls_get(), back = [];
         name = name.replace(/^[~\x2f]+/, "").split(/\x2f+/);
         var path = [], other = [];
         while (name.length > 0) {
             var part = name.shift();
-            if (dir.hasOwnProperty(part) && (typeof dir[part] != "string")) {
+            if (part == ".") continue;
+            if (part == "..") {
+                path.pop();
+                dir = back.pop();
+            }
+            else if (part == "~") {
+                path = [];
+                other = [];
+                back = [];
+                dir = store;
+            }
+            else if (dir.hasOwnProperty(part) && (typeof dir[part] != "string")) {
+                back.push(dir);
                 dir = dir[part];
                 path.push(part);
             }
             else {
                 other.push(part);
             }
-        };
+        }
         if (create) {
             var n = create == "file" ? 1 : 0;
             while (other.length > n) {
@@ -494,7 +506,13 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             }
             this.ls_set(store);
         }
-        return { store: store, dir: dir, path: path, other: other };
+        return {
+            store : store,
+            dir   : dir,
+            path  : path,
+            other : other,
+            full  : path.concat(other).join("/")
+        };
     };
 
     P.ls_deleteFile = function(name) {
@@ -505,6 +523,24 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     };
 
     /* -----[ filesystem operations ]----- */
+
+    P.fs_normalizePath = function(path) {
+        path = path.replace(/^[~\x2f]+/, "").split(/\x2f+/);
+        var ret = [];
+        while (path.length > 0) {
+            var x = path.shift();
+            if (x != ".") {
+                if (x == "..") {
+                    ret.pop();
+                } else if (x == "~") {
+                    ret = [];
+                } else {
+                    ret.push(x);
+                }
+            }
+        }
+        return ret.join("/");
+    };
 
     P.fs_fileType = function(name, cont) {
         cont(null);
@@ -524,14 +560,15 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         }
     };
 
-    P.fs_getDirectory = function(name, cont) {
-        var info = this.ls_getFileDirectory(name, false);
+    P.fs_getDirectory = function(dirname, cont) {
+        var info = this.ls_getFileDirectory(dirname, false);
+        dirname = info.path.join("/"); // normalized
         if (info) {
             var files = {};
             for (var f in info.dir) {
                 if (Object.HOP(info.dir, f)) {
                     files[f] = { name : f,
-                                 path : name + f,
+                                 path : dirname + "/" + f,
                                  type : (typeof info.dir[f] == "string"
                                          ? "regular"
                                          : "directory")};
