@@ -930,9 +930,20 @@ Ymacs_Buffer.newCommands({
     }),
 
     kill_buffer: Ymacs_Interactive(function() {
-        this.whenYmacs(function(ymacs){
-            ymacs.killBuffer(this);
-        });
+        var self = this;
+        function kill() {
+            self.whenYmacs(function(ymacs){
+                ymacs.killBuffer(self);
+            });
+        }
+        if (self.dirty()) {
+            var msg = "Buffer " + self.name + " was modified. Still wanna kill it?";
+            self.cmd("minibuffer_yn", msg, function(yes){
+                if (yes) kill();
+            });
+        } else {
+            kill();
+        }
     }),
 
     rename_buffer: Ymacs_Interactive("sRename current buffer to: ", function(name){
