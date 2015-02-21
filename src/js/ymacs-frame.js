@@ -458,7 +458,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             if (c1 == c2)
                 return c1;
             var col = Math.floor((c1 + c2) / 2);
-            if (col == 0) return 0;
             var p1 = self.coordinates(row, col),
             p2 = self.coordinates(row, col + 1);
             if (p2.x < x)
