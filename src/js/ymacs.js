@@ -516,10 +516,9 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     };
 
     P.ls_deleteFile = function(name) {
-        this.ls_getFileContents(name);
-        var files = this.ls_get();
-        delete files[name];
-        this.ls_set(files);
+        var info = this.ls_getFileDirectory(name);
+        delete info.dir[info.other.join("/")];
+        this.ls_set(info.store);
     };
 
     /* -----[ filesystem operations ]----- */
@@ -543,7 +542,12 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
     };
 
     P.fs_fileType = function(name, cont) {
-        cont(null);
+        try {
+            this.ls_getFileContents(name);
+            cont(true);
+        } catch(ex) {
+            cont(null);
+        }
     };
 
     P.fs_getFileContents = function(name, nothrow, cont) {
