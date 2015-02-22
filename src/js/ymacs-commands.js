@@ -937,7 +937,7 @@ Ymacs_Buffer.newCommands({
             });
         }
         if (self.dirty()) {
-            var msg = "Buffer " + self.name + " was modified. Still wanna kill it?";
+            var msg = "Buffer " + self.name + " modified; kill anyway?";
             self.cmd("minibuffer_yn", msg, function(yes){
                 if (yes) kill();
             });
