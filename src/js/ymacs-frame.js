@@ -441,13 +441,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
     P.coordinatesToRowCol = function(x, y) {
         function findLine(r1, r2) {
-            if (r1 == r2)
+            if (r1 >= r2)
                 return r1;
             var row = Math.floor((r1 + r2) / 2);
-            if (row == 0) return 0;
             var div = self.getLineDivElement(row);
             var y1  = div.offsetTop;
-            var y2  = y1 + div.offsetHeight - 1;
+            var y2  = y1 + div.offsetHeight;
             if (y2 < y)
                 return findLine(row + 1, r2);
             if (y < y1)
@@ -455,11 +454,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             return row;
         };
         function findCol(c1, c2) {
-            if (c1 == c2)
+            if (c1 >= c2)
                 return c1;
             var col = Math.floor((c1 + c2) / 2);
             var p1 = self.coordinates(row, col),
-            p2 = self.coordinates(row, col + 1);
+                p2 = self.coordinates(row, col + 1);
             if (p2.x < x)
                 return findCol(col + 1, c2);
             if (x < p1.x)
@@ -467,8 +466,8 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             return col;
         };
         var self = this,
-        row = findLine(0, this.buffer.code.length - 1),
-        col = findCol(0, this.buffer.code[row].length);
+            row = findLine(0, this.buffer.code.length - 1),
+            col = findCol(0, this.buffer.code[row].length);
         return { row: row, col: col };
     };
 
