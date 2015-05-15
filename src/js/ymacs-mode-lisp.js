@@ -241,7 +241,7 @@
                 }
                 tok.end = input.pos;
                 if (caret != null) {
-                    if (tok.type != "caret" && tok.start <= caret && tok.end >= caret) {
+                    if (tok.start <= caret && tok.end >= caret) {
                         if (!cont_exp) cont_exp = tok;
                     }
                 }
