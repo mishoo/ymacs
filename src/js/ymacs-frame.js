@@ -663,6 +663,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             DlEvent.captureGlobals(this._dragSelectCaptures);
         }
         else if (CLICK_COUNT == 2) {
+            buf.cmd("forward_word");
             buf.cmd("backward_word");
             buf.cmd("forward_word_mark");
         }
