@@ -18,6 +18,8 @@
 .Ymacs-frame-content {
   white-space: pre;
   padding-bottom: 1000px;
+  display: inline-block;
+  min-width: 100%;
 }
 
 .Ymacs-caret {
