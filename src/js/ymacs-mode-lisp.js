@@ -753,7 +753,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
 DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
-        "ENTER && C-j && C-m"  : "newline_and_indent",
+        "Enter && C-j && C-m"  : "newline_and_indent",
         "("                    : [ "lisp_open_paren", "(" ],
         ")"                    : [ "lisp_close_paren", ")" ],
         "["                    : [ "lisp_open_paren", "[" ],

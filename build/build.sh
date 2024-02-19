@@ -16,8 +16,7 @@ JSFILES=`cat loadfiles.txt`
 rm loadfiles.txt
 
 mkdir ../js-minified
-uglifyjs2 $JSFILES -c -m --source-map ymacs-min.js.map --source-map-root ../js -o ../js-minified/ymacs-min.js
-mv ymacs-min.js.map ../js-minified
+uglifyjs $JSFILES -cm -o ../js-minified/ymacs-min.js
 
 cd $TEMPDIR
 tar zcf ymacs.tar.gz Ymacs

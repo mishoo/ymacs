@@ -35,12 +35,6 @@
 
 DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
 
-    var REVERSE_KEYS = {};
-    Object.foreach(DlKeyboard, function(val, key) {
-        if (typeof val == "number")
-            REVERSE_KEYS[val] = key;
-    });
-
     D.CONSTRUCT = function() {
         this.definitions = Object.makeCopy(this.__originalDefs);
     };
@@ -61,19 +55,11 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         a.reverse();
         a.foreach(function(c, i){
             if (i == 0) {
-                if (c == "WHEEL_UP" || c == "WHEEL_DOWN") {
-                    key.charCode = c;
-                }
-                else if (typeof DlKeyboard[c] == "number")
-                    key.keyCode = DlKeyboard[c];
-                else {
-                    a[i] = c.toLowerCase();
-                    key.charCode = a[i].charCodeAt(0);
-                }
+                key.key = c == "Space" ? " " : c.length == 1 ? c.toLowerCase() : c;
             } else switch(c) {
-              case "C": key.ctrlKey = true; break;
-              case "M": key.metaKey = true; break;
-              case "S": key.shiftKey = true; break;
+                case "C": key.ctrlKey = true; break;
+                case "M": key.metaKey = true; break;
+                case "S": key.shiftKey = true; break;
             }
         });
         a.reverse();
@@ -86,31 +72,23 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
     };
 
     D.unparseKey = function(ev) {
-        var key, modifiers = [];
+        var key, a = [];
         if ("wheelDelta" in ev) {
-            key = ev.wheelDelta > 0 ? "WHEEL_UP" : "WHEEL_DOWN";
-        }
-        else if (ev.keyCode in REVERSE_KEYS)
-            key = REVERSE_KEYS[ev.keyCode];
-        else if (ev.charCode) {
-            if (ev.charCode == 32)
-                key = "SPACE";
-            else if (ev.charCode == 45)
-                key = "DASH";
-            else
-                key = String.fromCharCode(ev.charCode).toLowerCase();
+            key = ev.wheelDelta > 0 ? "WheelUp" : "WheelDown";
+        } else {
+            key = ev.key;
+            if (key == " ") key = "Space";
+            if (key.length == 1) key = key.toLowerCase();
         }
         if (ev.ctrlKey)
-            modifiers.push("C");
+            a.push("C");
         if (ev.altKey)
-            modifiers.push("M");
-        if (ev.shiftKey && (ev.charCode && /^[a-zA-Z0-9]$/.test(key) || ev.keyCode))
-            modifiers.push("S");
-        modifiers.sort();
-        modifiers = modifiers.join("-");
-        if (modifiers)
-            modifiers += "-";
-        return modifiers + key;
+            a.push("M");
+        if (ev.shiftKey && (key.length > 1 || key.toLowerCase() != key.toUpperCase()))
+            a.push("S");
+        a.sort();
+        a.push(key);
+        return a.join("-");
     };
 
     P.defineKey = function(key, func, args) {

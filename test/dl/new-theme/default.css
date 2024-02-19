@@ -985,7 +985,7 @@ table.DlHbox {
   overflow: hidden;
   height: 16px;
   width: 1px;
-  border-left: 1px dotted #6e6e99;
+  border-left: 1px solid #6e6e99;
   background-color: #e6e6ed;
   /*  margin-left: 3px; margin-right: 2px; */ }
 
@@ -1015,7 +1015,7 @@ table.DlVbox {
   height: 1px;
   font-size: 1px;
   line-height: 1px;
-  border-top: 1px dotted #6e6e99;
+  border-top: 1px solid #6e6e99;
   background-color: #e6e6ed;
   /*  margin-top: 3px; margin-bottom: 2px; */ }
 
@@ -1301,7 +1301,7 @@ table.DlButtonBox .DlButtonBox-spacer {
 
 .DlColorPickerHSV td {
   width: 8px;
-  height: 10px;
+  height: 8px;
   padding: 1px; }
 
 .DlColorPickerHSV td.DlColorPickerHSV-Sep {
@@ -1313,7 +1313,7 @@ table.DlButtonBox .DlButtonBox-spacer {
   overflow: visible;
   vertical-align: top;
   background: url("DLimg/color/hue.png") repeat-x 0 0;
-  width: 15px;
+  width: 20px;
   padding: 0; }
 
 .DlColorPickerHSV td.hover1 {

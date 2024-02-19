@@ -183,10 +183,10 @@ Ymacs_Buffer.newCommands({
     }),
 
     self_insert_command: Ymacs_Interactive("^p", function(repeat) {
-        var ev = this.interactiveEvent(),
-        ch = String.fromCharCode(ev.charCode),
-        rc = this._rowcol;
-        if (ev.charCode && ch && !ev.altKey && !ev.ctrlKey) {
+        var ev = this.interactiveEvent();
+        var ch = ev.key;
+        var rc = this._rowcol;
+        if (ch.length == 1 && !ev.altKey && !ev.ctrlKey) {
             this.deleteTransientRegion();
             if (repeat != null)
                 ch = ch.x(repeat);

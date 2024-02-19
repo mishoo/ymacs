@@ -41,11 +41,11 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         "C-M-q"                        : "indent_sexp",
         "C-M-f && C-M-n"               : "forward_sexp",
         "C-M-b && C-M-p"               : "backward_sexp",
-        "C-M-u && M-a && C-M-ARROW_UP" : "backward_up_list",
+        "C-M-u && M-a && C-M-ArrowUp"  : "backward_up_list",
         "M-e"                          : "up_list",
-        "C-M-ARROW_DOWN"               : "down_list",
+        "C-M-ArrowDown"                : "down_list",
         "M-C-k"                        : "kill_sexp",
-        "M-C-SPACE"                    : "mark_sexp",
+        "M-C-Space"                    : "mark_sexp",
         "M-C-t"                        : "transpose_sexps",
         "M-("                          : [ "paredit_wrap_round", "(" ],
         "M-["                          : [ "paredit_wrap_round", "[" ],
@@ -54,8 +54,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         "M-'"                          : [ "paredit_wrap_round", "'" ],
         "M-r"                          : "paredit_raise_sexp",
         "M-s"                          : "paredit_splice_sexp",
-        "BACKSPACE"                    : "paredit_backward_delete_char",
-        "DELETE && C-d"                : "paredit_delete_char"
+        "Backspace"                    : "paredit_backward_delete_char",
+        "Delete && C-d"                : "paredit_delete_char"
     };
 
     /* -----[ new commands ]----- */
@@ -321,7 +321,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                         if (this.cmd("looking_back", rx)) this.cmd("save_excursion", function(){
                             this.cmd("backward_delete_whitespace");
                             this.cmd("backward_delete_char");
-                        })
+                        });
                     }
                 }
                 this.cmd("delete_char");

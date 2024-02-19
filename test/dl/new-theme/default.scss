@@ -658,7 +658,7 @@ table.DlHbox { border-collapse: separate; }
   overflow: hidden;
   height: 16px;
   width: 1px;
-  border-left: 1px dotted $mainBgD3;
+  border-left: 1px solid $mainBgD3;
   background-color: $mainBgL2;
 /*  margin-left: 3px; margin-right: 2px; */
 }
@@ -682,7 +682,7 @@ table.DlVbox { border-collapse: separate; }
   height: 1px;
   font-size: 1px;
   line-height: 1px;
-  border-top: 1px dotted $mainBgD3;
+  border-top: 1px solid $mainBgD3;
   background-color: $mainBgL2;
 /*  margin-top: 3px; margin-bottom: 2px; */
 }
@@ -850,11 +850,11 @@ table.DlButtonBox .DlButtonBox-spacer { width: 100%; }
 /* ColorPicker */
 
 .DlColorPickerHSV { border: 1px solid #000; background-color: #e4dcec; }
-.DlColorPickerHSV td { width: 8px; height: 10px; padding: 1px; }
+.DlColorPickerHSV td { width: 8px; height: 8px; padding: 1px; }
 .DlColorPickerHSV td.DlColorPickerHSV-Sep { background-color: #000; width: 1px; padding: 0; }
 .DlColorPickerHSV td.DlColorPickerHSV-HSV {
   overflow: visible; vertical-align: top;
-  background: url("DLimg/color/hue.png") repeat-x 0 0; width: 15px; padding: 0; }
+  background: url("DLimg/color/hue.png") repeat-x 0 0; width: 20px; padding: 0; }
 .DlColorPickerHSV td.hover1 { padding: 0; border: 1px solid #fff !important; }
 .DlColorPickerHSV td.hover2 { padding: 0; border: 1px solid #000 !important; }
 .DlColorPickerHSV .DlColorPickerHSV-HSV-bar { height: 1px; left: 0px;

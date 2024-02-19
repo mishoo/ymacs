@@ -36,18 +36,18 @@
 DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
-        "C-g && ESCAPE": [ "isearch_abort", true ],
+        "C-g && Escape": [ "isearch_abort", true ],
         "C-w": "isearch_yank_word_or_char",
         "C-s": "isearch_forward",
         "C-r": "isearch_backward",
-        "BACKSPACE": function() {
+        "Backspace": function() {
             if (this.getMinibuffer().point() > this._isearchContext.mbMark.getPosition()) {
                 this.getMinibuffer().cmd("backward_delete_char");
                 this.cmd("goto_char", this._isearchContext.point);
                 updateIsearch.call(this, this._isearchContext.forward);
             }
         },
-        "ENTER": "isearch_abort"
+        "Enter": "isearch_abort"
     };
 
     D.CONSTRUCT = function() {
@@ -151,12 +151,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
         isearch_printing_char: Ymacs_Interactive(function() {
             var ev = this.interactiveEvent();
-            if (ev.charCode && !ev.ctrlKey && !ev.altKey) {
+            if (ev.key.length == 1 && !ev.ctrlKey && !ev.altKey) {
                 this.getMinibuffer().cmd("self_insert_command");
                 this.cmd("goto_char", this._isearchContext.point);
                 doSearch.call(this, getText(this));
                 return ev.domStop = true;
-            } else if (ev.keyCode != 0 || ev.ctrlKey || ev.altKey) {
+            } else {
                 this.cmd("isearch_abort");
                 return false;
             }

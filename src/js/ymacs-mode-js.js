@@ -179,12 +179,6 @@ parseInt undefined window document alert prototype constructor".qw();
             foundToken(start, stream.col, type);
         };
 
-        // function readLiteralRegexp() {
-        //         var m;
-        //         if (readString("/", "regexp") && (m = stream.lookingAt(/^[gmsiy]+/)))
-        //                 foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
-        // };
-
         function readLiteralRegexp() {
             var ch, esc = false, inset = 0, start = stream.col;
             while (!stream.eol()) {
@@ -381,7 +375,7 @@ D P $".qw());
 DEFINE_SINGLETON("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
-        "ENTER"                                     : "newline_and_indent",
+        "Enter"                                     : "newline_and_indent",
         "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent",
         "{"                                         : "c_electric_block"
     };

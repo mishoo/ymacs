@@ -242,7 +242,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
 
 DEFINE_SINGLETON("Ymacs_Keymap_CSS", Ymacs_Keymap);
 Ymacs_Keymap_CSS().defineKeys({
-    "ENTER"       : "newline_and_indent",
+    "Enter"       : "newline_and_indent",
     ": && } && )" : "c_insert_and_indent"
 });
 

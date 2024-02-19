@@ -231,8 +231,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
         "C-c /"   : "xml_close_tag",
-        "C-ENTER" : "xml_zen_expand",
-        "ENTER"   : "newline_and_indent"
+        "C-Enter" : "xml_zen_expand",
+        "Enter"   : "newline_and_indent"
     };
 
 });
@@ -256,8 +256,8 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
     DEFINE_SINGLETON("Ymacs_Keymap_XML_Zen", Ymacs_Keymap, function(D, P){
         D.KEYS = {
-            "TAB"   : "xml_zen_next_poi",
-            "S-TAB" : "xml_zen_prev_poi",
+            "Tab"   : "xml_zen_next_poi",
+            "S-Tab" : "xml_zen_prev_poi",
             "C-g"   : "xml_zen_stop"
         };
     });

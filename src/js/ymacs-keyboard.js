@@ -38,6 +38,7 @@
 //
 // Kudos for that work!
 
+// turned into a no-op, things are looking much better a decade later.
 (function(){
 
     var letters = {};
@@ -103,4 +104,4 @@
         getCharCode : getCharCode
     };
 
-})();
+});

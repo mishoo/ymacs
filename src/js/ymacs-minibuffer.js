@@ -84,12 +84,12 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
             timeout: 0,
             content: $menu,
             align: {
-		prefer: "Tr",
-		fallX1: "_r",
-		fallX2: "_L",
-		fallY1: "B_",
-		fallY2: "T_"
-	    },
+                prefer: "Tr",
+                fallX1: "_r",
+                fallX2: "_L",
+                fallY1: "B_",
+                fallY2: "T_"
+            },
             anchor: frame.getCaretElement(),
             widget: frame,
             onHide: function() {
@@ -424,11 +424,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         }
         if (old_item != null) {
             w = $menu.children(old_item);
-	    w.callHooks("onMouseLeave");
+            w.callHooks("onMouseLeave");
         }
         old_item = $item;
         w = $menu.children($item);
-	w.callHooks("onMouseEnter");
+        w.callHooks("onMouseEnter");
     };
 
     function handle_arrow_down() {
@@ -478,24 +478,24 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     };
 
     var DEFAULT_KEYS = {
-        "TAB"                                : handle_tab,
-        "ENTER"                              : handle_enter,
-        "HOME && C-a"                        : handle_home,
-        "S-HOME && S-C-a"                    : Ymacs_Interactive("^", handle_home_mark)
+        "Tab"                                : handle_tab,
+        "Enter"                              : handle_enter,
+        "Home && C-a"                        : handle_home,
+        "S-Home && S-C-a"                    : Ymacs_Interactive("^", handle_home_mark)
     };
 
     DEFINE_SINGLETON("Ymacs_Keymap_Minibuffer", Ymacs_Keymap, function(D, P){
         D.KEYS = Object.merge({
-            "C-g && ESCAPE" : "minibuffer_keyboard_quit"
+            "C-g && Escape" : "minibuffer_keyboard_quit"
         }, DEFAULT_KEYS);
     });
 
     var KEYMAP_POPUP_ACTIVE = DEFINE_CLASS(null, Ymacs_Keymap, function(D, P){
         D.KEYS = Object.merge({
-            "S-TAB"                                   : handle_s_tab,
-            "ARROW_DOWN && ARROW_RIGHT && C-n && C-f" : handle_arrow_down,
-            "ARROW_UP && ARROW_LEFT && C-p && C-b"    : handle_arrow_up,
-            "ESCAPE"                                  : function() {
+            "S-Tab"                                 : handle_s_tab,
+            "ArrowDown && ArrowRight && C-n && C-f" : handle_arrow_down,
+            "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
+            "Escape"                                : function() {
                 DlPopup.clearAllPopups();
             }
         }, DEFAULT_KEYS);

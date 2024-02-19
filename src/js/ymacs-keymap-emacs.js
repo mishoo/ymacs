@@ -97,50 +97,50 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
         // movement
-        "ARROW_UP     && C-p"                     : "backward_line",
-        "ARROW_DOWN   && C-n"                     : "forward_line",
-        "ARROW_LEFT   && C-b"                     : "backward_char",
-        "ARROW_RIGHT  && C-f"                     : "forward_char",
-        "HOME"                                    : "beginning_of_indentation_or_line",
-        "END && C-e"                              : "end_of_line",
+        "ArrowUp     && C-p"                      : "backward_line",
+        "ArrowDown   && C-n"                      : "forward_line",
+        "ArrowLeft   && C-b"                      : "backward_char",
+        "ArrowRight  && C-f"                      : "forward_char",
+        "Home"                                    : "beginning_of_indentation_or_line",
+        "End && C-e"                              : "end_of_line",
         "C-a"                                     : "beginning_of_line",
-        "C-HOME && M-<"                           : "beginning_of_buffer",
-        "C-END && M->"                            : "end_of_buffer",
-        "C-ARROW_RIGHT && M-f"                    : "forward_word",
-        "C-ARROW_LEFT && M-b"                     : "backward_word",
-        "C-ARROW_DOWN"                            : "forward_paragraph",
-        "C-ARROW_UP"                              : "backward_paragraph",
+        "C-Home && M-<"                           : "beginning_of_buffer",
+        "C-End && M->"                            : "end_of_buffer",
+        "C-ArrowRight && M-f"                     : "forward_word",
+        "C-ArrowLeft && M-b"                      : "backward_word",
+        "C-ArrowDown"                             : "forward_paragraph",
+        "C-ArrowUp"                               : "backward_paragraph",
         "C-l"                                     : "recenter_top_bottom",
-        "PAGE_UP && M-v"                          : "scroll_up_half",
-        "PAGE_DOWN && C-v"                        : "scroll_down_half",
-        "WHEEL_UP"                                : "scroll_up",
-        "WHEEL_DOWN"                              : "scroll_down",
+        "PageUp && M-v"                           : "scroll_up_half",
+        "PageDown && C-v"                         : "scroll_down_half",
+        "WheelUp"                                 : "scroll_up",
+        "WheelDown"                               : "scroll_down",
 
         // transient mark
-        "S-ARROW_UP       && S-C-p"               : "backward_line_mark",
-        "S-ARROW_DOWN     && S-C-n"               : "forward_line_mark",
-        "S-ARROW_LEFT     && S-C-b"               : "backward_char_mark",
-        "S-ARROW_RIGHT    && S-C-f"               : "forward_char_mark",
-        "S-C-ARROW_RIGHT  && S-M-f"               : "forward_word_mark",
-        "S-C-ARROW_LEFT   && S-M-b"               : "backward_word_mark",
-        "S-C-ARROW_DOWN"                          : "forward_paragraph_mark",
-        "S-C-ARROW_UP"                            : "backward_paragraph_mark",
-        "S-HOME"                                  : "beginning_of_indentation_or_line_mark",
+        "S-ArrowUp       && S-C-p"                : "backward_line_mark",
+        "S-ArrowDown     && S-C-n"                : "forward_line_mark",
+        "S-ArrowLeft     && S-C-b"                : "backward_char_mark",
+        "S-ArrowRight    && S-C-f"                : "forward_char_mark",
+        "S-C-ArrowRight  && S-M-f"                : "forward_word_mark",
+        "S-C-ArrowLeft   && S-M-b"                : "backward_word_mark",
+        "S-C-ArrowDown"                           : "forward_paragraph_mark",
+        "S-C-ArrowUp"                             : "backward_paragraph_mark",
+        "S-Home"                                  : "beginning_of_indentation_or_line_mark",
         "S-C-a"                                   : "beginning_of_line_mark",
-        "S-END && S-C-e"                          : "end_of_line_mark",
-        "S-C-HOME"                                : "beginning_of_buffer_mark",
-        "S-C-END"                                 : "end_of_buffer_mark",
+        "S-End && S-C-e"                          : "end_of_line_mark",
+        "S-C-Home"                                : "beginning_of_buffer_mark",
+        "S-C-End"                                 : "end_of_buffer_mark",
 
         // basic editing
-        "BACKSPACE"                               : "backward_delete_char",
-        "DELETE && C-d"                           : "delete_char",
-        "ENTER && C-m"                            : "newline",
-        "M-d && C-DELETE"                         : "kill_word",
-        "C-BACKSPACE && M-BACKSPACE && M-DELETE"  : "backward_kill_word",
+        "Backspace"                               : "backward_delete_char",
+        "Delete && C-d"                           : "delete_char",
+        "Enter && C-m"                            : "newline",
+        "M-d && C-Delete"                         : "kill_word",
+        "C-Backspace && M-Backspace && M-Delete"  : "backward_kill_word",
         "C-k"                                     : "kill_line",
-        "C-y && S-INSERT"                         : "yank",
+        "C-y && S-Insert"                         : "yank",
         "M-y"                                     : "yank_pop",
-        "C-SPACE"                                 : "set_mark_command",
+        "C-Space"                                 : "set_mark_command",
         "C-x C-x"                                 : "exchange_point_and_mark",
         "C-w"                                     : "kill_region",
         "M-t"                                     : "transpose_words",
@@ -151,11 +151,11 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "M-u"                                     : "upcase_word",
         "M-l"                                     : "downcase_word",
         "F11"                                     : "nuke_trailing_whitespace",
-        "TAB"                                     : "indent_line",
+        "Tab"                                     : "indent_line",
         "C-M-\\"                                  : "indent_region",
         "M-q"                                     : "fill_paragraph",
         "C-/ && C-x u && C-_ && C-z"              : "undo",
-        "INSERT"                                  : "overwrite_mode",
+        "Insert"                                  : "overwrite_mode",
         "M-s"                                     : "center_line",
         "M-/"                                     : "dabbrev_expand",
         "C-s"                                     : "isearch_forward",
@@ -176,10 +176,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "C-x r y"                                 : "yank_rectangle",
 
         // buffers
-        "C-x C-ARROW_RIGHT && C-x ARROW_RIGHT && C-TAB" : "next_buffer",
-        "C-x C-ARROW_LEFT && C-x ARROW_LEFT && C-S-TAB" : "previous_buffer",
-        "C-x b"                                         : "switch_to_buffer",
-        "C-x k"                                         : "kill_buffer",
+        "C-x C-ArrowRight && C-x ArrowRight && C-Tab"    : "next_buffer",
+        "C-x C-ArrowLeft && C-x ArrowLeft && C-S-Tab"    : "previous_buffer",
+        "C-x b"                                          : "switch_to_buffer",
+        "C-x k"                                          : "kill_buffer",
 
         // frames
         "C-x 0"                                   : "delete_frame",
@@ -199,17 +199,17 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         // my stuff, sorry if these have different meanings in the standard Emacs keys
         "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
         "C-c /"                                   : "close_last_xml_tag",
-        "S-BACKSPACE"                             : "backward_delete_whitespace",
-        "S-DELETE"                                : "delete_whitespace",
+        "S-Backspace"                             : "backward_delete_whitespace",
+        "S-Delete"                                : "delete_whitespace",
         "C-M-d"                                   : "delete_region_or_line",
-        "M-ENTER"                                 : "start_next_paragraph",
+        "M-Enter"                                 : "start_next_paragraph",
         "M-S-q"                                   : "fill_paragraph_no_prefix",
         "C-M-|"                                   : "cperl_lineup",
         "C-F4"                                    : "kill_buffer",
-        "M-ARROW_LEFT"                            : [ "windmove", "left" ],
-        "M-ARROW_RIGHT"                           : [ "windmove", "right" ],
-        "M-ARROW_UP"                              : [ "windmove", "up" ],
-        "M-ARROW_DOWN"                            : [ "windmove", "down" ],
+        "M-ArrowLeft"                             : [ "windmove", "left" ],
+        "M-ArrowRight"                            : [ "windmove", "right" ],
+        "M-ArrowUp"                               : [ "windmove", "up" ],
+        "M-ArrowDown"                             : [ "windmove", "down" ],
 
         "C-x e"                                   : "kmacro_end_and_call_macro",
         "C-x ("                                   : "kmacro_start_macro",
@@ -225,11 +225,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "C-x =": function() {
             var ch = this.charAt(), chname = ch;
             if (ch == " ")
-                chname = "<SPACE>";
+                chname = "Space";
             else if (ch == "\n")
-                chname = "<NEWLINE>";
-            else if (ch == "-")
-                chname = "<DASH>";
+                chname = "Newline";
             this.signalInfo(TMPL_INFO({
                 ch      : chname.htmlEscape(),
                 code    : ch.charCodeAt(0),
@@ -249,10 +247,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
 DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
 
     P.defaultHandler = [ Ymacs_Interactive("^", function(){
-        var ev = this.interactiveEvent(),
-        ch = String.fromCharCode(ev.charCode),
-        prefix = this.getPrefixArg(true);
-        if (ev.charCode && (/^[0-9]$/.test(ch) || (ch === "-" && prefix === "")) && !ev.altKey && !ev.ctrlKey) {
+        var ev = this.interactiveEvent();
+        var ch = ev.key;
+        var prefix = this.getPrefixArg(true);
+        if ((/^[0-9]$/.test(ch) || (ch === "-" && prefix === "")) && !ev.altKey && !ev.ctrlKey) {
             prefix += ch;
             this.setPrefixArg(prefix);
             if (!this.isMinibuffer) {

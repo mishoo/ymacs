@@ -1066,7 +1066,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
             else if (h) {
                 handled = foundPrefix = true;
             }
-            else if (key === "ESCAPE") {
+            else if (key === "Escape") {
                 this.__nextIsMeta = true;
                 handled = true;
             }

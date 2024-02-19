@@ -112,10 +112,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         this.packWidget(this.minibuffer_frame, { pos: "bottom" });
         this.packWidget(frame, { pos: "top", fill: "*" });
 
-        // this.__activeFrameEvents = {
-        //         // onPointChange: this._on_activeFramePointChange.$(this)
-        // };
-
         this.setActiveFrame(frame);
         frame._redrawCaret();
     };
@@ -657,37 +653,31 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
         return true;
     };
 
-    P.processKeyEvent = function(ev,press) {
+    function isModifier(key) {
+        return /^(?:Alt|AltGraph|CapsLock|Control|Fn|FnLock|Hyper|Meta|NumLock|ScrollLock|Shift|Super|Symbol|SymbolLock)$/.test(key);
+    }
+
+    P.processKeyEvent = function(ev, press) {
         var frame = this.__input_frame;
         var buffer = frame.buffer;
 
         ev.wasKeypress = press;
-        if (!ev._keyCode)
-          ev._keyCode = ev.keyCode;
+
+        console.log(ev.key);
 
         if (press) {
-            if (!is_gecko)
-                ev.keyCode = 0;
             if (this.__macro_recording) {
                 this.__macro_recording.push(ev);
             }
             return buffer._handleKeyEvent(ev);
         } else {
-            if (!is_gecko) {
-                var ki = window.KEYBOARD_INSANITY, code = ev.keyCode || ev._keyCode;
-                if (code == 0 || code in ki.modifiers)
-                    return false;
-                if ((code in ki.letters || code in ki.digits || code in ki.symbols) && !(ev.ctrlKey || ev.altKey)) {
-                    return false; // to be handled by the upcoming keypress event
-                }
-                ev.charCode = ki.getCharCode(code, ev.shiftKey);
-                if (ev.charCode)
-                    ev.keyCode = 0;
-                if (this.__macro_recording) {
-                    this.__macro_recording.push(ev);
-                }
-                return buffer._handleKeyEvent(ev);
+            if (isModifier(ev.key) || ev.key.length == 1 && !(ev.ctrlKey || ev.altKey)) {
+                return false; // to be handled by the upcoming keypress event
             }
+            if (this.__macro_recording) {
+                this.__macro_recording.push(ev);
+            }
+            return buffer._handleKeyEvent(ev);
         }
     };
 });
