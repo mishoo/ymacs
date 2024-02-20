@@ -339,8 +339,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         var keymap = Ymacs_Keymap_ParenMatch();
         this.pushKeymap(keymap);
 
-        var active = false,
-        clearOvl = function() {
+        var active = false;
+        var clearOvl = function() {
             if (active)
                 this.deleteOverlay("match-paren");
         }.clearingTimeout(500, this);

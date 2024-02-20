@@ -50,12 +50,12 @@ yield volatile while with".qw();
     var KEYWORDS_TYPE = "boolean byte char double float int long short void \
 Array Date Function Math Number Object RegExp String".qw();
 
-    var KEYWORDS_CONST = "false null undefined Infinity NaN true arguments this".qw();
+    var KEYWORDS_CONST = "false null undefined Infinity NaN true arguments".qw();
 
     var KEYWORDS_BUILTIN = "Infinity NaN \
 Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-parseInt undefined window document alert prototype constructor".qw();
+parseInt undefined window document alert prototype constructor this".qw();
 
     var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
 
@@ -93,12 +93,13 @@ parseInt undefined window document alert prototype constructor".qw();
 
     function JS_PARSER(KEYWORDS, KEYWORDS_TYPE, KEYWORDS_CONST, KEYWORDS_BUILTIN, stream, tok) {
 
-        var $cont = [],
-        $parens = [],
-        $passedParens = [],
-        $inComment = null,
-        $inString = null,
-        PARSER = {
+        var $cont = [];
+        var $parens = [];
+        var $passedParens = [];
+        var $inComment = null;
+        var $inString = [];
+        var $nestedExpr = false;
+        var PARSER = {
             next        : next,
             copy        : copy,
             indentation : indentation
@@ -112,16 +113,18 @@ parseInt undefined window document alert prototype constructor".qw();
             var context = restore.context = {
                 cont         : $cont.slice(0),
                 inComment    : $inComment,
-                inString     : $inString,
+                inString     : $inString.slice(0),
                 parens       : $parens.slice(0),
-                passedParens : $passedParens.slice(0)
+                passedParens : $passedParens.slice(0),
+                $nestedExpr  : $nestedExpr,
             };
             function restore() {
                 $cont          = context.cont.slice(0);
                 $inComment     = context.inComment;
-                $inString      = context.inString;
+                $inString      = context.inString.slice(0);
                 $parens        = context.parens.slice(0);
                 $passedParens  = context.passedParens.slice(0);
+                $nestedExpr    = context.$nestedExpr;
                 return PARSER;
             };
             return restore;
@@ -162,16 +165,27 @@ parseInt undefined window document alert prototype constructor".qw();
             }
         };
 
+        function inTemplateString() {
+            return $inString.length && $inString[$inString.length - 1].type == "tmpl";
+        };
+
         function readString(end, type) {
             var ch, esc = false, start = stream.col;
             while (!stream.eol()) {
                 ch = stream.peek();
-                if (ch === end && !esc) {
+                if (!esc && ch === end) {
                     $cont.pop();
-                    $inString = null;
+                    $inString.pop();
                     foundToken(start, stream.col, type);
                     foundToken(stream.col, ++stream.col, type + "-stopper");
-                    return true;
+                    return;
+                }
+                if (!esc && stream.lookingAt("${")) { // start nested expression
+                    foundToken(start, stream.col, type);
+                    foundToken(stream.col, stream.col += 2, type);
+                    $nestedExpr = true;
+                    $cont.push(readToken);
+                    return;
                 }
                 esc = !esc && ch === "\\";
                 stream.nextCol();
@@ -192,7 +206,7 @@ parseInt undefined window document alert prototype constructor".qw();
                 }
                 if (ch === "/" && !esc && !inset) {
                     $cont.pop();
-                    $inString = null;
+                    // $inString.pop(); // XXX WTF?
                     foundToken(start, stream.col, "regexp");
                     foundToken(stream.col, ++stream.col, "regexp-stopper");
                     var m = stream.lookingAt(/^[gmsiy]+/);
@@ -206,12 +220,13 @@ parseInt undefined window document alert prototype constructor".qw();
             foundToken(start, stream.col, "regexp");
         };
 
-        function next() {
-            stream.checkStop();
-            if ($cont.length > 0)
-                return $cont.peek()();
+        function readToken() {
             var ch = stream.peek(), m, tmp;
-            if (stream.lookingAt("/*")) {
+            if ($nestedExpr && stream.lookingAt("}")) {
+                foundToken(stream.col, stream.col += 1, "string");
+                $cont.pop();
+            }
+            else if (stream.lookingAt("/*")) {
                 $inComment = { line: stream.line, c1: stream.col };
                 foundToken(stream.col, stream.col += 2, "mcomment-starter");
                 $cont.push(readComment);
@@ -220,8 +235,8 @@ parseInt undefined window document alert prototype constructor".qw();
                 foundToken(stream.col, stream.col += 2, "comment-starter");
                 foundToken(stream.col, stream.col = stream.lineLength(), "comment");
             }
-            else if (ch === '"' || ch === "'") {
-                $inString = { line: stream.line, c1: stream.col };
+            else if (ch === '"' || ch === "'" || ch === "`") {
+                $inString.push({ line: stream.line, c1: stream.col, tmpl: ch === "`" });
                 foundToken(stream.col, ++stream.col, "string-starter");
                 $cont.push(readString.$C(ch, "string"));
             }
@@ -261,13 +276,20 @@ parseInt undefined window document alert prototype constructor".qw();
             else {
                 foundToken(stream.col, ++stream.col, null);
             }
+        }
+
+        function next() {
+            stream.checkStop();
+            if ($cont.length > 0)
+                return $cont.peek()();
+            readToken();
         };
 
         function indentation() {
 
             // no indentation for continued strings
-            if ($inString)
-                return 0;
+            if ($inString.length)
+                return null;
 
             var row = stream.line;
             var currentLine = stream.lineText();

@@ -55,7 +55,7 @@
 }
 
 .Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #eda;
+  /* background-color: #eda; */
 }
 
 .Ymacs-Theme-light .Ymacs-overwrite-mode .Ymacs-caret {
@@ -64,9 +64,9 @@
 }
 
 
-.Ymacs-Theme-light .Ymacs_Overlay .match-paren { background: #080; }
+.Ymacs-Theme-light .Ymacs_Overlay .match-paren { background: #2c2; opacity: 0.4; }
 .Ymacs-Theme-light .Ymacs_Overlay .selection { background: #88f; opacity: 0.8; }
-.Ymacs-Theme-light .Ymacs_Overlay .isearch { background: #a22; }
+.Ymacs-Theme-light .Ymacs_Overlay .isearch { background: #c82; }
 
 .Ymacs-Theme-light .Ymacs_Modeline {
   background-color: #777;

@@ -294,6 +294,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
             this.setActiveFrame(frame);
             frame.getElement().style.removeProperty("width");
             frame.getElement().style.removeProperty("height");
+            frame.centerOnCaret();
         }
     };
 
@@ -318,6 +319,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
                 other = ex;
             }
             this.setActiveFrame(other);
+            other.centerOnCaret();
         }
     };
 
@@ -662,8 +664,6 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         var buffer = frame.buffer;
 
         ev.wasKeypress = press;
-
-        console.log(ev.key);
 
         if (press) {
             if (this.__macro_recording) {

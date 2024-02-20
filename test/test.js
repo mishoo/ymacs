@@ -100,7 +100,7 @@ this.pushKeymap(My_Keymap());\n\
         var txt = new Ymacs_Buffer({ name: "lorem.txt" });
         txt.setCode(lorem);
 
-        javascript.cmd("javascript_dl_mode");
+        javascript.cmd("javascript_mode");
         javascript.setq("indent_level", 4);
         xml.cmd("xml_mode");
 
@@ -139,7 +139,7 @@ to the current one.\n\
                 buffers: [ javascript, xml, lisp, markdown, txt, keys ],
                 className: "Ymacs-blinking-caret"
         });
-        ymacs.setColorTheme([ "dark", "mishoo" ]);
+        ymacs.setColorTheme([ "dark", "material-dark" ]);
 
         try {
                 ymacs.getActiveBuffer().cmd("eval_file", ".ymacs");
@@ -219,6 +219,7 @@ to the current one.\n\
 
         [
                 "dark|y|Dark background (default)",
+                "dark|material-dark|Material-dark",
                 "dark|mishoo|>Mishoo's Emacs theme",
                 "dark|billw|>Billw",
                 "dark|charcoal-black|>Charcoal black",

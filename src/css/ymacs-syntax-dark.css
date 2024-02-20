@@ -57,9 +57,6 @@
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .markdown-blockquote3 { color: #f8f; }
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .markdown-blockquote { color: #aaa; }
 
-.Ymacs-Theme-dark .open-paren { color: #9a7 }
-.Ymacs-Theme-dark .close-paren { color: #9a7 }
-
 /* other stuff */
 
 .Ymacs-Theme-dark .Ymacs-caret {
@@ -75,7 +72,7 @@
 }
 
 .Ymacs-Theme-dark .Ymacs_Frame-focus .Ymacs-current-line {
-  background-color: #000;
+  /* background-color: #000; */
 }
 
 .Ymacs-Theme-dark .Ymacs-overwrite-mode .Ymacs-caret {
@@ -83,9 +80,9 @@
   color: #fff;
 }
 
-.Ymacs-Theme-dark .Ymacs_Overlay .match-paren { background: #8f8; }
-.Ymacs-Theme-dark .Ymacs_Overlay .selection { background: #ccf; }
-.Ymacs-Theme-dark .Ymacs_Overlay .isearch { background: #ffc; }
+.Ymacs-Theme-dark .Ymacs_Overlay .match-paren { background: #2c2; opacity: 0.4; }
+.Ymacs-Theme-dark .Ymacs_Overlay .selection { background: #555; }
+.Ymacs-Theme-dark .Ymacs_Overlay .isearch { background: #c82; }
 
 .Ymacs-Theme-dark .Ymacs_Modeline {
   background-color: #777;
@@ -101,8 +98,8 @@
 }
 
 .Ymacs-Theme-dark .Ymacs-line-numbers .Ymacs-frame-content div.line:before {
-  border-right: 1px dotted #888;
-  background-color: rgba(80, 80, 80, 0.2);
+  border-right: 1px solid #000;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .Ymacs-Theme-dark .Ymacs-line-numbers .Ymacs-frame-content div.Ymacs-current-line:before {

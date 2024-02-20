@@ -264,6 +264,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         layout.appendWidget(this);
         layout.appendWidget(fr);
         fr.centerOnCaret();
+        this.centerOnCaret();
         return fr;
     };
 
@@ -554,24 +555,39 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         }
         var p1 = this.coordinates(props.line1, props.col1);
         var p2 = this.coordinates(props.line2, props.col2);
-        var p0 = this.__lineNumbers ? this.coordinates(props.line1, 0) : { x: 0, y: 0 };
-        p1.x -= p0.x;
-        p2.x -= p0.x;
-        var str = String.buffer(
-            "<div id='", this.getOverlayId(name), "' class='Ymacs_Overlay ", name,
-            "' style='top:", p1.y, "px;left:", p0.x, "px'>"
-        );
+        var p0 = props.col1 == 0 ? p1 : this.coordinates(props.line1, 0);
+        var str = `<div id="${this.getOverlayId(name)}" class="Ymacs_Overlay ${name}">`;
         if (props.line1 == props.line2) {
-            str("<div class='", name, "' style='margin-left:", p1.x,
-                "px; width:", p2.x - p1.x, "px;height:", p2.h, "px;'>&nbsp;</div>");
+            str += `<div class="${name}" style="
+                top: ${p1.y}px;
+                left: ${p1.x}px;
+                height: ${p1.h}px;
+                width: ${p2.x - p1.x}px;
+            "></div>`;
         } else {
-            str("<div class='", name, "' style='margin-left:", p1.x, "px;height:", p1.h, "px;'>&nbsp;</div>");
-            if (props.line2 - props.line1 > 1)
-                str("<div class='", name, "' style='height:", p2.y - p1.y - p1.h, "px'></div>");
-            str("<div class='", name, "' style='width:", p2.x, "px;height:", p2.h, "px;'>&nbsp;</div>");
+            str += `<div class="${name}" style="
+                top: ${p1.y}px;
+                left: ${p1.x}px;
+                height: ${props.col1 > 0 ? p1.h : p2.y - p1.y}px;
+            "></div>`;
+            if (props.col1 > 0 && props.line2 - props.line1 > 1) {
+                str += `<div class="${name}" style="
+                    top: ${p1.y + p1.h}px;
+                    left: ${p0.x}px;
+                    height: ${p2.y - p1.y - p1.h}px;
+                "></div>`;
+            }
+            if (props.col2 > 0) {
+                str += `<div class="${name}" style="
+                    top: ${p2.y}px;
+                    left: ${p0.x}px;
+                    height: ${p2.h}px;
+                    width: ${p2.x - p0.x}px;
+                "></div>`;
+            }
         }
-        str("</div>");
-        return str.get();
+        str += "</div>";
+        return str;
     };
 
     P.getOverlaysCount = function() {
@@ -765,7 +781,7 @@ DEFINE_CLASS("Ymacs_SplitCont", DlContainer, function(D, P, DOM){
     P._setResizeCaptures = function(capture) {
         (capture ? DlEvent.captureGlobals : DlEvent.releaseGlobals)(this._resizeHandlers);
         var div = DlDialog.activateEventStopper(capture);
-        CC(div, capture, this._horiz ? "CURSOR-RESIZE-S" : "CURSOR-RESIZE-E");
+        CC(div, capture, this._horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
     };
     P._doResize = function(pos) {
         var cont = this.getElement();
@@ -798,6 +814,7 @@ DEFINE_CLASS("Ymacs_SplitCont", DlContainer, function(D, P, DOM){
         this._orig_sz = this._horiz ? a.offsetHeight : a.offsetWidth;
         this._orig_frac = this._1stChildFr();
         this._setResizeCaptures(true);
+        this.addClass("Ymacs_SplitCont_dragging");
         DlException.stopEventBubbling();
     }
     function mouseMove(ev) {
@@ -805,6 +822,6 @@ DEFINE_CLASS("Ymacs_SplitCont", DlContainer, function(D, P, DOM){
     }
     function stopResize(ev) {
         this._setResizeCaptures(false);
-        this._doResize(ev.pos);
+        this.delClass("Ymacs_SplitCont_dragging");
     }
 });

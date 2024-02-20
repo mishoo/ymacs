@@ -221,23 +221,21 @@ Ymacs_Buffer.newCommands({
     indent_line: Ymacs_Interactive("P", function(noEmpty) {
         if (this.tokenizer) {
             var indent = this.tokenizer.getIndentation(this._rowcol.row, this);
-            if (indent != null) {
-                if (!noEmpty || /\S/.test(this.getLine())) {
-                    var pos = this.cmd("save_excursion", function(){
-                        this.cmd("back_to_indentation");
-                        if (this._rowcol.col != indent) {
-                            this.cmd("beginning_of_line");
-                            this.cmd("delete_whitespace", true);
-                            this.cmd("insert", " ".x(indent));
-                        }
-                        return this.point();
-                    });
-                    // when point is before the indentation, go there.
-                    if (this.point() < pos)
-                        this.cmd("goto_char", pos);
-                }
-                return;
+            if (!noEmpty || /\S/.test(this.getLine())) {
+                var pos = this.cmd("save_excursion", function(){
+                    this.cmd("back_to_indentation");
+                    if (indent != null && this._rowcol.col != indent) {
+                        this.cmd("beginning_of_line");
+                        this.cmd("delete_whitespace", true);
+                        this.cmd("insert", " ".x(indent));
+                    }
+                    return this.point();
+                });
+                // when point is before the indentation, go there.
+                if (this.point() < pos)
+                    this.cmd("goto_char", pos);
             }
+            return;
         }
         this.cmd("insert", " ".x(this.getq("indent_line")));
     }),
