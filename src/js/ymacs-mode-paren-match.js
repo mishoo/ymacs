@@ -72,6 +72,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         "(" : ")",
         "[" : "]",
         "{" : "}",
+        "❰" : "❱",
+        "«" : "»",
         '"' : { close: '"', backslash: /[\x22\\]/g },
         "'" : { close: "'", backslash: /[\x27\\]/g }
     };
@@ -80,7 +82,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         ")" : "(",
         "]" : "[",
         "}" : "{",
-        '"' : '"'
+        '"' : '"',
+        "❱" : "❰",
+        "»" : "«",
     };
 
     function ERROR(o) {
@@ -296,7 +300,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         paredit_backward_delete_char: Ymacs_Interactive("^p", function(n){
             if (n != null) return this.cmd("backward_delete_char", n);
             if (!this.deleteTransientRegion()) {
-                if (this.cmd("looking_back", /[\(\[\{\"]/g)) {
+                if (this.cmd("looking_back", /[\(\[\{\"\❰\«]/g)) {
                     var close = PARENS[this.matchData[0]];
                     if (close) {
                         if (close.close) close = close.close;
@@ -314,7 +318,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         paredit_delete_char: Ymacs_Interactive("^p", function(n){
             if (n != null) return this.cmd("delete_char", n);
             if (!this.deleteTransientRegion()) {
-                if (this.cmd("looking_at", /[\]\}\)\"]/g)) {
+                if (this.cmd("looking_at", /[\]\}\)\"\❱\»]/g)) {
                     var open = R_PARENS[this.matchData[0]];
                     if (open) {
                         var rx = new RegExp("\\" + open + "\\s*", "mg");

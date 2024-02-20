@@ -404,13 +404,17 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
     var OPEN_PAREN = {
         "(" : ")",
         "{" : "}",
-        "[" : "]"
+        "[" : "]",
+        "❰" : "❱",
+        "«" : "»",
     };
 
     var CLOSE_PAREN = {
         ")" : "(",
         "}" : "{",
-        "]" : "["
+        "]" : "[",
+        "❱" : "❰",
+        "»" : "«",
     };
 
     var DEFINES_FUNCTION = "defun defmacro defgeneric defmethod".qw().toHash();
@@ -450,7 +454,8 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         "block"               : "1*",
         "dotimes"             : "1*",
         "dolist"              : "1*",
-        "multiple-value-bind" : "2*"
+        "multiple-value-bind" : "2*",
+        ":method"             : "1*",
     };
 
     var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();
@@ -624,7 +629,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                 foundToken(stream.col, ++stream.col, "string-starter");
                 $cont.push(readString.$C(ch, "string"));
             }
-            else if ((tmp = stream.lookingAt(/^[+-]?(#x[0-9a-f]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*)(\x2f(#x[0-9a-f]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*))?/))) { // Dude, WTF...
+            else if ((tmp = stream.lookingAt(/^[+-]?(#x[0-9a-fA-F]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*)(\x2f(#x[0-9a-fA-F]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*))?/))) { // Dude, WTF...
                 newArg();
                 foundToken(stream.col, stream.col += tmp[0].length, "number");
             }
