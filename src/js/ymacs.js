@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
+DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     D.DEFAULT_EVENTS = [
         "onBufferSwitch",
@@ -109,8 +109,8 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
 
         var frame = this.createFrame({ buffer: this.buffers[0] });
 
-        this.packWidget(this.minibuffer_frame, { pos: "bottom" });
-        this.packWidget(frame, { pos: "top", fill: "*" });
+        this.appendWidget(frame);
+        this.appendWidget(this.minibuffer_frame);
 
         this.setActiveFrame(frame);
         frame._redrawCaret();
@@ -282,7 +282,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             frame.setStyle("height", "");
         });
         this.minibuffer_frame.getOverlaysContainer().style.height = "";
-        this.doLayout();
     };
 
     P.keepOnlyFrame = function(frame) {
@@ -293,16 +292,18 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
             this.replaceWidget(p, frame);
             p.destroy();
             this.setActiveFrame(frame);
-            this.doLayout();
+            frame.getElement().style.removeProperty("width");
+            frame.getElement().style.removeProperty("height");
         }
     };
 
     P.deleteFrame = function(frame) {
         if (this.frames.length > 1) {
             var p = frame.parent, other = p.children().grep_first(function(f){
-                return f instanceof DlLayout || f instanceof Ymacs_Frame && f !== frame;
+                return f instanceof Ymacs_SplitCont || f instanceof Ymacs_Frame && f !== frame;
             });
-            if (p._resizeBar) p._resizeBar._widget = other;
+            other.getElement().style.removeProperty("width");
+            other.getElement().style.removeProperty("height");
             p.parent.replaceWidget(p, other);
             p.destroy();
             try {
@@ -317,7 +318,6 @@ DEFINE_CLASS("Ymacs", DlLayout, function(D, P, DOM){
                 other = ex;
             }
             this.setActiveFrame(other);
-            this.doLayout();
         }
     };
 

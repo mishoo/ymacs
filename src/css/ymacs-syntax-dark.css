@@ -102,7 +102,7 @@
 
 .Ymacs-Theme-dark .Ymacs-line-numbers .Ymacs-frame-content div.line:before {
   border-right: 1px dotted #888;
-  background-color: #112;
+  background-color: rgba(80, 80, 80, 0.2);
 }
 
 .Ymacs-Theme-dark .Ymacs-line-numbers .Ymacs-frame-content div.Ymacs-current-line:before {

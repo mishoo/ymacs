@@ -139,7 +139,7 @@ to the current one.\n\
                 buffers: [ javascript, xml, lisp, markdown, txt, keys ],
                 className: "Ymacs-blinking-caret"
         });
-        ymacs.setColorTheme([ "dark", "y" ]);
+        ymacs.setColorTheme([ "dark", "mishoo" ]);
 
         try {
                 ymacs.getActiveBuffer().cmd("eval_file", ".ymacs");

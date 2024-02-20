@@ -53,7 +53,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         // override in DlWidget
         _focusable           : [ "focusable"            , true ],
-        _fillParent          : [ "fillParent"           , true ]
     };
 
     D.CONSTRUCT = function() {
@@ -252,44 +251,28 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         this.ymacs.deleteFrame(this);
     };
 
-    P.vsplit = function(percent) {
-        if (percent == null) percent = "50%";
-        var cont   = this.parent,
-        fr     = this.ymacs.createFrame({ buffer: this.buffer }),
-        layout = new DlLayout(),
-        rb     = new DlResizeBar({ widget: this, keepPercent: true, horiz: true, className: "Ymacs-splitbar-horiz" });
-        if (this._resizeBar) {
-            this._resizeBar._widget = layout;
-            layout._resizeBar = this._resizeBar;
-        }
-        this._resizeBar = rb;
+    P._split_layout = function(horiz) {
+        var cont = this.parent;
+        var fr = this.ymacs.createFrame({ buffer: this.buffer });
+        var layout = new Ymacs_SplitCont({ horiz: horiz });
+        var lael = layout.getElement(), frel = this.getElement();
+        lael.style.width = frel.style.width;
+        lael.style.height = frel.style.height;
+        frel.style.removeProperty("width");
+        frel.style.removeProperty("height");
         cont.replaceWidget(this, layout);
-        layout.packWidget(this, { pos: "top", fill: percent });
-        layout.packWidget(rb, { pos: "top" });
-        layout.packWidget(fr, { pos: "top", fill: "*" });
-        cont.__doLayout();
+        layout.appendWidget(this);
+        layout.appendWidget(fr);
         fr.centerOnCaret();
         return fr;
     };
 
+    P.vsplit = function() {
+        return this._split_layout(true);
+    };
+
     P.hsplit = function(percent) {
-        if (percent == null) percent = "50%";
-        var cont   = this.parent,
-        fr     = this.ymacs.createFrame({ buffer: this.buffer }),
-        layout = new DlLayout(),
-        rb     = new DlResizeBar({ widget: this, keepPercent: true, className: "Ymacs-splitbar-vert" });
-        if (this._resizeBar) {
-            this._resizeBar._widget = layout;
-            layout._resizeBar = this._resizeBar;
-        }
-        this._resizeBar = rb;
-        cont.replaceWidget(this, layout);
-        layout.packWidget(this, { pos: "left", fill: percent });
-        layout.packWidget(rb, { pos: "left" });
-        layout.packWidget(fr, { pos: "left", fill: "*" });
-        cont.__doLayout();
-        fr.centerOnCaret();
-        return fr;
+        return this._split_layout(false);
     };
 
     P.toggleLineNumbers = function() {
@@ -484,9 +467,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P.setOuterSize = P.setSize = function(sz) {
-        D.BASE.setOuterSize.apply(this, arguments);
-        DOM.setOuterSize(this.getOverlaysContainer(), sz.x, sz.y - this.getModelineElement().offsetHeight);
-        DOM.setOuterSize(this.getModelineElement(), sz.x);
+        var el = this.getElement();
+        if (sz.x != null) el.style.width = sz.x + "px";
+        if (sz.y != null) el.style.height = sz.y + "px";
     };
 
     P.redrawModeline = function(rc) {
@@ -602,13 +585,13 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             var p = this.getOverlaysContainer(),
             old = !isNew && document.getElementById(this.getOverlayId(name));
             old ? p.replaceChild(div, old) : p.appendChild(div);
-            // this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+            this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         }
     };
 
     P._on_bufferOverlayDelete = function(name, props, isNew) {
         DOM.trash(document.getElementById(this.getOverlayId(name)));
-        // this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+        this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
     };
 
     /* -----[ self events ]----- */
@@ -756,4 +739,72 @@ DEFINE_CLASS("Ymacs_Message_Popup", DlPopup, function(D, P) {
         args.autolink = false;
         args.zIndex = 5000;
     };
+});
+
+DEFINE_CLASS("Ymacs_SplitCont", DlContainer, function(D, P, DOM){
+    var CC = DOM.condClass;
+    D.DEFAULT_ARGS = {
+        _horiz: [ "horiz", true ]
+    };
+    P._createElement = function() {
+        D.BASE._createElement.apply(this, arguments);
+        this.addClass(this._horiz ? "Ymacs_SplitCont_horiz" : "Ymacs_SplitCont_vert");
+    };
+    P._setListeners = function() {
+        D.BASE._setListeners.apply(this, arguments);
+        this._resizeHandlers = {
+            onMouseMove  : mouseMove.bind(this),
+            onMouseUp    : stopResize.bind(this),
+            onMouseOver  : DlException.stopEventBubbling,
+            onMouseOut   : DlException.stopEventBubbling,
+            onMouseEnter : DlException.stopEventBubbling,
+            onMouseLeave : DlException.stopEventBubbling
+        };
+        this.addEventListener("onMouseDown", startDrag);
+    };
+    P._setResizeCaptures = function(capture) {
+        (capture ? DlEvent.captureGlobals : DlEvent.releaseGlobals)(this._resizeHandlers);
+        var div = DlDialog.activateEventStopper(capture);
+        CC(div, capture, this._horiz ? "CURSOR-RESIZE-S" : "CURSOR-RESIZE-E");
+    };
+    P._doResize = function(pos) {
+        var cont = this.getElement();
+        var max = this._horiz ? cont.offsetHeight : cont.offsetWidth;
+        var diff = (this._horiz ? pos.y : pos.x) - this._start;
+        var a = this.children(0).getElement();
+        var b = this.children(1).getElement();
+        var target = Math.min(max, Math.max(0, this._orig_sz + diff));
+        var frac = Math.min(0.9, Math.max(0.1, target / max));
+        if (this._horiz) {
+            a.style.height = (frac * 100) + "%";
+            b.style.height = ((1 - frac) * 100) + "%";
+        } else {
+            a.style.width = (frac * 100) + "%";
+            b.style.width = ((1 - frac) * 100) + "%";
+        }
+    };
+    P._1stChildFr = function() {
+        var a = this.children(0).getElement();
+        var b = this.children(1).getElement();
+        if (this._horiz) {
+            return (a.offsetHeight + b.offsetHeight) / a.offsetHeight;
+        } else {
+            return (a.offsetWidth + b.offsetWidth) / a.offsetWidth;
+        }
+    };
+    function startDrag(ev) {
+        var a = this.children(0).getElement();
+        this._start = this._horiz ? ev.pos.y : ev.pos.x;
+        this._orig_sz = this._horiz ? a.offsetHeight : a.offsetWidth;
+        this._orig_frac = this._1stChildFr();
+        this._setResizeCaptures(true);
+        DlException.stopEventBubbling();
+    }
+    function mouseMove(ev) {
+        this._doResize(ev.pos);
+    }
+    function stopResize(ev) {
+        this._setResizeCaptures(false);
+        this._doResize(ev.pos);
+    }
 });

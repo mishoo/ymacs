@@ -1,18 +1,41 @@
-.Ymacs_Frame {
-  font-family: "DejaVu Sans Mono","Lucida Sans Typewriter",monospace;
-  overflow: hidden;
+.Ymacs, .Ymacs * {
+  box-sizing: border-box !important;
+  user-select: none;
 }
 
-/* .Ymacs_Frame { */
-/*   opacity: 0.8; */
-/* } */
-/* .Ymacs_Frame-active { */
-/*   opacity: 1; */
-/* } */
+.Ymacs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.Ymacs_Frame {
+  font-family: "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
+  font-size: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
 
 .Ymacs-frame-overlays {
   overflow: hidden;
   position: relative;
+  flex-grow: 1;
+}
+
+.Ymacs_Modeline {
+  font-family: "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
+  white-space: pre;
+  padding-bottom: 1px;
+  overflow: hidden;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+.Ymacs_Modeline:after {
+  content: "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
 }
 
 .Ymacs-frame-content {
@@ -27,6 +50,11 @@
 
 .Ymacs_Frame-focus .Ymacs-caret {
   opacity: 1;
+}
+
+.Ymacs_Minibuffer {
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; }
@@ -48,22 +76,6 @@
 .Ymacs_Overlay { position: absolute; right: 0; opacity: 0.5; filter: alpha(opacity=50); }
 .Ymacs_Overlay .match-paren { opacity: 0.4; filter: alpha(opacity=40); }
 .Ymacs_Overlay .selection { opacity: 0.7; filter: alpha(opacity=70); }
-
-.Ymacs_Message_Popup {
-  background-color: wheat;
-  padding: 10px;
-}
-
-.Ymacs_Modeline {
-  font-family: "Lucida Sans Typewriter",monospace;
-  white-space: pre;
-  padding-bottom: 1px;
-  overflow: hidden;
-}
-
-.Ymacs_Modeline:after {
-  content: "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
-}
 
 .Ymacs_Message_Popup {
   background-color: wheat;
@@ -89,3 +101,25 @@
 .Ymacs-splitbar-vert { border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000; }
 
 .Ymacs_Frame .minibuffer-prompt { font-weight: bold }
+
+.Ymacs_SplitCont {
+  display: flex;
+  overflow: hidden;
+  gap: 5px;
+}
+.Ymacs_SplitCont_horiz {
+  flex-direction: column;
+  cursor: ns-resize;
+}
+.Ymacs_SplitCont_vert {
+  flex-direction: row;
+  cursor: ew-resize;
+}
+.Ymacs_SplitCont_horiz > div {
+  height: 50%;
+  width: 100%;
+}
+.Ymacs_SplitCont_vert > div {
+  width: 50%;
+  height: 100%;
+}

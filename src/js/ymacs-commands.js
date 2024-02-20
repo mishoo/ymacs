@@ -1192,7 +1192,7 @@ Ymacs_Buffer.newCommands({
                 return;
             }
             if (this.ymacs.isRecordingMacro()) {
-                this.signalError("Already defining keyboard macro.")
+                this.signalError("Already defining keyboard macro.");
                 return;
             }
             this.signalInfo("Defining keyboard macro");
