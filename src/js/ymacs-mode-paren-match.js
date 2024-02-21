@@ -241,7 +241,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                     return compareRowCol(p, lc) >= 0;
                 });
                 if (p != null) {
-                    this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + 1);
+                    this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + p.type.length);
                 } else {
                     ERROR(this);
                 }

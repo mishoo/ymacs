@@ -72,15 +72,15 @@ parseInt undefined window document alert prototype constructor this".qw();
     };
 
     var OPEN_PAREN = {
-        "(" : ")",
-        "{" : "}",
-        "[" : "]"
+        "("  : ")",
+        "{"  : "}",
+        "["  : "]",
     };
 
     var CLOSE_PAREN = {
         ")" : "(",
         "}" : "{",
-        "]" : "["
+        "]" : "[",
     };
 
     function isOpenParen(ch) {
@@ -97,8 +97,7 @@ parseInt undefined window document alert prototype constructor this".qw();
         var $parens = [];
         var $passedParens = [];
         var $inComment = null;
-        var $inString = [];
-        var $nestedExpr = false;
+        var $inString = false;
         var PARSER = {
             next        : next,
             copy        : copy,
@@ -113,18 +112,16 @@ parseInt undefined window document alert prototype constructor this".qw();
             var context = restore.context = {
                 cont         : $cont.slice(0),
                 inComment    : $inComment,
-                inString     : $inString.slice(0),
+                inString     : $inString,
                 parens       : $parens.slice(0),
                 passedParens : $passedParens.slice(0),
-                $nestedExpr  : $nestedExpr,
             };
             function restore() {
                 $cont          = context.cont.slice(0);
                 $inComment     = context.inComment;
-                $inString      = context.inString.slice(0);
+                $inString      = context.inString;
                 $parens        = context.parens.slice(0);
                 $passedParens  = context.passedParens.slice(0);
-                $nestedExpr    = context.$nestedExpr;
                 return PARSER;
             };
             return restore;
@@ -165,25 +162,29 @@ parseInt undefined window document alert prototype constructor this".qw();
             }
         };
 
-        function inTemplateString() {
-            return $inString.length && $inString[$inString.length - 1].type == "tmpl";
-        };
-
         function readString(end, type) {
+            $inString = true;
             var ch, esc = false, start = stream.col;
             while (!stream.eol()) {
                 ch = stream.peek();
                 if (!esc && ch === end) {
                     $cont.pop();
-                    $inString.pop();
+                    $inString = false;
                     foundToken(start, stream.col, type);
+                    var p = $parens.peek();
+                    if (p && p.type == ch) {
+                        $parens.pop();
+                        p.closed = { line: stream.line, col: stream.col, opened: p };
+                        $passedParens.push(p);
+                    }
                     foundToken(stream.col, ++stream.col, type + "-stopper");
                     return;
                 }
-                if (!esc && stream.lookingAt("${")) { // start nested expression
+                if (!esc && end == "`" && stream.lookingAt("${")) { // start nested expression
+                    $inString = false;
+                    $parens.push({ line: stream.line, col: stream.col, type: "${" });
                     foundToken(start, stream.col, type);
-                    foundToken(stream.col, stream.col += 2, type);
-                    $nestedExpr = true;
+                    foundToken(stream.col, stream.col += 2, "open-paren");
                     $cont.push(readToken);
                     return;
                 }
@@ -206,7 +207,6 @@ parseInt undefined window document alert prototype constructor this".qw();
                 }
                 if (ch === "/" && !esc && !inset) {
                     $cont.pop();
-                    // $inString.pop(); // XXX WTF?
                     foundToken(start, stream.col, "regexp");
                     foundToken(stream.col, ++stream.col, "regexp-stopper");
                     var m = stream.lookingAt(/^[gmsiy]+/);
@@ -222,11 +222,7 @@ parseInt undefined window document alert prototype constructor this".qw();
 
         function readToken() {
             var ch = stream.peek(), m, tmp;
-            if ($nestedExpr && stream.lookingAt("}")) {
-                foundToken(stream.col, stream.col += 1, "string");
-                $cont.pop();
-            }
-            else if (stream.lookingAt("/*")) {
+            if (stream.lookingAt("/*")) {
                 $inComment = { line: stream.line, c1: stream.col };
                 foundToken(stream.col, stream.col += 2, "mcomment-starter");
                 $cont.push(readComment);
@@ -236,7 +232,7 @@ parseInt undefined window document alert prototype constructor this".qw();
                 foundToken(stream.col, stream.col = stream.lineLength(), "comment");
             }
             else if (ch === '"' || ch === "'" || ch === "`") {
-                $inString.push({ line: stream.line, c1: stream.col, tmpl: ch === "`" });
+                $parens.push({ line: stream.line, col: stream.col, type: ch });
                 foundToken(stream.col, ++stream.col, "string-starter");
                 $cont.push(readString.$C(ch, "string"));
             }
@@ -257,10 +253,15 @@ parseInt undefined window document alert prototype constructor this".qw();
             }
             else if ((tmp = isCloseParen(ch))) {
                 var p = $parens.pop();
-                if (!p || p.type != tmp) {
+                if (ch == "}" && p && p.type == "${") {
+                    p.closed = { line: stream.line, col: stream.col, opened: p };
+                    $passedParens.push(p);
+                    foundToken(stream.col, ++stream.col, "close-paren");
+                    $cont.pop();
+                }
+                else if (!p || p.type != tmp) {
                     foundToken(stream.col, ++stream.col, "error");
                 } else {
-                    // circular reference; poor browsers will leak.  mwuhahahaha
                     p.closed = { line: stream.line, col: stream.col, opened: p };
                     $passedParens.push(p);
                     foundToken(stream.col, ++stream.col, "close-paren");
@@ -288,7 +289,7 @@ parseInt undefined window document alert prototype constructor this".qw();
         function indentation() {
 
             // no indentation for continued strings
-            if ($inString.length)
+            if ($inString)
                 return null;
 
             var row = stream.line;
