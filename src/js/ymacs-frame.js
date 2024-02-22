@@ -381,10 +381,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         // hide stale carets :-\
         // mess everywhere.
-        Array.$(this.getElement().querySelectorAll(".Ymacs-caret, #" + this.__caretId)).foreach(function(el){
-            el.id = "";
-            el.className = "";
-        });
+        // XXX: why was this needed?
+        // Array.$(this.getElement().querySelectorAll(".Ymacs-caret, #" + this.__caretId)).foreach(function(el){
+        //     el.id = "";
+        //     el.className = "";
+        // });
 
         // redraw the line where the caret was previously, so that it disappears from there
         if (this.__prevCaretLine != null) {

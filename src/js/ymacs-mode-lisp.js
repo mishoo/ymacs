@@ -739,25 +739,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
             rx: /\s*;+\s?/g,
             ch: ";;"
         },
-        syntax_word_dabbrev: {
-            test: function(c) {
-                if (c) {
-                    var code = c.charCodeAt(0);
-                    return ((code >= 48 && code <= 57) || c.toUpperCase() != c.toLowerCase()
-                            || c == "-"
-                            || c == "*"
-                            || c == "%"
-                            || c == "+"
-                            || c == "/"
-                            || c == "@"
-                            || c == "&"
-                            || c == "$"
-                            || c == "."
-                            || c == "="
-                            || c == "~");
-                }
-            }
-        }
+        syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u
     });
     var keymap = Ymacs_Keymap_LispMode();
     var was_paren_match = this.cmd("paren_match_mode", true);

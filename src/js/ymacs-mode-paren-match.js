@@ -75,8 +75,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         "M-s"                          : "paredit_splice_sexp",
         "Backspace"                    : "paredit_backward_delete_char",
         "Delete && C-d"                : "paredit_delete_char",
-        "C-c ] && C-c C-]"             : "paredit_close_all_pairs",
         "Enter && C-j && C-m"          : "paredit_newline_and_indent",
+        "; && : && , && ."             : "paredit_electric_char",
     };
 
     /* -----[ new commands ]----- */
@@ -380,23 +380,23 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
             m.destroy();
         }),
 
-        paredit_close_all_pairs: Ymacs_Interactive(function() {
-            var p = this.tokenizer.getParserForLine(this._rowcol.row);
-            if (p) {
-                // this kind of sucks, we need to rewind the stream to that location..
-                var s = this.tokenizer.stream;
-                s.line = this._rowcol.row;
-                s.col = 0;
-                try {
-                    while (s.col < this._rowcol.col)
-                        p.next();
-                } catch(ex) {}
-                p = p.copy().context.parens; // these are still-to-close
-                p.r_foreach(function(p){
-                    this.cmd("paredit_close_pair", PARENS[p.type]);
-                }, this);
-            }
-        }),
+        // paredit_close_all_pairs: Ymacs_Interactive(function() {
+        //     var p = this.tokenizer.getParserForLine(this._rowcol.row);
+        //     if (p) {
+        //         // this kind of sucks, we need to rewind the stream to that location..
+        //         var s = this.tokenizer.stream;
+        //         s.line = this._rowcol.row;
+        //         s.col = 0;
+        //         try {
+        //             while (s.col < this._rowcol.col)
+        //                 p.next();
+        //         } catch(ex) {}
+        //         p = p.copy().context.parens; // these are still-to-close
+        //         p.r_foreach(function(p){
+        //             this.cmd("paredit_close_pair", PARENS[p.type]);
+        //         }, this);
+        //     }
+        // }),
 
         paredit_newline_and_indent: Ymacs_Interactive(function(){
             this.cmd("newline_and_indent");
@@ -411,7 +411,12 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
             if (this.getq("electric_indent")) {
                 this.cmd("indent_line");
             }
-        }
+        },
+
+        paredit_electric_char: Ymacs_Interactive(function(){
+            this.cmd("self_insert_command");
+            this.cmd("paredit_maybe_indent");
+        }),
 
     });
 

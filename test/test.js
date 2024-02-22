@@ -219,7 +219,7 @@ to the current one.\n\
 
         [
                 "dark|y|Dark background (default)",
-                "dark|material-dark|Material-dark",
+                "dark|material-dark|>Material-dark",
                 "dark|mishoo|>Mishoo's Emacs theme",
                 "dark|billw|>Billw",
                 "dark|charcoal-black|>Charcoal black",

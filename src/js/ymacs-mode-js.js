@@ -287,14 +287,19 @@ parseInt undefined window document alert prototype constructor this".qw();
         };
 
         function indentation() {
-
-            // no indentation for continued strings
-            if ($inString)
-                return null;
-
             var row = stream.line;
             var currentLine = stream.lineText();
             var indent = 0;
+
+            if ($inString) {
+                // inside string literal
+                if (row > 0 && !/\S/.test(currentLine)) {
+                    // on an empty line, set indentation from previous line
+                    return stream.lineIndentation(row - 1);
+                }
+                // otherwise keep existing indentation
+                return null;
+            }
 
             if ($inComment) {
                 var commentStartLine = stream.lineText($inComment.line);

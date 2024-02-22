@@ -71,8 +71,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         indent_level                : 4,
 
         // syntax variables
-        syntax_word                 : { test: TEST_UNICODE_WORD_CHAR },
-        syntax_word_dabbrev         : { test: TEST_DABBREV_WORD_CHAR },
+        syntax_word                 : /^[0-9\p{L}]$/u,
+        syntax_word_dabbrev         : /^[0-9_$\p{L}]$/u,
         syntax_paragraph_sep        : /\n\s*\n/g
     };
 
@@ -99,20 +99,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     function MRK(x) {
         return x instanceof Ymacs_Marker ? x.getPosition() : x;
-    };
-
-    function TEST_UNICODE_WORD_CHAR(c) {
-        if (c) {
-            var code = c.charCodeAt(0);
-            return (code >= 48 && code <= 57) || c.toUpperCase() != c.toLowerCase();
-        }
-    };
-
-    function TEST_DABBREV_WORD_CHAR(c) {
-        if (c) {
-            var code = c.charCodeAt(0);
-            return (code >= 48 && code <= 57) || c == "_" || c.toUpperCase() != c.toLowerCase();
-        }
     };
 
     P.lastIndexOfRegexp = function(str, re, caret, bound) {
