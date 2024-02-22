@@ -261,15 +261,17 @@ Ymacs_Buffer.newCommands({
 
     looking_at: function(rx) {
         var pos = rx.lastIndex = this.point();
-        var ret = this.matchData = rx.exec(this.getCode());
-        if (ret)
+        var ret = rx.exec(this.getCode());
+        if (ret && ret.index == pos) {
             ret.after = rx.lastIndex;
-        return ret && ret.index == pos;
+            return this.matchData = ret;
+        }
     },
 
     looking_back: function(rx) {
         var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point());
-        return m && m.after == this.point();
+        if (m && m.after == this.point())
+            return m;
     },
 
     search_forward: Ymacs_Interactive("sSearch: ", function(str, bound) {
@@ -495,7 +497,7 @@ Ymacs_Buffer.newCommands({
         rc = this._rowcol,
         line = this.code[rc.row],
         end = pos + line.length - rc.col;
-        if (rc.row < this.code.length - 1 && this.cmd("looking_at", /\s*$/mg))
+        if (rc.row < this.code.length - 1 && this.cmd("looking_at", /\s*$/my))
             end++;
         this._killingAction(pos, end);
     }),
@@ -596,22 +598,22 @@ Ymacs_Buffer.newCommands({
                 this.cmd("forward_char");
 
             // identify the prefix to use for each line
-            var prefix = "", del = /\s+/g;
-            if (this.cmd("looking_at", /\s*\/\/+\s*/g)) {
+            var prefix = "", del = /\s+/y;
+            if (this.cmd("looking_at", /\s*\/\/+\s*/y)) {
                 prefix = this.matchData[0];
-                del = /\s*\/\/+\s*/g;
+                del = /\s*\/\/+\s*/y;
             }
-            else if (this.cmd("looking_at", /\s*\/\*\s*/g)) {
+            else if (this.cmd("looking_at", /\s*\/\*\s*/y)) {
                 prefix = " ".x(this.matchData[0].length);
-                del = /\s*\**\s*/g;
+                del = /\s*\**\s*/y;
             }
-            else if (this.cmd("looking_at", /\s*([-*]|[0-9]+\.|\(?[a-z][\).])?\s+/ig)) {
+            else if (this.cmd("looking_at", /\s*([-*]|[0-9]+\.|\(?[a-z][\).])?\s+/iy)) {
                 prefix = " ".x(this.matchData[0].length);
-                del = /\s*[#>;\s]*\s*/g;
+                del = /\s*[#>;\s]*\s*/y;
             }
-            else if (this.cmd("looking_at", /\s*[#>;\s]+\s*/g)) {
+            else if (this.cmd("looking_at", /\s*[#>;\s]+\s*/y)) {
                 prefix = this.matchData[0];
-                del = /\s*[#>;\s]*\s*/g;
+                del = /\s*[#>;\s]*\s*/y;
             }
 
             if (noPrefix) {
@@ -671,17 +673,17 @@ Ymacs_Buffer.newCommands({
 
         // identify the prefix to use for each line
         var prefix = "";
-        if (this.cmd("looking_at", /(\s*)([0-9]+)(\.\s+)/g)) {
+        if (this.cmd("looking_at", /(\s*)([0-9]+)(\.\s+)/y)) {
             prefix = this.matchData[1] +
                 (parseInt(this.matchData[2], 10) + 1) +
                 this.matchData[3];
         }
-        else if (this.cmd("looking_at", /(\s*\(?)([a-z])([\.\)]\s+)/ig)) {
+        else if (this.cmd("looking_at", /(\s*\(?)([a-z])([\.\)]\s+)/iy)) {
             prefix = this.matchData[1] +
                 String.fromCharCode(this.matchData[2].charCodeAt(0) + 1) +
                 this.matchData[3];
         }
-        else if (this.cmd("looking_at", /\s*[#>;*\s-]+\s*/g)) {
+        else if (this.cmd("looking_at", /\s*[#>;*\s-]+\s*/y)) {
             prefix = this.matchData[0];
         }
 
@@ -691,7 +693,7 @@ Ymacs_Buffer.newCommands({
 
         this.cmd("insert", "\n", prefix);
 
-        if (!this.cmd("looking_at", /\n\n/g)) {
+        if (!this.cmd("looking_at", /\n\n/y)) {
             this.cmd("newline");
             this.cmd("backward_char");
         };
@@ -970,10 +972,10 @@ Ymacs_Buffer.newCommands({
             var skip = 1;
             while (skip != 0 && this.cmd("search_backward_regexp", /<\x2f?([a-zA-Z0-9:_-]+)/g)) {
                 tag = this.cmd("match_string", 1);
-                if (this.cmd("looking_at", /<\x2f/g)) {
+                if (this.cmd("looking_at", /<\x2f/y)) {
                     ++skip;
                 }
-                else if (!this.cmd("looking_at", /<[^\x2f][^>]*?\x2f>/g)) {
+                else if (!this.cmd("looking_at", /<[^\x2f][^>]*?\x2f>/y)) {
                     --skip;
                 }
             }
@@ -1026,25 +1028,19 @@ Ymacs_Buffer.newCommands({
         );
     }),
 
-    get_line_comment_syntax: function() {
-        var cstart = this.getq("syntax_comment_line");
-        if (!cstart) throw new Ymacs_Exception("Unknown comment syntax");
-        return cstart;
-    },
-
     comment_region: Ymacs_Interactive("^r", function(begin, end){
-        var cstart = this.cmd("get_line_comment_syntax");
+        var cstart = this.getq("syntax_comment_line");
         this.clearTransientMark();
         this.cmd("save_excursion", function(){
             end = this.createMarker(end);
             this.cmd("goto_char", begin);
             var min = 100000;
             out: while (this.point() < end.getPosition()) {
-                while (this.cmd("looking_at", /\s*$/mg)) {
+                while (this.cmd("looking_at", /\s*$/my)) {
                     if (!this.cmd("forward_line")) break out;
                 }
                 var col = this._rowcol.col;
-                while (this.cmd("looking_at", /\s/g) && col < min) {
+                while (this.cmd("looking_at", /\s/y) && col < min) {
                     if (!this.cmd("forward_char")) break out;
                     ++col;
                 }
@@ -1054,13 +1050,13 @@ Ymacs_Buffer.newCommands({
                 if (!this.cmd("forward_line")) break out;
             }
             this.cmd("goto_char", end);
-            if (this._rowcol.col > 0 && !this.cmd("looking_at", /\s*$/mg))
+            if (this._rowcol.col > 0 && !this.cmd("looking_at", /\s*$/my))
                 this.cmd("newline_and_indent");
         });
     }),
 
     uncomment_region: Ymacs_Interactive("r", function(begin, end){
-        var cstart = this.cmd("get_line_comment_syntax");
+        var cstart = this.getq("syntax_comment_line");
         this.clearTransientMark();
         this.cmd("save_excursion", function(){
             end = this.createMarker(end);
@@ -1075,7 +1071,7 @@ Ymacs_Buffer.newCommands({
     }),
 
     comment_dwim: Ymacs_Interactive("^r", function(begin, end){
-        var cstart = this.cmd("get_line_comment_syntax");
+        var cstart = this.getq("syntax_comment_line");
         if (this.transientMarker) {
             this.cmd("save_excursion", function(){
                 this.cmd("goto_char", begin);

@@ -304,7 +304,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                     var close = PARENS[this.matchData[0]];
                     if (close) {
                         if (close.close) close = close.close;
-                        var rx = new RegExp("\\s*\\" + close, "mg");
+                        var rx = new RegExp("\\s*\\" + close, "my");
                         if (this.cmd("looking_at", rx)) this.cmd("save_excursion", function(){
                             this.cmd("delete_whitespace");
                             this.cmd("delete_char");
@@ -318,7 +318,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         paredit_delete_char: Ymacs_Interactive("^p", function(n){
             if (n != null) return this.cmd("delete_char", n);
             if (!this.deleteTransientRegion()) {
-                if (this.cmd("looking_at", /[\]\}\)\"\❱\»]/g)) {
+                if (this.cmd("looking_at", /[\]\}\)\"\❱\»]/y)) {
                     var open = R_PARENS[this.matchData[0]];
                     if (open) {
                         var rx = new RegExp("\\" + open + "\\s*", "mg");

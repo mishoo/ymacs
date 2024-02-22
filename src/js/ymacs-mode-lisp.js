@@ -332,7 +332,7 @@
         }),
 
         lisp_close_paren: Ymacs_Interactive(function(what) {
-            var re = new RegExp("\\s*\\" + what, "ig");
+            var re = new RegExp("\\s*\\" + what, "iy");
             if (this.cmd("looking_at", re))
                 this._deleteText(this.point(), this.matchData.after);
             this.cmd("insert", what);
@@ -361,7 +361,7 @@
             p.parse(this.point());
             var tok = p.prev_exp();
             if (tok && tok.type == "string" && this.point() < tok.end) {
-                if (this.cmd("looking_at", /\"/g))
+                if (this.cmd("looking_at", /\"/y))
                     this.cmd("forward_char");
                 else if (!this.cmd("looking_back", /\\/g))
                     this.cmd("insert", "\\\"");
