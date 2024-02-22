@@ -47,15 +47,36 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         "M-C-k"                        : "kill_sexp",
         "M-C-Space"                    : "mark_sexp",
         "M-C-t"                        : "transpose_sexps",
-        "M-("                          : [ "paredit_wrap_round", "(" ],
-        "M-["                          : [ "paredit_wrap_round", "[" ],
-        "M-{"                          : [ "paredit_wrap_round", "{" ],
-        'M-"'                          : [ "paredit_wrap_round", '"' ],
-        "M-'"                          : [ "paredit_wrap_round", "'" ],
+
+        "("                            : [ "paredit_open_pair", "(", ")" ],
+        "["                            : [ "paredit_open_pair", "[", "]" ],
+        "{"                            : [ "paredit_open_pair", "{", "}" ],
+        "❰"                            : [ "paredit_open_pair", "❰", "❱" ],
+        "«"                            : [ "paredit_open_pair", "«", "»" ],
+        "“"                            : [ "paredit_open_pair", "“", "”" ],
+        '"'                            : [ "paredit_open_pair", '"', '"', /[\"\\]/g ],
+
+        ")"                            : [ "paredit_close_pair", "(", ")" ],
+        "]"                            : [ "paredit_close_pair", "[", "]" ],
+        "}"                            : [ "paredit_close_pair", "{", "}" ],
+        "❱"                            : [ "paredit_close_pair", "❰", "❱" ],
+        "»"                            : [ "paredit_close_pair", "«", "»" ],
+        "”"                            : [ "paredit_close_pair", "“", "”" ],
+
+        "M-("                          : [ "paredit_wrap_round", "(", ")" ],
+        "M-["                          : [ "paredit_wrap_round", "[", "]" ],
+        "M-{"                          : [ "paredit_wrap_round", "{", "}" ],
+        "M-❰"                          : [ "paredit_wrap_round", "❰", "❱" ],
+        "M-«"                          : [ "paredit_wrap_round", "«", "»" ],
+        "M-“"                          : [ "paredit_wrap_round", "“", "”" ],
+        'M-"'                          : [ "paredit_wrap_round", '"', '"', /[\"\\]/g ],
+
         "M-r"                          : "paredit_raise_sexp",
         "M-s"                          : "paredit_splice_sexp",
         "Backspace"                    : "paredit_backward_delete_char",
-        "Delete && C-d"                : "paredit_delete_char"
+        "Delete && C-d"                : "paredit_delete_char",
+        "C-c ] && C-c C-]"             : "paredit_close_all_pairs",
+        "Enter && C-j && C-m"          : "paredit_newline_and_indent",
     };
 
     /* -----[ new commands ]----- */
@@ -74,17 +95,22 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         "{" : "}",
         "❰" : "❱",
         "«" : "»",
-        '"' : { close: '"', backslash: /[\x22\\]/g },
-        "'" : { close: "'", backslash: /[\x27\\]/g }
+        "“" : "”",
+        '"' : '"',
+        "'" : "'",
+        '`' : '`',
     };
 
     var R_PARENS = {
         ")" : "(",
         "]" : "[",
         "}" : "{",
-        '"' : '"',
         "❱" : "❰",
         "»" : "«",
+        "”" : "“",
+        '"' : '"',
+        "'" : "'",
+        '`' : '`',
     };
 
     function ERROR(o) {
@@ -203,36 +229,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
             this.cmd("goto_char", this._swapAreas(a));
         }),
 
-        paredit_wrap_round: Ymacs_Interactive("^", function(paren, nosexp){
-            if (!paren)
-                paren = "(";
-            var closing = PARENS[paren],
-            r = this.transientMarker
-                ? this.getRegion()
-                : this.cmd("save_excursion", function(){
-                    var begin = this.point();
-                    if (!nosexp)
-                        this.cmd("forward_sexp");
-                    return { begin: begin, end: this.point() };
-                }),
-            txt = this._bufferSubstring(r.begin, r.end),
-            before = this.point() < r.end;
-            if (typeof closing != "string") {
-                txt = txt.replace(closing.backslash, function(s){
-                    return "\\" + s;
-                });
-                closing = closing.close;
-            }
-            var m = this.createMarker(r.end);
-            this.cmd("save_excursion", function(){
-                this._replaceText(r.begin, r.end, paren + txt + closing);
-            }, before);
-            this.cmd("forward_char", before ? 1 : -1);
-            this.clearTransientMark();
-            this.cmd("indent_region", r.begin, m.getPosition());
-            m.destroy();
-        }),
-
         down_list: Ymacs_Interactive(function(){
             var rc = this._rowcol, p = this.tokenizer.finishParsing();
             if (p) {
@@ -303,7 +299,6 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 if (this.cmd("looking_back", /[\(\[\{\"\❰\«]/g)) {
                     var close = PARENS[this.matchData[0]];
                     if (close) {
-                        if (close.close) close = close.close;
                         var rx = new RegExp("\\s*\\" + close, "my");
                         if (this.cmd("looking_at", rx)) this.cmd("save_excursion", function(){
                             this.cmd("delete_whitespace");
@@ -330,7 +325,93 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 }
                 this.cmd("delete_char");
             }
-        })
+        }),
+
+        paredit_open_pair: Ymacs_Interactive("^", function(pair_a, pair_b, backslash) {
+            if (this.transientMarker) {
+                this.cmd("paredit_wrap_round", pair_a, pair_b, backslash);
+                return;
+            }
+            if (pair_a == pair_b && this.looking_at(pair_a)) {
+                // presumably close; it's already there, just skip it
+                this.cmd("forward_char");
+            } else {
+                this.cmd("insert", pair_a);
+                this.cmd("insert", pair_b);
+                this.cmd("backward_char", pair_b.length);
+            }
+            this.cmd("paredit_maybe_indent");
+        }),
+
+        paredit_close_pair: Ymacs_Interactive("^", function(pair_a, pair_b) {
+            if (this.transientMarker) {
+                this.cmd("paredit_wrap_round", pair_a, pair_b);
+                return;
+            }
+            var re = new RegExp("\\s*\\" + pair_b, "iy");
+            if (this.cmd("looking_at", re))
+                this._deleteText(this.point(), this.matchData.after);
+            this.cmd("insert", pair_b);
+            this.cmd("paredit_maybe_indent");
+        }),
+
+        paredit_wrap_round: Ymacs_Interactive("^", function(paren, closing, backslash) {
+            var r = this.transientMarker
+                ? this.getRegion()
+                : this.cmd("save_excursion", function(){
+                    var begin = this.point();
+                    this.cmd("forward_sexp");
+                    return { begin: begin, end: this.point() };
+                }),
+                txt = this._bufferSubstring(r.begin, r.end),
+                before = this.point() < r.end;
+            if (backslash) {
+                txt = txt.replace(backslash, s => "\\" + s);
+            }
+            var m = this.createMarker(r.end);
+            this.cmd("save_excursion", function(){
+                this._replaceText(r.begin, r.end, paren + txt + closing);
+            }, before);
+            if (before) {
+                this.cmd("forward_char");
+            }
+            this.clearTransientMark();
+            this.cmd("indent_region", r.begin, m.getPosition());
+            m.destroy();
+        }),
+
+        paredit_close_all_pairs: Ymacs_Interactive(function() {
+            var p = this.tokenizer.getParserForLine(this._rowcol.row);
+            if (p) {
+                // this kind of sucks, we need to rewind the stream to that location..
+                var s = this.tokenizer.stream;
+                s.line = this._rowcol.row;
+                s.col = 0;
+                try {
+                    while (s.col < this._rowcol.col)
+                        p.next();
+                } catch(ex) {}
+                p = p.copy().context.parens; // these are still-to-close
+                p.r_foreach(function(p){
+                    this.cmd("paredit_close_pair", PARENS[p.type]);
+                }, this);
+            }
+        }),
+
+        paredit_newline_and_indent: Ymacs_Interactive(function(){
+            this.cmd("newline_and_indent");
+            if (this.looking_at(/[ \t]*[\]\}\)]/y)) {
+                this.cmd("newline_and_indent");
+                this.cmd("backward_line");
+                this.cmd("indent_line");
+            }
+        }),
+
+        paredit_maybe_indent: function() {
+            if (this.getq("electric_indent")) {
+                this.cmd("indent_line");
+            }
+        }
 
     });
 
@@ -368,6 +449,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
             }.clearingTimeout(100)
         };
         this.addEventListener(events);
+
+        if (this.getq("electric_indent") == null) {
+            this.setq("electric_indent", true);
+        }
 
         return function() {
             clearOvl.doItNow();

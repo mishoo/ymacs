@@ -1121,4 +1121,31 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         return this._textProperties.getLineHTML(row, this.code[row], caret);
     };
 
+    P.looking_at = function(needle) {
+        var haystack = this.getCode();
+        if (needle instanceof RegExp) {
+            var pos = needle.lastIndex = this.point();
+            var ret = needle.exec(haystack);
+            if (ret && ret.index == pos) {
+                ret.after = needle.lastIndex;
+                return this.matchData = ret;
+            }
+        } else if (typeof needle == "string") {
+            // XXX: account for case_fold_search here?
+            return haystack.substr(this.point(), needle.length) == needle;
+        }
+    };
+
+    P.looking_back = function(needle) {
+        var haystack = this.getCode();
+        if (needle instanceof RegExp) {
+            var m = this.lastIndexOfRegexp(haystack, needle, this.point());
+            if (m && m.after == this.point())
+                return m;
+        } else if (typeof needle == "string") {
+            // XXX: account for case_fold_search here?
+            return haystack.substr(this.point() - needle.length, needle.length) == needle;
+        }
+    };
+
 });

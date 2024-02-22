@@ -323,39 +323,6 @@
             if (list && list.parent) this.cmd("goto_char", list.start);
         }),
 
-        lisp_open_paren: Ymacs_Interactive(function(what) {
-            if (what == null)
-                what = "(";
-            what += isOpenParen(what);
-            this.cmd("insert", what);
-            this.cmd("backward_char");
-        }),
-
-        lisp_close_paren: Ymacs_Interactive(function(what) {
-            var re = new RegExp("\\s*\\" + what, "iy");
-            if (this.cmd("looking_at", re))
-                this._deleteText(this.point(), this.matchData.after);
-            this.cmd("insert", what);
-        }),
-
-        lisp_close_all_parens: Ymacs_Interactive(function() {
-            var p = this.tokenizer.getParserForLine(this._rowcol.row);
-            if (p) {
-                // this kind of sucks, we need to rewind the stream to that location..
-                var s = this.tokenizer.stream;
-                s.line = this._rowcol.row;
-                s.col = 0;
-                try {
-                    while (s.col < this._rowcol.col)
-                        p.next();
-                } catch(ex) {}
-                p = p.copy().context.parens; // these are still-to-close
-                p.r_foreach(function(p){
-                    this.cmd("lisp_close_paren", isOpenParen(p.type));
-                }, this);
-            }
-        }),
-
         lisp_handle_string_quote: Ymacs_Interactive(function(){
             var p = QuickParser(this);
             p.parse(this.point());
@@ -756,19 +723,10 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
 })();
 
 DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
-
+    // XXX: keep this?
     D.KEYS = {
-        "Enter && C-j && C-m"  : "newline_and_indent",
-        "("                    : [ "lisp_open_paren", "(" ],
-        ")"                    : [ "lisp_close_paren", ")" ],
-        "["                    : [ "lisp_open_paren", "[" ],
-        "]"                    : [ "lisp_close_paren", "]" ],
-        "{"                    : [ "lisp_open_paren", "{" ],
-        "}"                    : [ "lisp_close_paren", "}" ],
-        '"'                    : [ "lisp_handle_string_quote" ],
-        "C-c ] && C-c C-]"     : "lisp_close_all_parens"
+        '"' : [ "lisp_handle_string_quote" ],
     };
-
 });
 
 Ymacs_Buffer.newMode("lisp_mode", function() {
@@ -802,8 +760,8 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         }
     });
     var keymap = Ymacs_Keymap_LispMode();
-    this.pushKeymap(keymap);
     var was_paren_match = this.cmd("paren_match_mode", true);
+    this.pushKeymap(keymap);
 
     var changed_commands = this.replaceCommands({
         "forward_sexp"            : "lisp_forward_sexp",
@@ -815,9 +773,9 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         this.setTokenizer(tok);
         this.setq(changed_vars);
         this.newCommands(changed_commands);
-        this.popKeymap(keymap);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
+        this.popKeymap(keymap);
     };
 
 });

@@ -395,17 +395,14 @@ D P $".qw());
 
 /* -----[ Keymap for C-like language mode ]----- */
 
-DEFINE_SINGLETON("Ymacs_Keymap_CLanguages", Ymacs_Keymap, function(D, P){
-
+DEFINE_SINGLETON("Ymacs_Keymap_JS", Ymacs_Keymap, function(D, P){
     D.KEYS = {
-        "Enter"                                     : "newline_and_indent",
-        "} && ) && ] && : && ; && { && ( && [ && *" : "c_insert_and_indent",
-        "{"                                         : "c_electric_block"
+        "`"   : [ "paredit_open_pair", "`", "`", /[\`\\]/g ],
+        "'"   : [ "paredit_open_pair", "'", "'", /[\'\\]/g ],
+        "M-`" : [ "paredit_wrap_round", "`", "`", /[\`\\]/g ],
+        "M-'" : [ "paredit_wrap_round", "'", "'", /[\'\\]/g ],
     };
-
 });
-
-DEFINE_SINGLETON("Ymacs_Keymap_JS", Ymacs_Keymap_CLanguages().constructor, function(D, P){});
 
 /* -----[ Mode entry point ]----- */
 
@@ -413,8 +410,8 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
     var tok = this.tokenizer;
     var keymap = Ymacs_Keymap_JS();
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
-    this.pushKeymap(keymap);
     var was_paren_match = this.cmd("paren_match_mode", true);
+    this.pushKeymap(keymap);
     var changed_vars = this.setq({
         syntax_comment_line: {
             rx: /\s*\x2f+\s?/g,
@@ -424,11 +421,10 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
 
     return function() {
         this.setTokenizer(tok);
-        this.popKeymap(keymap);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
+        this.popKeymap(keymap);
     };
-
 });
 
 Ymacs_Buffer.newCommands({

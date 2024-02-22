@@ -259,19 +259,12 @@ Ymacs_Buffer.newCommands({
         return this.createMarker(pos);
     },
 
-    looking_at: function(rx) {
-        var pos = rx.lastIndex = this.point();
-        var ret = rx.exec(this.getCode());
-        if (ret && ret.index == pos) {
-            ret.after = rx.lastIndex;
-            return this.matchData = ret;
-        }
+    looking_at: function() {
+        return this.looking_at.apply(this, arguments);
     },
 
-    looking_back: function(rx) {
-        var m = this.lastIndexOfRegexp(this.getCode(), rx, this.point());
-        if (m && m.after == this.point())
-            return m;
+    looking_back: function() {
+        return this.looking_back.apply(this, arguments);
     },
 
     search_forward: Ymacs_Interactive("sSearch: ", function(str, bound) {
