@@ -550,45 +550,45 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P.getOverlayHTML = function(name, props) {
-        if (props.line1 == props.line2 && props.col1 == props.col2) {
-            this._on_bufferOverlayDelete(name, props);
-            return null;
-        }
-        var p1 = this.coordinates(props.line1, props.col1);
-        var p2 = this.coordinates(props.line2, props.col2);
-        var p0 = props.col1 == 0 ? p1 : this.coordinates(props.line1, 0);
-        var str = `<div id="${this.getOverlayId(name)}" class="Ymacs_Overlay ${name}">`;
-        if (props.line1 == props.line2) {
-            str += `<div class="${name}" style="
-                top: ${p1.y}px;
-                left: ${p1.x}px;
-                height: ${p1.h}px;
-                width: ${p2.x - p1.x}px;
-            "></div>`;
-        } else {
-            str += `<div class="${name}" style="
-                top: ${p1.y}px;
-                left: ${p1.x}px;
-                height: ${props.col1 > 0 ? p1.h : p2.y - p1.y}px;
-            "></div>`;
-            if (props.col1 > 0 && props.line2 - props.line1 > 1) {
-                str += `<div class="${name}" style="
-                    top: ${p1.y + p1.h}px;
-                    left: ${p0.x}px;
-                    height: ${p2.y - p1.y - p1.h}px;
-                "></div>`;
+        var str = "";
+        props.forEach(p => {
+            if (p.line1 == p.line2 && p.col1 == p.col2) {
+                return;
             }
-            if (props.col2 > 0) {
+            var p1 = this.coordinates(p.line1, p.col1);
+            var p2 = this.coordinates(p.line2, p.col2);
+            var p0 = p.col1 == 0 ? p1 : this.coordinates(p.line1, 0);
+            if (p.line1 == p.line2) {
                 str += `<div class="${name}" style="
-                    top: ${p2.y}px;
-                    left: ${p0.x}px;
-                    height: ${p2.h}px;
-                    width: ${p2.x - p0.x}px;
+                    top: ${p1.y}px;
+                    left: ${p1.x}px;
+                    height: ${p1.h}px;
+                    width: ${p2.x - p1.x}px;
                 "></div>`;
+            } else {
+                str += `<div class="${name}" style="
+                    top: ${p1.y}px;
+                    left: ${p1.x}px;
+                    height: ${p.col1 > 0 ? p1.h : p2.y - p1.y}px;
+                "></div>`;
+                if (p.col1 > 0 && p.line2 - p.line1 > 1) {
+                    str += `<div class="${name}" style="
+                        top: ${p1.y + p1.h}px;
+                        left: ${p0.x}px;
+                        height: ${p2.y - p1.y - p1.h}px;
+                    "></div>`;
+                }
+                if (p.col2 > 0) {
+                    str += `<div class="${name}" style="
+                        top: ${p2.y}px;
+                        left: ${p0.x}px;
+                        height: ${p2.h}px;
+                        width: ${p2.x - p0.x}px;
+                    "></div>`;
+                }
             }
-        }
-        str += "</div>";
-        return str;
+        });
+        return str ? `<div id="${this.getOverlayId(name)}" class="Ymacs_Overlay ${name}">${str}</div>` : null;
     };
 
     P.getOverlaysCount = function() {
@@ -596,17 +596,19 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._on_bufferOverlayChange = function(name, props, isNew) {
-        var div = this.getOverlayHTML(name, props);
+        var div = this.getOverlayHTML(name, Array.isArray(props) ? props : [ props ]);
         if (div) {
             div = DOM.createFromHtml(div);
             var p = this.getOverlaysContainer(),
             old = !isNew && document.getElementById(this.getOverlayId(name));
             old ? p.replaceChild(div, old) : p.appendChild(div);
             this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+        } else {
+            this._on_bufferOverlayDelete(name);
         }
     };
 
-    P._on_bufferOverlayDelete = function(name, props, isNew) {
+    P._on_bufferOverlayDelete = function(name) {
         DOM.trash(document.getElementById(this.getOverlayId(name)));
         this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
     };

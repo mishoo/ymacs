@@ -425,32 +425,37 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         var keymap = Ymacs_Keymap_ParenMatch();
         this.pushKeymap(keymap);
 
-        var active = false;
         var clearOvl = function() {
-            if (active)
-                this.deleteOverlay("match-paren");
-        }.clearingTimeout(500, this);
+            this.deleteOverlay("match-paren");
+        }.bind(this);
+
+        function inside(a, b, c) {
+            return b >= a && b < a + c;
+        }
 
         var events = {
             beforeInteractiveCommand: function() {
-                clearOvl.doItNow();
+                clearOvl();
             },
             afterInteractiveCommand: function() {
                 var p = this.tokenizer.getLastParser(), rc = this._rowcol;
+                var hl = [];
                 if (p) {
-                    getPP(p).foreach(function(p){
-                        var match = p.closed;
-                        if ((p.line == rc.row && p.col == rc.col) ||
-                            (match.line == rc.row && match.col == rc.col - 1)) {
-                            active = true;
-                            this.setOverlay("match-paren", {
-                                line1: p.line, line2: match.line,
-                                col1: p.col, col2: match.col + 1
+                    getPP(p).foreach(function(par_a){
+                        var par_b = par_a.closed;
+                        if ((par_a.line == rc.row && inside(par_a.col, rc.col, par_a.type.length)) ||
+                            (par_b.line == rc.row && inside(par_b.col, rc.col - 1, 1))) {
+                            hl.push({
+                                line1: par_a.line, col1: par_a.col,
+                                line2: par_a.line, col2: par_a.col + par_a.type.length
+                            }, {
+                                line1: par_b.line, col1: par_b.col,
+                                line2: par_b.line, col2: par_b.col + 1
                             });
-                            clearOvl();
                         }
                     }, this);
                 }
+                this.setOverlay("match-paren", hl);
             }.clearingTimeout(100)
         };
         this.addEventListener(events);
@@ -460,7 +465,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         }
 
         return function() {
-            clearOvl.doItNow();
+            clearOvl();
             this.popKeymap(keymap);
             this.removeEventListener(events);
         };
