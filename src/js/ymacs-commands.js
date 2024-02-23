@@ -398,7 +398,8 @@ Ymacs_Buffer.newCommands({
 
     kill_word: Ymacs_Interactive("^p", function(prefix) {
         if (this.transientMarker) {
-            this.cmd("kill_region", this.point(), this.transientMarker);
+            var r = this.getRegion();
+            this.cmd("kill_region", r.begin, r.end);
             this.clearTransientMark();
         } else {
             var pos = this.point();
@@ -492,7 +493,8 @@ Ymacs_Buffer.newCommands({
 
     kill_line: Ymacs_Interactive("^p", function(prefix) {
         if (this.transientMarker) {
-            this.cmd("kill_region", this.point(), this.transientMarker);
+            var r = this.getRegion();
+            this.cmd("kill_region", r.begin, r.end);
             this.clearTransientMark();
         } else if (prefix != null) {
             this._killingAction(
