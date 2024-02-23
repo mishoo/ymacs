@@ -345,3 +345,8 @@ if (!is_gecko && !is_khtml) (function(){
         dlg.show(true);
 
 })();
+
+window.addEventListener("beforeunload", ev => {
+    ev.preventDefault();
+    return ev.returnValue = true;
+});

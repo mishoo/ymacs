@@ -37,8 +37,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
 
     D.KEYS = {
         "C-g && Escape": [ "isearch_abort", true ],
-        "C-w": "isearch_yank_word_or_char",
-        "M-w": "isearch_yank_word_or_char",
+        "C-w && M-w && C-S-s": "isearch_yank_word_or_char",
         "C-s": "isearch_forward",
         "C-r": "isearch_backward",
         "Backspace": function() {

@@ -396,11 +396,16 @@ Ymacs_Buffer.newCommands({
             this.cmd("goto_char", this._swapAreas([ pos - 1, pos, pos, pos + 1 ]));
     }),
 
-    kill_word: Ymacs_Interactive_X(function() {
-        var pos = this.point();
-        this.cmd("forward_word");
-        var pos2 = this.point();
-        this._killingAction(pos, pos2, false);
+    kill_word: Ymacs_Interactive("^p", function(prefix) {
+        if (this.transientMarker) {
+            this.cmd("kill_region", this.point(), this.transientMarker);
+            this.clearTransientMark();
+        } else {
+            var pos = this.point();
+            this.cmd("forward_word", prefix == null ? 1 : prefix);
+            var pos2 = this.point();
+            this._killingAction(pos, pos2, false);
+        }
     }),
 
     backward_kill_word: Ymacs_Interactive_X(function() {
@@ -485,14 +490,28 @@ Ymacs_Buffer.newCommands({
         return this._bufferSubstring(begin, end);
     },
 
-    kill_line: Ymacs_Interactive_X(function() {
-        var pos = this.point(),
-        rc = this._rowcol,
-        line = this.code[rc.row],
-        end = pos + line.length - rc.col;
-        if (rc.row < this.code.length - 1 && this.cmd("looking_at", /\s*$/my))
-            end++;
-        this._killingAction(pos, end);
+    kill_line: Ymacs_Interactive("^p", function(prefix) {
+        if (this.transientMarker) {
+            this.cmd("kill_region", this.point(), this.transientMarker);
+            this.clearTransientMark();
+        } else if (prefix != null) {
+            this._killingAction(
+                this.point(),
+                this._saveExcursion(() => {
+                    this.cmd("forward_line", prefix);
+                    this.cmd("beginning_of_line");
+                    return this.point();
+                })
+            );
+        } else {
+            var pos = this.point(),
+                rc = this._rowcol,
+                line = this.code[rc.row],
+                end = pos + line.length - rc.col;
+            if (rc.row < this.code.length - 1 && this.cmd("looking_at", /\s*$/my))
+                end++;
+            this._killingAction(pos, end);
+        }
     }),
 
     save_excursion: function() {
