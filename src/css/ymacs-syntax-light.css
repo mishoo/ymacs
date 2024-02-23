@@ -64,9 +64,10 @@
 }
 
 
-.Ymacs-Theme-light .Ymacs_Overlay .match-paren { background: #2c2; opacity: 0.4; }
+.Ymacs-Theme-light .Ymacs_Overlay .match-paren { background: #28c; }
 .Ymacs-Theme-light .Ymacs_Overlay .selection { background: #88f; opacity: 0.8; }
-.Ymacs-Theme-light .Ymacs_Overlay .isearch { background: #c82; }
+.Ymacs-Theme-light .Ymacs_Overlay .isearch { background: #2c2; }
+.Ymacs-Theme-light .Ymacs_Overlay .isearch-lazy { background: #2c2; opacity: 0.6; }
 
 .Ymacs-Theme-light .Ymacs_Modeline {
   background-color: #777;

@@ -42,7 +42,7 @@
   white-space: pre;
   /* padding: 4px; */
   padding-bottom: 1000px;
-  z-index: 10;
+  z-index: 20;
   position: relative;
 }
 
@@ -76,12 +76,16 @@
   border-radius: 15px;
 }
 
-.Ymacs_Overlay { opacity: 0.8; }
+.Ymacs_Overlay {}
 .Ymacs_Overlay div {
   position: absolute;
   right: 0;
   left: 0;
 }
+.Ymacs_Overlay .isearch {
+  z-index: 10;
+}
+.Ymacs_Overlay .isearch-lazy {}
 
 .Ymacs_Message_Popup {
   background-color: wheat;

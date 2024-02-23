@@ -80,22 +80,48 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
         return doSearch.call(this, text);
     };
 
-    function doSearch(text) {
-        if (text == null)
-            text = getText(this);
-        var found = this.cmd("bind_variables", { case_fold_search: text == text.toLowerCase() },
-                             this.cmd,
-                             this._isearchContext.forward ? "search_forward" : "search_backward",
-                             text);
-        if (found) {
-            this.cmd("ensure_caret_visible");
-            var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * text.length);
-            this.setOverlay("isearch", {
-                line1: rc_begin.row, line2: this._rowcol.row,
-                col1: rc_begin.col, col2: this._rowcol.col
-            });
+    function lazyHighlight(str) {
+        this.deleteOverlay("isearch-lazy");
+        if (/\S/.test(str)) {
+            let cursor = this._rowcol;
+            let minpos = this._rowColToPosition(cursor.row - 50, 0);
+            let maxpos = this._rowColToPosition(cursor.row + 50, Infinity);
+            let code = this.getCode();
+            if (this.getq("case_fold_search")) {
+                code = code.toLowerCase();
+                str = str.toLowerCase();
+            }
+            let pos = minpos, hl = [];
+            while (true) {
+                pos = code.indexOf(str, pos);
+                if (pos < 0 || pos > maxpos) break;
+                let p1 = this._positionToRowCol(pos);
+                let p2 = this._positionToRowCol(pos += str.length);
+                hl.push({
+                    line1: p1.row, col1: p1.col,
+                    line2: p2.row, col2: p2.col
+                });
+            }
+            this.setOverlay("isearch-lazy", hl);
         }
-        return found;
+    };
+
+    function doSearch(str) {
+        return this.cmd("bind_variables", {
+            case_fold_search: str == str.toLowerCase()
+        }, function() {
+            var found = this.cmd(this._isearchContext.forward ? "search_forward" : "search_backward", str);
+            if (found) {
+                this.cmd("ensure_caret_visible");
+                var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * str.length);
+                this.setOverlay("isearch", {
+                    line1: rc_begin.row, col1: rc_begin.col,
+                    line2: this._rowcol.row, col2: this._rowcol.col
+                });
+            }
+            lazyHighlight.call(this, str);
+            return found;
+        });
     };
 
     function getText(o) {
@@ -133,8 +159,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
         }),
 
         isearch_yank_word_or_char: Ymacs_Interactive(function() {
-            var pos = this.point(),
-            pos2 = this.cmd("save_excursion", function(){
+            var pos = this.point();
+            var pos2 = this.cmd("save_excursion", function(){
                 this.cmd("forward_word");
                 return this.point();
             });

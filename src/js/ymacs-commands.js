@@ -329,21 +329,21 @@ Ymacs_Buffer.newCommands({
     }),
 
     forward_word: Ymacs_Interactive_X(function(){
-        var word = this.getq("syntax_word"), end = false;
-        while (!end && !word.test(this.charAt()))
+        var syntax_word = this.getq("syntax_word"), end = false;
+        while (!end && !syntax_word.test(this.charAt()))
             if (!this.cmd("forward_char"))
                 end = true;
-        while (!end && word.test(this.charAt()))
+        while (!end && syntax_word.test(this.charAt()))
             if (!this.cmd("forward_char"))
                 end = true;
     }),
 
     backward_word: Ymacs_Interactive_X(function(){
-        var word = this.getq("syntax_word"), end = false;
-        while (!end && !word.test(this.charAt(-1)))
+        var syntax_word = this.getq("syntax_word"), end = false;
+        while (!end && !syntax_word.test(this.charAt(-1)))
             if (!this.cmd("backward_char"))
                 end = true;
-        while (!end && word.test(this.charAt(-1)))
+        while (!end && syntax_word.test(this.charAt(-1)))
             if (!this.cmd("backward_char"))
                 end = true;
     }),
