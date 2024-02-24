@@ -57,7 +57,8 @@ function () {\n\
 * or move the caret to the first “{” character and press C-M-q\n\
 */\n\
         return function(){\n\
-    alert(this.foo);\n\
+      alert(this.foo);\n\
+      this.addClass(this._horiz ? 'Ymacs_SplitCont_horiz' : 'Ymacs_SplitCont_vert');\n\
 }.$(this);\n\
 }\n\
 \n\

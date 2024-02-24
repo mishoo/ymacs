@@ -36,14 +36,11 @@
 DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
 
     D.CONSTRUCT = function() {
-        this.definitions = Object.makeCopy(this.__originalDefs);
+        this.definitions = Object.assign({}, this.__originalDefs);
     };
 
     P.FINISH_OBJECT_DEF = function() {
-        if (this.__originalDefs)
-            this.__originalDefs = Object.makeCopy(this.__originalDefs);
-        else
-            this.__originalDefs = {};
+        this.__originalDefs = Object.assign({}, this.__originalDefs);
         var keys = this.constructor.KEYS;
         if (keys)
             this.defineKeys(keys);

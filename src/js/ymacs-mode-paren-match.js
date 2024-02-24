@@ -170,12 +170,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                     ERROR(this);
                     return;
                 }
-                var start = this._rowColToPosition(next.line, next.col);
-                if ((this._rowcol.row == next.line && this._rowcol.col == next.col)
-                    || !/\S/.test(this._bufferSubstring(null, start)))
-                    this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
-                else
-                    this.cmd("goto_char", start);
+                this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
                 return true;
             }
         }),
@@ -186,8 +181,9 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 // find next paren
                 var parens = getPP(p).grep("closed").map("closed").mergeSort(compareRowCol);
                 var prev = parens.r_foreach(function(p){
-                    if (p.line < rc.row || (p.line == rc.row && p.col < rc.col))
+                    if (p.line < rc.row || (p.line == rc.row && p.col < rc.col)) {
                         $RETURN(p);
+                    }
                 });
                 if (!prev) {
                     ERROR(this);

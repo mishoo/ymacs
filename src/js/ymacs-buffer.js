@@ -696,7 +696,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     P.getPrefixArg = function(noDiscard) {
         var ret = this.getq("universal_prefix");
-        if (!noDiscard) {
+        if (!noDiscard && ret !== undefined) {
             this.setq("universal_prefix", undefined);
             if (!this.isMinibuffer)
                 this.setMinibuffer("");

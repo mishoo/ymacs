@@ -480,7 +480,11 @@ Ymacs_Buffer.newCommands({
         return this._insertText(Array.$(arguments).join(""));
     }),
 
-    keyboard_quit: Ymacs_Interactive("^p", Function.noop),
+    keyboard_quit: Ymacs_Interactive(function(){
+        this.clearTransientMark();
+        this.setPrefixArg(undefined);
+        this.setMinibuffer("");
+    }),
 
     buffer_substring: function(begin, end) {
         if (arguments.length == 0) {
@@ -576,7 +580,9 @@ Ymacs_Buffer.newCommands({
     }),
 
     exchange_point_and_mark: Ymacs_Interactive("^", function(){
+        this.transientMarker = this.createMarker();
         this.caretMarker.swap(this.markMarker);
+        this.ensureTransientMark();
     }),
 
     mark_whole_buffer: Ymacs_Interactive(function(){
