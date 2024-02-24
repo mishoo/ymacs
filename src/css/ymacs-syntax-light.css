@@ -49,20 +49,19 @@
   color: #222;
 }
 
-.Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-caret {
-  background-color: #f51;
-  color: #324;
+.Ymacs-Theme-light {
+  --ymacs-cursor-bg: #f51;
+  --ymacs-cursor-fg: #000;
+}
+
+.Ymacs-Theme-light .Ymacs-overwrite-mode .Ymacs-caret {
+  --ymacs-cursor-bg: #97f;
+  --ymacs-cursor-fg: #fff;
 }
 
 .Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-current-line {
   /* background-color: #eda; */
 }
-
-.Ymacs-Theme-light .Ymacs-overwrite-mode .Ymacs-caret {
-  background-color: #97f;
-  color: #fff;
-}
-
 
 .Ymacs-Theme-light .Ymacs_Overlay .match-paren { background: #28c; }
 .Ymacs-Theme-light .Ymacs_Overlay .selection { background: #88f; opacity: 0.8; }

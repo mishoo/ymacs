@@ -58,26 +58,18 @@
 .Ymacs-Theme-dark.Ymacs-Theme-y .Ymacs_Frame .markdown-blockquote { color: #aaa; }
 
 /* other stuff */
-
-.Ymacs-Theme-dark .Ymacs-caret {
-  background-color: #aaa;
-  color: #222;
-  /* outline: 1px solid #f83; */
+.Ymacs-Theme-dark {
+  --ymacs-cursor-bg: #f82;
+  --ymacs-cursor-fg: #000;
 }
 
-.Ymacs-Theme-dark .Ymacs_Frame-focus .Ymacs-caret {
-  background-color: #f83;
-  color: #324 !important;
-  /* outline: none; */
+.Ymacs-Theme-dark .Ymacs-overwrite-mode .Ymacs-caret {
+  --ymacs-cursor-bg: #97f;
+  --ymacs-cursor-fg: #fff;
 }
 
 .Ymacs-Theme-dark .Ymacs_Frame-focus .Ymacs-current-line {
   /* background-color: #000; */
-}
-
-.Ymacs-Theme-dark .Ymacs-overwrite-mode .Ymacs-caret {
-  background-color: #97f;
-  color: #fff;
 }
 
 .Ymacs-Theme-dark .Ymacs_Overlay .match-paren { background: #28c; }

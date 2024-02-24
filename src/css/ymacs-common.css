@@ -11,8 +11,8 @@
 }
 
 .Ymacs_Frame {
-  font-family: "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
   font-size: 14px;
+  font-family: "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -26,7 +26,6 @@
 }
 
 .Ymacs_Modeline {
-  font-family: "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
   white-space: pre;
   padding-bottom: 1px;
   overflow: hidden;
@@ -46,21 +45,10 @@
   position: relative;
 }
 
-.Ymacs-caret {
-  margin: 0;
-  padding: 0;
-}
-
-.Ymacs_Frame-focus .Ymacs-caret {
-  opacity: 1;
-}
-
 .Ymacs_Minibuffer {
   flex-grow: 0;
   flex-shrink: 0;
 }
-
-.Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; }
 
 .Ymacs_Minibuffer .Ymacs_Modeline { display: none; }
 
@@ -71,10 +59,6 @@
 /* .Ymacs_Frame-hasOverlays .Ymacs-current-line { */
 /*   background: transparent !important; */
 /* } */
-
-.Ymacs-overwrite-mode .Ymacs-caret {
-  border-radius: 15px;
-}
 
 .Ymacs_Overlay {}
 .Ymacs_Overlay div {
@@ -138,4 +122,37 @@
 .Ymacs_SplitCont_vert > div {
   width: 50%;
   height: 100%;
+}
+
+@property --ymacs-cursor-bg {
+  syntax: "<color>";
+}
+@property --ymacs-cursor-fg {
+  syntax: "<color>";
+}
+
+@keyframes ymacs-caret-blink {
+  0% { background-color: unset; }
+  50% { background-color: var(--ymacs-cursor-bg); color: var(--ymacs-cursor-fg); }
+}
+
+.Ymacs-overwrite-mode .Ymacs-caret {
+  border-radius: 15px;
+}
+
+.Ymacs_Frame .Ymacs-caret {
+  outline: 1px solid var(--ymacs-cursor-bg);
+  outline-offset: -1px;
+}
+
+.Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; outline: none; }
+
+.Ymacs_Frame-focus .Ymacs-caret {
+  outline: none;
+  animation-name: ymacs-caret-blink;
+  animation-duration: 0.8s;
+  /* animation-delay: 1s; */
+  animation-iteration-count: infinite;
+  animation-timing-function: step-start;
+  animation-fill-mode: backwards;
 }

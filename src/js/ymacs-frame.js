@@ -41,8 +41,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
     var LINE_DIV = DOM.createElement("div", null, { className: "line", innerHTML: "<br/>" });
 
-    var BLINK_TIMEOUT = 225;
-
     D.DEFAULT_EVENTS = [ "onPointChange" ];
 
     D.DEFAULT_ARGS = {
@@ -56,7 +54,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     D.CONSTRUCT = function() {
-        this.__blinkCaret = this.__blinkCaret.$(this);
         this.__caretId = Dynarch.ID();
         this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
 
@@ -330,27 +327,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             return insertInText(row, col, DOM.createElement("span"));
     };
 
-    P.__restartBlinking = function() {
-        if (this.ymacs.cf_blinkCursor) {
-            this.__stopBlinking();
-            if (this.focusInside()) {
-                this.__caretTimer = setTimeout(this.__blinkCaret, 2 * BLINK_TIMEOUT);
-            }
-        }
-    };
-
-    P.__stopBlinking = function() {
-        if (this.ymacs.cf_blinkCursor) {
-            clearTimeout(this.__caretTimer);
-            this.__showCaret();
-        }
-    };
-
-    P.__blinkCaret = function() {
-        DOM.condClass(this.getCaretElement(), this.BLINKING = ! this.BLINKING, "Ymacs-caret");
-        this.__caretTimer = setTimeout(this.__blinkCaret, BLINK_TIMEOUT);
-    };
-
     P.__showCaret = function() {
         DOM.addClass(this.getCaretElement(), "Ymacs-caret");
     };
@@ -396,9 +372,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             this.__prevCaretLine = rc.row;
             this._on_bufferLineChange(rc.row);
         }
-
-        if (isActive)
-            this.__restartBlinking();
 
         this.callHooks("onPointChange", rc.row, rc.col);
         this.redrawModelineWithTimer(rc);
@@ -616,7 +589,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
     P._on_destroy = function() {
         this.setBuffer(null);
-        this.__stopBlinking();
     };
 
     P._on_focus = function() {
@@ -629,7 +601,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         }
         this.buffer.addEventListener(this._moreBufferEvents);
         this._redrawCaret();
-        this.__restartBlinking();
     };
 
     P._on_blur = function() {
@@ -638,7 +609,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
         }
         this.buffer.removeEventListener(this._moreBufferEvents);
-        this.__stopBlinking();
     };
 
     var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
@@ -651,7 +621,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         CLICK_COUNT++;
         CLICK_COUNT_TIMER = CLEAR_CLICK_COUNT.delayed(DBL_CLICK_SPEED);
 
-        this.__restartBlinking();
         var pos = ev.computePos(this.getContentElement()),
         rc = this.coordinatesToRowCol(pos.x, pos.y),
         buf = this.buffer;
