@@ -57,7 +57,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         this.__caretId = Dynarch.ID();
         this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
 
-        this.getElement().innerHTML = HTML;
+        this.getElement().innerHTML = "<div class='Ymacs-frame-overlays'>"
+            + "<div class='Ymacs-frame-content'></div>"
+            + "</div>"
+            + "<div class='Ymacs_Modeline'></div>";
 
         this.addEventListener({
             onDestroy    : this._on_destroy,
@@ -90,12 +93,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             onProgressChange         : this._on_bufferProgressChange.$(this),
             beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this),
             afterInteractiveCommand  : this._on_bufferAfterInteractiveCommand.$(this),
-            onOverlayDelete          : this._on_bufferOverlayDelete.$(this)
+            onOverlayChange          : this._on_bufferOverlayChange.$(this),
+            onOverlayDelete          : this._on_bufferOverlayDelete.$(this),
         };
 
         this._moreBufferEvents = {
             onMessage               : this._on_bufferMessage.$(this),
-            onOverlayChange         : this._on_bufferOverlayChange.$(this),
             afterInteractiveCommand : function(){
                 if (this.__ensureCaretVisible)
                     this.ensureCaretVisible();
@@ -111,13 +114,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         this.getOverlaysContainer().onscroll = this._on_scroll.$(this);
     };
-
-    var HTML = String.buffer(
-        "<div class='Ymacs-frame-overlays'>",
-        "<div class='Ymacs-frame-content'></div>",
-        "</div>",
-        "<div class='Ymacs_Modeline'></div>"
-    ).get();
 
     P.focus = function(exitAllowed) {
         D.BASE.focus.call(this);
@@ -279,54 +275,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             this.buffer.ensureTransientMark();
     };
 
-    function insertInText(div, col, el) {
-        // this is for empty lines
-        if (/^br$/i.test(div.firstChild.tagName)) {
-            div.insertBefore(el, div.firstChild);
-            return el;
-        }
-        var len = 0, OUT = {};
-        function walk(div) {
-            for (var i = div.firstChild; i; i = i.nextSibling) {
-                if (i.nodeType == 3 /* TEXT */) {
-                    var clen = i.length;
-                    if (len + clen > col) {
-                        var pos = col - len; // here we should insert it, relative to the current node
-                        var next = i.splitText(pos);
-                        div.insertBefore(el, next);
-                        throw OUT;
-                    }
-                    else if (len + clen == col) {
-                        // this case is simpler; it could have been treated
-                        // above, but let's optimize a bit since there's no need
-                        // to split the text.
-                        div.insertBefore(el, i.nextSibling);
-                        throw OUT;
-                    }
-                    len += clen;
-                }
-                else if (i.nodeType == 1 /* ELEMENT */) {
-                    walk(i); // recurse
-                }
-            }
-        };
-        try {
-            walk(div);
-        }
-        catch(ex) {
-            if (ex === OUT)
-                return el;
-            throw ex;
-        }
-    };
-
-    P.setMarkerAtPos = function(row, col) {
-        if (!row.tagName) // accept an element as well
-            row = this.getLineDivElement(row);
-        if (row)
-            return insertInText(row, col, DOM.createElement("span"));
-    };
-
     P.__showCaret = function() {
         DOM.addClass(this.getCaretElement(), "Ymacs-caret");
     };
@@ -428,12 +376,31 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         return { row: row, col: col };
     };
 
+    function textColX(div, col) {
+        let range = document.createRange();
+        range.selectNodeContents(div);
+        let treeWalker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
+        let len = 0;
+        while (treeWalker.nextNode()) {
+            let node = treeWalker.currentNode;
+            let clen = node.nodeValue.length;
+            if (len + clen >= col) {
+                range.setEnd(node, col - len);
+                break;
+            }
+            len += clen;
+        }
+        return range.getBoundingClientRect().right;
+    };
+
     P.coordinates = function(row, col) {
+        var box = this.getContentElement().getBoundingClientRect();
         var div = this.getLineDivElement(row);
-        var span = this.setMarkerAtPos(div, col);
-        var ret = { x: span.offsetLeft, y: div.offsetTop, h: div.offsetHeight };
-        DOM.trash(span);
-        return ret;
+        return {
+            x: textColX(div, col) - box.left,
+            y: div.offsetTop,
+            h: div.offsetHeight
+        };
     };
 
     P.heightInLines = function() {
@@ -567,12 +534,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         return this.getOverlaysContainer().childNodes.length - 1; // XXX: subtract the div.content; we need to revisit this if we add new elements.
     };
 
-    P._on_bufferOverlayChange = function(name, props, isNew) {
+    P._on_bufferOverlayChange = function(name, props) {
         var div = this.getOverlayHTML(name, Array.isArray(props) ? props : [ props ]);
         if (div) {
             div = DOM.createFromHtml(div);
-            var p = this.getOverlaysContainer(),
-            old = !isNew && document.getElementById(this.getOverlayId(name));
+            var p = this.getOverlaysContainer();
+            var old = document.getElementById(this.getOverlayId(name));
             old ? p.replaceChild(div, old) : p.appendChild(div);
             this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         } else {

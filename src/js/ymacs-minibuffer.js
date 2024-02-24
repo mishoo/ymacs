@@ -382,11 +382,10 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_complete_and_exit: function() {
-            var self = this;
-            self.whenMinibuffer(function(mb){
-                mb.getq("minibuffer_validation").call(mb, null, function (valid) {
+            this.whenMinibuffer(mb => {
+                mb.getq("minibuffer_validation").call(mb, null, valid => {
                     if (valid)
-                        mb.cmd("minibuffer_keyboard_quit", self.getq("minibuffer_continuation"));
+                        mb.cmd("minibuffer_keyboard_quit", this.getq("minibuffer_continuation"));
                 });
             });
         },
@@ -397,6 +396,9 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 mb.setCode("");
                 this.ymacs.setInputFrame(this.ymacs.getActiveFrame());
                 this.ymacs.getActiveFrame().focus();
+                if (!cont) {
+                    mb.callHooks("abort");
+                }
                 (function(text){
                     if (cont)
                         cont.call(this, text);

@@ -52,7 +52,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         "finishedEvent",
         "onProgressChange",
         "onTextInsert",
-        "onTextDelete"
+        "onTextDelete",
+        "abort",
     ];
 
     D.DEFAULT_ARGS = {
@@ -428,8 +429,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     };
 
     P.callInteractively = function(func, args, finalArgs) {
-        if (!args)
-            args = []; // make IE happy
+        if (!args) args = [];
         var cmd;
         if (!(func instanceof Function)) {
             cmd = func;

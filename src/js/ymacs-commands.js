@@ -546,7 +546,7 @@ Ymacs_Buffer.newCommands({
         this._insertText(this.ymacs.killRingText());
         this.cmd("set_mark_command", point);
         if (atStart)
-            this.cmd("exchange_point_and_mark");
+            this.caretMarker.swap(this.markMarker);
     }),
 
     yank_pop: Ymacs_Interactive(function() {
