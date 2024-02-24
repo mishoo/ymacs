@@ -44,11 +44,6 @@
 
 /* other stuff */
 
-.Ymacs-Theme-light .Ymacs-caret {
-  background-color: #888;
-  color: #222;
-}
-
 .Ymacs-Theme-light {
   --ymacs-cursor-bg: #f51;
   --ymacs-cursor-fg: #000;

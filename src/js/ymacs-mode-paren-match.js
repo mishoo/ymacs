@@ -395,8 +395,10 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         // }),
 
         paredit_newline_and_indent: Ymacs_Interactive(function(){
+            var inparens = this.looking_at(/[ \t]*([\]\}])/y)
+                && this.looking_back(new RegExp("\\" + R_PARENS[this.matchData[1]] + "[ \\t]*"));
             this.cmd("newline_and_indent");
-            if (this.looking_at(/[ \t]*[\]\}\)]/y)) {
+            if (inparens) {
                 this.cmd("newline_and_indent");
                 this.cmd("backward_line");
                 this.cmd("indent_line");
