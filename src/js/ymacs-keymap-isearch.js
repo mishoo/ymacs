@@ -236,14 +236,18 @@
                 lazyHighlight.call(this, txt);
             };
             mb.addEventListener("afterInteractiveCommand", hlOrig);
-            let onQuit = () => {
+            let onQuit = (continued) => {
                 mb.removeEventListener("afterInteractiveCommand", hlOrig);
                 mbMark.destroy();
                 mb.removeEventListener("abort", onQuit);
+                if (!continued) {
+                    this.deleteOverlay("isearch");
+                    this.deleteOverlay("isearch-lazy");
+                }
             };
             mb.addEventListener("abort", onQuit);
             this.cmd("minibuffer_read_string", null, orig => {
-                onQuit();
+                onQuit(true);
                 query_replace_2.call(this, mb, orig);
             });
         });
