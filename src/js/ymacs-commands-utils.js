@@ -111,7 +111,7 @@ Ymacs_Buffer.newCommands({
             ++max;
             lines.forEach(l => {
                 this.cmd("goto_char", this._rowColToPosition(l[0], l[1]));
-                this.cmd("insert", " ".x(max - l[1]));
+                this.cmd("insert", " ".repeat(max - l[1]));
             });
         });
     }),

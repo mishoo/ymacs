@@ -189,7 +189,7 @@ Ymacs_Buffer.newCommands({
         if (ch.length == 1 && !ev.altKey && !ev.ctrlKey) {
             this.deleteTransientRegion();
             if (repeat != null)
-                ch = ch.x(repeat);
+                ch = ch.repeat(repeat);
             if (this.overwriteMode) {
                 var line = this.code[rc.row], left = line.length - rc.col;
                 if (left > 0)
@@ -205,7 +205,7 @@ Ymacs_Buffer.newCommands({
     newline: Ymacs_Interactive("^p", function(n){
         if (n == null) n = 1;
         this.deleteTransientRegion();
-        this.cmd("insert", "\n".x(n));
+        this.cmd("insert", "\n".repeat(n));
     }),
 
     newline_and_indent: Ymacs_Interactive("^p", function(n){
@@ -227,7 +227,7 @@ Ymacs_Buffer.newCommands({
                     if (indent != null && this._rowcol.col != indent) {
                         this.cmd("beginning_of_line");
                         this.cmd("delete_whitespace", true);
-                        this.cmd("insert", " ".x(indent));
+                        this.cmd("insert", " ".repeat(indent));
                     }
                     return this.point();
                 });
@@ -237,7 +237,7 @@ Ymacs_Buffer.newCommands({
             }
             return;
         }
-        this.cmd("insert", " ".x(this.getq("indent_line")));
+        this.cmd("insert", " ".repeat(this.getq("indent_line")));
     }),
 
     indent_region: Ymacs_Interactive("r", function(begin, end) {
@@ -463,7 +463,7 @@ Ymacs_Buffer.newCommands({
         if (text.length < col) {
             if (force) {
                 this.cmd("end_of_line");
-                this.cmd("insert", " ".x(col - text.length));
+                this.cmd("insert", " ".repeat(col - text.length));
             } else {
                 this.cmd("end_of_line");
             }
@@ -624,11 +624,11 @@ Ymacs_Buffer.newCommands({
                 del = /\s*\/\/+\s*/y;
             }
             else if (this.cmd("looking_at", /\s*\/\*\s*/y)) {
-                prefix = " ".x(this.matchData[0].length);
+                prefix = " ".repeat(this.matchData[0].length);
                 del = /\s*\**\s*/y;
             }
             else if (this.cmd("looking_at", /\s*([-*]|[0-9]+\.|\(?[a-z][\).])?\s+/iy)) {
-                prefix = " ".x(this.matchData[0].length);
+                prefix = " ".repeat(this.matchData[0].length);
                 del = /\s*[#>;\s]*\s*/y;
             }
             else if (this.cmd("looking_at", /\s*[#>;\s]+\s*/y)) {
@@ -786,9 +786,8 @@ Ymacs_Buffer.newCommands({
 
     center_line: Ymacs_Interactive("p", function(n){
         if (n == null) n = 1;
-        n.times(function(i){
-            if (i > 0)
-                this.cmd("forward_line");
+        for (let i = 0; i < n; ++i) {
+            if (i > 0) this.cmd("forward_line");
             this.cmd("save_excursion", function(){
                 this.cmd("end_of_line");
                 this.cmd("backward_delete_whitespace", true);
@@ -796,9 +795,9 @@ Ymacs_Buffer.newCommands({
                 this.cmd("delete_whitespace", true);
                 var line = this.code[this._rowcol.row];
                 var indent = Math.floor((this.getq("fill_column") - line.length) / 2);
-                this.cmd("insert", " ".x(indent));
+                this.cmd("insert", " ".repeat(indent));
             });
-        }, this);
+        }
     }),
 
     /* -----[ dabbrev ]----- */
@@ -1147,7 +1146,7 @@ Ymacs_Buffer.newCommands({
         string_rectangle: Ymacs_Interactive("r\nsString rectangle: ", function(begin, end, string) {
             apply_on_rectangle(this, begin, end, function(c1, c2, ws){
                 if (ws > 0) {
-                    this._insertText(" ".x(ws), c1);
+                    this._insertText(" ".repeat(ws), c1);
                 } else {
                     this._deleteText(c1, c2);
                 }
@@ -1160,7 +1159,7 @@ Ymacs_Buffer.newCommands({
             apply_on_rectangle(this, begin, end, function(c1, c2, ws, width){
                 var str = this._bufferSubstring(c1, c2);
                 if (c2 - c1 < width)
-                    str += " ".x(width - c2 + c1);
+                    str += " ".repeat(width - c2 + c1);
                 text.push(str);
                 this._deleteText(c1, c2);
             });
@@ -1169,8 +1168,8 @@ Ymacs_Buffer.newCommands({
 
         clear_rectangle: Ymacs_Interactive("r", function(begin, end){
             this.cmd("string_rectangle", begin, end,
-                     " ".x(Math.abs(this._positionToRowCol(end).col -
-                                    this._positionToRowCol(begin).col)));
+                     " ".repeat(Math.abs(this._positionToRowCol(end).col -
+                                         this._positionToRowCol(begin).col)));
         }),
 
         insert_rectangle: function(point, rect) {

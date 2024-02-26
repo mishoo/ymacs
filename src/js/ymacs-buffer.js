@@ -343,7 +343,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     };
 
     P.setCode = function(code) {
-        // this.__code = code = code.replace(/\t/g, " ".x(this.getq("tab_width")));
+        // this.__code = code = code.replace(/\t/g, " ".repeat(this.getq("tab_width")));
         this.__isDirty = false;
         this.__code = code;
         this.__size = code.length;
@@ -822,9 +822,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
             // frequently used (ENTER pressed) and the
             // default algorithm messes up colorization
             // for a fraction of a second, flashing badly.
-            text.length.times(function(j){
+            for (let j = 0; j < text.length; ++j) {
                 this._insertLine(i + j, "");
-            }, this);
+            }
         } else {
             var lines = text.split("\n"), ln = this.code[i], rest = ln.substr(rc.col);
             if (lines.length > 1) {
@@ -861,7 +861,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
             this._replaceLine(brc.row, line);
             // delete lines in between
             line = brc.row + 1;
-            (erc.row - brc.row).times(this._deleteLine.bind(this, line));
+            for (let n = erc.row - brc.row; n-- > 0;) this._deleteLine(line);
         }
         this._updateMarkers(begin, begin - end, begin);
         this.callHooks("onTextDelete", begin, end);

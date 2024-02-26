@@ -109,7 +109,7 @@
     window.Ymacs_Interactive_X = function(func) {
         return Ymacs_Interactive("p", function(n){
             if (n == null) n = 1;
-            n.times(func, this);
+            while (n-- > 0) func.call(this);
         });
     };
 
