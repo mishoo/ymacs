@@ -358,7 +358,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         this.callHooks("onResetCode", this.code);
         this.caretMarker.setPosition(0, false, true);
         this.markMarker.setPosition(0, true);
-        this.forAllFrames(function(frame){
+        this.forAllFrames(frame => {
             frame.ensureCaretVisible();
             frame.redrawModelineWithTimer();
         });
