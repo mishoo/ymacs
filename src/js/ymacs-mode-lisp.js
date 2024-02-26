@@ -343,8 +343,16 @@
     // XXX: much of the parser is actually copied from ymacs-mode-js.js.  I should somehow unify
     // the duplicate code.
 
+    function qw(str) {
+        return str.trim().split(/\s+/);
+    }
+
+    function toHash(str) {
+        return qw(str).reduce((a, key, i) => (a[key] = i + 1, a), Object.create(null));
+    }
+
     function regexp_opt(x, mods) {
-        if (typeof x == "string") x = x.qw();
+        if (typeof x == "string") x = qw(x);
         return new RegExp("^(" + x.join("|") + ")$", mods);
     }
 
@@ -360,11 +368,11 @@ labels function symbol-macrolet block tagbody catch locally \
 inc! dec! cons c[ad]{1,4}r list and or not null null\\? \
 return return-from setq set! set-car! set-cdr! setf multiple-value-call values", "i");
 
-    var ERROR_FORMS = "error warn".qw().toHash();
+    var ERROR_FORMS = toHash("error warn");
 
-    var COMMON_MACROS = "loop do while dotimes".qw().toHash();
+    var COMMON_MACROS = toHash("loop do while dotimes");
 
-    var CONSTANTS = "t nil".qw().toHash();
+    var CONSTANTS = toHash("t nil");
 
     var OPEN_PAREN = {
         "(" : ")",
@@ -382,9 +390,9 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         "»" : "«",
     };
 
-    var DEFINES_FUNCTION = "defun defmacro defgeneric defmethod".qw().toHash();
+    var DEFINES_FUNCTION = toHash("defun defmacro defgeneric defmethod");
 
-    var DEFINES_TYPE = "deftype defclass defstruct".qw().toHash();
+    var DEFINES_TYPE = toHash("deftype defclass defstruct");
 
     var FORM_ARGS = {
         "if"                  : "3+",
@@ -423,7 +431,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         ":method"             : "1*",
     };
 
-    var LOCAL_BODYDEF = "labels flet macrolet".qw().toHash();
+    var LOCAL_BODYDEF = toHash("labels flet macrolet");
 
     function isOpenParen(ch) {
         return OPEN_PAREN[ch];

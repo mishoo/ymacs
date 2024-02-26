@@ -37,7 +37,15 @@
 
 (function(){
 
-    var KEYWORDS = "abstract break case catch class const \
+    function qw(str) {
+        return str.trim().split(/\s+/);
+    }
+
+    function toHash(a) {
+        return a.reduce((a, key, i) => (a[key] = i + 1, a), Object.create(null));
+    }
+
+    var KEYWORDS = qw("abstract break case catch class const \
 continue debugger default delete do else \
 enum export extends final finally for \
 function goto if implements import in \
@@ -45,17 +53,17 @@ instanceof interface native new package \
 private protected public return static \
 super switch synchronized throw \
 throws transient try typeof var void let \
-yield volatile while with".qw();
+yield volatile while with");
 
-    var KEYWORDS_TYPE = "boolean byte char double float int long short void \
-Array Date Function Math Number Object RegExp String".qw();
+    var KEYWORDS_TYPE = qw("boolean byte char double float int long short void \
+Array Date Function Math Number Object RegExp String");
 
-    var KEYWORDS_CONST = "false null undefined Infinity NaN true arguments".qw();
+    var KEYWORDS_CONST = qw("false null undefined Infinity NaN true arguments");
 
-    var KEYWORDS_BUILTIN = "Infinity NaN \
+    var KEYWORDS_BUILTIN = qw("Infinity NaN \
 Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-parseInt undefined window document alert prototype constructor this".qw();
+parseInt undefined window document alert prototype constructor this");
 
     var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
 
@@ -376,26 +384,26 @@ parseInt undefined window document alert prototype constructor this".qw();
 
     Ymacs_Tokenizer.define("js", JS_PARSER.bind(
         null,
-        KEYWORDS.toHash(true),
-        KEYWORDS_TYPE.toHash(true),
-        KEYWORDS_CONST.toHash(true),
-        KEYWORDS_BUILTIN.toHash(true)
+        toHash(KEYWORDS),
+        toHash(KEYWORDS_TYPE),
+        toHash(KEYWORDS_CONST),
+        toHash(KEYWORDS_BUILTIN)
     ));
 
     /* -----[ DynarchLIB ]----- */
 
-    var DL_KEYWORDS_BUILTIN = KEYWORDS_BUILTIN.concat("\
+    var DL_KEYWORDS_BUILTIN = KEYWORDS_BUILTIN.concat(qw("\
 DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
 DEFAULT_ARGS DEFAULT_EVENTS \
 FIXARGS CONSTRUCT BEFORE_BASE FINISH_OBJECT_DEF \
-D P $".qw());
+D P $"));
 
     Ymacs_Tokenizer.define("js-dynarchlib", JS_PARSER.bind(
         null,
-        KEYWORDS.toHash(true),
-        KEYWORDS_TYPE.toHash(true),
-        KEYWORDS_CONST.toHash(true),
-        DL_KEYWORDS_BUILTIN.toHash(true)
+        toHash(KEYWORDS),
+        toHash(KEYWORDS_TYPE),
+        toHash(KEYWORDS_CONST),
+        toHash(DL_KEYWORDS_BUILTIN)
     ));
 
 })();

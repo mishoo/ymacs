@@ -153,7 +153,6 @@ to the current one.\n\
 
         var files = [
                 "ymacs.js",
-                "ymacs-keyboard.js",
                 "ymacs-regexp.js",
                 "ymacs-frame.js",
                 "ymacs-textprop.js",
