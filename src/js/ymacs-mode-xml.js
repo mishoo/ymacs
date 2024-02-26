@@ -277,9 +277,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                 html(' class="', el.klass.replace(/\$/g, i), '"');
             }
             if (el.attributes) {
-                el.attributes.foreach(function(attr){
-                    html(" ", attr, '="|"');
-                });
+                el.attributes.forEach(attr => html(" ", attr, '="|"'));
             }
             html(">");
             if (el.child) {
@@ -455,23 +453,25 @@ Ymacs_Buffer.newMode("xml_mode", function(){
         }),
 
         xml_zen_next_poi: Ymacs_Interactive(function(){
-            var markers = this.getq("xml_zen_markers"), pos = this.point();
-            markers.foreach(function(m){
+            let markers = this.getq("xml_zen_markers"), pos = this.point();
+            for (let i = 0; i < markers.length; ++i) {
+                let m = markers[i];
                 if (m.getPosition() > pos) {
                     this.cmd("goto_char", m.getPosition());
-                    $BREAK();
+                    break;
                 }
-            }, this);
+            }
         }),
 
         xml_zen_prev_poi: Ymacs_Interactive(function(){
-            var markers = this.getq("xml_zen_markers"), pos = this.point();
-            markers.r_foreach(function(m){
+            let markers = this.getq("xml_zen_markers"), pos = this.point();
+            for (let i = markers.length; --i >= 0;) {
+                let m = markers[i];
                 if (m.getPosition() < pos) {
                     this.cmd("goto_char", m.getPosition());
-                    $BREAK();
+                    break;
                 }
-            }, this);
+            }
         })
 
     });

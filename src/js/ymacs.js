@@ -61,10 +61,10 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
     };
 
     D.CONSTRUCT = function() {
-        this.buffers.foreach(function(b){
+        this.buffers.forEach(b => {
             b.ymacs = this;
             this._addBufferListeners(b);
-        }, this);
+        });
 
         /* -----[ variables ]----- */
         this.killRing = [];
@@ -116,17 +116,16 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
     };
 
     P._addBufferListeners = function(buf) {
-        var self = this;
-        buf.addEventListener("onDestroy", function(){
-            var fr = self.getActiveFrame();
-            self.getBufferFrames(buf).foreach(function(f){
+        buf.addEventListener("onDestroy", () => {
+            var fr = this.getActiveFrame();
+            this.getBufferFrames(buf).forEach(f => {
                 if (f !== fr) {
-                    self.deleteFrame(f);
+                    this.deleteFrame(f);
                 }
             });
-            self.buffers.remove(buf);
-            if (self.getActiveBuffer() === buf)
-                self.nextHiddenBuffer(buf);
+            this.buffers.remove(buf);
+            if (this.getActiveBuffer() === buf)
+                this.nextHiddenBuffer(buf);
         });
     };
 
@@ -276,9 +275,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         style = this.cf_frameStyle = reset
             ? Object.makeCopy(style)
             : Object.merge(this.cf_frameStyle, style);
-        [ this.minibuffer_frame ].concat(this.frames).foreach(function(frame){
+        [ this.minibuffer_frame ].concat(this.frames).forEach(frame => {
             frame.setStyle(style);
-            frame.setStyle("height", "");
+            frame.setStyle("height", ""); // XXX: needed?
         });
         this.minibuffer_frame.getOverlaysContainer().style.height = "";
     };
@@ -362,9 +361,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         this.delClass(/Ymacs-Theme-[^\s]*/g);
         if (!(themeId instanceof Array))
             themeId = [ themeId ];
-        themeId.foreach(function(themeId){
+        themeId.forEach(themeId => {
             this.addClass("Ymacs-Theme-" + themeId);
-        }, this);
+        });
     };
 
     P.getFrameInDirection = function(dir, pos, frame) {

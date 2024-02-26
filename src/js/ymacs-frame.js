@@ -305,7 +305,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         // hide stale carets :-\
         // mess everywhere.
-        Array.$(this.getElement().querySelectorAll(".Ymacs-caret, #" + this.__caretId)).foreach(function(el){
+        [...this.getElement().querySelectorAll(".Ymacs-caret, #" + this.__caretId)].forEach(el => {
             el.id = "";
             el.className = "";
         });

@@ -125,11 +125,14 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     D.replaceCommands = P.replaceCommands = function(cmds) {
         this.COMMANDS = Object.makeCopy(this.COMMANDS);
-        var replacements = {};
-        Object.foreach(cmds, function(newcmd, oldcmd){
-            if (typeof newcmd == "string") newcmd = this[newcmd];
+        var replacements = Object.create(null);
+        Object.keys(cmds).forEach(oldcmd => {
+            let newcmd = cmds[oldcmd];
+            if (typeof newcmd == "string") {
+                newcmd = this.COMMANDS[newcmd];
+            }
             replacements[oldcmd] = newcmd;
-        }, this.COMMANDS);
+        });
         return this.newCommands(replacements);
     };
 
@@ -142,9 +145,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 // currently active
                 if (force !== true) {
                     // deactivate
-                    this.getq(hookvar).foreach(function(hook){
-                        hook.call(this, false);
-                    }, this);
+                    this.getq(hookvar).forEach(hook => hook.call(this, false));
                     if (status instanceof Function) {
                         // clean-up
                         status.call(this);
@@ -161,9 +162,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                         off = true;
                     this.setq(modevar, off);
                     this.modes.push(name);
-                    this.getq(hookvar).foreach(function(hook){
-                        hook.call(this, true);
-                    }, this);
+                    this.getq(hookvar).forEach(hook => hook.call(this, true));
                 }
             }
             return status;
@@ -303,7 +302,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     P.pushKeymap = function(keymap) {
         if (keymap instanceof Array) {
-            keymap.foreach(this.pushKeymap, this);
+            keymap.forEach(this.pushKeymap, this);
         } else {
             this.popKeymap(keymap);
             this.keymap.push(keymap);
@@ -343,7 +342,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     P.dirty = function(dirty) {
         if (arguments.length > 0) {
             this.__isDirty = dirty;
-            this.__undoQueue.foreach(function(x){
+            this.__undoQueue.forEach(x => {
                 if (x.type !== 3) x.dirty = true;
             });
             this.updateModeline();
@@ -567,7 +566,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     P.forAllFrames = function(cont) {
         if (this.ymacs)
-            this.ymacs.getBufferFrames(this).foreach(cont);
+            this.ymacs.getBufferFrames(this).forEach(cont);
     };
 
     P.whenYmacs = function() {
@@ -607,11 +606,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     P.redrawDirtyLines = function() {
         this.callHooks("beforeRedraw");
-        this.__dirtyLines.foreach(function(draw, row){
+        this.__dirtyLines.forEach((draw, row) => {
             if (draw) {
                 this.callHooks("onLineChange", row);
             }
-        }, this);
+        });
         this.__dirtyLines = [];
         this.callHooks("afterRedraw");
     };
@@ -786,9 +785,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
             action = q[this.__undoPointer];
             if (action.type == 3) { // boundary
                 // restore markers
-                action.markers.foreach(function(m){
-                    m[0].setPosition(m[1]);
-                });
+                action.markers.forEach(m => m[0].setPosition(m[1]));
                 if (!didit) continue;
                 break;
             }
@@ -867,9 +864,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
             var lines = text.split("\n"), ln = this.code[i], rest = ln.substr(rc.col);
             if (lines.length > 1) {
                 this._replaceLine(i, ln.substr(0, rc.col) + lines.shift());
-                lines.foreach(function(text){
-                    this._insertLine(++i, text);
-                }, this);
+                lines.forEach(text => this._insertLine(++i, text));
                 this._replaceLine(i, this.code[i] + rest);
             } else {
                 this._replaceLine(i, ln.substr(0, rc.col) + lines[0] + ln.substr(rc.col));
@@ -1043,8 +1038,9 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         var foundPrefix = false;
         cc.push(key);
 
-        this.keymap.r_foreach(function(km){
-            var h = km.getHandler(cc);
+        for (let i = this.keymap.length; --i >= 0;) {
+            let km = this.keymap[i];
+            let h = km.getHandler(cc);
             if (h instanceof Array) {
                 this.callInteractively(h[0], h[1]);
                 handled = true;
@@ -1060,8 +1056,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
                 handled = this.callInteractively(km.defaultHandler[0], km.defaultHandler[1]);
             }
             if (handled)
-                $BREAK();
-        }, this);
+                break;
+        }
 
         if (!foundPrefix) {
             if (!handled) {

@@ -1176,7 +1176,7 @@ Ymacs_Buffer.newCommands({
         insert_rectangle: function(point, rect) {
             var col = this._positionToRowCol(point).col;
             this.cmd("set_mark_command", point);
-            rect.foreach(function(text, i){
+            rect.forEach((text, i) => {
                 if (i > 0) {
                     if (!this.cmd("forward_line")) {
                         this.cmd("end_of_line");
@@ -1185,7 +1185,7 @@ Ymacs_Buffer.newCommands({
                     this.cmd("move_to_column", col, true);
                 }
                 this.cmd("insert", text);
-            }, this);
+            });
         },
 
         yank_rectangle: Ymacs_Interactive("d", function(point){

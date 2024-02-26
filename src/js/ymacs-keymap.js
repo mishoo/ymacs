@@ -50,7 +50,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         var key = {};
         var a = str.split(/-/);
         a.reverse();
-        a.foreach(function(c, i){
+        a.forEach((c, i) => {
             if (i == 0) {
                 key.key = c == "Space" ? " " : c.length == 1 ? c.toLowerCase() : c;
             } else switch(c) {
@@ -95,21 +95,19 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         }
         key = key.trim().split(/\s*&&\s*/);
         if (key.length > 1) {
-            key.foreach(function(key){
-                this.defineKey(key, func, args);
-            }, this);
+            key.forEach(key => this.defineKey(key, func, args));
         } else {
             key = key[0].trim();
             var dfn = this.definitions || this.__originalDefs;
             if (key.indexOf(" ") >= 0) {
                 var a = key.split(/\s+/);
                 key = a.pop();
-                a.foreach(function(key){
+                a.forEach(key => {
                     key = this.parseKey(key).str;
                     if (!dfn[key])
                         dfn[key] = {};
                     dfn = dfn[key];
-                }, this);
+                });
             }
             key = this.parseKey(key);
             dfn[key.str] = [ func, args ];
@@ -117,25 +115,23 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
     };
 
     P.defineKeys = function(map) {
-        Object.foreach(map, function(func, key){
-            this.defineKey(key, func);
-        }, this);
+        Object.keys(map).forEach(key => this.defineKey(key, map[key]));
     };
 
     P.getHandler = function(keys) {
-        var handler = null, def = this.definitions;
-        keys.foreach(function(key){
-            var tmp = handler ? handler[key] : def[key];
+        let handler = null, def = this.definitions;
+        for (let key of keys) {
+            let tmp = handler ? handler[key] : def[key];
             if (tmp) {
                 handler = tmp;
-                if (handler instanceof Array)
-                    $BREAK();
-            }
-            else {
+                if (Array.isArray(handler)) {
+                    break;
+                }
+            } else {
                 handler = null;
-                $BREAK();
+                break;
             }
-        });
+        }
         return handler;
     };
 

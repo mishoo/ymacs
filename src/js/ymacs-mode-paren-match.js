@@ -125,17 +125,18 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
     Ymacs_Buffer.newCommands({
 
         matching_paren: function() {
-            var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-            if (p) {
-                var parens = getPP(p);
-                return parens.foreach(function(p){
-                    var match = p.closed;
+            let parser = this.tokenizer.getLastParser();
+            if (parser) {
+                let rc = this._rowcol;
+                let parens = getPP(parser);
+                for (let p of parens) {
+                    let match = p.closed;
                     if (p.line == rc.row && p.col == rc.col) {
-                        $RETURN( this._rowColToPosition(match.line, match.col + 1) );
+                        return this._rowColToPosition(match.line, match.col + 1);
                     } else if (match.line == rc.row && match.col == rc.col - 1) {
-                        $RETURN( this._rowColToPosition(p.line, p.col) );
+                        return this._rowColToPosition(p.line, p.col);
                     }
-                }, this);
+                }
             }
         },
 
@@ -157,15 +158,19 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         }),
 
         forward_sexp: Ymacs_Interactive(function() {
-            var rc = this._rowcol, p = this.tokenizer.finishParsing();
-            if (p) {
+            let parser = this.tokenizer.finishParsing();
+            if (parser) {
                 // find next paren
-                var parens = getPP(p).mergeSort(compareRowCol);
-                var next = parens.foreach(function(p){
+                let rc = this._rowcol;
+                let parens = getPP(parser).sort(compareRowCol);
+                let next = null;
+                for (let i = 0; i < parens.length; ++i) {
+                    let p = parens[i];
                     if (p.line > rc.row || (p.line == rc.row && p.col >= rc.col)) {
-                        $RETURN(p);
+                        next = p;
+                        break;
                     }
-                });
+                }
                 if (!next || !next.closed) {
                     ERROR(this);
                     return;
@@ -176,15 +181,19 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         }),
 
         backward_sexp: Ymacs_Interactive(function() {
-            var rc = this._rowcol, p = this.tokenizer.finishParsing();
-            if (p) {
+            let parser = this.tokenizer.finishParsing();
+            if (parser) {
                 // find next paren
-                var parens = getPP(p).grep("closed").map("closed").mergeSort(compareRowCol);
-                var prev = parens.r_foreach(function(p){
+                let rc = this._rowcol;
+                let parens = getPP(parser).filter(p => p.closed).map(p => p.closed).sort(compareRowCol);
+                let prev = null;
+                for (let i = parens.length; --i >= 0;) {
+                    let p = parens[i];
                     if (p.line < rc.row || (p.line == rc.row && p.col < rc.col)) {
-                        $RETURN(p);
+                        prev = p;
+                        break;
                     }
-                });
+                }
                 if (!prev) {
                     ERROR(this);
                     return;
@@ -439,7 +448,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                 var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                 var hl = [];
                 if (p) {
-                    getPP(p).foreach(function(par_a){
+                    getPP(p).forEach(par_a => {
                         var par_b = par_a.closed;
                         if ((par_a.line == rc.row && inside(par_a.col, rc.col, par_a.type.length)) ||
                             (par_b.line == rc.row && inside(par_b.col, rc.col - 1, 1))) {
@@ -451,7 +460,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                                 line2: par_b.line, col2: par_b.col + 1
                             });
                         }
-                    }, this);
+                    });
                 }
                 this.setOverlay("match-paren", hl);
             }.clearingTimeout(100)

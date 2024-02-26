@@ -57,7 +57,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         if ($menu)
             $menu.destroy();
         $menu = new DlVMenu({});
-        list.foreach(function(item, index){
+        list.forEach((item, index) => {
             var data = item;
             if (typeof item != "string") {
                 data = item.completion;

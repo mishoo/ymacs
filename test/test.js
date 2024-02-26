@@ -177,7 +177,7 @@ to the current one.\n\
         ];
         var submenu = new DlVMenu({});
         item.setMenu(submenu);
-        files.foreach(function(file){
+        files.forEach(function(file){
                 var item = new DlMenuItem({ label: file, parent: submenu });
                 item.addEventListener("onSelect", function(){
                         var request = new DlRPC({ url: YMACS_SRC_PATH + file + "?killCache=" + new Date().getTime() });
@@ -242,7 +242,7 @@ to the current one.\n\
                 "light|standard-xemacs|>Standard XEmacs",
                 "light|vim-colors|>Vim colors",
                 "light|standard|>Emacs standard (light)"
-        ].foreach(function(theme){
+        ].forEach(function(theme){
                 if (theme == null) {
                         submenu.addSeparator();
                 } else {
@@ -281,7 +281,7 @@ to the current one.\n\
                 "Georgia",
                 "Times New Roman"
 
-        ].foreach(function(font){
+        ].forEach(function(font){
                 item = new DlMenuItem({ parent: submenu, label: "<span style='font-family:" + font + "'>" + font + "</span>" });
                 item.addEventListener("onSelect", function(){
                         setFrameStyle({ fontFamily: font });
@@ -313,7 +313,7 @@ to the current one.\n\
                 "22px",
                 "24px"
 
-        ].foreach(function(font){
+        ].forEach(function(font){
                 item = new DlMenuItem({ parent: submenu, label: "<span style='font-size:" + font + "'>" + font + "</span>" });
                 item.addEventListener("onSelect", function(){
                         setFrameStyle({ fontSize: font });
@@ -327,6 +327,8 @@ to the current one.\n\
         desktop.callHooks("onResize");
 
 DynarchDomUtils.trash(document.getElementById("x-loading"));
+
+ymacs.getActiveBuffer().cmd("load_file", "ymacs-frame.js");
 
 if (!is_gecko && !is_khtml) (function(){
 

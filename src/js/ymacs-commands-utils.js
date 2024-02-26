@@ -45,11 +45,10 @@ Ymacs_Buffer.newCommands({
         var lines = code.split(/\n/);
         if (lines.length > 4)
             lines.splice(2, lines.length - 4);
-        return lines.foreach(function(line, m){
-            if ((m = /-\*-\s*(.*?)\s*-\*-/i.exec(line))) {
-                $RETURN(m[1]);
-            }
-        });
+        for (let line of lines) {
+            let m = /-\*-\s*(.*?)\s*-\*-/i.exec(line);
+            if (m) return m[1];
+        }
     },
 
     mode_from_name: function(name) {
@@ -110,10 +109,10 @@ Ymacs_Buffer.newCommands({
                     break;
             }
             ++max;
-            lines.foreach(function(l){
+            lines.forEach(l => {
                 this.cmd("goto_char", this._rowColToPosition(l[0], l[1]));
                 this.cmd("insert", " ".x(max - l[1]));
-            }, this);
+            });
         });
     }),
 
