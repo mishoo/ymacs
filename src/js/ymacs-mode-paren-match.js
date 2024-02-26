@@ -235,12 +235,11 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         }),
 
         down_list: Ymacs_Interactive(function(){
-            var rc = this._rowcol, tok = this.tokenizer.finishParsing();
+            let tok = this.tokenizer.finishParsing();
             if (tok) {
-                var lc = { line: rc.row, col: rc.col };
-                var p = getPP(tok).grep("closed").mergeSort(compareRowCol).grep_first(function(p){
-                    return compareRowCol(p, lc) >= 0;
-                });
+                let rc = this._rowcol;
+                let lc = { line: rc.row, col: rc.col };
+                let p = getPP(tok).filter(p => p.closed).sort(compareRowCol).find(p => compareRowCol(p, lc) >= 0);
                 if (p != null) {
                     this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + p.type.length);
                 } else {
@@ -250,12 +249,11 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
         }),
 
         backward_up_list: Ymacs_Interactive(function(){
-            var rc = this._rowcol, tok = this.tokenizer.finishParsing();
+            let tok = this.tokenizer.finishParsing();
             if (tok) {
-                var lc = { line: rc.row, col: rc.col };
-                var p = getPP(tok).grep("closed").mergeSort(compareRowCol).grep_last(function(p){
-                    return compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0;
-                });
+                let rc = this._rowcol;
+                let lc = { line: rc.row, col: rc.col };
+                let p = getPP(tok).filter(p => p.closed).sort(compareRowCol).findLast(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
                 if (p != null) {
                     this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
                 } else {

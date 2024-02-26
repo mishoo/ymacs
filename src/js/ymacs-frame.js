@@ -339,9 +339,9 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._redrawBuffer = function() {
-        this.setContent(this.buffer.code.map(function(line, i){
-            return this._getLineHTML(i).htmlEmbed("div", "line");
-        }, this).join(""));
+        this.setContent(this.buffer.code.map((line, i) =>
+            `<div class="line">${this._getLineHTML(i)}</div>`
+        ).join(""));
     };
 
     P.coordinatesToRowCol = function(x, y) {

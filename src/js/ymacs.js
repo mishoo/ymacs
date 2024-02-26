@@ -157,9 +157,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     P.getBuffer = function(buf) {
         if (!(buf instanceof Ymacs_Buffer)) {
-            buf = this.buffers.grep_first(function(b){
-                return b.name == buf;
-            });
+            buf = this.buffers.find(b => b.name == buf);
         }
         return buf;
     };
@@ -194,10 +192,10 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
     };
 
     P.nextHiddenBuffer = function(cur) {
-        var a = this.buffers.grep(function(buf){
+        var a = this.buffers.filter(buf => {
             if (buf === cur) return false;
             var hidden = true;
-            buf.forAllFrames(function(){ hidden = false });
+            buf.forAllFrames(() => hidden = false);
             return hidden;
         });
         if (a.length > 0) {
@@ -242,14 +240,11 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     P.getBufferFrames = function(buf) {
         buf = this.getBuffer(buf);
-        return this.frames.grep(function(f){
-            return f.buffer === buf;
-        });
+        return this.frames.filter(f => f.buffer === buf);
     };
 
     P.createBuffer = function(args) {
-        if (!args) args = {};
-        Object.merge(args, { ymacs: this });
+        args = Object.assign({}, args, { ymacs: this });
         var buf = new Ymacs_Buffer(args);
         this._addBufferListeners(buf);
         if (!args.hidden)
@@ -259,8 +254,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
     };
 
     P.createFrame = function(args) {
-        if (!args) args = {};
-        Object.merge(args, { ymacs: this });
+        args = Object.assign({}, args, { ymacs: this });
         var frame = new Ymacs_Frame(args);
         if (!args.hidden)
             this.frames.unshift(frame);
@@ -271,15 +265,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         return frame;
     };
 
-    P.setFrameStyle = function(style, reset) {
-        style = this.cf_frameStyle = reset
-            ? Object.makeCopy(style)
-            : Object.merge(this.cf_frameStyle, style);
-        [ this.minibuffer_frame ].concat(this.frames).forEach(frame => {
-            frame.setStyle(style);
-            frame.setStyle("height", ""); // XXX: needed?
-        });
-        this.minibuffer_frame.getOverlaysContainer().style.height = "";
+    P.setFrameStyle = function(style) {
+        [ this.minibuffer_frame, ...this.frames ].forEach(frame => frame.setStyle(style));
     };
 
     P.keepOnlyFrame = function(frame) {
@@ -298,9 +285,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     P.deleteFrame = function(frame) {
         if (this.frames.length > 1) {
-            var p = frame.parent, other = p.children().grep_first(function(f){
-                return f instanceof Ymacs_SplitCont || f instanceof Ymacs_Frame && f !== frame;
-            });
+            let p = frame.parent;
+            let other = p.children().find(f => f instanceof Ymacs_SplitCont || (f instanceof Ymacs_Frame && f !== frame));
             other.getElement().style.removeProperty("width");
             other.getElement().style.removeProperty("height");
             p.parent.replaceWidget(p, other);
@@ -374,8 +360,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
             pos = DOM.getPos(caret);
         if (!pos.sz)
             pos.sz = DOM.getOuterSize(caret);
-        var byx = this.frames.mergeSort(function(a, b){ return a.getPos().x - b.getPos().x });
-        var byy = this.frames.mergeSort(function(a, b){ return a.getPos().y - b.getPos().y });
+        var byx = this.frames.sort((a, b) => a.getPos().x - b.getPos().x);
+        var byy = this.frames.sort((a, b) => a.getPos().y - b.getPos().y);
         return this["_get_frameInDir_" + dir](byx, byy, pos, frame);
     };
 
@@ -402,8 +388,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
     };
 
     P._get_frameInDir_left = function(byx, byy, pos, frame) {
-        byx = byx.grep(function(f){
-            var p = f.getPos(), s = f.getSize();
+        byx = byx.filter(f => {
+            let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.x < pos.x) && (p.y - pos.sz.y <= pos.y) && (p.y + s.y > pos.y);
         });
         return selectClosestFrameX(byx, pos);
@@ -411,16 +397,16 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     P._get_frameInDir_right = function(byx, byy, pos, frame) {
         byx.reverse();
-        byx = byx.grep(function(f){
-            var p = f.getPos(), s = f.getSize();
+        byx = byx.filter(f => {
+            let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.x > pos.x) && (p.y - pos.sz.y <= pos.y) && (p.y + s.y > pos.y);
         });
         return selectClosestFrameX(byx, pos);
     };
 
     P._get_frameInDir_up = function(byx, byy, pos, frame) {
-        byy = byy.grep(function(f){
-            var p = f.getPos(), s = f.getSize();
+        byy = byy.filter(f => {
+            let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.y < pos.y) && (p.x - pos.sz.x <= pos.x) && (p.x + s.x > pos.x);
         });
         return selectClosestFrameY(byy, pos);
@@ -428,8 +414,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     P._get_frameInDir_down = function(byx, byy, pos, frame) {
         byy.reverse();
-        byy = byy.grep(function(f){
-            var p = f.getPos(), s = f.getSize();
+        byy = byy.filter(f => {
+            let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.y > pos.y) && (p.x - pos.sz.x <= pos.x) && (p.x + s.x > pos.x);
         });
         return selectClosestFrameY(byy, pos);

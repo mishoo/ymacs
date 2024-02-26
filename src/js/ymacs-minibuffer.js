@@ -215,10 +215,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_read_command: function(cont) {
-            var commandNames = Array.hashKeys(this.COMMANDS).grep(function(cmd){
-                return this.COMMANDS[cmd].ymacsInteractive;
-            }, this).sort();
-            read_with_continuation.call(this, commandNames, cont, function(mb, name, cont2){
+            var completions = Object.keys(this.COMMANDS).filter(cmd => this.COMMANDS[cmd].ymacsInteractive).sort();
+            read_with_continuation.call(this, completions, cont, function(mb, name, cont2){
                 var cmd = this.COMMANDS[name],
                 ret = cmd && cmd.ymacsInteractive;
                 if (!ret) {
@@ -241,7 +239,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
 
         minibuffer_read_buffer: function(cont) {
             this.whenYmacs(function(ymacs){
-                var bufferNames = ymacs.buffers.map("name");
+                var bufferNames = ymacs.buffers.map(b => b.name);
                 bufferNames.push(bufferNames.shift());
                 read_with_continuation.call(this, bufferNames, cont);
                 //handle_tab.call(this);
@@ -253,11 +251,8 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         },
 
         minibuffer_read_variable: function(cont) {
-            var tmp = this.globalVariables;
-            Object.merge(tmp, this.variables);
-            var completions = Array.hashKeys(tmp).grep(function(name){
-                return !/^\*/.test(name);
-            }).sort();
+            var tmp = Object.assign({}, this.globalVariables, this.variables);
+            var completions = Object.keys(tmp).filter(name => !/^\*/.test(name)).sort();
             read_with_continuation.call(this, completions, cont
                                         // XXX: seems like a good idea, but it doesn't work
                                         // XXX: need to refactor the signalInfo stuff.  It doesn't show up
@@ -371,9 +366,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                     });
                 }
                 else if (a && a.length > 0) {
-                    a = a.grep(function(cmd){
-                        return re.test(cmd);
-                    });
+                    a = a.filter(cmd => re.test(cmd));
                     complete(a);
                 }
                 else

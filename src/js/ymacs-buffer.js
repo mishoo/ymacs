@@ -196,7 +196,6 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         this.__dirtyLines = [];
         this.__undoQueue = [];
         this.__undoPointer = 0;
-        this.__overlays = {};
 
         this.markers = [];
         this.caretMarker = this.createMarker(0, false, "point");
@@ -266,13 +265,13 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     P.withCommands = function(cmds, cont) {
         var saved = this.COMMANDS;
-        this.COMMANDS = Object.makeCopy(saved);
-        Object.merge(this.COMMANDS, cmds);
+        this.COMMANDS = Object.assign({}, this.COMMANDS, cmds);
         try {
-            if (cont instanceof Function)
-                return cont.apply(this, Array.$(arguments, 2));
-            else
-                return this.cmdApply(cont, Array.$(arguments, 2));
+            if (cont instanceof Function) {
+                return cont.apply(this, [...arguments].slice(2));
+            } else {
+                return this.cmdApply(cont, [...arguments].slice(2));
+            }
         } finally {
             this.COMMANDS = saved;
         }
@@ -357,8 +356,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         this.__size = code.length;
         this.__undoQueue = [];
         this.__undoPointer = 0;
-        this.__overlays = {};
-        this.markers.map("setPosition", 0, true, true);
+        this.markers.map(m => m.setPosition(0, true, true));
         this.code = code.split(/\n/);
         this._textProperties.reset();
         if (this.tokenizer) {
@@ -615,33 +613,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         this.callHooks("afterRedraw");
     };
 
-    P.getOverlays = function() {
-        return this.__overlays;
-    };
-
-    P.getOverlay = function(name) {
-        return this.__overlays[name];
-    };
-
     P.setOverlay = function(name, props) {
-        var ov = this.__overlays[name], isNew = !ov, tmp;
-        if (isNew)
-            ov = this.__overlays[name] = props;
-        else
-            Object.merge(ov, props);
-        // normalize line/col
-        if (ov.line2 < ov.line1) {
-            tmp = ov.line2; ov.line2 = ov.line1; ov.line1 = tmp;
-            tmp = ov.col2; ov.col2 = ov.col1; ov.col1 = tmp;
-        }
-        else if (ov.line2 == ov.line1 && ov.col2 < ov.col1) {
-            tmp = ov.col2; ov.col2 = ov.col1; ov.col1 = tmp;
-        }
-        this.callHooks("onOverlayChange", name, ov, isNew);
+        this.callHooks("onOverlayChange", name, props);
     };
 
     P.deleteOverlay = function(name) {
-        delete this.__overlays[name];
         this.callHooks("onOverlayDelete", name);
     };
 
@@ -765,9 +741,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 
     P._placeUndoBoundary = function() {
         var q = this.__undoQueue;
-        var m = this.markers.map(function(m){
-            return [ m, m.getPosition() ];
-        });
+        var m = this.markers.map(m => [ m, m.getPosition() ]);
         var last = q.peek();
         if (!last || last.type != 3) {
             q.push({ type: 3, markers: m });
@@ -908,7 +882,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     };
 
     P._swapAreas = function(a) {
-        a = a.map(MRK).mergeSort();
+        a = a.map(MRK).sort();
         var b1 = a[0];
         var e1 = a[1];
         var b2 = a[2];
@@ -996,7 +970,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         this.__size = null;
         this.__code = null;
         // if (this.__undoInProgress == 0) {
-        this.markers.map("editorChange", offset, delta, min || 0);
+        this.markers.map(m => m.editorChange(offset, delta, min || 0));
         // }
         if (this.tokenizer) {
             this.tokenizer.quickUpdate(Math.min(offset, offset + delta));

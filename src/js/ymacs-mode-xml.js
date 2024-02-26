@@ -445,7 +445,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
         xml_zen_stop: Ymacs_Interactive(function(){
             var tmp = this.getq("xml_zen_markers");
             if (tmp) {
-                tmp.map("destroy");
+                tmp.map(m => m.destroy());
                 this.setq("xml_zen_markers", null);
             }
             this.popKeymap(Ymacs_Keymap_XML_Zen());
