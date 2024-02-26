@@ -304,7 +304,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
         p = p();
         var iteration = 0;
         var first = true;
-        var doit = function() {
+        var doit = () => {
             this.buffer.preventUpdates();
             n = 100;
             if (++iteration > 10)
@@ -335,7 +335,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 }
             }
             this.showProgress();
-        }.$(this);
+        };
         doit();
     };
 

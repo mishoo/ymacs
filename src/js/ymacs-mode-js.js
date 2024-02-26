@@ -234,7 +234,7 @@ parseInt undefined window document alert prototype constructor this".qw();
             else if (ch === '"' || ch === "'" || ch === "`") {
                 $parens.push({ line: stream.line, col: stream.col, type: ch });
                 foundToken(stream.col, ++stream.col, "string-starter");
-                $cont.push(readString.$C(ch, "string"));
+                $cont.push(readString.bind(null, ch, "string"));
             }
             else if ((m = stream.lookingAt(/^0x[0-9a-f]+|^[0-9]*\.?[0-9]+/))) {
                 foundToken(stream.col, stream.col += m[0].length, "number");
@@ -374,7 +374,8 @@ parseInt undefined window document alert prototype constructor this".qw();
 
     };
 
-    Ymacs_Tokenizer.define("js", JS_PARSER.$C(
+    Ymacs_Tokenizer.define("js", JS_PARSER.bind(
+        null,
         KEYWORDS.toHash(true),
         KEYWORDS_TYPE.toHash(true),
         KEYWORDS_CONST.toHash(true),
@@ -389,7 +390,8 @@ DEFAULT_ARGS DEFAULT_EVENTS \
 FIXARGS CONSTRUCT BEFORE_BASE FINISH_OBJECT_DEF \
 D P $".qw());
 
-    Ymacs_Tokenizer.define("js-dynarchlib", JS_PARSER.$C(
+    Ymacs_Tokenizer.define("js-dynarchlib", JS_PARSER.bind(
+        null,
         KEYWORDS.toHash(true),
         KEYWORDS_TYPE.toHash(true),
         KEYWORDS_CONST.toHash(true),

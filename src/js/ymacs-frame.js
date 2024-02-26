@@ -79,30 +79,30 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             onMouseOut   : EX,
             onMouseEnter : EX,
             onMouseLeave : EX,
-            onMouseMove  : _dragSelect_onMouseMove.$(this),
-            onMouseUp    : _dragSelect_onMouseUp.$(this)
+            onMouseMove  : _dragSelect_onMouseMove.bind(this),
+            onMouseUp    : _dragSelect_onMouseUp.bind(this)
         };
 
         this._bufferEvents = {
-            onLineChange             : this._on_bufferLineChange.$(this),
-            onInsertLine             : this._on_bufferInsertLine.$(this),
-            onDeleteLine             : this._on_bufferDeleteLine.$(this),
-            onPointChange            : this._on_bufferPointChange.$(this),
-            onResetCode              : this._on_bufferResetCode.$(this),
-            onOverwriteMode          : this._on_bufferOverwriteMode.$(this),
-            onProgressChange         : this._on_bufferProgressChange.$(this),
-            beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.$(this),
-            afterInteractiveCommand  : this._on_bufferAfterInteractiveCommand.$(this),
-            onOverlayChange          : this._on_bufferOverlayChange.$(this),
-            onOverlayDelete          : this._on_bufferOverlayDelete.$(this),
+            onLineChange             : this._on_bufferLineChange.bind(this),
+            onInsertLine             : this._on_bufferInsertLine.bind(this),
+            onDeleteLine             : this._on_bufferDeleteLine.bind(this),
+            onPointChange            : this._on_bufferPointChange.bind(this),
+            onResetCode              : this._on_bufferResetCode.bind(this),
+            onOverwriteMode          : this._on_bufferOverwriteMode.bind(this),
+            onProgressChange         : this._on_bufferProgressChange.bind(this),
+            beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.bind(this),
+            afterInteractiveCommand  : this._on_bufferAfterInteractiveCommand.bind(this),
+            onOverlayChange          : this._on_bufferOverlayChange.bind(this),
+            onOverlayDelete          : this._on_bufferOverlayDelete.bind(this),
         };
 
         this._moreBufferEvents = {
-            onMessage               : this._on_bufferMessage.$(this),
+            onMessage               : this._on_bufferMessage.bind(this),
             afterInteractiveCommand : function(){
                 if (this.__ensureCaretVisible)
                     this.ensureCaretVisible();
-            }.$(this)
+            }.bind(this)
         };
 
         var buffer = this.buffer;
@@ -112,7 +112,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         if (!this.isMinibuffer && this.ymacs.cf_lineNumbers)
             this.toggleLineNumbers();
 
-        this.getOverlaysContainer().onscroll = this._on_scroll.$(this);
+        this.getOverlaysContainer().onscroll = this._on_scroll.bind(this);
     };
 
     P.focus = function(exitAllowed) {
@@ -488,12 +488,18 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         return this.id + "-ovl-" + name;
     };
 
+    function normalizeRect(p) {
+        return p.line1 > p.line2 || (p.line1 == p.line2 && p.col1 > p.col2) ?
+            { line1: p.line2, col1: p.col2, line2: p.line1, col2: p.col1 } : p;
+    }
+
     P.getOverlayHTML = function(name, props) {
         var str = "";
         props.forEach(p => {
             if (p.line1 == p.line2 && p.col1 == p.col2) {
                 return;
             }
+            p = normalizeRect(p);
             var p1 = this.coordinates(p.line1, p.col1);
             var p2 = this.coordinates(p.line2, p.col2);
             var p0 = p.col1 == 0 ? p1 : this.coordinates(p.line1, 0);

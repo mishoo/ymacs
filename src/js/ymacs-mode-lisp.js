@@ -161,7 +161,7 @@
             switch (peek()) {
               case "\\": next(); return token("char", read_char);
               case "/": return token("regexp", read_regexp);
-              case "(": return token("vector", read_list.$C("(", ")"));
+              case "(": return token("vector", read_list.bind(null, "(", ")"));
               case "'": next(); return token("function", read_symbol);
               case "|": next(); return token("comment", read_multiline_comment);
               default:
@@ -176,9 +176,9 @@
             switch (peek()) {
               case ";"  : return token("comment", read_comment);
               case "\"" : return token("string", read_string);
-              case "("  : return token("list", read_list.$C("(", ")"));
-              case "{"  : return token("list", read_list.$C("{", "}"));
-              case "["  : return token("list", read_list.$C("[", "]"));
+              case "("  : return token("list", read_list.bind(null, "(", ")"));
+              case "{"  : return token("list", read_list.bind(null, "{", "}"));
+              case "["  : return token("list", read_list.bind(null, "[", "]"));
               case "#"  : return token("sharp", read_sharp);
               case "`"  : next(); return token("qq", read_token, -1);
               case ","  :
@@ -298,9 +298,7 @@
         }),
 
         lisp_make_quick_parser: function() {
-            var args = Array.$(arguments);
-            args.unshift(this);
-            return QuickParser.apply(this, args);
+            return QuickParser.apply(this, [this, ...arguments]);
         },
 
         lisp_forward_sexp: Ymacs_Interactive(function(){
@@ -594,7 +592,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                 newArg();
                 $inString = { line: stream.line, c1: stream.col };
                 foundToken(stream.col, ++stream.col, "string-starter");
-                $cont.push(readString.$C(ch, "string"));
+                $cont.push(readString.bind(null, ch, "string"));
             }
             else if ((tmp = stream.lookingAt(/^[+-]?(#x[0-9a-fA-F]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*)(\x2f(#x[0-9a-fA-F]+|#o[0-7]+|#b[01]+|[0-9]*\.?[0-9]+e?[0-9]*))?/))) { // Dude, WTF...
                 newArg();

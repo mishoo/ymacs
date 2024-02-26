@@ -476,8 +476,8 @@ Ymacs_Buffer.newCommands({
         this._deleteText(begin, end);
     }),
 
-    insert: Ymacs_Interactive("sInsert text: ", function(){
-        return this._insertText(Array.$(arguments).join(""));
+    insert: Ymacs_Interactive("sInsert text: ", function(...args){
+        return this._insertText(args.join(""));
     }),
 
     keyboard_quit: Ymacs_Interactive(function(){

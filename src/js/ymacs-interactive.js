@@ -57,7 +57,7 @@
             func = args;
             args = null;
         } else {
-            var documentation;
+            let documentation;
             if (!(func instanceof Function)) {
                 documentation = func;
                 func = arguments[2];
@@ -65,11 +65,8 @@
             }
         }
         func.ymacsInteractive = true;
-        if (args instanceof Function) {
-            func.ymacsGetArgs = args;
-        }
-        else if (args != null) {
-            if (!(args instanceof Array)) {
+        if (args != null) {
+            if (!Array.isArray(args)) {
                 var m = /^[\^\@\*]+/.exec(args);
                 if (m) {
                     m = m[0];
@@ -88,16 +85,17 @@
                     args = args.split(/\n+/);
             }
             if (args) {
-                var collect,
-                execute = function() {
-                    collect.append(Array.$(arguments));
+                let collect;
+                let execute = function(...rest) {
+                    collect = collect.concat(rest);
                     return this.callInteractively(func, collect, true);
                 };
                 while (args.length > 0) {
-                    execute = createArgumentFunction(args.pop(), function(next) {
-                        collect.append(Array.$(arguments, 1));
+                    let next = execute;
+                    execute = createArgumentFunction(args.pop(), function(...rest) {
+                        collect = collect.concat(rest);
                         next.call(this);
-                    }.$(null, execute));
+                    });
                 }
                 func.ymacsCallInteractively = function(){
                     collect = [];
@@ -279,9 +277,11 @@
     };
 
     function createArgumentFunction(arg, cont) {
-        var code = arg.charAt(0);
+        let reader = ARG_READERS[arg.charAt(0)];
         arg = arg.substr(1);
-        return ARG_READERS[code].$(null, arg, cont);
+        return function() {
+            return reader.call(this, arg, cont);
+        };
     };
 
 })();

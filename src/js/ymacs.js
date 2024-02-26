@@ -258,9 +258,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         var frame = new Ymacs_Frame(args);
         if (!args.hidden)
             this.frames.unshift(frame);
-        frame.addEventListener("onDestroy", function(frame) {
-            this.frames.remove(frame);
-        }.$(this, frame));
+        frame.addEventListener("onDestroy", frame => this.frames.remove(frame));
         frame.setStyle(this.cf_frameStyle);
         return frame;
     };

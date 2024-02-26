@@ -142,7 +142,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
         else if (ch === '"' || ch === "'") {
             $inString = { line: stream.line, c1: stream.col };
             foundToken(stream.col, ++stream.col, "string-starter");
-            $cont.push(readString.$C(ch, "string"));
+            $cont.push(readString.bind(null, ch, "string"));
         }
         else if ((tmp = isOpenParen(ch))) {
             $parens.push({ line: stream.line, col: stream.col, type: ch });

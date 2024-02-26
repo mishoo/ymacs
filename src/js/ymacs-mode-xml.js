@@ -124,7 +124,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         }
         else if (ch === '"' || ch === "'") {
             foundToken(stream.col, ++stream.col, "string-starter");
-            $cont.push(readString.$C(ch));
+            $cont.push(readString.bind(null, ch));
         }
         else foundToken(stream.col, ++stream.col, null);
     };
@@ -165,12 +165,12 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         if (stream.lookingAt("<![CDATA[")) {
             foundToken(stream.col, stream.col += 9, "xml-cdata-starter");
             $inComment = { line: stream.line, c1: stream.col };
-            $cont.push(readComment.$C("xml-cdata", "]]>"));
+            $cont.push(readComment.bind(null, "xml-cdata", "]]>"));
         }
         else if (stream.lookingAt("<!--")) {
             foundToken(stream.col, stream.col += 4, "mcomment-starter");
             $inComment = { line: stream.line, c1: stream.col };
-            $cont.push(readComment.$C("mcomment", "-->"));
+            $cont.push(readComment.bind(null, "mcomment", "-->"));
         }
         else if (stream.lookingAt(/^<\x2f/) && isNameStart(stream.peek(+2))) {
             foundToken(stream.col, ++stream.col, "xml-open-bracket");

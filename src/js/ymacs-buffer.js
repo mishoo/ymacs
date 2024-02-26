@@ -108,7 +108,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         re.lastIndex = bound || 0;
         var m = re.exec(str);
         if (m) {
-            var a = Array.$(m, 2);
+            var a = [...m].slice(2);
             a.index = m.index + m[1].length;
             a.after = m.index + m[0].length;
             a[0] = str.substring(a.index, a.after);
@@ -219,11 +219,11 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         });
 
         this._tokenizerEvents = {
-            "onFoundToken": this._on_tokenizerFoundToken.$(this)
+            "onFoundToken": this._on_tokenizerFoundToken.bind(this)
         };
 
         this._textProperties = new Ymacs_Text_Properties({ buffer: this });
-        this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.$(this));
+        this._textProperties.addEventListener("onChange", this._on_textPropertiesChange.bind(this));
 
         this.keymap = [];
         this.pushKeymap(this.makeDefaultKeymap());
@@ -243,29 +243,22 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     // assign temporary values to them and execute a function.
 
     P.withVariables = function(vars, cont) {
-        var saved = {}, i, ret;
-        for (i in vars) {
-            saved[i] = this.variables[i];
-            this.variables[i] = vars[i];
-        }
+        var saved = this.variables;
+        this.variables = Object.assign(Object.create(this.variables), vars);
         try {
-            if (cont instanceof Function)
-                return cont.apply(this, Array.$(arguments, 2));
-            else
-                return this.cmdApply(cont, Array.$(arguments, 2));
-        } finally {
-            for (i in saved) {
-                if (saved[i] === undefined)
-                    delete this.variables[i];
-                else
-                    this.variables[i] = saved[i];
+            if (cont instanceof Function) {
+                return cont.apply(this, [...arguments].slice(2));
+            } else {
+                return this.cmdApply(cont, [...arguments].slice(2));
             }
+        } finally {
+            this.variables = saved;
         }
     };
 
     P.withCommands = function(cmds, cont) {
         var saved = this.COMMANDS;
-        this.COMMANDS = Object.assign({}, this.COMMANDS, cmds);
+        this.COMMANDS = Object.assign(Object.create(this.COMMANDS), cmds);
         try {
             if (cont instanceof Function) {
                 return cont.apply(this, [...arguments].slice(2));
@@ -498,8 +491,8 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
         });
     };
 
-    P.cmd = function(cmd) {
-        return this.COMMANDS[cmd].apply(this, Array.$(arguments, 1));
+    P.cmd = function(cmd, ...args) {
+        return this.COMMANDS[cmd].apply(this, args);
     };
 
     P.cmdApply = function(cmd, args) {
@@ -538,24 +531,23 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     // don't use the same name for both an object property and a
     // variable in this.variables.  Otherwise, the property takes
     // precedence.
-    P.when = function(what, cont) {
+    P.when = function(what, cont, ...args) {
         what = this[what] || this.getq(what);
         if (what != null) {
             if (cont instanceof Function)
                 return cont.call(this, what);
             else {
-                return what[cont].apply(what, Array.$(arguments, 2));
+                return what[cont].apply(what, args);
             }
         }
     };
 
-    // XXX: this is way too ugly.
+    // XXX: this is way too ugly. (15 years later: Oh Yeah.)
     P.whenActiveFrame = function() {
         var fr = this.getActiveFrame(); // miserable hack
         if (fr.buffer === this) {
             this.activeFrame = fr;
-            var a = Array.$(arguments);
-            a.unshift("activeFrame");
+            var a = ["activeFrame", ...arguments];
             return this.when.apply(this, a);
         } else {
             this.activeFrame = null;
@@ -568,8 +560,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
     };
 
     P.whenYmacs = function() {
-        var a = Array.$(arguments);
-        a.unshift("ymacs");
+        var a = ["ymacs", ...arguments];
         return this.when.apply(this, a);
     };
 
@@ -870,7 +861,7 @@ DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
             this._replaceLine(brc.row, line);
             // delete lines in between
             line = brc.row + 1;
-            (erc.row - brc.row).times(this._deleteLine.$(this, line));
+            (erc.row - brc.row).times(this._deleteLine.bind(this, line));
         }
         this._updateMarkers(begin, begin - end, begin);
         this.callHooks("onTextDelete", begin, end);

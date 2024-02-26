@@ -59,7 +59,7 @@ function () {\n\
         return function(){\n\
       alert(this.foo);\n\
       this.addClass(this._horiz ? 'Ymacs_SplitCont_horiz' : 'Ymacs_SplitCont_vert');\n\
-}.$(this);\n\
+}.bind(this);\n\
 }\n\
 \n\
 // select the following few lines and try M-x eval_region\n\
@@ -250,7 +250,7 @@ to the current one.\n\
                         var label = theme.pop();
                         label = label.replace(/^>\s*/, "&nbsp;".x(4));
                         var item = new DlMenuItem({ parent: submenu, label: label });
-                        item.addEventListener("onSelect", ymacs.setColorTheme.$(ymacs, theme));
+                        item.addEventListener("onSelect", ymacs.setColorTheme.bind(ymacs, theme));
                 }
         });
 
@@ -342,7 +342,7 @@ if (!is_gecko && !is_khtml) (function(){
         var tmp = new DlWidget({ parent: vbox });
         tmp.getElement().appendChild(document.getElementById("browser-warning"));
         var ok = new DlButton({ parent: vbox, focusable: true, label: "OK, let's see it" });
-        ok.addEventListener("onClick", dlg.destroy.$(dlg));
+        ok.addEventListener("onClick", dlg.destroy.bind(dlg));
         dlg._focusedWidget = ok;
 
         dlg.show(true);

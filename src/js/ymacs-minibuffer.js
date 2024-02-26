@@ -111,19 +111,19 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         this.whenMinibuffer(function(mb){
             var changed_vars = mb.setq({
                 completion_list: completions,
-                minibuffer_validation: function(what, cont2){
+                minibuffer_validation: (what, cont2) => {
                     if (what == null)
                         what = mb.cmd("minibuffer_contents");
                     if (validate)
                         validate.call(this, mb, what, cont2);
                     else
                         cont2(true); // accept anything by default
-                }.$(this),
-                minibuffer_continuation: function(what){
+                },
+                minibuffer_continuation: what => {
                     mb.setq(changed_vars);
                     if (cont)
                         cont.call(this, what);
-                }.$(this)
+                },
             });
         });
     };
