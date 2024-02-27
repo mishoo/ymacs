@@ -1271,20 +1271,30 @@ Ymacs_Buffer.newCommands({
 
     Ymacs_Buffer.newCommands({
 
-        yank_from_operating_system: Ymacs_Interactive(function() {
+        yank_from_operating_system: Ymacs_Interactive(async function() {
             var self = this;
-            modalTextarea(self, "paste", "Paste below (press CTRL-V)", null, function(code){
+            try {
+                let code = await navigator.clipboard.readText();
+                next(code);
+            } catch(ex) {
+                modalTextarea(self, "paste", "Paste below (press CTRL-V)", null, next);
+            }
+            function next(code){
                 self._saveKilledText(code);
-                self.cmd("yank");
-                self.cmd("recenter_top_bottom");
-            });
+                self.callInteractively("yank");
+            }
         }),
 
-        copy_for_operating_system: Ymacs_Interactive("r", function(begin, end) {
+        copy_for_operating_system: Ymacs_Interactive("r", async function(begin, end) {
             var self = this;
-            modalTextarea(self, "copy", "Press CTRL-C to copy", self.cmd("buffer_substring"), function(){
-                self.cmd("copy_region_as_kill", begin, end);
-            });
+            try {
+                let code = self.cmd("buffer_substring", begin, end);
+                await navigator.clipboard.writeText(code);
+            } catch(ex) {
+                modalTextarea(self, "copy", "Press CTRL-C to copy", self.cmd("buffer_substring"), function(){
+                    self.cmd("copy_region_as_kill", begin, end);
+                });
+            }
         })
 
     });

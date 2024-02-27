@@ -111,8 +111,8 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "C-ArrowDown"                             : "forward_paragraph",
         "C-ArrowUp"                               : "backward_paragraph",
         "C-l"                                     : "recenter_top_bottom",
-        "PageUp && M-v"                           : "scroll_up_half",
-        "PageDown && C-v"                         : "scroll_down_half",
+        "PageUp"                                  : "scroll_up_half",
+        "PageDown"                                : "scroll_down_half",
         "WheelUp"                                 : "scroll_up",
         "WheelDown"                               : "scroll_down",
 
@@ -195,7 +195,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
         "M-x"                                     : "execute_extended_command",
 
         // necessary evil
-        "C-S-y"                                   : "yank_from_operating_system",
+        "C-S-y && C-v"                            : "yank_from_operating_system",
         "M-S-w"                                   : "copy_for_operating_system",
 
         // my stuff, sorry if these have different meanings in the standard Emacs keys

@@ -385,6 +385,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
             let node = treeWalker.currentNode;
             let clen = node.nodeValue.length;
             if (len + clen >= col) {
+                range.setStart(node, col - len);
                 range.setEnd(node, col - len);
                 break;
             }
