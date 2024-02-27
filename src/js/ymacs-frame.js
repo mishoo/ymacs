@@ -109,8 +109,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
         this.buffer = null;
         if (buffer)
             this.setBuffer(buffer);
-        if (!this.isMinibuffer && this.ymacs.cf_lineNumbers)
-            this.toggleLineNumbers();
 
         this.getOverlaysContainer().onscroll = this._on_scroll.bind(this);
     };
@@ -269,12 +267,6 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
     P.hsplit = function(percent) {
         return this._split_layout(false);
-    };
-
-    P.toggleLineNumbers = function() {
-        this.condClass(this.__lineNumbers =! this.__lineNumbers, "Ymacs-line-numbers");
-        if (this.buffer.transientMarker)
-            this.buffer.ensureTransientMark();
     };
 
     P.__showCaret = function() {

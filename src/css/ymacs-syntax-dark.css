@@ -90,12 +90,12 @@
   border-top: 1px solid #fff;
 }
 
-.Ymacs-Theme-dark .Ymacs-line-numbers .Ymacs-frame-content div.line:before {
+.Ymacs.Ymacs-Theme-dark.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
   border-right: 1px solid #000;
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.Ymacs-Theme-dark .Ymacs-line-numbers .Ymacs-frame-content div.Ymacs-current-line:before {
+.Ymacs.Ymacs-Theme-dark.Ymacs-line-numbers .Ymacs-frame-content div.Ymacs-current-line:before {
   background-color: #000;
   color: #f51;
 }

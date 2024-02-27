@@ -52,10 +52,6 @@
 
 .Ymacs_Minibuffer .Ymacs_Modeline { display: none; }
 
-.Ymacs_Minibuffer .Ymacs-frame-content {
-  padding: 0;
-}
-
 /* .Ymacs_Frame-hasOverlays .Ymacs-current-line { */
 /*   background: transparent !important; */
 /* } */
@@ -79,20 +75,30 @@
 
 .Ymacs_Completion_Popup .DlMenuItem .div2 { font-size: 100%; }
 
-.Ymacs-line-numbers .Ymacs-frame-content { counter-reset: ymacs-line 0; }
-.Ymacs-line-numbers .Ymacs-frame-content div.line { counter-increment: ymacs-line; }
-.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
+.Ymacs.Ymacs-line-numbers .Ymacs-frame-content {
+  counter-reset: ymacs-line 0;
+  padding-left: calc(3.3em + 7px);
+}
+.Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line { counter-increment: ymacs-line; }
+.Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
+  box-sizing: border-box;
   color: #888;
-  display: inline-block;
-  width: 3em;
-  padding-right: 0.5em;
-  margin-right: 0.5em;
+  display: block;
+  position: absolute;
+  left: 0;
+  width: 3.3em;
+  padding-right: 7px;
   content: counter(ymacs-line, decimal);
   text-align: right;
 }
 
-.Ymacs-splitbar-horiz { border-bottom: 1px solid #000; }
-.Ymacs-splitbar-vert { border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px solid #000; }
+.Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content {
+  padding: 0;
+}
+.Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content div.line:before {
+  content: none;
+  display: none;
+}
 
 .Ymacs_Frame .minibuffer-prompt { font-weight: bold }
 

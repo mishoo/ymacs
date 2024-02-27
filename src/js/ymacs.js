@@ -44,7 +44,6 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         frames  : [ "frames"  , null ],
 
         // default options
-        cf_lineNumbers: [ "lineNumbers", false ],
         cf_frameStyle: [ "frameStyle", null ],
 
         // override in DlWidget
