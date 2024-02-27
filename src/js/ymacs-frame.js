@@ -408,9 +408,10 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P.setOuterSize = P.setSize = function(sz) {
-        var el = this.getElement();
-        if (sz.x != null) el.style.width = sz.x + "px";
-        if (sz.y != null) el.style.height = sz.y + "px";
+        debugger;
+        // var el = this.getElement();
+        // if (sz.x != null) el.style.width = sz.x + "px";
+        // if (sz.y != null) el.style.height = sz.y + "px";
     };
 
     P.redrawModeline = function(rc) {

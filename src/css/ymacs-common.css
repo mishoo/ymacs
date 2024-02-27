@@ -11,8 +11,8 @@
 }
 
 .Ymacs_Frame {
-  font-size: 14px;
-  font-family: "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
+  font-size: 16px;
+  font-family: "Iosevka Custom", "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
   overflow: hidden;
   display: flex;
   flex-direction: column;

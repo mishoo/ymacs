@@ -357,7 +357,7 @@
     }
 
     var SPECIAL_FORMS = regexp_opt("\
-define defvar defparameter deftype defstruct defclass defsetf destructuring-bind \
+define defvar defparameter defconstant deftype defstruct defclass defsetf destructuring-bind \
 defmacro defun defmethod defgeneric defpackage in-package defreadtable in-readtable \
 when cond unless etypecase typecase ctypecase \
 lambda λ let load-time-value quote macrolet \
@@ -396,7 +396,10 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
 
     var FORM_ARGS = {
         "if"                  : "3+",
+        "aif"                 : "3+",
         "when"                : "1*",
+        "awhen"               : "1*",
+        "once-only"           : "1*",
         "lambda"              : "1*",
         "unless"              : "1*",
         "defun"               : "2*",
@@ -429,6 +432,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         "dolist"              : "1*",
         "multiple-value-bind" : "2*",
         ":method"             : "1*",
+        "eval-when"           : "1*",
     };
 
     var LOCAL_BODYDEF = toHash("labels flet macrolet");
