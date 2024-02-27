@@ -245,19 +245,21 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._split_layout = function(horiz) {
-        var cont = this.parent;
-        var fr = this.ymacs.createFrame({ buffer: this.buffer });
-        var layout = new Ymacs_SplitCont({ horiz: horiz });
-        var lael = layout.getElement(), frel = this.getElement();
+        let cont = this.parent;
+        let fr = this.ymacs.createFrame({ buffer: this.buffer });
+        let layout = new Ymacs_SplitCont({ horiz: horiz });
+        let lael = layout.getElement(), frel = this.getElement();
         lael.style.width = frel.style.width;
         lael.style.height = frel.style.height;
         frel.style.removeProperty("width");
         frel.style.removeProperty("height");
+        let ovdiv = this.getOverlaysContainer();
+        let posY = ovdiv.scrollTop;
         cont.replaceWidget(this, layout);
         layout.appendWidget(this);
         layout.appendWidget(fr);
-        fr.centerOnCaret();
-        this.centerOnCaret();
+        ovdiv.scrollTop = posY;
+        fr.getOverlaysContainer().scrollTop = posY;
         return fr;
     };
 
@@ -543,12 +545,11 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._on_bufferOverlayChange = function(name, props) {
-        var div = this.getOverlayHTML(name, Array.isArray(props) ? props : [ props ]);
-        if (div) {
-            div = DOM.createFromHtml(div);
-            var p = this.getOverlaysContainer();
-            var old = document.getElementById(this.getOverlayId(name));
-            old ? p.replaceChild(div, old) : p.appendChild(div);
+        let html = this.getOverlayHTML(name, Array.isArray(props) ? props : [ props ]);
+        if (html) {
+            let div = DOM.createFromHtml(html);
+            let old = document.getElementById(this.getOverlayId(name));
+            old ? old.replaceWith(div) : this.getOverlaysContainer().appendChild(div);
             this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
         } else {
             this._on_bufferOverlayDelete(name);
