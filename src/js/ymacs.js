@@ -31,7 +31,9 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
+import { DOM, Widget } from "./ymacs-utils.js";
+
+DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
 
     D.DEFAULT_EVENTS = [
         "onBufferSwitch",
@@ -107,8 +109,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
         var frame = this.createFrame({ buffer: this.buffers[0] });
 
-        this.appendWidget(frame);
-        this.appendWidget(this.minibuffer_frame);
+        this.getElement().appendChild(frame.getElement());
+        this.getElement().appendChild(this.minibuffer_frame.getElement());
 
         this.setActiveFrame(frame);
         frame._redrawCaret();
@@ -122,7 +124,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
                     this.deleteFrame(f);
                 }
             });
-            this.buffers.remove(buf);
+            remove(this.buffers, buf);
             if (this.getActiveBuffer() === buf)
                 this.nextHiddenBuffer(buf);
         });
@@ -184,7 +186,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
             // create new buffer
             buf = this.createBuffer({ name: maybeName });
         }
-        a.remove(buf);
+        remove(a, buf);
         a.unshift(buf);
         this._do_switchToBuffer(buf);
         return buf;
@@ -199,7 +201,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         });
         if (a.length > 0) {
             var buf = a[0];
-            this.buffers.remove(buf);
+            remove(this.buffers, buf);
             this.buffers.push(buf);
             this._do_switchToBuffer(buf);
         } else {
@@ -228,13 +230,12 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
     P.getNextBuffer = function(buf, n) {
         if (n == null) n = 1;
         var a = this.buffers;
-        return a[a.rotateIndex(a.find(buf) + n)];
+        return a[(a.indexOf(buf) + n) % a.length];
     };
 
     P.getPrevBuffer = function(buf, n) {
         if (n == null) n = 1;
-        var a = this.buffers;
-        return a[a.rotateIndex(a.find(buf) - n)];
+        return this.getNextBuffer(buf, -n);
     };
 
     P.getBufferFrames = function(buf) {
@@ -257,7 +258,6 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         var frame = new Ymacs_Frame(args);
         if (!args.hidden)
             this.frames.unshift(frame);
-        frame.addEventListener("onDestroy", () => this.frames.remove(frame));
         frame.setStyle(this.cf_frameStyle);
         return frame;
     };
@@ -268,37 +268,36 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
 
     P.keepOnlyFrame = function(frame) {
         if (this.frames.length > 1) {
-            var p = frame.parent;
-            while (p.parent != this)
-                p = p.parent;
-            this.replaceWidget(p, frame);
-            p.destroy();
-            this.setActiveFrame(frame);
-            frame.getElement().style.removeProperty("width");
-            frame.getElement().style.removeProperty("height");
-            frame.centerOnCaret();
+            var el = frame.getElement();
+            while (el.parentNode != this.getContentElement())
+                el = el.parentNode;
+            if (el !== frame) {
+                el.replaceWith(frame.getElement());
+                frame.getElement().style.removeProperty("width");
+                frame.getElement().style.removeProperty("height");
+                this.setActiveFrame(frame);
+                frame.centerOnCaret();
+                this.frames = [ frame ];
+            }
         }
     };
 
     P.deleteFrame = function(frame) {
         if (this.frames.length > 1) {
-            let p = frame.parent;
-            let other = p.children().find(f => f instanceof Ymacs_SplitCont || (f instanceof Ymacs_Frame && f !== frame));
-            other.getElement().style.removeProperty("width");
-            other.getElement().style.removeProperty("height");
-            p.parent.replaceWidget(p, other);
-            p.destroy();
-            try {
-                DOM.walk(other.getElement(), function(el){
-                    el = DlWidget.getFromElement(el);
-                    if (el && el instanceof Ymacs_Frame)
-                        throw el;
-                });
-            } catch(ex) {
-                if (!(ex instanceof Ymacs_Frame))
-                    throw ex;
-                other = ex;
+            remove(this.frames, frame);
+            let parent = frame.getElement().parentNode;
+            let other = [...parent.children].find(el => {
+                let obj = el._ymacs_object;
+                return obj instanceof Ymacs_SplitCont
+                    || (obj instanceof Ymacs_Frame && obj !== frame);
+            });
+            other.style.removeProperty("width");
+            other.style.removeProperty("height");
+            parent.replaceWith(other);
+            if (!DOM.hasClass(other, "Ymacs_Frame")) {
+                other = other.querySelector(".Ymacs_Frame");
             }
+            other = other._ymacs_object;
             this.setActiveFrame(other);
             other.centerOnCaret();
         }
@@ -323,7 +322,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
             if (old) {
                 old.delClass("Ymacs_Frame-active");
             }
-            this.frames.remove(frame);
+            remove(this.frames, frame);
             this.frames.push(frame);
         }
         this.__input_frame = frame;
@@ -354,9 +353,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
             frame = this.getActiveFrame();
         var caret = frame.getCaretElement();
         if (!pos)
-            pos = DOM.getPos(caret);
+            pos = OLDOM.getPos(caret);
         if (!pos.sz)
-            pos.sz = DOM.getOuterSize(caret);
+            pos.sz = OLDOM.getOuterSize(caret);
         var byx = this.frames.sort((a, b) => a.getPos().x - b.getPos().x);
         var byy = this.frames.sort((a, b) => a.getPos().y - b.getPos().y);
         return this["_get_frameInDir_" + dir](byx, byy, pos, frame);
@@ -662,3 +661,8 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, DOM){
         }
     };
 });
+
+function remove(array, element) {
+    let pos = array.indexOf(element);
+    if (pos >= 0) array.splice(pos, 1);
+}

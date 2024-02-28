@@ -108,27 +108,27 @@
   gap: 5px;
   background-color: #888;
 }
-.Ymacs_SplitCont_dragging {
+.Ymacs_SplitCont.dragging {
   background-color: orange;
 }
-.Ymacs_SplitCont_horiz {
+.Ymacs_SplitCont.horiz {
   flex-direction: column;
   cursor: ns-resize;
 }
-.Ymacs_SplitCont_vert {
-  flex-direction: row;
-  cursor: ew-resize;
-}
-.Ymacs_Resize_horiz { cursor: ns-resize !important }
-.Ymacs_Resize_vert { cursor: ew-resize !important }
-.Ymacs_SplitCont_horiz > div {
+.Ymacs_SplitCont.horiz > div {
   height: 50%;
   width: 100%;
 }
-.Ymacs_SplitCont_vert > div {
+.Ymacs_SplitCont.vert {
+  flex-direction: row;
+  cursor: ew-resize;
+}
+.Ymacs_SplitCont.vert > div {
   width: 50%;
   height: 100%;
 }
+.Ymacs_Resize_horiz { cursor: ns-resize !important }
+.Ymacs_Resize_vert { cursor: ew-resize !important }
 
 @property --ymacs-cursor-bg {
   syntax: "<color>";

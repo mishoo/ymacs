@@ -32,7 +32,7 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import "./ymacs.js";
-import { DOM } from "./ymacs-utils.js";
+import { DOM, Widget } from "./ymacs-utils.js";
 
 DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
 
@@ -55,6 +55,12 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
     };
 
     D.CONSTRUCT = function() {
+
+        // <XXX> // during transition
+        this.el = this.getElement();
+        this.el._ymacs_object = this;
+        // </XXX>
+
         this.__caretId = Dynarch.ID();
         this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
 
@@ -244,21 +250,19 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
     };
 
     P._split_layout = function(horiz) {
-        let cont = this.parent;
-        let fr = this.ymacs.createFrame({ buffer: this.buffer });
-        let layout = new Ymacs_SplitCont({ horiz: horiz });
-        let lael = layout.getElement(), frel = this.getElement();
-        lael.style.width = frel.style.width;
-        lael.style.height = frel.style.height;
-        frel.style.removeProperty("width");
-        frel.style.removeProperty("height");
         let ovdiv = this.getOverlaysContainer();
-        let posY = ovdiv.scrollTop;
-        cont.replaceWidget(this, layout);
-        layout.appendWidget(this);
-        layout.appendWidget(fr);
-        ovdiv.scrollTop = posY;
-        fr.getOverlaysContainer().scrollTop = posY;
+        let scroll = ovdiv.scrollTop;
+        let fr = this.ymacs.createFrame({ buffer: this.buffer });
+        let sc = new Ymacs_SplitCont({ horiz: horiz });
+        sc.el.style.width = this.el.style.width;
+        sc.el.style.height = this.el.style.height;
+        this.getElement().replaceWith(sc.getElement());
+        this.el.style.removeProperty("width");
+        this.el.style.removeProperty("height");
+        sc.add(this);
+        sc.add(fr);
+        ovdiv.scrollTop = scroll;
+        fr.getOverlaysContainer().scrollTop = scroll;
         return fr;
     };
 
@@ -697,71 +701,61 @@ DEFINE_CLASS("Ymacs_Message_Popup", DlPopup, function(D, P) {
     };
 });
 
-DEFINE_CLASS("Ymacs_SplitCont", DlContainer, function(D, P, DOM){
-    var CC = DOM.condClass;
-    D.DEFAULT_ARGS = {
-        _horiz: [ "horiz", true ]
+class Ymacs_SplitCont extends Widget {
+    static options = {
+        horiz: false
     };
-    P._createElement = function() {
-        D.BASE._createElement.apply(this, arguments);
-        this.addClass(this._horiz ? "Ymacs_SplitCont_horiz" : "Ymacs_SplitCont_vert");
-    };
-    P._setListeners = function() {
-        D.BASE._setListeners.apply(this, arguments);
-        this._resizeHandlers = {
-            onMouseMove  : mouseMove.bind(this),
-            onMouseUp    : stopResize.bind(this),
-            onMouseOver  : DlException.stopEventBubbling,
-            onMouseOut   : DlException.stopEventBubbling,
-            onMouseEnter : DlException.stopEventBubbling,
-            onMouseLeave : DlException.stopEventBubbling
+    initClassName() {
+        return "Ymacs_SplitCont " + (this.o.horiz ? "horiz" : "vert");
+    }
+    createElement() {
+        super.createElement();
+        this._dragHandlers = {
+            mousemove : this._onMouseMove.bind(this),
+            mouseup   : this._onMouseUp.bind(this),
         };
-        this.addEventListener("onMouseDown", startDrag);
-    };
-    P._setResizeCaptures = function(capture) {
-        (capture ? DlEvent.captureGlobals : DlEvent.releaseGlobals)(this._resizeHandlers);
-        var div = DlDialog.activateEventStopper(capture);
-        CC(div, capture, this._horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
-    };
-    P._doResize = function(pos) {
-        var cont = this.getElement();
-        var max = this._horiz ? cont.offsetHeight : cont.offsetWidth;
-        var diff = (this._horiz ? pos.y : pos.x) - this._start;
-        var a = this.children(0).getElement();
-        var b = this.children(1).getElement();
-        var target = Math.min(max, Math.max(0, this._orig_sz + diff));
-        var frac = Math.min(0.9, Math.max(0.1, target / max));
-        if (this._horiz) {
+        DOM.on(this.getElement(), "mousedown", this._onMouseDown.bind(this));
+    }
+    _onMouseDown(ev) {
+        let first = this.getContentElement().children[0];
+        this._start = this.o.horiz ? ev.clientY : ev.clientX;
+        this._orig_sz = this.o.horiz ? first.offsetHeight : first.offsetWidth;
+        this._orig_frac = this._1stChildFr();
+        this.addClass("dragging");
+        ev.stopPropagation();
+        DOM.on(window, this._dragHandlers);
+        DOM.overlay_on(this.o.horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
+    }
+    _onMouseUp(ev) {
+        DOM.off(window, this._dragHandlers);
+        this.delClass("dragging");
+        DOM.overlay_off();
+    }
+    _onMouseMove(ev) {
+        let cont = this.getElement();
+        let max = this.o.horiz ? cont.offsetHeight : cont.offsetWidth;
+        let diff = (this.o.horiz ? ev.clientY : ev.clientX) - this._start;
+        let a = this.getContentElement().children[0];
+        let b = this.getContentElement().children[1];
+        let target = Math.min(max, Math.max(0, this._orig_sz + diff));
+        let frac = Math.min(0.9, Math.max(0.1, target / max));
+        if (this.o.horiz) {
             a.style.height = (frac * 100) + "%";
             b.style.height = ((1 - frac) * 100) + "%";
         } else {
             a.style.width = (frac * 100) + "%";
             b.style.width = ((1 - frac) * 100) + "%";
         }
-    };
-    P._1stChildFr = function() {
-        var a = this.children(0).getElement();
-        var b = this.children(1).getElement();
-        if (this._horiz) {
+    }
+    _1stChildFr() {
+        let a = this.getContentElement().children[0];
+        let b = this.getContentElement().children[1];
+        if (this.o.horiz) {
             return (a.offsetHeight + b.offsetHeight) / a.offsetHeight;
         } else {
             return (a.offsetWidth + b.offsetWidth) / a.offsetWidth;
         }
-    };
-    function startDrag(ev) {
-        var a = this.children(0).getElement();
-        this._start = this._horiz ? ev.pos.y : ev.pos.x;
-        this._orig_sz = this._horiz ? a.offsetHeight : a.offsetWidth;
-        this._orig_frac = this._1stChildFr();
-        this._setResizeCaptures(true);
-        this.addClass("Ymacs_SplitCont_dragging");
-        DlException.stopEventBubbling();
     }
-    function mouseMove(ev) {
-        this._doResize(ev.pos);
-    }
-    function stopResize(ev) {
-        this._setResizeCaptures(false);
-        this.delClass("Ymacs_SplitCont_dragging");
-    }
-});
+}
+
+window.Ymacs_SplitCont = Ymacs_SplitCont; // XXX.
