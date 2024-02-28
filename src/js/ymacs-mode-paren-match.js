@@ -31,8 +31,8 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-// @require ymacs-buffer.js
-// @require ymacs-tokenizer.js
+import "./ymacs-buffer.js";
+import "./ymacs-tokenizer.js";
 
 DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
 

@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-// @require ymacs-keymap.js
+import "./ymacs-keymap.js";
 
 // This is the default keymap, as configured in
 // Ymacs_Buffer::makeDefaultKeymap.  It follows closely the standard

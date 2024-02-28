@@ -31,7 +31,8 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-// @require ymacs-interactive.js
+import "./ymacs-interactive.js";
+import "./ymacs-textprop.js";
 
 DEFINE_CLASS("Ymacs_Buffer", DlEventProxy, function(D, P){
 

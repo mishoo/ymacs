@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-// @require ymacs-buffer.js
+import "./ymacs-buffer.js";
 
 /* -----[ markers are objects that hold a position which is
    automatically maintained as text is inserted or

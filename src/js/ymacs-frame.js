@@ -31,15 +31,16 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-// @require ymacs.js
+import "./ymacs.js";
+import { DOM } from "./ymacs-utils.js";
 
-DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
+DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
 
     var DBL_CLICK_SPEED = 300;
 
     var EX = DlException.stopEventBubbling;
 
-    var LINE_DIV = DOM.createElement("div", null, { className: "line", innerHTML: "<br/>" });
+    var LINE_DIV = OLDOM.createElement("div", null, { className: "line", innerHTML: "<br/>" });
 
     D.DEFAULT_EVENTS = [ "onPointChange" ];
 
@@ -270,12 +271,12 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P.__showCaret = function() {
-        DOM.addClass(this.getCaretElement(), "Ymacs-caret");
+        OLDOM.addClass(this.getCaretElement(), "Ymacs-caret");
     };
 
     P._unhoverLine = function() {
         if (this.__hoverLine != null) {
-            DOM.delClass(this.getLineDivElement(this.__hoverLine), "Ymacs-current-line");
+            OLDOM.delClass(this.getLineDivElement(this.__hoverLine), "Ymacs-current-line");
             this.__hoverLine = null;
         }
     };
@@ -293,7 +294,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
 
         if (this.highlightCurrentLine) {
             this._unhoverLine();
-            DOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
+            OLDOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
             this.__hoverLine = rc.row;
         }
 
@@ -441,7 +442,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._on_bufferDeleteLine = function(row) {
-        DOM.trash(this.getLineDivElement(row));
+        OLDOM.trash(this.getLineDivElement(row));
     };
 
     P._on_bufferPointChange = function(rc, pos) {
@@ -539,7 +540,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     P._on_bufferOverlayChange = function(name, props) {
         let html = this.getOverlayHTML(name, Array.isArray(props) ? props : [ props ]);
         if (html) {
-            let div = DOM.createFromHtml(html);
+            let div = DOM.fromHTML(html);
             let old = document.getElementById(this.getOverlayId(name));
             old ? old.replaceWith(div) : this.getOverlaysContainer().appendChild(div);
             this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
@@ -549,7 +550,7 @@ DEFINE_CLASS("Ymacs_Frame", DlContainer, function(D, P, DOM) {
     };
 
     P._on_bufferOverlayDelete = function(name) {
-        DOM.trash(document.getElementById(this.getOverlayId(name)));
+        OLDOM.trash(document.getElementById(this.getOverlayId(name)));
         this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
     };
 

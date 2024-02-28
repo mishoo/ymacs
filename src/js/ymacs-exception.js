@@ -34,3 +34,5 @@
 function Ymacs_Exception(why) {
     this.message = why;
 };
+
+window.Ymacs_Exception = Ymacs_Exception;

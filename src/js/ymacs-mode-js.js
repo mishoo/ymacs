@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-// @require ymacs-tokenizer.js
+import "./ymacs-tokenizer.js";
 
 /* -----[ This defines the tokenizer ]----- */
 
