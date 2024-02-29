@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import { DOM, Widget } from "./ymacs-utils.js";
+import { DOM, Widget, remove } from "./ymacs-utils.js";
 
 DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
 
@@ -661,8 +661,3 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
         }
     };
 });
-
-function remove(array, element) {
-    let pos = array.indexOf(element);
-    if (pos >= 0) array.splice(pos, 1);
-}

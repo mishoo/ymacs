@@ -1,7 +1,7 @@
 let TEMPLATE = document.createElement("template");
 let OVERLAY;
 
-let DOM = {
+export let DOM = {
     fromHTML(html) {
         TEMPLATE.innerHTML = html.trim();
         let cont = TEMPLATE.content;
@@ -55,11 +55,38 @@ let DOM = {
     }
 };
 
-OVERLAY = DOM.fromHTML(`<div style="position: fixed; z-index: 20000; left: 0; top: 0; right: 0; bottom: 0">`);
+OVERLAY = DOM.fromHTML(`<div style="position: fixed; z-index: 20000; left: 0; top: 0; right: 0; bottom: 0"></div>`);
 
-class Widget {
+export class EventProxy {
     constructor(options) {
-        this.o = Object.assign(Object.create(this.constructor.options), options);
+        this._ev_handlers = Object.create(null);
+        this.o = Object.assign(Object.create(this.constructor.options || null), options);
+    }
+    addEventListener(event, handler) {
+        if (typeof event == "string") {
+            this._getHandlers(event).push(handler);
+        } else {
+            Object.keys(event).forEach(ev => this.addEventListener(ev, event[ev]));
+        }
+    }
+    removeEventListener(event, handler) {
+        if (typeof event == "string") {
+            remove(this._getHandlers(event), handler);
+        } else {
+            Object.keys(event).forEach(ev => this.removeEventListener(ev, event[ev]));
+        }
+    }
+    callHooks(ev, ...args) {
+        this._getHandlers(ev).forEach(f => f.apply(this, args));
+    }
+    _getHandlers(ev) {
+        return this._ev_handlers[ev] || (this._ev_handlers[ev] = []);
+    }
+}
+
+export class Widget extends EventProxy {
+    constructor(...args) {
+        super(...args);
         this.createElement();
     }
     createElement() {
@@ -70,7 +97,7 @@ class Widget {
         return el;
     }
     initClassName() {
-        return this.constructor.name; // XXX: probabil fail after minification
+        return this.constructor.name; // XXX: fail after minification
     }
     getContentElement() {
         return this.el;
@@ -78,8 +105,8 @@ class Widget {
     getElement() {
         return this.el;
     }
-    add(wid) {
-        this.getContentElement().appendChild(wid.getElement());
+    add(widget) {
+        this.getContentElement().appendChild(widget.getElement());
     }
     addClass(cls) {
         DOM.addClass(this.getElement(), cls);
@@ -95,4 +122,9 @@ class Widget {
     }
 }
 
-export { DOM, Widget };
+export function remove(array, element) {
+    let pos = 0;
+    while ((pos = array.indexOf(element, pos)) >= 0) {
+        array.splice(pos, 1);
+    }
+}
