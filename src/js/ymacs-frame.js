@@ -111,7 +111,7 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             this.setBuffer(buffer);
 
         DOM.on(this.getOverlaysContainer(), "scroll", this._on_scroll.bind(this));
-        DOM.on(this.getContentElement(), "mousedown", this._dragSelect_onMouseDown.bind(this));
+        DOM.on(this.getElement(), "mousedown", this._dragSelect_onMouseDown.bind(this));
     };
 
     P.focus = function(exitAllowed) {
@@ -581,6 +581,7 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
     function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
 
     P._dragSelect_onMouseDown = function(ev) {
+        this.focus();
         if (ev.ctrlKey && ev.shiftKey)
             return;
         ev.stopPropagation();

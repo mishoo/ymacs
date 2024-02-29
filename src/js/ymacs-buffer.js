@@ -81,7 +81,7 @@ export class Ymacs_Buffer extends EventProxy {
         code         : "",
         ymacs        : null,
         tokenizer    : null,
-    }
+    };
 
     static COMMANDS = Object.create(null);
 

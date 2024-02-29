@@ -329,25 +329,6 @@ DynarchDomUtils.trash(document.getElementById("x-loading"));
 
 ymacs.getActiveBuffer().cmd("load_file", "ymacs-frame.js");
 
-if (!is_gecko && !is_khtml) (function(){
-
-        var dlg = new DlDialog({
-                title   : "Information",
-                modal   : true,
-                quitBtn : "destroy"
-        });
-
-        var vbox = new DlVbox({ parent: dlg, borderSpacing: 5 });
-        var tmp = new DlWidget({ parent: vbox });
-        tmp.getElement().appendChild(document.getElementById("browser-warning"));
-        var ok = new DlButton({ parent: vbox, focusable: true, label: "OK, let's see it" });
-        ok.addEventListener("onClick", dlg.destroy.bind(dlg));
-        dlg._focusedWidget = ok;
-
-        dlg.show(true);
-
-})();
-
 window.addEventListener("beforeunload", ev => {
     ev.preventDefault();
     return ev.returnValue = true;
