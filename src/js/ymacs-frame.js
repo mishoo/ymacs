@@ -36,11 +36,9 @@ import { DOM, Widget } from "./ymacs-utils.js";
 
 DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
 
-    var DBL_CLICK_SPEED = 300;
-
     var EX = DlException.stopEventBubbling;
 
-    var LINE_DIV = OLDOM.createElement("div", null, { className: "line", innerHTML: "<br/>" });
+    var LINE_DIV = DOM.fromHTML(`<div class="line"><br/></div>`);
 
     D.DEFAULT_EVENTS = [ "onPointChange" ];
 
@@ -73,7 +71,6 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             onDestroy    : this._on_destroy,
             onFocus      : this._on_focus,
             onBlur       : this._on_blur,
-            onMouseDown  : this._on_mouseDown,
             onKeyDown    : this._on_keyDown,
             onKeyPress   : this._on_keyPress,
             onKeyUp      : this._on_keyUp,
@@ -81,13 +78,9 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             onMouseWheel : this._on_mouseWheel
         });
 
-        this._dragSelectCaptures = {
-            onMouseOver  : EX,
-            onMouseOut   : EX,
-            onMouseEnter : EX,
-            onMouseLeave : EX,
-            onMouseMove  : _dragSelect_onMouseMove.bind(this),
-            onMouseUp    : _dragSelect_onMouseUp.bind(this)
+        this._dragSelectHandlers = {
+            mousemove : _dragSelect_onMouseMove.bind(this),
+            mouseup   : _dragSelect_onMouseUp.bind(this)
         };
 
         this._bufferEvents = {
@@ -117,7 +110,8 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
         if (buffer)
             this.setBuffer(buffer);
 
-        this.getOverlaysContainer().onscroll = this._on_scroll.bind(this);
+        DOM.on(this.getOverlaysContainer(), "scroll", this._on_scroll.bind(this));
+        DOM.on(this.getContentElement(), "mousedown", this._dragSelect_onMouseDown.bind(this));
     };
 
     P.focus = function(exitAllowed) {
@@ -249,16 +243,16 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
         this.ymacs.deleteFrame(this);
     };
 
-    P._split_layout = function(horiz) {
+    P._split = function(horiz) {
         let ovdiv = this.getOverlaysContainer();
         let scroll = ovdiv.scrollTop;
         let fr = this.ymacs.createFrame({ buffer: this.buffer });
         let sc = new Ymacs_SplitCont({ horiz: horiz });
         sc.el.style.width = this.el.style.width;
         sc.el.style.height = this.el.style.height;
-        this.getElement().replaceWith(sc.getElement());
         this.el.style.removeProperty("width");
         this.el.style.removeProperty("height");
+        this.getElement().replaceWith(sc.getElement());
         sc.add(this);
         sc.add(fr);
         ovdiv.scrollTop = scroll;
@@ -267,11 +261,11 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
     };
 
     P.vsplit = function() {
-        return this._split_layout(true);
+        return this._split(true);
     };
 
     P.hsplit = function(percent) {
-        return this._split_layout(false);
+        return this._split(false);
     };
 
     P.__showCaret = function() {
@@ -566,7 +560,6 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
 
     P._on_focus = function() {
         window.focus();
-        // console.log("FOCUS for %s", this.buffer.name);
         this.ymacs.setActiveFrame(this, true);
         this.addClass("Ymacs_Frame-active");
         if (!this.isMinibuffer) {
@@ -577,33 +570,34 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
     };
 
     P._on_blur = function() {
-        // console.log("BLUR for %s", this.buffer.name);
         if (!this.isMinibuffer) {
             this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
         }
         this.buffer.removeEventListener(this._moreBufferEvents);
     };
 
+    var DBL_CLICK_SPEED = 300;
     var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
     function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
 
-    P._on_mouseDown = function(ev) {
+    P._dragSelect_onMouseDown = function(ev) {
         if (ev.ctrlKey && ev.shiftKey)
             return;
+        ev.stopPropagation();
         clearTimeout(CLICK_COUNT_TIMER);
         CLICK_COUNT++;
         CLICK_COUNT_TIMER = CLEAR_CLICK_COUNT.delayed(DBL_CLICK_SPEED);
 
-        var pos = ev.computePos(this.getContentElement()),
-        rc = this.coordinatesToRowCol(pos.x, pos.y),
-        buf = this.buffer;
+        let pos = DOM.mousePos(ev, this.getContentElement());
+        let rc = this.coordinatesToRowCol(pos.x, pos.y);
+        let buf = this.buffer;
 
         buf.clearTransientMark();
         buf.cmd("goto_char", buf._rowColToPosition(rc.row, rc.col));
         buf.callInteractively("keyboard_quit");
         if (CLICK_COUNT == 1) {
             buf.ensureTransientMark();
-            DlEvent.captureGlobals(this._dragSelectCaptures);
+            DOM.on(window, this._dragSelectHandlers);
         }
         else if (CLICK_COUNT == 2) {
             buf.cmd("forward_word");
@@ -620,20 +614,18 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             buf.cmd("beginning_of_line");
             buf.cmd("forward_paragraph_mark");
         }
-
-        EX();
     };
 
     function _dragSelect_onMouseMove(ev) {
-        var pos = ev.computePos(this.getContentElement()),
-        rc = this.coordinatesToRowCol(pos.x, pos.y);
+        let pos = DOM.mousePos(ev, this.getContentElement());
+        let rc = this.coordinatesToRowCol(pos.x, pos.y);
         this.buffer.cmd("goto_char", this.buffer._rowColToPosition(rc.row, rc.col));
         this.buffer.ensureTransientMark();
         this.ensureCaretVisible();
     };
 
     function _dragSelect_onMouseUp(ev) {
-        DlEvent.releaseGlobals(this._dragSelectCaptures);
+        DOM.off(window, this._dragSelectHandlers);
     };
 
     P._on_keyDown = function(ev) {
@@ -724,12 +716,12 @@ class Ymacs_SplitCont extends Widget {
         this.addClass("dragging");
         ev.stopPropagation();
         DOM.on(window, this._dragHandlers);
-        DOM.overlay_on(this.o.horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
+        DOM.overlayOn(this.o.horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
     }
     _onMouseUp(ev) {
         DOM.off(window, this._dragHandlers);
         this.delClass("dragging");
-        DOM.overlay_off();
+        DOM.overlayOff();
     }
     _onMouseMove(ev) {
         let cont = this.getElement();

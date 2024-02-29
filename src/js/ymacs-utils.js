@@ -36,15 +36,22 @@ let DOM = {
             Object.keys(event).forEach(ev => DOM.off(element, ev, event[ev], handler || {}));
         }
     },
-    overlay_on(cls) {
+    overlayOn(cls) {
         document.body.appendChild(OVERLAY);
         if (cls) {
             OVERLAY.className = cls;
         }
         return OVERLAY;
     },
-    overlay_off() {
+    overlayOff() {
         OVERLAY.remove();
+    },
+    mousePos(ev, el) {
+        let box = el.getBoundingClientRect();
+        return {
+            x: ev.pageX - box.left,
+            y: ev.pageY - box.top
+        };
     }
 };
 
