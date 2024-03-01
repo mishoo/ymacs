@@ -1,3 +1,43 @@
+window.addEventListener("beforeunload", ev => {
+    ev.preventDefault();
+    return ev.returnValue = true;
+});
+
+{
+    let ymacs = window.ymacs = new Ymacs();
+    Object.assign(ymacs.getElement().style, {
+        position : "absolute",
+        left     : 0,
+        top      : 0,
+        width    : "100%",
+        height   : "100%"
+    });
+    ymacs.setColorTheme([ "dark", "material-dark" ]);
+    document.body.appendChild(ymacs.getElement());
+    let b = ymacs.getActiveBuffer.bind(ymacs);
+    b().cmd("load_file", "ymacs-frame.js");
+    b().callInteractively("split_frame_horizontally");
+    b().cmd("other_frame");
+    b().cmd("load_file", "queen-board.lisp");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(function(){                    // commented out.
+
 /*
 
   Note that this file is just an example.  It should not be treated as
@@ -329,7 +369,4 @@ DynarchDomUtils.trash(document.getElementById("x-loading"));
 
 ymacs.getActiveBuffer().cmd("load_file", "ymacs-frame.js");
 
-window.addEventListener("beforeunload", ev => {
-    ev.preventDefault();
-    return ev.returnValue = true;
 });

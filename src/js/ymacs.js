@@ -33,35 +33,52 @@
 
 import { DOM, Widget, remove } from "./ymacs-utils.js";
 
-DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
+function selectClosestFrameX(byx, pos) {
+    if (byx.length > 0) {
+        var x = byx.peek().getPos().x, a = [ byx.pop() ];
+        while (byx.length > 0 && byx.peek().getPos().x == x)
+            a.push(byx.pop());
+        return a.minElement(function(f){
+            return Math.abs(pos.y - f.getPos().y - f.getSize().y/2);
+        });
+    }
+}
 
-    D.DEFAULT_EVENTS = [
-        "onBufferSwitch",
-        "onCreateBuffer",
-        "onDeleteBuffer"
-    ];
+function selectClosestFrameY(byy, pos) {
+    if (byy.length > 0) {
+        var y = byy.peek().getPos().y, a = [ byy.pop() ];
+        while (byy.length > 0 && byy.peek().getPos().y == y)
+            a.push(byy.pop());
+        return a.minElement(function(f){
+            return Math.abs(pos.x - f.getPos().x - f.getSize().x/2);
+        });
+    }
+}
 
-    D.DEFAULT_ARGS = {
-        buffers : [ "buffers" , null ],
-        frames  : [ "frames"  , null ],
+function ensureLocalStorage() {
+    if (!(window.localStorage && window.localStorage.getItem))
+        throw new Ymacs_Exception("Local storage facility not available in this browser");
+}
 
-        // default options
-        cf_frameStyle: [ "frameStyle", null ],
+function isModifier(key) {
+    return /^(?:Alt|AltGraph|CapsLock|Control|Fn|FnLock|Hyper|Meta|NumLock|ScrollLock|Shift|Super|Symbol|SymbolLock)$/.test(key);
+}
 
-        // override in DlWidget
-        _focusable : [ "focusable"  , true ]
+class Ymacs extends Widget {
+
+    static options = {
+        buffers       : [],
+        frames        : [],
+        cf_frameStyle : Object.create(null),
     };
 
-    D.FIXARGS = function(args) {
-        if (!args.buffers)
-            args.buffers = [];
-        if (!args.frames)
-            args.frames = [];
-        if (!args.cf_frameStyle)
-            args.cf_frameStyle = {};
-    };
+    constructor(...args) {
+        super(...args);
 
-    D.CONSTRUCT = function() {
+        this.buffers = [...this.o.buffers];
+        this.frames = [...this.o.frames];
+        this.cf_frameStyle = {...this.o.cf_frameStyle};
+
         this.buffers.forEach(b => {
             b.ymacs = this;
             this._addBufferListeners(b);
@@ -109,14 +126,18 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
 
         var frame = this.createFrame({ buffer: this.buffers[0] });
 
-        this.getElement().appendChild(frame.getElement());
-        this.getElement().appendChild(this.minibuffer_frame.getElement());
+        this.add(frame);
+        this.add(this.minibuffer_frame);
 
         this.setActiveFrame(frame);
         frame._redrawCaret();
-    };
+    }
 
-    P._addBufferListeners = function(buf) {
+    initClassName() {
+        return "Ymacs";
+    }
+
+    _addBufferListeners(buf) {
         buf.addEventListener("onDestroy", () => {
             var fr = this.getActiveFrame();
             this.getBufferFrames(buf).forEach(f => {
@@ -128,25 +149,25 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             if (this.getActiveBuffer() === buf)
                 this.nextHiddenBuffer(buf);
         });
-    };
+    }
 
-    P.pushToKillRing = function(text, prepend) {
+    pushToKillRing(text, prepend) {
         prepend ? this.killRing.unshift(text)
             : this.killRing.push(text);
-    };
+    }
 
-    P.killRingToMaster = function() {
+    killRingToMaster() {
         if (this.killRing.length && (this.killMasterOfRings.length == 0 ||
                                      this.killMasterOfRings.peek().join("") != this.killRing.join("")))
             this.killMasterOfRings.push(this.killRing);
         this.killRing = [];
-    };
+    }
 
-    P.killRingText = function() {
+    killRingText() {
         return this.killRing.join("");
-    };
+    }
 
-    P.rotateKillRing = function(push) {
+    rotateKillRing(push) {
         if (push) {
             this.killMasterOfRings.push(this.killRing);
             this.killRing = this.killMasterOfRings.shift();
@@ -154,33 +175,33 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             this.killMasterOfRings.unshift(this.killRing);
             this.killRing = this.killMasterOfRings.pop();
         }
-    };
+    }
 
-    P.getBuffer = function(buf) {
+    getBuffer(buf) {
         if (!(buf instanceof Ymacs_Buffer)) {
             buf = this.buffers.find(b => b.name == buf);
         }
         return buf;
-    };
+    }
 
-    P.killBuffer = function(buf) {
+    killBuffer(buf) {
         buf = this.getBuffer(buf);
         this.callHooks("onDeleteBuffer", buf);
         buf.destroy();
-    };
+    }
 
-    P.renameBuffer = function(buf, name) {
+    renameBuffer(buf, name) {
         buf = this.getBuffer(buf);
         buf.name = name;
         buf.callHooks("onProgressChange");
-    };
+    }
 
-    P._do_switchToBuffer = function(buf) {
+    _do_switchToBuffer(buf) {
         this.getActiveFrame().setBuffer(buf);
         this.callHooks("onBufferSwitch", buf);
-    };
+    }
 
-    P.switchToBuffer = function(maybeName) {
+    switchToBuffer(maybeName) {
         var buf = this.getBuffer(maybeName), a = this.buffers;
         if (!buf) {
             // create new buffer
@@ -190,9 +211,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
         a.unshift(buf);
         this._do_switchToBuffer(buf);
         return buf;
-    };
+    }
 
-    P.nextHiddenBuffer = function(cur) {
+    nextHiddenBuffer(cur) {
         var a = this.buffers.filter(buf => {
             if (buf === cur) return false;
             var hidden = true;
@@ -207,43 +228,43 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
         } else {
             this.switchToBuffer("*scratch*");
         }
-    };
+    }
 
-    P.switchToNextBuffer = function() {
+    switchToNextBuffer() {
         var a = this.buffers;
         if (a.length > 1) {
             var buf = a.shift();
             a.push(buf);
             this._do_switchToBuffer(a[0]);
         }
-    };
+    }
 
-    P.switchToPreviousBuffer = function() {
+    switchToPreviousBuffer() {
         var a = this.buffers;
         if (a.length > 1) {
             var buf = a.pop();
             a.unshift(buf);
             this._do_switchToBuffer(buf);
         }
-    };
+    }
 
-    P.getNextBuffer = function(buf, n) {
+    getNextBuffer(buf, n) {
         if (n == null) n = 1;
         var a = this.buffers;
         return a[(a.indexOf(buf) + n) % a.length];
-    };
+    }
 
-    P.getPrevBuffer = function(buf, n) {
+    getPrevBuffer(buf, n) {
         if (n == null) n = 1;
         return this.getNextBuffer(buf, -n);
-    };
+    }
 
-    P.getBufferFrames = function(buf) {
+    getBufferFrames(buf) {
         buf = this.getBuffer(buf);
         return this.frames.filter(f => f.buffer === buf);
-    };
+    }
 
-    P.createBuffer = function(args) {
+    createBuffer(args) {
         args = Object.assign({}, args, { ymacs: this });
         var buf = new Ymacs_Buffer(args);
         this._addBufferListeners(buf);
@@ -251,22 +272,22 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             this.buffers.push(buf);
         this.callHooks("onCreateBuffer", buf);
         return buf;
-    };
+    }
 
-    P.createFrame = function(args) {
+    createFrame(args) {
         args = Object.assign({}, args, { ymacs: this });
         var frame = new Ymacs_Frame(args);
         if (!args.hidden)
             this.frames.unshift(frame);
         frame.setStyle(this.cf_frameStyle);
         return frame;
-    };
+    }
 
-    P.setFrameStyle = function(style) {
+    setFrameStyle(style) {
         [ this.minibuffer_frame, ...this.frames ].forEach(frame => frame.setStyle(style));
-    };
+    }
 
-    P.keepOnlyFrame = function(frame) {
+    keepOnlyFrame(frame) {
         if (this.frames.length > 1) {
             var el = frame.getElement();
             while (el.parentNode != this.getContentElement())
@@ -280,9 +301,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
                 this.frames = [ frame ];
             }
         }
-    };
+    }
 
-    P.deleteFrame = function(frame) {
+    deleteFrame(frame) {
         if (this.frames.length > 1) {
             remove(this.frames, frame);
             let parent = frame.getElement().parentNode;
@@ -301,22 +322,21 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             this.setActiveFrame(other);
             other.centerOnCaret();
         }
-    };
+    }
 
-    P.focusOtherFrame = function() {
+    focusOtherFrame() {
         this.setActiveFrame(this.frames[0]);
-    };
+    }
 
-    P.focus = function() {
-        D.BASE.focus.apply(this, arguments);
+    focus() {
         this.frames.peek().focus();
-    };
+    }
 
-    P.setInputFrame = function(frame) {
+    setInputFrame(frame) {
         this.__input_frame = frame;
-    };
+    }
 
-    P.setActiveFrame = function(frame, nofocus) {
+    setActiveFrame(frame, nofocus) {
         if (!frame.isMinibuffer) {
             var old = this.getActiveFrame();
             if (old) {
@@ -328,113 +348,86 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
         this.__input_frame = frame;
         if (!nofocus)
             frame.focus();
-    };
+    }
 
-    P.getActiveFrame = function() {
+    getActiveFrame() {
         return this.frames.peek();
-    };
+    }
 
-    P.getActiveBuffer = function() {
+    getActiveBuffer() {
         var frame = this.getActiveFrame();
         return frame ? frame.buffer : this.buffers.peek();
-    };
+    }
 
-    P.setColorTheme = function(themeId) {
+    setColorTheme(themeId) {
         this.delClass(/Ymacs-Theme-[^\s]*/g);
         if (!(themeId instanceof Array))
             themeId = [ themeId ];
         themeId.forEach(themeId => {
             this.addClass("Ymacs-Theme-" + themeId);
         });
-    };
+    }
 
-    P.getFrameInDirection = function(dir, pos, frame) {
-        if (!frame)
-            frame = this.getActiveFrame();
-        var caret = frame.getCaretElement();
-        if (!pos)
-            pos = OLDOM.getPos(caret);
-        if (!pos.sz)
-            pos.sz = OLDOM.getOuterSize(caret);
+    getFrameInDirection(dir) {
+        let frame = this.getActiveFrame();
+        let caret = frame.getCaretElement();
+        let box = caret.getBoundingClientRect();
+        let pos = {
+            x: box.left, y: box.top,
+            sz: { x: box.width, y: box.height }
+        };
         var byx = this.frames.sort((a, b) => a.getPos().x - b.getPos().x);
         var byy = this.frames.sort((a, b) => a.getPos().y - b.getPos().y);
         return this["_get_frameInDir_" + dir](byx, byy, pos, frame);
-    };
+    }
 
-    function selectClosestFrameX(byx, pos) {
-        if (byx.length > 0) {
-            var x = byx.peek().getPos().x, a = [ byx.pop() ];
-            while (byx.length > 0 && byx.peek().getPos().x == x)
-                a.push(byx.pop());
-            return a.minElement(function(f){
-                return Math.abs(pos.y - f.getPos().y - f.getSize().y/2);
-            });
-        }
-    };
-
-    function selectClosestFrameY(byy, pos) {
-        if (byy.length > 0) {
-            var y = byy.peek().getPos().y, a = [ byy.pop() ];
-            while (byy.length > 0 && byy.peek().getPos().y == y)
-                a.push(byy.pop());
-            return a.minElement(function(f){
-                return Math.abs(pos.x - f.getPos().x - f.getSize().x/2);
-            });
-        }
-    };
-
-    P._get_frameInDir_left = function(byx, byy, pos, frame) {
+    _get_frameInDir_left(byx, byy, pos, frame) {
         byx = byx.filter(f => {
             let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.x < pos.x) && (p.y - pos.sz.y <= pos.y) && (p.y + s.y > pos.y);
         });
         return selectClosestFrameX(byx, pos);
-    };
+    }
 
-    P._get_frameInDir_right = function(byx, byy, pos, frame) {
+    _get_frameInDir_right(byx, byy, pos, frame) {
         byx.reverse();
         byx = byx.filter(f => {
             let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.x > pos.x) && (p.y - pos.sz.y <= pos.y) && (p.y + s.y > pos.y);
         });
         return selectClosestFrameX(byx, pos);
-    };
+    }
 
-    P._get_frameInDir_up = function(byx, byy, pos, frame) {
+    _get_frameInDir_up(byx, byy, pos, frame) {
         byy = byy.filter(f => {
             let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.y < pos.y) && (p.x - pos.sz.x <= pos.x) && (p.x + s.x > pos.x);
         });
         return selectClosestFrameY(byy, pos);
-    };
+    }
 
-    P._get_frameInDir_down = function(byx, byy, pos, frame) {
+    _get_frameInDir_down(byx, byy, pos, frame) {
         byy.reverse();
         byy = byy.filter(f => {
             let p = f.getPos(), s = f.getSize();
             return (f !== frame) && (p.y > pos.y) && (p.x - pos.sz.x <= pos.x) && (p.x + s.x > pos.x);
         });
         return selectClosestFrameY(byy, pos);
-    };
+    }
 
     /* -----[ local storage ]----- */
 
-    function ensureLocalStorage() {
-        if (!(window.localStorage && window.localStorage.getItem))
-            throw new Ymacs_Exception("Local storage facility not available in this browser");
-    };
-
-    P.ls_get = function() {
+    ls_get() {
         ensureLocalStorage();
         return DlJSON.decode(localStorage.getItem(".ymacs") || "{}", true);
-    };
+    }
 
-    P.ls_set = function(src) {
+    ls_set(src) {
         ensureLocalStorage();
         localStorage.setItem(".ymacs", DlJSON.encode(src));
-    };
+    }
 
-    P.ls_getFileContents = function(name, nothrow) {
+    ls_getFileContents(name, nothrow) {
         var info = this.ls_getFileDirectory(name), other = info.other, code;
         if (other.length == 1) {
             code = info.dir[other[0]];
@@ -443,15 +436,15 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             throw new Ymacs_Exception("File not found");
         }
         return code;
-    };
+    }
 
-    P.ls_setFileContents = function(name, content) {
+    ls_setFileContents(name, content) {
         var files = this.ls_getFileDirectory(name, "file");
         files.dir[files.other[0]] = content;
         this.ls_set(files.store);
-    };
+    }
 
-    P.ls_getFileDirectory = function(name, create) {
+    ls_getFileDirectory(name, create) {
         var store, dir = store = this.ls_get(), back = [];
         name = name.replace(/^[~\x2f]+/, "").split(/\x2f+/);
         var path = [], other = [];
@@ -491,17 +484,17 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             other : other,
             full  : path.concat(other).join("/")
         };
-    };
+    }
 
-    P.ls_deleteFile = function(name) {
+    ls_deleteFile(name) {
         var info = this.ls_getFileDirectory(name);
         delete info.dir[info.other.join("/")];
         this.ls_set(info.store);
-    };
+    }
 
     /* -----[ filesystem operations ]----- */
 
-    P.fs_normalizePath = function(path) {
+    fs_normalizePath(path) {
         path = path.replace(/^[~\x2f]+/, "").split(/\x2f+/);
         var ret = [];
         while (path.length > 0) {
@@ -517,73 +510,73 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             }
         }
         return ret.join("/");
-    };
+    }
 
-    P.fs_fileType = function(name, cont) {
+    fs_fileType(name, cont) {
         try {
             this.ls_getFileContents(name);
             cont(true);
         } catch(ex) {
             cont(null);
         }
-    };
+    }
 
-    P.fs_getFileContents = function(name, nothrow, cont) {
+    fs_getFileContents(name, nothrow, cont) {
         var code = this.ls_getFileContents(name, nothrow);
         cont(code, code); // second parameter is file stamp, on a real fs it should be last modification time
-    };
+    }
 
-    P.fs_setFileContents = function(name, content, stamp, cont) {
+    fs_setFileContents(name, content, stamp, cont) {
         if (stamp && (this.ls_getFileContents(name, true) || "") != stamp) {
             cont(null); // did not change file because stamp is wrong
         } else {
             this.ls_setFileContents(name, content);
             cont(content);
         }
-    };
+    }
 
-    P.fs_getDirectory = function(dirname, cont) {
+    fs_getDirectory(dirname, cont) {
         var info = this.ls_getFileDirectory(dirname, false);
         dirname = info.path.join("/"); // normalized
         if (info) {
             var files = {};
             for (var f in info.dir) {
                 if (Object.HOP(info.dir, f)) {
-                    files[f] = { name : f,
-                                 path : dirname + "/" + f,
-                                 type : (typeof info.dir[f] == "string"
-                                         ? "regular"
-                                         : "directory")};
+                    files[f] = {
+                        name : f,
+                        path : dirname + "/" + f,
+                        type : typeof info.dir[f] == "string" ? "regular" : "directory"
+                    };
                 }
             }
             cont(files);
         } else {
             cont(null);
         }
-    };
+    }
 
-    P.fs_deleteFile = function(name, cont) {
+    fs_deleteFile(name, cont) {
         this.ls_deleteFile(name);
         cont();
-    };
+    }
 
-    P.fs_remapDir = function(dir, cont) {
+    fs_remapDir(dir, cont) {
         cont(dir);
-    };
+    }
 
-    P.isRunningMacro = function() {
+    isRunningMacro() {
         return !!this.__running_macro;
-    };
+    }
 
-    P.isRecordingMacro = function() {
+    isRecordingMacro() {
         return !!this.__macro_recording;
-    };
+    }
 
-    P.indicateError = function() {
+    indicateError() {
         this.__error_thrown = true;
-    };
+    }
 
-    P.startMacro = function(do_append) {
+    startMacro(do_append) {
         if (this.isRecordingMacro())
             return false;
         if (do_append) {
@@ -592,20 +585,20 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
         } else
             this.__macro_recording = [];
         return true;
-    };
+    }
 
-    P.stopMacro = function() {
+    stopMacro() {
         if (this.__macro_recording) {
             this.__macro_finished = this.__macro_recording;
             this.__macro_recording = null;
         }
-    };
+    }
 
-    P.getLastMacro = function() {
+    getLastMacro() {
         return this.__macro_finished;
-    };
+    }
 
-    P.stepMacro = function() {
+    stepMacro() {
         while (true) {
             if (this.__macro_step >= this.__running_macro.length) {
                 this.__macro_times--;
@@ -621,9 +614,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             this.processKeyEvent(ev, ev.wasKeypress);
             this.__macro_step++;
         }
-    };
+    }
 
-    P.runMacro = function(times, macro) {
+    runMacro(times, macro) {
         if (this.isRecordingMacro())
             return false;
         this.__error_thrown = false;
@@ -633,13 +626,9 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
         var self = this;
         setTimeout(function() { self.stepMacro(); }, 0);
         return true;
-    };
-
-    function isModifier(key) {
-        return /^(?:Alt|AltGraph|CapsLock|Control|Fn|FnLock|Hyper|Meta|NumLock|ScrollLock|Shift|Super|Symbol|SymbolLock)$/.test(key);
     }
 
-    P.processKeyEvent = function(ev, press) {
+    processKeyEvent(ev, press) {
         var frame = this.__input_frame;
         var buffer = frame.buffer;
 
@@ -659,5 +648,7 @@ DEFINE_CLASS("Ymacs", DlContainer, function(D, P, OLDOM){
             }
             return buffer._handleKeyEvent(ev);
         }
-    };
-});
+    }
+}
+
+window.Ymacs = Ymacs; // XXX.

@@ -79,6 +79,9 @@ export class EventProxy {
     callHooks(ev, ...args) {
         this._getHandlers(ev).forEach(f => f.apply(this, args));
     }
+    destroy() {
+        this.callHooks("onDestroy");
+    }
     _getHandlers(ev) {
         return this._ev_handlers[ev] || (this._ev_handlers[ev] = []);
     }
