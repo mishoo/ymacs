@@ -31,6 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
+import { delayed } from "./ymacs-utils.js";
 import "./ymacs-buffer.js";
 import "./ymacs-tokenizer.js";
 
@@ -442,7 +443,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
             beforeInteractiveCommand: function() {
                 clearOvl();
             },
-            afterInteractiveCommand: function() {
+            afterInteractiveCommand: delayed(() => {
                 var p = this.tokenizer.getLastParser(), rc = this._rowcol;
                 var hl = [];
                 if (p) {
@@ -461,7 +462,7 @@ DEFINE_SINGLETON("Ymacs_Keymap_ParenMatch", Ymacs_Keymap, function(D, P) {
                     });
                 }
                 this.setOverlay("match-paren", hl);
-            }.clearingTimeout(100)
+            }, 100)
         };
         this.addEventListener(events);
 

@@ -392,11 +392,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 if (!cont) {
                     mb.callHooks("abort");
                 }
-                (function(text){
+                setTimeout(() => {
                     if (cont)
                         cont.call(this, text);
                     this.getPrefixArg();
-                }).delayed(1, this, text);
+                }, 1);
             });
             DlPopup.clearAllPopups();
         }

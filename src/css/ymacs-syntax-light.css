@@ -54,7 +54,7 @@
   --ymacs-cursor-fg: #fff;
 }
 
-.Ymacs-Theme-light .Ymacs_Frame-focus .Ymacs-current-line {
+.Ymacs-Theme-light .Ymacs_Frame:focus .Ymacs-current-line {
   /* background-color: #eda; */
 }
 

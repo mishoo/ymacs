@@ -31,6 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
+import { delayed } from "./ymacs-utils.js";
 import "./ymacs-buffer.js";
 
 DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
@@ -262,10 +263,10 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
                 smallest = row;
             }
             clearTimeout(timer);
-            timer = function(){
+            timer = setTimeout(() => {
                 this._do_quickUpdate(smallest);
                 smallest = null;
-            }.delayed(1, this);
+            }, 1);
         };
         this._stopQuickUpdate = function() {
             clearTimeout(timer);
@@ -388,7 +389,7 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
             //         this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.min(row, currentLine));
             // }
             if (s.line < s.length())
-                this.timerUpdate = this._do_quickUpdate.delayed(50, this, s.line);
+                this.timerUpdate = setTimeout(this._do_quickUpdate.bind(this, s.line), 50);
         }
     };
 

@@ -35,22 +35,22 @@ import { DOM, Widget, remove } from "./ymacs-utils.js";
 
 function selectClosestFrameX(byx, pos) {
     if (byx.length > 0) {
-        var x = byx.peek().getPos().x, a = [ byx.pop() ];
-        while (byx.length > 0 && byx.peek().getPos().x == x)
+        var x = byx.peek().getBox().left, a = [ byx.pop() ];
+        while (byx.length > 0 && byx.peek().getBox().left == x)
             a.push(byx.pop());
         return a.minElement(function(f){
-            return Math.abs(pos.y - f.getPos().y - f.getSize().y/2);
+            return Math.abs(pos.top - f.getBox().top - f.getBox().height/2);
         });
     }
 }
 
 function selectClosestFrameY(byy, pos) {
     if (byy.length > 0) {
-        var y = byy.peek().getPos().y, a = [ byy.pop() ];
-        while (byy.length > 0 && byy.peek().getPos().y == y)
+        var y = byy.peek().getBox().top, a = [ byy.pop() ];
+        while (byy.length > 0 && byy.peek().getBox().top == y)
             a.push(byy.pop());
         return a.minElement(function(f){
-            return Math.abs(pos.x - f.getPos().x - f.getSize().x/2);
+            return Math.abs(pos.left - f.getBox().left - f.getBox().width/2);
         });
     }
 }
@@ -372,19 +372,15 @@ class Ymacs extends Widget {
         let frame = this.getActiveFrame();
         let caret = frame.getCaretElement();
         let box = caret.getBoundingClientRect();
-        let pos = {
-            x: box.left, y: box.top,
-            sz: { x: box.width, y: box.height }
-        };
-        var byx = this.frames.sort((a, b) => a.getPos().x - b.getPos().x);
-        var byy = this.frames.sort((a, b) => a.getPos().y - b.getPos().y);
-        return this["_get_frameInDir_" + dir](byx, byy, pos, frame);
+        var byx = [...this.frames].sort((a, b) => a.getBox().left - b.getBox().left);
+        var byy = [...this.frames].sort((a, b) => a.getBox().top - b.getBox().top);
+        return this["_get_frameInDir_" + dir](byx, byy, box, frame);
     }
 
     _get_frameInDir_left(byx, byy, pos, frame) {
         byx = byx.filter(f => {
-            let p = f.getPos(), s = f.getSize();
-            return (f !== frame) && (p.x < pos.x) && (p.y - pos.sz.y <= pos.y) && (p.y + s.y > pos.y);
+            let p = f.getBox();
+            return (f !== frame) && (p.left < pos.left) && (p.top - pos.height <= pos.top) && (p.top + p.height > pos.top);
         });
         return selectClosestFrameX(byx, pos);
     }
@@ -392,16 +388,16 @@ class Ymacs extends Widget {
     _get_frameInDir_right(byx, byy, pos, frame) {
         byx.reverse();
         byx = byx.filter(f => {
-            let p = f.getPos(), s = f.getSize();
-            return (f !== frame) && (p.x > pos.x) && (p.y - pos.sz.y <= pos.y) && (p.y + s.y > pos.y);
+            let p = f.getBox();
+            return (f !== frame) && (p.left > pos.left) && (p.top - pos.height <= pos.top) && (p.top + p.height > pos.top);
         });
         return selectClosestFrameX(byx, pos);
     }
 
     _get_frameInDir_up(byx, byy, pos, frame) {
         byy = byy.filter(f => {
-            let p = f.getPos(), s = f.getSize();
-            return (f !== frame) && (p.y < pos.y) && (p.x - pos.sz.x <= pos.x) && (p.x + s.x > pos.x);
+            let p = f.getBox();
+            return (f !== frame) && (p.top < pos.top) && (p.left - pos.width <= pos.left) && (p.left + p.width > pos.left);
         });
         return selectClosestFrameY(byy, pos);
     }
@@ -409,8 +405,8 @@ class Ymacs extends Widget {
     _get_frameInDir_down(byx, byy, pos, frame) {
         byy.reverse();
         byy = byy.filter(f => {
-            let p = f.getPos(), s = f.getSize();
-            return (f !== frame) && (p.y > pos.y) && (p.x - pos.sz.x <= pos.x) && (p.x + s.x > pos.x);
+            let p = f.getBox();
+            return (f !== frame) && (p.top > pos.top) && (p.left - pos.width <= pos.left) && (p.left + p.width > pos.left);
         });
         return selectClosestFrameY(byy, pos);
     }

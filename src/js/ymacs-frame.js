@@ -32,36 +32,64 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import "./ymacs.js";
-import { DOM, Widget } from "./ymacs-utils.js";
+import { DOM, Widget, delayed } from "./ymacs-utils.js";
 
-DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
+function textColX(div, col) {
+    let range = document.createRange();
+    range.selectNodeContents(div);
+    let treeWalker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
+    let len = 0;
+    while (treeWalker.nextNode()) {
+        let node = treeWalker.currentNode;
+        let clen = node.nodeValue.length;
+        if (len + clen >= col) {
+            range.setStart(node, col - len);
+            range.setEnd(node, col - len);
+            break;
+        }
+        len += clen;
+    }
+    return range.getBoundingClientRect().right;
+}
 
-    var EX = DlException.stopEventBubbling;
+function normalizeRect(p) {
+    return p.line1 > p.line2 || (p.line1 == p.line2 && p.col1 > p.col2) ?
+        { line1: p.line2, col1: p.col2, line2: p.line1, col2: p.col1 } : p;
+}
 
-    var LINE_DIV = DOM.fromHTML(`<div class="line"><br/></div>`);
+var DBL_CLICK_SPEED = 300;
+var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
+function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
 
-    D.DEFAULT_EVENTS = [ "onPointChange" ];
+var LINE_DIV = DOM.fromHTML(`<div class="line"><br/></div>`);
 
-    D.DEFAULT_ARGS = {
-        highlightCurrentLine : [ "highlightCurrentLine" , true ],
-        buffer               : [ "buffer"               , null ],
-        ymacs                : [ "ymacs"                , null ],
-        isMinibuffer         : [ "isMinibuffer"         , false ],
+var COUNT = 0;
 
-        // override in DlWidget
-        _focusable           : [ "focusable"            , true ],
+class Ymacs_Frame extends Widget {
+
+    static options = {
+        highlightCurrentLine : true,
+        buffer               : null,
+        ymacs                : null,
+        isMinibuffer         : false,
     };
 
-    D.CONSTRUCT = function() {
+    constructor(...args) {
+        super(...args);
+
+        this.buffer = this.o.buffer;
+        this.ymacs = this.o.ymacs;
+        this.isMinibuffer = this.o.isMinibuffer;
 
         // <XXX> // during transition
         this.el = this.getElement();
         this.el._ymacs_object = this;
         // </XXX>
 
-        this.__caretId = Dynarch.ID();
-        this.redrawModelineWithTimer = this.redrawModeline.clearingTimeout(0, this);
+        this.__caretId = `ymacs-caret-${++COUNT}`;
+        this.redrawModelineWithTimer = delayed(this.redrawModeline.bind(this));
 
+        this.getElement().tabIndex = 0;
         this.getElement().innerHTML = "<div class='Ymacs-frame-overlays'>"
             + "<div class='Ymacs-frame-content'></div>"
             + "</div>"
@@ -69,18 +97,11 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
 
         this.addEventListener({
             onDestroy    : this._on_destroy,
-            onFocus      : this._on_focus,
-            onBlur       : this._on_blur,
-            onKeyDown    : this._on_keyDown,
-            onKeyPress   : this._on_keyPress,
-            onKeyUp      : this._on_keyUp,
-            onResize     : this._on_resize.clearingTimeout(5),
-            onMouseWheel : this._on_mouseWheel
         });
 
         this._dragSelectHandlers = {
-            mousemove : _dragSelect_onMouseMove.bind(this),
-            mouseup   : _dragSelect_onMouseUp.bind(this)
+            mousemove : this._dragSelect_onMouseMove.bind(this),
+            mouseup   : this._dragSelect_onMouseUp.bind(this)
         };
 
         this._bufferEvents = {
@@ -111,50 +132,61 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             this.setBuffer(buffer);
 
         DOM.on(this.getOverlaysContainer(), "scroll", this._on_scroll.bind(this));
-        DOM.on(this.getElement(), "mousedown", this._dragSelect_onMouseDown.bind(this));
-    };
+        DOM.on(this.getElement(), {
+            mousedown   : this._dragSelect_onMouseDown.bind(this),
+            focus       : this._on_focus.bind(this),
+            blur        : this._on_blur.bind(this),
+            keydown     : this._on_keyDown.bind(this),
+            keypress    : this._on_keyPress.bind(this),
+            keyup       : this._on_keyUp.bind(this),
+            wheel       : this._on_mouseWheel.bind(this),
+        });
+    }
 
-    P.focus = function(exitAllowed) {
-        D.BASE.focus.call(this);
-        if (exitAllowed instanceof Function) {
-            this.removeEventListener("onBlur", this.__exitFocusHandler);
-            this.addEventListener("onBlur", this.__exitFocusHandler = function(){
-                if (exitAllowed.call(this.buffer)) {
-                    this.removeEventListener("onBlur", this.__exitFocusHandler);
-                } else {
-                    this.focus.delayed(2, this, null);
-                }
-            });
-        }
-    };
+    initClassName() {
+        return `Ymacs_Frame${this.o.isMinibuffer ? ' Ymacs_Minibuffer' : ''}`;
+    }
 
-    P.blur = function(force) {
-        if (force)
-            this.removeEventListener("onBlur", this.__exitFocusHandler);
-        D.BASE.blur.call(this);
-    };
+    focus(exitAllowed) {
+        this.getElement().focus();
+        // if (exitAllowed instanceof Function) {
+        //     this.removeEventListener("onBlur", this.__exitFocusHandler);
+        //     this.addEventListener("onBlur", this.__exitFocusHandler = function(){
+        //         if (exitAllowed.call(this.buffer)) {
+        //             this.removeEventListener("onBlur", this.__exitFocusHandler);
+        //         } else {
+        //             this.focus.delayed(2, this, null);
+        //         }
+        //     });
+        // }
+    }
 
-    P.getOverlaysContainer = function() {
+    blur(force) {
+        // if (force)
+        //     this.removeEventListener("onBlur", this.__exitFocusHandler);
+    }
+
+    getOverlaysContainer() {
         return this.getElement().firstChild;
-    };
+    }
 
-    P.getModelineElement = function() {
+    getModelineElement() {
         return this.getElement().childNodes[1];
-    };
+    }
 
-    P.getContentElement = function() {
+    getContentElement() {
         return this.getElement().firstChild.firstChild;
-    };
+    }
 
-    P.getCaretElement = function() {
+    getCaretElement() {
         return document.getElementById(this.__caretId);
-    };
+    }
 
-    P.getLineDivElement = function(row) {
+    getLineDivElement(row) {
         return this.getContentElement().childNodes[row] || null;
-    };
+    }
 
-    P.ensureCaretVisible = function() {
+    ensureCaretVisible() {
         // return true if the scroll position was changed (that is, if
         // the caren't wasn't visible before the call).
         this._redrawCaret();
@@ -193,11 +225,15 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             }
         }
         return ret;
-    };
+    }
 
-    P.setBuffer = function(buffer) {
+    focusInside() {
+        return document.activeElement === this.getElement();
+    }
+
+    setBuffer(buffer) {
         if (this.buffer) {
-            if (this.caretMarker && !this.isMinibuffer) {
+            if (this.caretMarker && !this.o.isMinibuffer) {
                 this.caretMarker.destroy();
                 this.caretMarker = null;
             }
@@ -210,7 +246,7 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             if (this.focusInside()) {
                 buffer.addEventListener(this._moreBufferEvents);
             }
-            if (this.isMinibuffer) {
+            if (this.o.isMinibuffer) {
                 this.caretMarker = buffer.caretMarker;
             } else {
                 this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition(), false, "framecaret");
@@ -219,31 +255,31 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             this._redrawCaret(true);
             this.centerOnCaret();
         }
-    };
+    }
 
-    P.centerOnCaret = function() {
+    centerOnCaret() {
         this.centerOnLine(this.buffer._rowcol.row);
-    };
+    }
 
-    P.centerOnLine = function(row) {
+    centerOnLine(row) {
         var line = this.getLineDivElement(row), div = this.getOverlaysContainer();
         div.scrollTop = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
         // this._redrawBuffer();
-    };
+    }
 
-    P.setModelineContent = function(html) {
+    setModelineContent(html) {
         this.getModelineElement().innerHTML = html;
-    };
+    }
 
-    P.deleteOtherFrames = function() {
+    deleteOtherFrames() {
         this.ymacs.keepOnlyFrame(this);
-    };
+    }
 
-    P.deleteFrame = function() {
+    deleteFrame() {
         this.ymacs.deleteFrame(this);
-    };
+    }
 
-    P._split = function(horiz) {
+    _split(horiz) {
         let ovdiv = this.getOverlaysContainer();
         let scroll = ovdiv.scrollTop;
         let fr = this.ymacs.createFrame({ buffer: this.buffer });
@@ -258,41 +294,41 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
         ovdiv.scrollTop = scroll;
         fr.getOverlaysContainer().scrollTop = scroll;
         return fr;
-    };
+    }
 
-    P.vsplit = function() {
+    vsplit() {
         return this._split(true);
-    };
+    }
 
-    P.hsplit = function(percent) {
+    hsplit(percent) {
         return this._split(false);
-    };
+    }
 
-    P.__showCaret = function() {
-        OLDOM.addClass(this.getCaretElement(), "Ymacs-caret");
-    };
+    __showCaret() {
+        DOM.addClass(this.getCaretElement(), "Ymacs-caret");
+    }
 
-    P._unhoverLine = function() {
+    _unhoverLine() {
         if (this.__hoverLine != null) {
-            OLDOM.delClass(this.getLineDivElement(this.__hoverLine), "Ymacs-current-line");
+            DOM.delClass(this.getLineDivElement(this.__hoverLine), "Ymacs-current-line");
             this.__hoverLine = null;
         }
-    };
+    }
 
-    P._redrawCaret = function(force) {
-        if (this.isMinibuffer) force = true;
+    _redrawCaret(force) {
+        if (this.o.isMinibuffer) force = true;
         var isActive = this.ymacs.getActiveFrame() === this;
         if (!force && !isActive)
             return;
 
-        if (isActive && !this.isMinibuffer && this.focusInside())
+        if (isActive && !this.o.isMinibuffer && this.focusInside())
             this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
 
         var rc = this.buffer._rowcol;
 
-        if (this.highlightCurrentLine) {
+        if (this.o.highlightCurrentLine) {
             this._unhoverLine();
-            OLDOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
+            DOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
             this.__hoverLine = rc.row;
         }
 
@@ -316,9 +352,9 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
 
         this.callHooks("onPointChange", rc.row, rc.col);
         this.redrawModelineWithTimer(rc);
-    };
+    }
 
-    P._getLineHTML = function(row) {
+    _getLineHTML(row) {
         var html = this.buffer.formatLineHTML(row, this.caretMarker);
         // taking advantage of the fact that a literal > entered by the user will never appear in
         // the generated HTML, since special HTMl characters are escaped.
@@ -329,15 +365,15 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
                 + html.substr(pos + 12);
         }
         return html;
-    };
+    }
 
-    P._redrawBuffer = function() {
+    _redrawBuffer() {
         this.setContent(this.buffer.code.map((line, i) =>
             `<div class="line">${this._getLineHTML(i)}</div>`
         ).join(""));
-    };
+    }
 
-    P.coordinatesToRowCol = function(x, y) {
+    coordinatesToRowCol(x, y) {
         function findLine(r1, r2) {
             if (r1 >= r2)
                 return r1;
@@ -367,27 +403,9 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             row = findLine(0, this.buffer.code.length - 1),
             col = findCol(0, this.buffer.code[row].length);
         return { row: row, col: col };
-    };
+    }
 
-    function textColX(div, col) {
-        let range = document.createRange();
-        range.selectNodeContents(div);
-        let treeWalker = document.createTreeWalker(div, NodeFilter.SHOW_TEXT);
-        let len = 0;
-        while (treeWalker.nextNode()) {
-            let node = treeWalker.currentNode;
-            let clen = node.nodeValue.length;
-            if (len + clen >= col) {
-                range.setStart(node, col - len);
-                range.setEnd(node, col - len);
-                break;
-            }
-            len += clen;
-        }
-        return range.getBoundingClientRect().right;
-    };
-
-    P.coordinates = function(row, col) {
+    coordinates(row, col) {
         var box = this.getContentElement().getBoundingClientRect();
         var div = this.getLineDivElement(row);
         return {
@@ -395,20 +413,13 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             y: div.offsetTop,
             h: div.offsetHeight
         };
-    };
+    }
 
-    P.heightInLines = function() {
+    heightInLines() {
         return Math.floor(this.getOverlaysContainer().clientHeight / this.getContentElement().firstChild.offsetHeight);
-    };
+    }
 
-    P.setOuterSize = P.setSize = function(sz) {
-        debugger;
-        // var el = this.getElement();
-        // if (sz.x != null) el.style.width = sz.x + "px";
-        // if (sz.y != null) el.style.height = sz.y + "px";
-    };
-
-    P.redrawModeline = function(rc) {
+    redrawModeline(rc) {
         if (!rc) rc = this.caretMarker.getRowCol();
         var maxline = this.buffer.code.length - 1;
         var firstline = this.firstLineVisible();
@@ -419,44 +430,44 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             ? "Bot"
             : Math.round(lastline / maxline * 100) + "%";
         this.setModelineContent(this.buffer.renderModelineContent(rc, percent));
-    };
+    }
 
     /* -----[ event handlers ]----- */
 
-    P._on_bufferLineChange = function(row) {
+    _on_bufferLineChange(row) {
         var div = this.getLineDivElement(row);
         if (div) {
             //console.log("Redrawing line %d [%s]", row, this.buffer.code[row]);
             div.innerHTML = this._getLineHTML(row);
         }
-    };
+    }
 
-    P._on_bufferInsertLine = function(row, drawIt) {
+    _on_bufferInsertLine(row, drawIt) {
         var div = LINE_DIV.cloneNode(true);
         this.getContentElement().insertBefore(div, this.getLineDivElement(row));
         if (drawIt) {
             div.innerHTML = this._getLineHTML(row);
         }
-    };
+    }
 
-    P._on_bufferDeleteLine = function(row) {
-        OLDOM.trash(this.getLineDivElement(row));
-    };
+    _on_bufferDeleteLine(row) {
+        DOM.trash(this.getLineDivElement(row));
+    }
 
-    P._on_bufferPointChange = function(rc, pos) {
+    _on_bufferPointChange(rc, pos) {
         this._redrawCaret();
-    };
+    }
 
-    P._on_bufferResetCode = function() {
+    _on_bufferResetCode() {
         this._redrawBuffer();
-    };
+    }
 
-    P._on_bufferOverwriteMode = function(om) {
+    _on_bufferOverwriteMode(om) {
         this.condClass(om, "Ymacs-overwrite-mode");
-    };
+    }
 
-    P._on_bufferMessage = function(type, text, html, timeout) {
-        var anchor = this.isMinibuffer ? this.ymacs : this;
+    _on_bufferMessage(type, text, html, timeout) {
+        var anchor = this.o.isMinibuffer ? this.ymacs : this;
         var popup = Ymacs_Message_Popup.get(0);
         popup.popup({
             content : html ? text : text.htmlEscape(),
@@ -465,30 +476,25 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             align   : { prefer: "CC", fallX1: "CC", fallX2: "CC", fallY1: "CC", fallY2: "CC" }
         });
         popup.hide(timeout || 5000);
-    };
+    }
 
-    P._on_bufferBeforeInteractiveCommand = function() {
+    _on_bufferBeforeInteractiveCommand() {
         this.__ensureCaretVisible = true;
         this._unhoverLine();
         Ymacs_Message_Popup.clearAll();
-    };
-
-    P._on_bufferAfterInteractiveCommand = function() {};
-
-    P._on_bufferProgressChange = function() {
-        this.redrawModelineWithTimer(null);
-    };
-
-    P.getOverlayId = function(name) {
-        return this.id + "-ovl-" + name;
-    };
-
-    function normalizeRect(p) {
-        return p.line1 > p.line2 || (p.line1 == p.line2 && p.col1 > p.col2) ?
-            { line1: p.line2, col1: p.col2, line2: p.line1, col2: p.col1 } : p;
     }
 
-    P.getOverlayHTML = function(name, props) {
+    _on_bufferAfterInteractiveCommand() {}
+
+    _on_bufferProgressChange() {
+        this.redrawModelineWithTimer(null);
+    }
+
+    getOverlayId(name) {
+        return this.id + "-ovl-" + name;
+    }
+
+    getOverlayHTML(name, props) {
         var str = "";
         props.forEach(p => {
             if (p.line1 == p.line2 && p.col1 == p.col2) {
@@ -529,13 +535,13 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             }
         });
         return str ? `<div id="${this.getOverlayId(name)}" class="Ymacs_Overlay ${name}">${str}</div>` : null;
-    };
+    }
 
-    P.getOverlaysCount = function() {
+    getOverlaysCount() {
         return this.getOverlaysContainer().childNodes.length - 1; // XXX: subtract the div.content; we need to revisit this if we add new elements.
-    };
+    }
 
-    P._on_bufferOverlayChange = function(name, props) {
+    _on_bufferOverlayChange(name, props) {
         let html = this.getOverlayHTML(name, Array.isArray(props) ? props : [ props ]);
         if (html) {
             let div = DOM.fromHTML(html);
@@ -545,49 +551,45 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
         } else {
             this._on_bufferOverlayDelete(name);
         }
-    };
+    }
 
-    P._on_bufferOverlayDelete = function(name) {
-        OLDOM.trash(document.getElementById(this.getOverlayId(name)));
+    _on_bufferOverlayDelete(name) {
+        DOM.trash(document.getElementById(this.getOverlayId(name)));
         this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
-    };
+    }
 
     /* -----[ self events ]----- */
 
-    P._on_destroy = function() {
+    _on_destroy() {
         this.setBuffer(null);
-    };
+    }
 
-    P._on_focus = function() {
+    _on_focus() {
         window.focus();
         this.ymacs.setActiveFrame(this, true);
         this.addClass("Ymacs_Frame-active");
-        if (!this.isMinibuffer) {
+        if (!this.o.isMinibuffer) {
             this.buffer.cmd("goto_char", this.caretMarker.getPosition());
         }
         this.buffer.addEventListener(this._moreBufferEvents);
         this._redrawCaret();
-    };
+    }
 
-    P._on_blur = function() {
-        if (!this.isMinibuffer) {
+    _on_blur() {
+        if (!this.o.isMinibuffer) {
             this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
         }
         this.buffer.removeEventListener(this._moreBufferEvents);
-    };
+    }
 
-    var DBL_CLICK_SPEED = 300;
-    var CLICK_COUNT = 0, CLICK_COUNT_TIMER = null, CLICK_LAST_TIME = null;
-    function CLEAR_CLICK_COUNT() { CLICK_COUNT = null };
-
-    P._dragSelect_onMouseDown = function(ev) {
+    _dragSelect_onMouseDown(ev) {
         this.focus();
         if (ev.ctrlKey && ev.shiftKey)
             return;
         ev.stopPropagation();
         clearTimeout(CLICK_COUNT_TIMER);
         CLICK_COUNT++;
-        CLICK_COUNT_TIMER = CLEAR_CLICK_COUNT.delayed(DBL_CLICK_SPEED);
+        CLICK_COUNT_TIMER = setTimeout(CLEAR_CLICK_COUNT, DBL_CLICK_SPEED);
 
         let pos = DOM.mousePos(ev, this.getContentElement());
         let rc = this.coordinatesToRowCol(pos.x, pos.y);
@@ -615,76 +617,71 @@ DEFINE_CLASS("Ymacs_Frame", DlWidget, function(D, P, OLDOM) {
             buf.cmd("beginning_of_line");
             buf.cmd("forward_paragraph_mark");
         }
-    };
+    }
 
-    function _dragSelect_onMouseMove(ev) {
+    _dragSelect_onMouseMove(ev) {
         let pos = DOM.mousePos(ev, this.getContentElement());
         let rc = this.coordinatesToRowCol(pos.x, pos.y);
         this.buffer.cmd("goto_char", this.buffer._rowColToPosition(rc.row, rc.col));
         this.buffer.ensureTransientMark();
         this.ensureCaretVisible();
-    };
+    }
 
-    function _dragSelect_onMouseUp(ev) {
+    _dragSelect_onMouseUp(ev) {
         DOM.off(window, this._dragSelectHandlers);
-    };
+    }
 
-    P._on_keyDown = function(ev) {
-        if (this.ymacs.processKeyEvent(ev, false))
-            EX();
-    };
-
-    P._on_keyPress = function(ev) {
-        if (this.ymacs.processKeyEvent(ev, true))
-            EX();
-    };
-
-    P._on_keyUp = function(ev) {
-    };
-
-    P._on_resize = function() {
-        if (!this.destroyed) {
-            this.centerOnCaret();
-            this.redrawModelineWithTimer();
+    _on_keyDown(ev) {
+        if (this.ymacs.processKeyEvent(ev, false)) {
+            ev.preventDefault();
         }
-    };
+    }
 
-    P._on_scroll = function() {
+    _on_keyPress(ev) {
+        if (this.ymacs.processKeyEvent(ev, true)) {
+            ev.preventDefault();
+        }
+    }
+
+    _on_keyUp(ev) {
+    }
+
+    _on_scroll() {
         this.redrawModelineWithTimer();
-    };
+    }
 
-    P._on_mouseWheel = function(ev) {
+    _on_mouseWheel(ev) {
         this.buffer._handleKeyEvent(ev);
         ev.domStop = true;
-    };
+    }
 
-    P.firstLineVisible = function() {
+    firstLineVisible() {
         var div = this.getOverlaysContainer();
         return this.coordinatesToRowCol(1, div.scrollTop + 1).row;
-    };
+    }
 
-    P.lastLineVisible = function() {
+    lastLineVisible() {
         var div = this.getOverlaysContainer();
         return this.coordinatesToRowCol(div.clientWidth - 2, div.scrollTop + div.clientHeight - 2).row;
-    };
+    }
 
-    P.scrollUp = function(lines) {
+    scrollUp(lines) {
         var div = this.getOverlaysContainer();
         var line = Math.max(this.firstLineVisible() - lines, 0);
         line = this.getLineDivElement(line);
         div.scrollTop = line.offsetTop;
         this.__ensureCaretVisible = false;
-    };
+    }
 
-    P.scrollDown = function(lines) {
+    scrollDown(lines) {
         var div = this.getOverlaysContainer();
         var line = Math.min(this.firstLineVisible() + lines, this.buffer.code.length - 1);
         line = this.getLineDivElement(line);
         div.scrollTop = line.offsetTop;
         this.__ensureCaretVisible = false;
-    };
+    }
 
-});
+}
 
 DEFINE_CLASS("Ymacs_Message_Popup", DlPopup, function(D, P) {
     D.FIXARGS = function(args) {
@@ -752,3 +749,4 @@ class Ymacs_SplitCont extends Widget {
 }
 
 window.Ymacs_SplitCont = Ymacs_SplitCont; // XXX.
+window.Ymacs_Frame = Ymacs_Frame;

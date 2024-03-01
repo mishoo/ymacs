@@ -33,7 +33,7 @@
 
 import "./ymacs-interactive.js";
 import "./ymacs-textprop.js";
-import { EventProxy, remove } from "./ymacs-utils.js";
+import { EventProxy, remove, delayed } from "./ymacs-utils.js";
 
 let GLOBAL_VARS = {
     case_fold_search            : true,
@@ -478,7 +478,7 @@ export class Ymacs_Buffer extends EventProxy {
         }
         var dlg = new DlDialog(args);
         this.whenActiveFrame(function(frame){
-            dlg.addEventListener("onDestroy", frame.focus.clearingTimeout(0, frame));
+            dlg.addEventListener("onDestroy", delayed(frame.focus.bind(frame)));
         });
         return dlg;
     }

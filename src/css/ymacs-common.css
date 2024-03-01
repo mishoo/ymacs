@@ -11,6 +11,7 @@
 }
 
 .Ymacs_Frame {
+  cursor: default;
   font-size: 16px;
   font-family: "Iosevka Custom", "DejaVu Sans Mono", "Lucida Sans Typewriter", "Ubuntu Mono", monospace;
   overflow: hidden;
@@ -153,7 +154,10 @@
 
 .Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; outline: none; }
 
-.Ymacs_Frame-focus .Ymacs-caret {
+.Ymacs_Frame:focus {
+  outline: none;
+}
+.Ymacs_Frame:focus .Ymacs-caret {
   outline: none;
   animation-name: ymacs-caret-blink;
   animation-duration: 0.8s;

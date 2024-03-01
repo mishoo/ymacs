@@ -31,6 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
+import { delayed } from "./ymacs-utils.js";
 import "./ymacs-buffer.js";
 
 Ymacs_Buffer.newCommands({
@@ -1250,17 +1251,17 @@ Ymacs_Buffer.newCommands({
         var entry = new DlEntry({ type: "textarea", fillParent: true, value: text });
         dlg._focusedWidget = entry;
         if (type == "copy") {
-            entry.addEventListener("onCopy", function(ev){
+            entry.addEventListener("onCopy", delayed(function(){
                 dlg.destroy();
                 cont();
-            }.clearingTimeout(0));
+            }));
         } else if (type == "paste") {
-            entry.addEventListener("onPaste", function(ev){
+            entry.addEventListener("onPaste", delayed(function(){
                 // var code = entry.getValue().replace(/\t/g, "        ");
                 var code = entry.getValue();
                 dlg.destroy();
                 cont(code);
-            }.clearingTimeout(0));
+            }));
         }
         layout.packWidget(entry, { pos: "top", fill: "*" });
         layout.setSize({ x: 350, y: 250 });

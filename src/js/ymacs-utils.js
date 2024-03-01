@@ -22,6 +22,9 @@ export let DOM = {
             el.classList.toggle(clsFalse, !cond);
         }
     },
+    trash(el) {
+        el && el.remove();
+    },
     on(element, event, handler, options) {
         if (typeof event == "string") {
             element.addEventListener(event, handler, options || {});
@@ -64,7 +67,9 @@ export class EventProxy {
     }
     addEventListener(event, handler) {
         if (typeof event == "string") {
-            this._getHandlers(event).push(handler);
+            let a = this._getHandlers(event);
+            remove(a, handler);
+            a.push(handler);
         } else {
             Object.keys(event).forEach(ev => this.addEventListener(ev, event[ev]));
         }
@@ -123,6 +128,20 @@ export class Widget extends EventProxy {
     condClass(cond, clsTrue, clsFalse) {
         DOM.condClass(this.getElement(), cond, clsTrue, clsFalse);
     }
+    setContent(cont) {
+        this.getContentElement().innerHTML = cont;
+    }
+    setStyle(prop, val) {
+        let style = this.getElement().style;
+        if (typeof prop == "string") {
+            style[prop] = val;
+        } else {
+            Object.assign(style, prop);
+        }
+    }
+    getBox() {
+        return this.getElement().getBoundingClientRect();
+    }
 }
 
 export function remove(array, element) {
@@ -130,4 +149,15 @@ export function remove(array, element) {
     while ((pos = array.indexOf(element, pos)) >= 0) {
         array.splice(pos, 1);
     }
+}
+
+export function delayed(fn, timeout = 0, obj, ...args) {
+    if (arguments.length > 2) {
+        fn = fn.bind(obj, ...args);
+    }
+    let timer = null;
+    return function() {
+        clearTimeout(timer);
+        timer = setTimeout(fn, timeout);
+    };
 }
