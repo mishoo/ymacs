@@ -399,7 +399,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                     this.getPrefixArg();
                 }, 1);
             });
-            DlPopup.clearAllPopups();
+            //XXX: DlPopup.clearAllPopups();
         }
 
     });
@@ -443,7 +443,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         if ($popupActive) {
             if ($item != null) {
                 this.cmd("minibuffer_replace_input", $menu.children()[$item].userData);
-                DlPopup.clearAllPopups();
+                //XXX: DlPopup.clearAllPopups();
             } else {
                 this.signalError("Select something...");
             }
@@ -489,11 +489,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         "ArrowDown && ArrowRight && C-n && C-f" : handle_arrow_down,
         "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
         "Escape"                                : function() {
-            DlPopup.clearAllPopups();
+            //XXX: DlPopup.clearAllPopups();
         }
     }, DEFAULT_KEYS));
     KEYMAP_POPUP_ACTIVE.defaultHandler = [ function() {
-        DlPopup.clearAllPopups();
+        //XXX: DlPopup.clearAllPopups();
         return false; // say it's not handled though
     } ];
 

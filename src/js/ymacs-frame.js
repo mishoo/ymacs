@@ -294,6 +294,7 @@ class Ymacs_Frame extends Widget {
         sc.add(fr);
         ovdiv.scrollTop = scroll;
         fr.getOverlaysContainer().scrollTop = scroll;
+        this.focus(); // XXX: only if necessary
         return fr;
     }
 
@@ -558,7 +559,6 @@ class Ymacs_Frame extends Widget {
     }
 
     _on_focus() {
-        window.focus();
         this.ymacs.setActiveFrame(this, true);
         if (!this.o.isMinibuffer) {
             this.buffer.cmd("goto_char", this.caretMarker.getPosition());
@@ -575,10 +575,10 @@ class Ymacs_Frame extends Widget {
     }
 
     _dragSelect_onMouseDown(ev) {
-        this.focus();
         if (ev.ctrlKey && ev.shiftKey)
             return;
         ev.stopPropagation();
+
         clearTimeout(CLICK_COUNT_TIMER);
         CLICK_COUNT++;
         CLICK_COUNT_TIMER = setTimeout(CLEAR_CLICK_COUNT, DBL_CLICK_SPEED);
@@ -587,28 +587,30 @@ class Ymacs_Frame extends Widget {
         let rc = this.coordinatesToRowCol(pos.x, pos.y);
         let buf = this.buffer;
 
-        buf.clearTransientMark();
-        buf.cmd("goto_char", buf._rowColToPosition(rc.row, rc.col));
-        buf.callInteractively("keyboard_quit");
-        if (CLICK_COUNT == 1) {
-            buf.ensureTransientMark();
-            DOM.on(window, this._dragSelectHandlers);
-        }
-        else if (CLICK_COUNT == 2) {
-            buf.cmd("forward_word");
-            buf.cmd("backward_word");
-            buf.cmd("forward_word_mark");
-        }
-        else if (CLICK_COUNT == 3) {
-            buf.cmd("beginning_of_line");
-            buf.cmd("end_of_line_mark");
-        }
-        else if (CLICK_COUNT == 4) {
-            buf.cmd("backward_paragraph");
-            buf.cmd("forward_whitespace");
-            buf.cmd("beginning_of_line");
-            buf.cmd("forward_paragraph_mark");
-        }
+        setTimeout(() => {
+            buf.clearTransientMark();
+            buf.cmd("goto_char", buf._rowColToPosition(rc.row, rc.col));
+            buf.callInteractively("keyboard_quit");
+            if (CLICK_COUNT == 1) {
+                buf.ensureTransientMark();
+                DOM.on(window, this._dragSelectHandlers);
+            }
+            else if (CLICK_COUNT == 2) {
+                buf.cmd("forward_word");
+                buf.cmd("backward_word");
+                buf.cmd("forward_word_mark");
+            }
+            else if (CLICK_COUNT == 3) {
+                buf.cmd("beginning_of_line");
+                buf.cmd("end_of_line_mark");
+            }
+            else if (CLICK_COUNT == 4) {
+                buf.cmd("backward_paragraph");
+                buf.cmd("forward_whitespace");
+                buf.cmd("beginning_of_line");
+                buf.cmd("forward_paragraph_mark");
+            }
+        });
     }
 
     _dragSelect_onMouseMove(ev) {
@@ -691,14 +693,16 @@ class Ymacs_SplitCont extends Widget {
         DOM.on(this.getElement(), "mousedown", this._onMouseDown.bind(this));
     }
     _onMouseDown(ev) {
-        let first = this.getContentElement().children[0];
-        this._start = this.o.horiz ? ev.clientY : ev.clientX;
-        this._orig_sz = this.o.horiz ? first.offsetHeight : first.offsetWidth;
-        this._orig_frac = this._1stChildFr();
-        this.addClass("dragging");
-        ev.stopPropagation();
-        DOM.on(window, this._dragHandlers);
-        DOM.overlayOn(this.o.horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
+        if (ev.target === this.getElement()) {
+            let first = this.getContentElement().children[0];
+            this._start = this.o.horiz ? ev.clientY : ev.clientX;
+            this._orig_sz = this.o.horiz ? first.offsetHeight : first.offsetWidth;
+            this._orig_frac = this._1stChildFr();
+            this.addClass("dragging");
+            ev.stopPropagation();
+            DOM.on(window, this._dragHandlers);
+            DOM.overlayOn(this.o.horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
+        }
     }
     _onMouseUp(ev) {
         DOM.off(window, this._dragHandlers);
