@@ -31,33 +31,36 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
+import { EventProxy } from "./ymacs-utils.js";
 import "./ymacs-buffer.js";
 
-/* -----[ markers are objects that hold a position which is
-   automatically maintained as text is inserted or
-   removed ]----- */
+/* markers are objects that hold a position which is automatically
+   maintained as text is inserted or removed */
 
-DEFINE_CLASS("Ymacs_Marker", null, function(D, P){
+class Ymacs_Marker {
 
-    D.DEFAULT_ARGS = {
-        position : [ "pos"    , null ],
-        editor   : [ "editor" , null ],
-        before   : [ "before" , false ],
-        name     : [ "name"   , null ]
-    };
+    constructor({
+        pos = null,
+        editor = null,
+        before = false,
+        name = null
+    } = {}) {
+        this.position = pos;
+        this.editor = editor;
+        this.before = before;
+        this.name = name;
 
-    D.CONSTRUCT = function() {
         this.editor.markers.push(this);
         this.rowcol = null;
         this.onChange = [];
     };
 
-    P.destroy = function() {
+    destroy() {
         this.editor.markers.remove(this);
         this.editor = null;
-    };
+    }
 
-    P.editorChange = function(pos, diff, min) {
+    editorChange(pos, diff, min) {
         var p = this.position;
         if (this.before)
             --p;
@@ -68,38 +71,40 @@ DEFINE_CLASS("Ymacs_Marker", null, function(D, P){
                 this.position = min;
             this.callHooks(this.onChange, this.position);
         }
-    };
+    }
 
-    P.callHooks = function(a, arg) {
+    callHooks(a, arg) {
         for (var i = a.length; --i >= 0;)
             a[i].call(this.editor, arg);
-    };
+    }
 
-    P.getPosition = function() {
+    getPosition() {
         return this.position;
-    };
+    }
 
-    P.setPosition = function(pos, noHooks, force) {
+    setPosition(pos, noHooks, force) {
         if (force || this.position != pos) {
             this.rowcol = null;
             this.position = pos;
             if (!noHooks)
                 this.callHooks(this.onChange, this.position);
         }
-    };
+    }
 
-    P.getRowCol = function() {
+    getRowCol() {
         return this.rowcol || (this.rowcol = this.editor._positionToRowCol(this.position));
-    };
+    }
 
-    P.updateMarkers = function(delta) {
+    updateMarkers(delta) {
         this.editor._updateMarkers(this.getPosition(), delta);
-    };
+    }
 
-    P.swap = function(other, noHooks, force) {
+    swap(other, noHooks, force) {
         var tmp = this.getPosition();
         this.setPosition(other.getPosition(), noHooks, force);
         other.setPosition(tmp, noHooks, force);
-    };
+    }
 
-});
+}
+
+window.Ymacs_Marker = Ymacs_Marker;

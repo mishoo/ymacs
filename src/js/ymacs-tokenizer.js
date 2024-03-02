@@ -31,181 +31,164 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import { delayed } from "./ymacs-utils.js";
+import { delayed, EventProxy } from "./ymacs-utils.js";
 import "./ymacs-buffer.js";
 
-DEFINE_CLASS("Ymacs_Stream", null, function(D, P){
+class Ymacs_Stream {
 
-    D.DEFAULT_ARGS = {
-        buffer : [ "buffer" , null ],
-        line   : [ "line"   , 0 ],
-        col    : [ "col"    , 0 ]
-    };
+    constructor({
+        buffer = null,
+        line = 0,
+        col = 0
+    } = {}) {
+        this.buffer = buffer;
+        this.line = line;
+        this.col = col;
+    }
 
-    P.nextCol = function() {
+    nextCol() {
         ++this.col;
-    };
+    }
 
-    P.prevCol = function() {
+    prevCol() {
         --this.col;
-    };
+    }
 
-    P.nextLine = function() {
+    nextLine() {
         ++this.line;
         this.col = 0;
-    };
+    }
 
-    P.prevLine = function() {
+    prevLine() {
         --this.line;
         this.col = 0;
-    };
+    }
 
-    P.peek = function(n) {
+    peek(n) {
         if (n == null) n = 0;
         return this.buffer.code[this.line].charAt(this.col + n);
-    };
+    }
 
-    P.next = function() {
+    next() {
         var ch = this.peek();
         this.nextCol();
         if (this.col >= this.buffer.code[this.line].length)
             this.nextLine();
         return ch;
-    };
+    }
 
-    P.get = function() {
+    get() {
         var ch = this.peek();
         this.nextCol();
         return ch;
-    };
+    }
 
-    P.lineText = function(row) {
+    lineText(row) {
         if (row == null)
             row = this.line;
         return this.buffer.code[row];
-    };
+    }
 
-    P.lineIndentation = function(row) {
+    lineIndentation(row) {
         return /^\s*/.exec(this.lineText(row))[0].length;
-    };
+    }
 
-    P.lookingAt = function(what) {
+    lookingAt(what) {
         var line = this.buffer.code[this.line];
         if (what instanceof RegExp) {
             return what.exec(line.substr(this.col));
         } else {
             return line.substr(this.col, what.length) == what;
         }
-    };
+    }
 
-    P.textBefore = function(pos) {
+    textBefore(pos) {
         if (pos == null)
             pos = this.buffer._rowColToPosition(this.line, this.col);
         return this.buffer.getCode().substr(0, pos);
-    };
+    }
 
-    P.textAfter = function(pos) {
+    textAfter(pos) {
         if (pos == null)
             pos = this.buffer._rowColToPosition(this.line, this.col);
         return this.buffer.getCode().substr(pos);
-    };
+    }
 
-    P.substring = function(start, end) {
+    substring(start, end) {
         return this.buffer.getCode().substring(start, end);
-    };
+    }
 
-    P.substr = function(start, end) {
+    substr(start, end) {
         return this.buffer.getCode().substr(start, end);
-    };
+    }
 
-    P.eol = function() {
+    eol() {
         return this.col == this.buffer.code[this.line].length;
-    };
+    }
 
-    P.eof = function() {
+    eof() {
         var n = this.buffer.code.length, l = this.line;
         return l >= n || l == n - 1 && this.eol();
-    };
+    }
 
-    P.length = function() {
+    length() {
         return this.buffer.code.length;
-    };
+    }
 
-    P.lineLength = function(line) {
+    lineLength(line) {
         if (line == null)
             line = this.line;
         return this.buffer.code[line].length;
-    };
+    }
 
-    P.save = function() {
+    save() {
         return { buffer: this.buffer, line: this.line, col: this.col };
-    };
+    }
 
-    P.restore = function(state) {
+    restore(state) {
         this.buffer = state.buffer;
         this.line = state.line;
         this.col = state.col;
-    };
+    }
 
-    P.checkStop = function() {
+    checkStop() {
         if (this.eof()) throw this.EOF;
         if (this.eol()) throw this.EOL;
-    };
+    }
 
-    P.EOL = {};
-
-    P.EOF = {};
-
-    P.skip_ws = function() {
+    skip_ws() {
         while (Ymacs_Simple_Stream.is_whitespace(this.peek()))
             this.next();
-    };
+    }
 
-});
+}
 
-DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
-    D.DEFAULT_ARGS = {
-        buffer : [ "buffer" , null ],
-        line   : [ "line"   , 0 ],
-        col    : [ "col"    , 0 ],
-        pos    : [ "pos"    , null ]
-    };
-    D.CONSTRUCT = function() {
-        if (this.pos == null)
+Ymacs_Stream.prototype.EOL = {};
+Ymacs_Stream.prototype.EOF = {};
+
+class Ymacs_Simple_Stream {
+
+    constructor({
+        buffer = null,
+        line = 0,
+        col = 0,
+        pos = null
+    } = {}) {
+        this.buffer = buffer;
+        this.line = line;
+        this.col = col;
+        this.pos = pos;
+
+        if (this.pos == null) {
             this.pos = this.buffer._rowColToPosition(this.line, this.col);
-        else {
+        } else {
             var rc = this.buffer._positionToRowCol(this.pos);
             this.line = rc.row;
             this.col = rc.col;
         }
-    };
-    P.peek = function() {
-        var a = this.buffer.code;
-        var line = a[this.line];
-        if (line == null) return null;
-        if (this.col == line.length)
-            return this.line == a.length - 1 ? null : "\n";
-        return line.charAt(this.col);
-    };
-    P.next = function() {
-        var ch = this.peek();
-        if (ch) {
-            ++this.pos;
-            ++this.col;
-            if (this.col > this.buffer.code[this.line].length) {
-                this.col = 0;
-                ++this.line;
-            }
-        }
-        return ch;
-    };
-    P.read_while = function(pred) {
-        var ret = "", ch;
-        while ((ch = this.peek()) && pred(ch))
-            ret += this.next();
-        return ret;
-    };
-    P.is_whitespace = D.is_whitespace = function(ch) {
+    }
+
+    static is_whitespace(ch) {
         switch (ch) {
           case " ":
           case "\n":
@@ -216,41 +199,72 @@ DEFINE_CLASS("Ymacs_Simple_Stream", null, function(D, P){
           case "\xA0":
             return true;
         }
-    };
-    P.skip_ws = function() {
+    }
+
+    peek() {
+        var a = this.buffer.code;
+        var line = a[this.line];
+        if (line == null) return null;
+        if (this.col == line.length)
+            return this.line == a.length - 1 ? null : "\n";
+        return line.charAt(this.col);
+    }
+
+    next() {
+        var ch = this.peek();
+        if (ch) {
+            ++this.pos;
+            ++this.col;
+            if (this.col > this.buffer.code[this.line].length) {
+                this.col = 0;
+                ++this.line;
+            }
+        }
+        return ch;
+    }
+
+    read_while(pred) {
+        var ret = "", ch;
+        while ((ch = this.peek()) && pred(ch))
+            ret += this.next();
+        return ret;
+    }
+
+    skip_ws() {
         return this.read_while(this.is_whitespace);
-    };
-    P.looking_at = function(what) {
+    }
+
+    looking_at(what) {
         var line = this.buffer.code[this.line];
         if (what instanceof RegExp) {
             return what.exec(line.substr(this.col));
         } else {
             return line.substr(this.col, what.length) == what;
         }
-    };
-});
+    }
 
-DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
+}
 
-    var LANGUAGES = {};
+Ymacs_Simple_Stream.prototype.is_whitespace = Ymacs_Simple_Stream.is_whitespace;
 
-    D.define = function(name, func) {
+let LANGUAGES = Object.create(null);
+
+class Ymacs_Tokenizer extends EventProxy {
+
+    static define(name, func) {
         LANGUAGES[name.toLowerCase()] = func;
-    };
+    }
 
-    D.DEFAULT_EVENTS = [ "onFoundToken" ];
+    constructor({ buffer, type }) {
+        super(...arguments);
 
-    D.DEFAULT_ARGS = {
-        buffer : [ "buffer", null ],
-        type   : [ "type", null ]
-    };
+        if (typeof type == "string") {
+            type = LANGUAGES[type.toLowerCase()];
+        }
 
-    D.FIXARGS = function(args) {
-        if (typeof args.type == "string")
-            args.type = LANGUAGES[args.type.toLowerCase()];
-    };
+        this.buffer = buffer;
+        this.type = type;
 
-    D.CONSTRUCT = function() {
         var smallest = null;
         var timer = null;
         this.quickUpdate = function(offset) {
@@ -273,29 +287,29 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
             clearTimeout(this.timerUpdate);
         };
         this.reset();
-    };
+    }
 
-    P.reset = function() {
+    reset() {
         this.stream = new Ymacs_Stream({ buffer: this.buffer });
         this.theParser = this.type(this.stream, this);
         this.parsers = [];
         this.parsers[-1] = this.theParser.copy();
         this.timerUpdate = null;
         this.quickUpdate(0);
-    };
+    }
 
-    P.getLanguage = function(name, options) {
+    getLanguage(name, options) {
         return LANGUAGES[name](this.stream, this, options);
-    };
+    }
 
-    P.showProgress = function(p) {
+    showProgress(p) {
         if (p != null) {
             p = Math.round(p / this.stream.length() * 100) + "%";
         }
         this.buffer.updateProgress("Syntax highlighting", p);
-    };
+    }
 
-    P._do_quickUpdate = function(row) {
+    _do_quickUpdate(row) {
         this._stopQuickUpdate();
         var s = this.stream, p, a = this.parsers, n;
         s.line = row - 1;
@@ -338,21 +352,21 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
             this.showProgress();
         };
         doit();
-    };
+    }
 
-    P.quickInsertLine = function(row) {
+    quickInsertLine(row) {
         this.parsers.splice(row, this.parsers.length + 1);
-    };
+    }
 
-    P.quickDeleteLine = function(row) {
+    quickDeleteLine(row) {
         this.parsers.splice(row, this.parsers.length + 1);
-    };
+    }
 
-    P.onToken = function(line, c1, c2, type) {
+    onToken(line, c1, c2, type) {
         this.callHooks("onFoundToken", line, c1, c2, type);
-    };
+    }
 
-    P.getParserForLine = function(row) {
+    getParserForLine(row) {
         this._stopQuickUpdate();
         var s = this.stream, p, a = this.parsers, n;
         var currentLine = s.line;
@@ -391,26 +405,30 @@ DEFINE_CLASS("Ymacs_Tokenizer", DlEventProxy, function(D, P){
             if (s.line < s.length())
                 this.timerUpdate = setTimeout(this._do_quickUpdate.bind(this, s.line), 50);
         }
-    };
+    }
 
-    P.reparseAll = function() {
+    reparseAll() {
         this.parsers.splice(0, this.parsers.length);
         return this.finishParsing();
-    };
+    }
 
-    P.finishParsing = function() {
+    finishParsing() {
         this.getParserForLine(this.stream.length());
         return this.getLastParser();
-    };
+    }
 
-    P.getLastParser = function() {
+    getLastParser() {
         return this.parsers.peek();
-    };
+    }
 
-    P.getIndentation = function(row, buffer) {
+    getIndentation(row, buffer) {
         var p = this.getParserForLine(row);
         if (p && p.indentation instanceof Function)
             return p.indentation(buffer);
-    };
+    }
 
-});
+}
+
+window.Ymacs_Stream = Ymacs_Stream; // XXX.
+window.Ymacs_Simple_Stream = Ymacs_Simple_Stream;
+window.Ymacs_Tokenizer = Ymacs_Tokenizer;

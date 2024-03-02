@@ -31,39 +31,41 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
+import { EventProxy } from "./ymacs-utils.js";
 
-    D.DEFAULT_EVENTS = [ "onChange" ];
+class Ymacs_Text_Properties extends EventProxy {
 
-    D.DEFAULT_ARGS = {
-        buffer: [ "buffer", null ]
-    };
+    constructor({ buffer }) {
+        super(...arguments);
+        this.buffer = buffer;
+        this.reset();
+    }
 
-    D.CONSTRUCT = P.reset = function() {
+    reset() {
         this.props = [];
-    };
+    }
 
-    P.insertLine = function(row) {
+    insertLine(row) {
         if (this.props.length < row)
             this.props[row] = null;
         else {
             this.props.splice(row, 0, null);
         }
-    };
+    }
 
-    P.deleteLine = function(row) {
+    deleteLine(row) {
         this.props.splice(row, 1);
-    };
+    }
 
-    P.replaceLine = function(row, text) {
+    replaceLine(row, text) {
         var p = this.props[row];
         if (p && p.length > text.length) {
             // remove extra-properties
             p.splice(text.length, p.length);
         }
-    };
+    }
 
-    P.addLineProps = function(row, i, j, prop, val) {
+    addLineProps(row, i, j, prop, val) {
         var p = this.props, o, changed = false;
         if (i < j) {
             p = p[row] || (p[row] = []);
@@ -78,9 +80,9 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
                 this.callHooks("onChange", row);
         }
         return changed;
-    };
+    }
 
-    P.removeLineProps = function(row, i, j, prop) {
+    removeLineProps(row, i, j, prop) {
         var p = this.props[row], o, changed = false;
         if (p && i < j) {
             while (i < j) {
@@ -95,7 +97,7 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
                 this.callHooks("onChange", row);
         }
         return changed;
-    };
+    }
 
     // this uses the "css" text property to intercalate <span class="$css"> ... </span> tags in the given text.
     // "css" properties are added as the tokenizer parses the code and sends onFoundToken events.
@@ -107,7 +109,7 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
     // positioned (which seems to be the only practical way to position the cursor at the correct location).  It is
     // ESSENTIAL that the start tag of the element that defines the caret ends with "Ymacs-caret'>", so that the
     // frame widget can find it.
-    P.getLineHTML = function(row, text, caret) {
+    getLineHTML(row, text, caret) {
         var p = this.props[row];
         if (caret === null) {
             if (text == "")
@@ -163,6 +165,8 @@ DEFINE_CLASS("Ymacs_Text_Properties", DlEventProxy, function(D, P){
             ret += "<span class='Ymacs-caret'>&nbsp;</span>";
         }
         return ret;
-    };
+    }
 
-});
+}
+
+window.Ymacs_Text_Properties = Ymacs_Text_Properties;
