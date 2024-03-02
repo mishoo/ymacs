@@ -467,21 +467,13 @@ class Ymacs_Frame extends Widget {
     }
 
     _on_bufferMessage(type, text, html, timeout) {
-        var anchor = this.o.isMinibuffer ? this.ymacs : this;
-        var popup = Ymacs_Message_Popup.get(0);
-        popup.popup({
-            content : html ? text : text.htmlEscape(),
-            widget  : anchor,
-            anchor  : anchor.getElement(),
-            align   : { prefer: "CC", fallX1: "CC", fallX2: "CC", fallY1: "CC", fallY2: "CC" }
-        });
-        popup.hide(timeout || 5000);
+        this.ymacs.popupMessage(type, text, html, timeout);
     }
 
     _on_bufferBeforeInteractiveCommand() {
         this.__ensureCaretVisible = true;
         this._unhoverLine();
-        Ymacs_Message_Popup.clearAll();
+        this.ymacs.clearPopupMessage();
     }
 
     _on_bufferAfterInteractiveCommand() {}
@@ -682,14 +674,6 @@ class Ymacs_Frame extends Widget {
     }
 
 }
-
-DEFINE_CLASS("Ymacs_Message_Popup", DlPopup, function(D, P) {
-    D.FIXARGS = function(args) {
-        args.focusable = false;
-        args.autolink = false;
-        args.zIndex = 5000;
-    };
-});
 
 class Ymacs_SplitCont extends Widget {
     static options = {

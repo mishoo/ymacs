@@ -32,6 +32,7 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { DOM, Widget, remove } from "./ymacs-utils.js";
+import { Ymacs_Popup } from "./ymacs-popup.js";
 
 function selectClosestFrameX(byx, pos) {
     if (byx.length > 0) {
@@ -643,6 +644,28 @@ class Ymacs extends Widget {
                 this.__macro_recording.push(ev);
             }
             return buffer._handleKeyEvent(ev);
+        }
+    }
+
+    #timer_popupMessage = null;
+    popupMessage(type, text, isHtml, timeout) {
+        if (!this.__popup) {
+            this.__popup = new Ymacs_Popup();
+        }
+        if (!isHtml) {
+            text = DOM.htmlEscape(text);
+        }
+        this.__popup.setContent(text);
+        this.add(this.__popup);
+        clearTimeout(this.#timer_popupMessage);
+        if (timeout) {
+            this.#timer_popupMessage = setTimeout(this.clearPopupMessage.bind(this), timeout);
+        }
+    }
+
+    clearPopupMessage() {
+        if (this.__popup) {
+            this.__popup.getElement().remove();
         }
     }
 }

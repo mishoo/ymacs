@@ -55,7 +55,15 @@ export let DOM = {
             x: ev.pageX - box.left,
             y: ev.pageY - box.top
         };
-    }
+    },
+    htmlEscape: function(str) {
+        return str.replace(/&/g, "&amp;")
+            .replace(/\x22/g, "&quot;")
+            .replace(/\x27/g, "&#x27;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\u00A0/g, "&#xa0;");
+    },
 };
 
 OVERLAY = DOM.fromHTML(`<div style="position: fixed; z-index: 20000; left: 0; top: 0; right: 0; bottom: 0"></div>`);
