@@ -76,6 +76,16 @@
 
 .Ymacs_Completion_Popup .DlMenuItem .div2 { font-size: 100%; }
 
+.Ymacs.Ymacs-line-numbers .Ymacs-frame-content:before {
+  box-sizing: border-box;
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.3em;
+}
 .Ymacs.Ymacs-line-numbers .Ymacs-frame-content {
   counter-reset: ymacs-line 0;
   padding-left: calc(3.3em + 7px);
@@ -96,6 +106,7 @@
 .Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content {
   padding: 0;
 }
+.Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content:before,
 .Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content div.line:before {
   content: none;
   display: none;
