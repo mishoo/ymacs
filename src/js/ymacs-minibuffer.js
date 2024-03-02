@@ -33,6 +33,7 @@
 
 import "./ymacs-buffer.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
+import { common_prefix } from "./ymacs-utils.js";
 
 Ymacs_Buffer.newMode("minibuffer_mode", function(){
     var marker = this.createMarker(0, true);
@@ -153,7 +154,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 if (completions.length == 0) {
                     cont([]);
                 } else {
-                    var prefix = completions.common_prefix();
+                    var prefix = common_prefix(completions);
                     if (prefix != partial) {
                         mb.cmd("minibuffer_replace_input", dir+prefix);
                         cont(null);
@@ -342,7 +343,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                         mb.signalError("No completions");
                     }
                     else {
-                        var prefix = a.common_prefix();
+                        var prefix = common_prefix(a);
                         if (prefix != str) {
                             mb.cmd("minibuffer_replace_input", prefix);
                         }
@@ -497,5 +498,3 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     } ];
 
 })();
-
-DEFINE_CLASS("Ymacs_Completion_Popup", DlCompletionPopup);

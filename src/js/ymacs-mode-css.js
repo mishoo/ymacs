@@ -132,7 +132,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
     function next() {
         stream.checkStop();
         if ($cont.length > 0)
-            return $cont.peek()();
+            return $cont.at(-1)();
         var ch = stream.peek(), tmp;
         if (stream.lookingAt("/*")) {
             $inComment = { line: stream.line, c1: stream.col };
@@ -207,7 +207,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
             return indent;
         }
 
-        var p = $parens.peek();
+        var p = $parens.at(-1);
         if (p) {
             // check if the current line closes the paren
             var re = new RegExp("^\\s*\\" + OPEN_PAREN[p.type]);

@@ -31,7 +31,8 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs-keymap.js";
+import { DOM, formatBytes } from "./ymacs-utils.js";
+import { Ymacs_Keymap } from "./ymacs-keymap.js";
 
 // This is the default keymap, as configured in
 // Ymacs_Buffer::makeDefaultKeymap.  It follows closely the standard
@@ -82,8 +83,6 @@ import "./ymacs-keymap.js";
    this.previousCommand, which is useful in a number of cases.
 
 */
-
-import { Ymacs_Keymap } from "./ymacs-keymap.js";
 
 function TMPL_INFO({
     ch, code, codeHex, point, mark, sizeKB
@@ -227,13 +226,13 @@ let emacs_keymap = Ymacs_Keymap.define("emacs", {
         else if (ch == "\n")
             chname = "Newline";
         this.signalInfo(TMPL_INFO({
-            ch      : chname.htmlEscape(),
+            ch      : DOM.htmlEscape(chname),
             code    : ch.charCodeAt(0),
-            codeHex : ch.charCodeAt().hex(),
+            codeHex : ch.charCodeAt().toString(16).toUpperCase(),
             point   : this.point(),
             mark    : this.markMarker.getPosition(),
             size    : this.getCodeSize(),
-            sizeKB  : this.getCodeSize().formatBytes(2)
+            sizeKB  : formatBytes(this.getCodeSize(), 2)
         }), true);
     }
 });

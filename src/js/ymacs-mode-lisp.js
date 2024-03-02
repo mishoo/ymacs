@@ -263,7 +263,7 @@ import "./ymacs-tokenizer.js";
                     return caret_token.parent.value[caret_token.index - 1];
                 } else if (cont_exp) {
                     if (cont_exp.type == "list" && cont_exp.end == caret + 1)
-                        return cont_exp.value.peek();
+                        return cont_exp.value.at(-1);
                     return cont_exp.parent.value[cont_exp.index];
                 }
             },
@@ -571,7 +571,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         function next() {
             stream.checkStop();
             if ($cont.length > 0)
-                return $cont.peek()();
+                return $cont.at(-1)();
             var ch = stream.peek(), tmp;
             if ((tmp = stream.lookingAt(/^#\\.[a-z0-9_-]*/i))) {
                 newArg();
@@ -667,7 +667,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
 
             // XXX: rewrite this mess.
 
-            var p = $parens.peek();
+            var p = $parens.at(-1);
             if (p) {
                 var line = stream.lineText(p.line);
                 indent = p.col + 1;
@@ -700,7 +700,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                                 formArgs = "2*";
                         }
                         if (!formArgs) try {
-                            if (Object.HOP(LOCAL_BODYDEF, $backList[$backList.length - 2][0].id)) {
+                            if (Object.hasOwn(LOCAL_BODYDEF, $backList[$backList.length - 2][0].id)) {
                                 formArgs = "1*";
                             }
                         } catch(ex){}

@@ -179,7 +179,7 @@ parseInt undefined window document alert prototype constructor this");
                     $cont.pop();
                     $inString = false;
                     foundToken(start, stream.col, type);
-                    var p = $parens.peek();
+                    var p = $parens.at(-1);
                     if (p && p.type == ch) {
                         $parens.pop();
                         p.closed = { line: stream.line, col: stream.col, opened: p };
@@ -290,7 +290,7 @@ parseInt undefined window document alert prototype constructor this");
         function next() {
             stream.checkStop();
             if ($cont.length > 0)
-                return $cont.peek()();
+                return $cont.at(-1)();
             readToken();
         };
 
@@ -323,7 +323,7 @@ parseInt undefined window document alert prototype constructor this");
                 return indent;
             }
 
-            var p = $parens.peek();
+            var p = $parens.at(-1);
             if (p) {
                 // check if the current line closes the paren
                 var re = new RegExp("^\\s*\\" + OPEN_PAREN[p.type]);
@@ -361,7 +361,7 @@ parseInt undefined window document alert prototype constructor this");
 
                     // Note that the passedParen saved for that close paren is actually
                     // the opening one, which suits us greatly.
-                    p = $passedParens.peek();
+                    p = $passedParens.at(-1);
                     var stmtLine = stream.lineText(p.line);
                     if (/^\s*(if|for|while)\W/.test(stmtLine))
                         indent += INDENT_LEVEL();

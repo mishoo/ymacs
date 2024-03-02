@@ -418,7 +418,7 @@ class Ymacs_Tokenizer extends EventProxy {
     }
 
     getLastParser() {
-        return this.parsers.peek();
+        return this.parsers.at(-1);
     }
 
     getIndentation(row, buffer) {

@@ -32,6 +32,7 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import "./ymacs-buffer.js";
+import { zeroPad } from "./ymacs-utils.js";
 
 Ymacs_Buffer.newCommands({
 
@@ -80,9 +81,9 @@ Ymacs_Buffer.newCommands({
         if (!mode)
             mode = this.cmd("figure_out_mode") || this.cmd("mode_from_name");
         if (mode) {
-            if (Object.HOP(this.COMMANDS, mode)) {
+            if (Object.hasOwn(this.COMMANDS, mode)) {
                 this.cmd(mode, true);
-            } else if (Object.HOP(this.COMMANDS, mode + "_mode")) {
+            } else if (Object.hasOwn(this.COMMANDS, mode + "_mode")) {
                 this.cmd(mode + "_mode", true);
             }
         }
@@ -119,7 +120,7 @@ Ymacs_Buffer.newCommands({
     htmlize_region: Ymacs_Interactive("r\nP", function(begin, end, lineNum) {
         this.tokenizer.finishParsing();
         var row = this._positionToRowCol(begin).row;
-        var html = String.buffer();
+        var html = "";
         var line = row;
         var pad;
         if (lineNum && !lineNum.empty)
@@ -127,14 +128,13 @@ Ymacs_Buffer.newCommands({
         end = this._positionToRowCol(end).row;
         pad = String(end).length;
         while (row <= end) {
-            html("<div class='line'>");
+            html += "<div class='line'>";
             if (lineNum)
-                html("<span class='line-number'>", line.zeroPad(pad, " "), "</span>");
+                html += "<span class='line-number'>" + zeroPad(line, pad, " ") + "</span>";
             ++line;
-            html(this._textProperties.getLineHTML(row, this.code[row], null), "</div>\n");
+            html += this._textProperties.getLineHTML(row, this.code[row], null) + "</div>\n";
             ++row;
         }
-        html = html.get();
         var tmp = this.ymacs.switchToBuffer("*Htmlize*");
         tmp.setCode(html);
         tmp.cmd("xml_mode", true);

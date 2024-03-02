@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import { EventProxy } from "./ymacs-utils.js";
+import { DOM, EventProxy } from "./ymacs-utils.js";
 
 class Ymacs_Text_Properties extends EventProxy {
 
@@ -115,19 +115,19 @@ class Ymacs_Text_Properties extends EventProxy {
             if (text == "")
                 return "<br/>";
             if (!p || p.length == 0) {
-                return text.htmlEscape();
+                return DOM.htmlEscape(text);
             }
         } else {
             if (text == "")
                 return "<span class='Ymacs-caret'>&nbsp;</span>";
             if (!p || p.length == 0) {
                 if (caret === text.length)
-                    return text.htmlEscape() + "<span class='Ymacs-caret'>&nbsp;</span>";
-                return text.substr(0, caret).htmlEscape() +
+                    return DOM.htmlEscape(text) + "<span class='Ymacs-caret'>&nbsp;</span>";
+                return DOM.htmlEscape(text.substr(0, caret)) +
                     "<span class='Ymacs-caret'>" +
-                    text.charAt(caret).htmlEscape() +
+                    DOM.htmlEscape(text.charAt(caret)) +
                     "</span>" +
-                    text.substr(caret + 1).htmlEscape();
+                    DOM.htmlEscape(text.substr(caret + 1));
             }
         }
         var i = 0, n = text.length, last = null, o, ret = "", ch;

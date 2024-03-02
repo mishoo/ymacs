@@ -888,7 +888,7 @@ Ymacs_Buffer.newCommands({
                     syntax_word: this.getq("syntax_word_dabbrev")
                 }, "forward_word");
                 expansion = this.cmd("buffer_substring", p1, this.point());
-                if (Object.HOP(ctx.encountered, expansion))
+                if (Object.hasOwn(ctx.encountered, expansion))
                     repeat.call(this);
             }
         });
@@ -1322,7 +1322,7 @@ Ymacs_Buffer.newCommands({
     "end_of_line",
     "end_of_buffer"
 
-].foreach(function(cmd) {
+].forEach(function(cmd) {
     Ymacs_Buffer.COMMANDS[cmd + "_mark"] = Ymacs_Interactive("^", function(){
         this.ensureTransientMark();
         this.cmdApply(cmd, arguments);

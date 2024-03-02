@@ -34,12 +34,26 @@
 import { DOM, Widget, remove } from "./ymacs-utils.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
 
+function minElement(array, f, obj, remove) {
+    if (array.length == 0)
+        return null;
+    var i = 0, minEl = array[0], minValue = f.call(obj, minEl), minIndex = 0, tmp;
+    while (++i < array.length) if ((tmp = f.call(obj, array[i])) < minValue) {
+        minValue = tmp;
+        minIndex = i;
+        minEl = array[i];
+    }
+    if (remove)
+        array.splice(minIndex, 1);
+    return minEl;
+}
+
 function selectClosestFrameX(byx, pos) {
     if (byx.length > 0) {
-        var x = byx.peek().getBox().left, a = [ byx.pop() ];
-        while (byx.length > 0 && byx.peek().getBox().left == x)
+        var x = byx.at(-1).getBox().left, a = [ byx.pop() ];
+        while (byx.length > 0 && byx.at(-1).getBox().left == x)
             a.push(byx.pop());
-        return a.minElement(function(f){
+        return minElement(a, function(f){
             return Math.abs(pos.top - f.getBox().top - f.getBox().height/2);
         });
     }
@@ -47,10 +61,10 @@ function selectClosestFrameX(byx, pos) {
 
 function selectClosestFrameY(byy, pos) {
     if (byy.length > 0) {
-        var y = byy.peek().getBox().top, a = [ byy.pop() ];
-        while (byy.length > 0 && byy.peek().getBox().top == y)
+        var y = byy.at(-1).getBox().top, a = [ byy.pop() ];
+        while (byy.length > 0 && byy.at(-1).getBox().top == y)
             a.push(byy.pop());
-        return a.minElement(function(f){
+        return minElement(a, function(f){
             return Math.abs(pos.left - f.getBox().left - f.getBox().width/2);
         });
     }
@@ -159,7 +173,7 @@ class Ymacs extends Widget {
 
     killRingToMaster() {
         if (this.killRing.length && (this.killMasterOfRings.length == 0 ||
-                                     this.killMasterOfRings.peek().join("") != this.killRing.join("")))
+                                     this.killMasterOfRings.at(-1).join("") != this.killRing.join("")))
             this.killMasterOfRings.push(this.killRing);
         this.killRing = [];
     }
@@ -330,7 +344,7 @@ class Ymacs extends Widget {
     }
 
     focus() {
-        this.frames.peek().focus();
+        this.frames.at(-1).focus();
     }
 
     setInputFrame(frame) {
@@ -345,6 +359,7 @@ class Ymacs extends Widget {
             }
             remove(this.frames, frame);
             this.frames.push(frame);
+            frame.addClass("Ymacs_Frame-active");
         }
         this.__input_frame = frame;
         if (!nofocus)
@@ -352,12 +367,12 @@ class Ymacs extends Widget {
     }
 
     getActiveFrame() {
-        return this.frames.peek();
+        return this.frames.at(-1);
     }
 
     getActiveBuffer() {
         var frame = this.getActiveFrame();
-        return frame ? frame.buffer : this.buffers.peek();
+        return frame ? frame.buffer : this.buffers.at(-1);
     }
 
     setColorTheme(themeId) {
@@ -416,12 +431,12 @@ class Ymacs extends Widget {
 
     ls_get() {
         ensureLocalStorage();
-        return DlJSON.decode(localStorage.getItem(".ymacs") || "{}", true);
+        return JSON.parse(localStorage.getItem(".ymacs") || "{}");
     }
 
     ls_set(src) {
         ensureLocalStorage();
-        localStorage.setItem(".ymacs", DlJSON.encode(src));
+        localStorage.setItem(".ymacs", JSON.stringify(src));
     }
 
     ls_getFileContents(name, nothrow) {
@@ -538,7 +553,7 @@ class Ymacs extends Widget {
         if (info) {
             var files = {};
             for (var f in info.dir) {
-                if (Object.HOP(info.dir, f)) {
+                if (Object.hasOwn(info.dir, f)) {
                     files[f] = {
                         name : f,
                         path : dirname + "/" + f,

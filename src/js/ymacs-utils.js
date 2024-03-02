@@ -176,3 +176,54 @@ export function delayed(fn, timeout = 0, obj, ...args) {
         timer = setTimeout(fn, timeout);
     };
 }
+
+var $1K = 1024, $1M = $1K * 1024, $1G = $1M * 1024, $1T = $1G * 1024;
+export function formatBytes(number, fixed) {
+    var sz = number, spec, r;
+    if (sz < $1K) {
+        spec = "B";
+    } else if (sz < $1M) {
+        sz /= $1K;
+        spec = "K";
+    } else if (sz < $1G) {
+        sz /= $1M;
+        spec = "M";
+    } else if (sz < $1T) {
+        sz /= $1G;
+        spec = "G";
+    }
+    // spec = " " + spec;
+    r = Math.round(sz);
+    if (fixed && sz != r)
+        return sz.toFixed(fixed) + spec;
+    else
+        return r + spec;
+}
+
+export function zeroPad(thing, width, zero = "0") {
+    if (typeof thing == "number") {
+        thing = Math.round(thing);
+    }
+    var s = "" + thing;
+    while (s.length < width)
+        s = zero + s;
+    return s;
+}
+
+export function common_prefix(strings) {
+    switch (strings.length) {
+      case 0:
+        return "";
+      case 1:
+        return strings[0];
+      case 2:
+        let a = strings[0];
+        let b = strings[1];
+        let n = Math.min(a.length, b.length);
+        let i = 0;
+        while (i < n && a.charAt(i) === b.charAt(i)) ++i;
+        return a.substring(0, i);
+      default:
+        return common_prefix([ strings[0], common_prefix(strings.slice(1)) ]);
+    }
+}

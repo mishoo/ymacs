@@ -33,7 +33,7 @@
 
 import "./ymacs-interactive.js";
 import "./ymacs-textprop.js";
-import { EventProxy, remove, delayed } from "./ymacs-utils.js";
+import { DOM, EventProxy, remove, delayed, formatBytes } from "./ymacs-utils.js";
 import { Ymacs_Keymap_Emacs } from "./ymacs-keymap-emacs.js";
 
 let GLOBAL_VARS = {
@@ -91,7 +91,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     static replaceCommands(cmds) {
-        this.COMMANDS = Object.makeCopy(this.COMMANDS);
+        this.COMMANDS = Object.assign(Object.create(null), this.COMMANDS);
         let replacements = Object.create(null);
         Object.keys(cmds).forEach(oldcmd => {
             let newcmd = cmds[oldcmd];
@@ -658,27 +658,25 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     renderModelineContent(rc, percent) {
-        var ml = String.buffer(
-            this.__isDirty ? "**" : "--",
-            " <b>",
-            this.name.htmlEscape(),
-            "</b>",
-            "  ", percent, " of ", this.getCodeSize().formatBytes(2).toLowerCase(), "  ",
-            "(", rc.row + 1, ",", rc.col, ") "
-        );
+        var ml = (this.__isDirty ? "**" : "--") +
+            " <b>" +
+            DOM.htmlEscape(this.name) +
+            "</b>" +
+            "  " + percent + " of " + formatBytes(this.getCodeSize(), 2).toLowerCase() + "  " +
+            "(" + (rc.row + 1) + "," + rc.col + ") ";
         var custom = this.getq("modeline_custom_handler");
         if (custom) {
             custom = custom.call(this, this, rc);
-            if (custom) ml("[", custom, "] ");
+            if (custom) ml += "[" + custom + "] ";
         }
         var pr = [];
         for (var i in this.progress) {
             pr.push(i + ": " + this.progress[i]);
         }
         if (pr.length > 0) {
-            ml("{", pr.join(", "), "}");
+            ml += "{" + pr.join(", ") + "}";
         }
-        return ml.get();
+        return ml;
     }
 
     /* -----[ not-so-public API ]----- */
@@ -704,7 +702,7 @@ export class Ymacs_Buffer extends EventProxy {
     _placeUndoBoundary() {
         var q = this.__undoQueue;
         var m = this.markers.map(m => [ m, m.getPosition() ]);
-        var last = q.peek();
+        var last = q.at(-1);
         if (!last || last.type != 3) {
             q.push({ type: 3, markers: m });
         } else {

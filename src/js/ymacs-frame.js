@@ -86,7 +86,8 @@ class Ymacs_Frame extends Widget {
         this.el._ymacs_object = this;
         // </XXX>
 
-        this.__caretId = `ymacs-caret-${++COUNT}`;
+        this.id = `ymacs-frame-${++COUNT}`;
+        this.__caretId = `ymacs-caret-${COUNT}`;
         this.redrawModelineWithTimer = delayed(this.redrawModeline.bind(this));
 
         this.getElement().tabIndex = 0;
@@ -559,7 +560,6 @@ class Ymacs_Frame extends Widget {
     _on_focus() {
         window.focus();
         this.ymacs.setActiveFrame(this, true);
-        this.addClass("Ymacs_Frame-active");
         if (!this.o.isMinibuffer) {
             this.buffer.cmd("goto_char", this.caretMarker.getPosition());
         }

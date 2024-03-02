@@ -31,7 +31,7 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import { EventProxy } from "./ymacs-utils.js";
+import { EventProxy, remove } from "./ymacs-utils.js";
 import "./ymacs-buffer.js";
 
 /* markers are objects that hold a position which is automatically
@@ -56,7 +56,7 @@ class Ymacs_Marker {
     };
 
     destroy() {
-        this.editor.markers.remove(this);
+        remove(this.editor.markers, this);
         this.editor = null;
     }
 

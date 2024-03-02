@@ -59,8 +59,8 @@ function print(obj) {
                 if (val instanceof Function)
                         val = val.toString();
                 else
-                        val = DlJSON.encode(val);
-                a.push(DlJSON.encode(i) + " : " + val);
+                        val = JSON.stringify(val);
+                a.push(JSON.stringify(i) + " : " + val);
         }
         return a.map(function(line){
                 return line.replace(/^/mg, function(s) {

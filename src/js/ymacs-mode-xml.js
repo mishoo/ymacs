@@ -160,7 +160,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
     function next() {
         stream.checkStop();
         if ($cont.length > 0)
-            return $cont.peek()();
+            return $cont.at(-1)();
         var ch = stream.peek(), m;
         if (stream.lookingAt("<![CDATA[")) {
             foundToken(stream.col, stream.col += 9, "xml-cdata-starter");
@@ -214,7 +214,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 indent = stream.lineIndentation($inTag.line);
             }
         }
-        else if ((lastTag = $tags.peek())) {
+        else if ((lastTag = $tags.at(-1))) {
             indent = stream.lineIndentation(lastTag.line) + INDENT_LEVEL();
             // if current line begins with a closing tag, back one level
             if (/^\s*<\x2f/.test(stream.lineText()))
@@ -367,9 +367,9 @@ Ymacs_Buffer.newMode("xml_mode", function(){
         var point = this.point(),
         a = this.getq("xml_zen_markers"),
         start = a[0],
-        end = a.peek();
+        end = a.at(-1);
         if (point < start.getPosition() || point > end.getPosition() ||
-            end.getPosition() == a.peek(1).getPosition()) {
+            end.getPosition() == a.at(-2).getPosition()) {
             this.cmd("xml_zen_stop");
         }
     };
@@ -383,28 +383,27 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
         xml_zen_expand: Ymacs_Interactive(function() {
             this.cmd("xml_zen_stop");
-            var html = String.buffer(),
-            start = this.cmd("save_excursion", function() {
+            var html = "";
+            var start = this.cmd("save_excursion", function() {
                 this.cmd("backward_whitespace");
                 while (!this.cmd("looking_back", /[\x20\xa0\s\t\n;&]/))
                     if (!this.cmd("backward_char"))
                         break;
                 return this.point();
-            }),
-            point = this.point();
+            });
+            var point = this.point();
 
             try {
                 zen_render(
                     zen_parse(
                         this.cmd("buffer_substring", start, point).trim(), 0
                     ),
-                    html
+                    out => html += out
                 );
             } catch(ex) {
                 throw new Ymacs_Exception("The Zen is not strong today :-/");
             }
 
-            html = html.get();
             this.cmd("delete_region", start, point);
             this.cmd("insert", html);
             start = this.createMarker(start, false, "xml_zen");
