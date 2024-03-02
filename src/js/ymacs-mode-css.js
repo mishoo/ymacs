@@ -240,24 +240,14 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
 
 });
 
-DEFINE_SINGLETON("Ymacs_Keymap_CSS", Ymacs_Keymap);
-Ymacs_Keymap_CSS().defineKeys({
-    "Enter"       : "newline_and_indent",
-    ": && } && )" : "c_insert_and_indent"
-});
-
 Ymacs_Buffer.newMode("css_mode", function(){
-
     var tok = this.tokenizer;
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "css" }));
     var was_paren_match = this.cmd("paren_match_mode", true);
-    this.pushKeymap(Ymacs_Keymap_CSS());
 
     return function() {
         this.setTokenizer(tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
-        this.popKeymap(Ymacs_Keymap_CSS());
     };
-
 });

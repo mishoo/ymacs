@@ -32,14 +32,14 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import "./ymacs-buffer.js";
-import "./ymacs-keymap.js";
+import { Ymacs_Keymap } from "./ymacs-keymap.js";
 
 Ymacs_Buffer.newMode("minibuffer_mode", function(){
     var marker = this.createMarker(0, true);
     var changed_vars = this.setq({
         minibuffer_end_marker: marker
     });
-    var keymap = Ymacs_Keymap_Minibuffer();
+    var keymap = Ymacs_Keymap.get("minibuffer");
     this.pushKeymap(keymap);
     return function() {
         this.setq(changed_vars);
@@ -479,28 +479,22 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         "S-Home && S-C-a"                    : Ymacs_Interactive("^", handle_home_mark)
     };
 
-    DEFINE_SINGLETON("Ymacs_Keymap_Minibuffer", Ymacs_Keymap, function(D, P){
-        D.KEYS = Object.merge({
-            "C-g && Escape" : "minibuffer_keyboard_quit"
-        }, DEFAULT_KEYS);
-    });
+    Ymacs_Keymap.define("minibuffer", Object.assign({
+        "C-g && Escape" : "minibuffer_keyboard_quit"
+    }, DEFAULT_KEYS));
 
-    var KEYMAP_POPUP_ACTIVE = DEFINE_CLASS(null, Ymacs_Keymap, function(D, P){
-        D.KEYS = Object.merge({
-            "S-Tab"                                 : handle_s_tab,
-            "ArrowDown && ArrowRight && C-n && C-f" : handle_arrow_down,
-            "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
-            "Escape"                                : function() {
-                DlPopup.clearAllPopups();
-            }
-        }, DEFAULT_KEYS);
-        P.defaultHandler = [ function() {
+    var KEYMAP_POPUP_ACTIVE = Ymacs_Keymap.define(null, Object.assign({
+        "S-Tab"                                 : handle_s_tab,
+        "ArrowDown && ArrowRight && C-n && C-f" : handle_arrow_down,
+        "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
+        "Escape"                                : function() {
             DlPopup.clearAllPopups();
-            return false; // say it's not handled though
-        } ];
-    });
-
-    KEYMAP_POPUP_ACTIVE = new KEYMAP_POPUP_ACTIVE();
+        }
+    }, DEFAULT_KEYS));
+    KEYMAP_POPUP_ACTIVE.defaultHandler = [ function() {
+        DlPopup.clearAllPopups();
+        return false; // say it's not handled though
+    } ];
 
 })();
 

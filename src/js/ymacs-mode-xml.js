@@ -227,26 +227,21 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
 });
 
-DEFINE_SINGLETON("Ymacs_Keymap_XML", Ymacs_Keymap, function(D, P){
-
-    D.KEYS = {
-        "C-c /"   : "xml_close_tag",
-        "C-Enter" : "xml_zen_expand",
-        "Enter"   : "newline_and_indent"
-    };
-
+let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
+    "C-c /"   : "xml_close_tag",
+    "C-Enter" : "xml_zen_expand",
+    "Enter"   : "newline_and_indent"
 });
 
 Ymacs_Buffer.newMode("xml_mode", function(){
 
     var tok = this.tokenizer;
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
-    var keymap = Ymacs_Keymap_XML();
-    this.pushKeymap(keymap);
+    this.pushKeymap(Ymacs_Keymap_XML);
     var changed_vars = this.setq({ indent_level: 2 });
     return function() {
         this.setTokenizer(tok);
-        this.popKeymap(keymap);
+        this.popKeymap(Ymacs_Keymap_XML);
         this.setq(changed_vars);
     };
 
@@ -254,12 +249,10 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
 (function(){
 
-    DEFINE_SINGLETON("Ymacs_Keymap_XML_Zen", Ymacs_Keymap, function(D, P){
-        D.KEYS = {
-            "Tab"   : "xml_zen_next_poi",
-            "S-Tab" : "xml_zen_prev_poi",
-            "C-g"   : "xml_zen_stop"
-        };
+    let Ymacs_Keymap_XML_Zen = Ymacs_Keymap.define("xml_zen", {
+        "Tab"   : "xml_zen_next_poi",
+        "S-Tab" : "xml_zen_prev_poi",
+        "C-g"   : "xml_zen_stop"
     });
 
     var MODE_TYPE = 1, MODE_CLASS = 2, MODE_ID = 3, MODE_REPEAT = 4, MODE_ATTR = 5;
@@ -434,7 +427,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                 markers.unshift(start);
                 markers.push(end);
                 this.setq("xml_zen_markers", markers);
-                this.pushKeymap(Ymacs_Keymap_XML_Zen());
+                this.pushKeymap(Ymacs_Keymap_XML_Zen);
                 this.addEventListener("afterInteractiveCommand", maybe_stop_zen);
             } else {
                 start.destroy();
@@ -448,7 +441,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                 tmp.map(m => m.destroy());
                 this.setq("xml_zen_markers", null);
             }
-            this.popKeymap(Ymacs_Keymap_XML_Zen());
+            this.popKeymap(Ymacs_Keymap_XML_Zen);
             this.removeEventListener("afterInteractiveCommand", maybe_stop_zen);
         }),
 

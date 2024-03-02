@@ -31,353 +31,341 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs-keymap.js";
+import { Ymacs_Keymap } from  "./ymacs-keymap.js";
 
-(function(){
+let Ymacs_Keymap_ISearch = Ymacs_Keymap.define("isearch", {
+    "C-g && Escape": [ "isearch_abort", true ],
+    "C-w && M-w && C-S-s": "isearch_yank_word_or_char",
+    "C-s": "isearch_forward",
+    "C-r": "isearch_backward",
+    "M-%": "query_replace",
+    "Backspace": function() {
+        if (this.getMinibuffer().point() > this._isearchContext.mbMark.getPosition()) {
+            this.getMinibuffer().cmd("backward_delete_char");
+            this.cmd("goto_char", this._isearchContext.point);
+            isearchText.call(this);
+            updateIsearch.call(this, this._isearchContext.forward);
+        }
+    },
+    "Enter": "isearch_abort"
+});
+Ymacs_Keymap_ISearch.defaultHandler = [ "isearch_printing_char" ];
 
-    DEFINE_SINGLETON("Ymacs_Keymap_ISearch", Ymacs_Keymap, function(D, P){
-        D.KEYS = {
-            "C-g && Escape": [ "isearch_abort", true ],
-            "C-w && M-w && C-S-s": "isearch_yank_word_or_char",
-            "C-s": "isearch_forward",
-            "C-r": "isearch_backward",
-            "M-%": "query_replace",
-            "Backspace": function() {
-                if (this.getMinibuffer().point() > this._isearchContext.mbMark.getPosition()) {
-                    this.getMinibuffer().cmd("backward_delete_char");
-                    this.cmd("goto_char", this._isearchContext.point);
-                    isearchText.call(this);
-                    updateIsearch.call(this, this._isearchContext.forward);
-                }
-            },
-            "Enter": "isearch_abort"
+function initIsearch(fw) {
+    if (!this._isearchContext) {
+        this.pushKeymap(Ymacs_Keymap_ISearch);
+        this.cmd("set_mark_command", this.point());
+        this.setMinibuffer(fw ? "I-Search: " : "I-Search backward: ");
+        this._isearchContext = {
+            forward : fw,
+            point   : this.point(),
+            mbMark  : this.getMinibuffer().createMarker(null, true),
+            text    : "",
         };
-        D.CONSTRUCT = function() {
-            this.defaultHandler = [ "isearch_printing_char" ];
-        };
+        return true;
+    }
+};
+
+function isearchText() {
+    return this._isearchContext.text = this.getMinibuffer()._bufferSubstring(this._isearchContext.mbMark);
+}
+
+function updateIsearch(fw) {
+    this._isearchContext.forward = fw;
+    this._isearchContext.point = this.point();
+    var text = this._isearchContext.text;
+    if (!/\S/.test(text) && this.getq("isearch_last_text")) {
+        text = this._isearchContext.text = this.getq("isearch_last_text");
+        this.getMinibuffer()._placeUndoBoundary();
+        this.getMinibuffer().cmd("insert", text);
+    }
+    return doSearch.call(this, text);
+};
+
+function _lazyHighlight(str) {
+    this.deleteOverlay("isearch-lazy");
+    if (str) {
+        let cursor = this._rowcol;
+        let minpos = this._rowColToPosition(cursor.row - 50, 0);
+        let maxpos = this._rowColToPosition(cursor.row + 50, Infinity);
+        let code = this.getCode();
+        if (this.getq("case_fold_search")) {
+            code = code.toLowerCase();
+            str = str.toLowerCase();
+        }
+        let pos = minpos, hl = [];
+        while (true) {
+            pos = code.indexOf(str, pos);
+            if (pos < 0 || pos > maxpos) break;
+            let p1 = this._positionToRowCol(pos);
+            let p2 = this._positionToRowCol(pos += str.length);
+            hl.push({
+                line1: p1.row, col1: p1.col,
+                line2: p2.row, col2: p2.col
+            });
+        }
+        this.setOverlay("isearch-lazy", hl);
+    }
+}
+
+function lazyHighlight(str) {
+    this.cmd("bind_variables", {
+        case_fold_search: str != null && str == str.toLowerCase()
+    }, _lazyHighlight.bind(this, str));
+}
+
+function doSearch(str) {
+    return this.cmd("bind_variables", {
+        case_fold_search: str == str.toLowerCase()
+    }, function() {
+        var found = this.cmd(this._isearchContext.forward ? "search_forward" : "search_backward", str);
+        if (found) {
+            this.cmd("ensure_caret_visible");
+            var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * str.length);
+            this.setOverlay("isearch", {
+                line1: rc_begin.row, col1: rc_begin.col,
+                line2: this._rowcol.row, col2: this._rowcol.col
+            });
+        }
+        lazyHighlight.call(this, str);
+        return found;
     });
+};
 
-    function initIsearch(fw) {
+Ymacs_Buffer.newCommands({
+
+    isearch_forward: Ymacs_Interactive(function() {
+        if (!initIsearch.call(this, true)) {
+            if (!updateIsearch.call(this, true))
+                this.signalError("No more forward occurrences of the search text");
+        }
+    }),
+
+    isearch_forward_regexp: Ymacs_Interactive(function() {
+        this.signalError("Not implemented, but should be easy.  Volunteers?");
+    }),
+
+    isearch_backward_regexp: Ymacs_Interactive(function() {
+        this.signalError("Not implemented, but should be easy.  Volunteers?");
+    }),
+
+    isearch_backward: Ymacs_Interactive(function() {
+        if (!initIsearch.call(this, false)) {
+            if (!updateIsearch.call(this, false)) {
+                this.signalError("No more backward occurrences of the search text");
+            }
+        }
+    }),
+
+    isearch_yank_word_or_char: Ymacs_Interactive(function() {
         if (!this._isearchContext) {
-            this.pushKeymap(Ymacs_Keymap_ISearch());
-            this.cmd("set_mark_command", this.point());
-            this.setMinibuffer(fw ? "I-Search: " : "I-Search backward: ");
-            this._isearchContext = {
-                forward : fw,
-                point   : this.point(),
-                mbMark  : this.getMinibuffer().createMarker(null, true),
-                text    : "",
-            };
-            return true;
+            initIsearch.call(this, true);
         }
-    };
-
-    function isearchText() {
-        return this._isearchContext.text = this.getMinibuffer()._bufferSubstring(this._isearchContext.mbMark);
-    }
-
-    function updateIsearch(fw) {
-        this._isearchContext.forward = fw;
-        this._isearchContext.point = this.point();
-        var text = this._isearchContext.text;
-        if (!/\S/.test(text) && this.getq("isearch_last_text")) {
-            text = this._isearchContext.text = this.getq("isearch_last_text");
+        var pos = this.point();
+        var pos2 = this.cmd("save_excursion", function(){
+            this.cmd("forward_word");
+            return this.point();
+        });
+        if (pos2 != pos) {
+            var word = this._bufferSubstring(pos, pos2);
             this.getMinibuffer()._placeUndoBoundary();
-            this.getMinibuffer().cmd("insert", text);
+            this.getMinibuffer().cmd("insert", word.toLowerCase());
+            word = isearchText.call(this);
+            if (this._isearchContext.forward)
+                this.cmd("goto_char", pos2 - word.length);
+            doSearch.call(this, word);
         }
-        return doSearch.call(this, text);
-    };
+    }),
 
-    function _lazyHighlight(str) {
+    isearch_printing_char: Ymacs_Interactive(function() {
+        var ev = this.interactiveEvent();
+        if (ev.key.length == 1 && !ev.ctrlKey && !ev.altKey) {
+            this.getMinibuffer().cmd("self_insert_command");
+            this.cmd("goto_char", this._isearchContext.point);
+            isearchText.call(this);
+            doSearch.call(this, this._isearchContext.text);
+            return ev.domStop = true;
+        } else {
+            this.cmd("isearch_abort");
+            return false;
+        }
+    }),
+
+    isearch_abort: Ymacs_Interactive(function(cancelled) {
+        if (!cancelled)
+            this.setGlobal("isearch_last_text", this._isearchContext.text);
+        this.setMinibuffer("");
+        this.popKeymap(Ymacs_Keymap_ISearch);
+        this._isearchContext.mbMark.destroy();
+        this._isearchContext = null;
+        if (cancelled)
+            this.caretMarker.swap(this.markMarker);
+        this.deleteOverlay("isearch");
         this.deleteOverlay("isearch-lazy");
-        if (str) {
-            let cursor = this._rowcol;
-            let minpos = this._rowColToPosition(cursor.row - 50, 0);
-            let maxpos = this._rowColToPosition(cursor.row + 50, Infinity);
-            let code = this.getCode();
-            if (this.getq("case_fold_search")) {
-                code = code.toLowerCase();
-                str = str.toLowerCase();
-            }
-            let pos = minpos, hl = [];
-            while (true) {
-                pos = code.indexOf(str, pos);
-                if (pos < 0 || pos > maxpos) break;
-                let p1 = this._positionToRowCol(pos);
-                let p2 = this._positionToRowCol(pos += str.length);
-                hl.push({
-                    line1: p1.row, col1: p1.col,
-                    line2: p2.row, col2: p2.col
-                });
-            }
-            this.setOverlay("isearch-lazy", hl);
-        }
-    }
+        return true;
+    }),
+});
 
-    function lazyHighlight(str) {
-        this.cmd("bind_variables", {
-            case_fold_search: str != null && str == str.toLowerCase()
-        }, _lazyHighlight.bind(this, str));
-    }
+/* -----[ query-replace ]----- */
 
-    function doSearch(str) {
+let Ymacs_Keymap_Query_Replace = Ymacs_Keymap.define("query_replace", {
+    "y"     : "query_replace_yes_this_occurrence",
+    "n"     : "query_replace_no_this_occurrence",
+    "u"     : "query_replace_undo_previous",
+    "!"     : "query_replace_yes_all_occurrences",
+    "Enter" : [ "query_replace_abort", true ],
+});
+Ymacs_Keymap_Query_Replace.defaultHandler = [ "query_replace_abort" ];
+
+function query_replace() {
+    this.whenMinibuffer(mb => {
+        this.cmd("minibuffer_prompt", "Query replace: ");
+        let mbMark = mb.createMarker(null, true);
+        let hlOrig = (cmd) => {
+            let txt = mb._bufferSubstring(mbMark);
+            lazyHighlight.call(this, txt);
+        };
+        mb.addEventListener("afterInteractiveCommand", hlOrig);
+        let onQuit = (continued) => {
+            mb.removeEventListener("afterInteractiveCommand", hlOrig);
+            mbMark.destroy();
+            mb.removeEventListener("abort", onQuit);
+            if (!continued) {
+                this.deleteOverlay("isearch");
+                this.deleteOverlay("isearch-lazy");
+            }
+        };
+        mb.addEventListener("abort", onQuit);
+        this.cmd("minibuffer_read_string", null, orig => {
+            onQuit(true);
+            query_replace_2.call(this, mb, orig);
+        });
+    });
+}
+
+function query_replace_2(mb, orig) {
+    lazyHighlight.call(this, orig);
+    if (orig) {
+        this.cmd("minibuffer_prompt", `Replace “${orig}” with: `);
+        let onQuit = () => {
+            this.deleteOverlay("isearch");
+            this.deleteOverlay("isearch-lazy");
+            mb.removeEventListener("abort", onQuit);
+        };
+        mb.addEventListener("abort", onQuit);
+        this.cmd("minibuffer_read_string", null, rplc => {
+            query_replace_3.call(this, mb, orig, rplc);
+        });
+    }
+}
+
+function query_replace_3(mb, orig, rplc) {
+    mb.setCode(`Replace with “${rplc}”?`);
+    this.pushKeymap(Ymacs_Keymap_Query_Replace);
+    let cmds, stop, curr, count = 0;
+    let gotoNext = (quick) => {
         return this.cmd("bind_variables", {
-            case_fold_search: str == str.toLowerCase()
+            case_fold_search: orig == orig.toLowerCase()
         }, function() {
-            var found = this.cmd(this._isearchContext.forward ? "search_forward" : "search_backward", str);
+            var found = this.cmd("search_forward", orig);
             if (found) {
-                this.cmd("ensure_caret_visible");
-                var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * str.length);
-                this.setOverlay("isearch", {
-                    line1: rc_begin.row, col1: rc_begin.col,
-                    line2: this._rowcol.row, col2: this._rowcol.col
-                });
+                var begin = this.point() - orig.length;
+                found = { begin: begin, end: this.point() };
+                if (!quick) {
+                    this.cmd("ensure_caret_visible");
+                    var rc_begin = this._positionToRowCol(begin);
+                    this.setOverlay("isearch", {
+                        line1: rc_begin.row, col1: rc_begin.col,
+                        line2: this._rowcol.row, col2: this._rowcol.col
+                    });
+                }
             }
-            lazyHighlight.call(this, str);
+            if (!quick) {
+                lazyHighlight.call(this, orig);
+            }
             return found;
         });
     };
-
-    Ymacs_Buffer.newCommands({
-
-        isearch_forward: Ymacs_Interactive(function() {
-            if (!initIsearch.call(this, true)) {
-                if (!updateIsearch.call(this, true))
-                    this.signalError("No more forward occurrences of the search text");
-            }
+    let queue = [];
+    cmds = this.replaceCommands({
+        query_replace_yes_this_occurrence: Ymacs_Interactive(() => {
+            queue.push(curr);
+            this._replaceText(curr.begin, curr.end, rplc);
+            count++;
+            curr = gotoNext();
+            if (!curr) stop();
         }),
-
-        isearch_forward_regexp: Ymacs_Interactive(function() {
-            this.signalError("Not implemented, but should be easy.  Volunteers?");
+        query_replace_no_this_occurrence: Ymacs_Interactive(() => {
+            curr = gotoNext();
+            if (!curr) stop();
         }),
-
-        isearch_backward_regexp: Ymacs_Interactive(function() {
-            this.signalError("Not implemented, but should be easy.  Volunteers?");
-        }),
-
-        isearch_backward: Ymacs_Interactive(function() {
-            if (!initIsearch.call(this, false)) {
-                if (!updateIsearch.call(this, false)) {
-                    this.signalError("No more backward occurrences of the search text");
-                }
-            }
-        }),
-
-        isearch_yank_word_or_char: Ymacs_Interactive(function() {
-            if (!this._isearchContext) {
-                initIsearch.call(this, true);
-            }
-            var pos = this.point();
-            var pos2 = this.cmd("save_excursion", function(){
-                this.cmd("forward_word");
-                return this.point();
-            });
-            if (pos2 != pos) {
-                var word = this._bufferSubstring(pos, pos2);
-                this.getMinibuffer()._placeUndoBoundary();
-                this.getMinibuffer().cmd("insert", word.toLowerCase());
-                word = isearchText.call(this);
-                if (this._isearchContext.forward)
-                    this.cmd("goto_char", pos2 - word.length);
-                doSearch.call(this, word);
-            }
-        }),
-
-        isearch_printing_char: Ymacs_Interactive(function() {
-            var ev = this.interactiveEvent();
-            if (ev.key.length == 1 && !ev.ctrlKey && !ev.altKey) {
-                this.getMinibuffer().cmd("self_insert_command");
-                this.cmd("goto_char", this._isearchContext.point);
-                isearchText.call(this);
-                doSearch.call(this, this._isearchContext.text);
-                return ev.domStop = true;
-            } else {
-                this.cmd("isearch_abort");
-                return false;
-            }
-        }),
-
-        isearch_abort: Ymacs_Interactive(function(cancelled) {
-            if (!cancelled)
-                this.setGlobal("isearch_last_text", this._isearchContext.text);
-            this.setMinibuffer("");
-            this.popKeymap(Ymacs_Keymap_ISearch());
-            this._isearchContext.mbMark.destroy();
-            this._isearchContext = null;
-            if (cancelled)
-                this.caretMarker.swap(this.markMarker);
-            this.deleteOverlay("isearch");
-            this.deleteOverlay("isearch-lazy");
-            return true;
-        }),
-    });
-
-    /* -----[ query-replace ]----- */
-
-    DEFINE_SINGLETON("Ymacs_Keymap_ISearch_Replace", Ymacs_Keymap, function(D, P){
-        D.KEYS = {
-            "y"     : "query_replace_yes_this_occurrence",
-            "n"     : "query_replace_no_this_occurrence",
-            "u"     : "query_replace_undo_previous",
-            "!"     : "query_replace_yes_all_occurrences",
-            "Enter" : [ "query_replace_abort", true ],
-        };
-        D.CONSTRUCT = function() {
-            this.defaultHandler = [ "query_replace_abort" ];
-        };
-    });
-
-    function query_replace() {
-        this.whenMinibuffer(mb => {
-            this.cmd("minibuffer_prompt", "Query replace: ");
-            let mbMark = mb.createMarker(null, true);
-            let hlOrig = (cmd) => {
-                let txt = mb._bufferSubstring(mbMark);
-                lazyHighlight.call(this, txt);
-            };
-            mb.addEventListener("afterInteractiveCommand", hlOrig);
-            let onQuit = (continued) => {
-                mb.removeEventListener("afterInteractiveCommand", hlOrig);
-                mbMark.destroy();
-                mb.removeEventListener("abort", onQuit);
-                if (!continued) {
-                    this.deleteOverlay("isearch");
-                    this.deleteOverlay("isearch-lazy");
-                }
-            };
-            mb.addEventListener("abort", onQuit);
-            this.cmd("minibuffer_read_string", null, orig => {
-                onQuit(true);
-                query_replace_2.call(this, mb, orig);
-            });
-        });
-    }
-
-    function query_replace_2(mb, orig) {
-        lazyHighlight.call(this, orig);
-        if (orig) {
-            this.cmd("minibuffer_prompt", `Replace “${orig}” with: `);
-            let onQuit = () => {
-                this.deleteOverlay("isearch");
-                this.deleteOverlay("isearch-lazy");
-                mb.removeEventListener("abort", onQuit);
-            };
-            mb.addEventListener("abort", onQuit);
-            this.cmd("minibuffer_read_string", null, rplc => {
-                query_replace_3.call(this, mb, orig, rplc);
-            });
-        }
-    }
-
-    function query_replace_3(mb, orig, rplc) {
-        mb.setCode(`Replace with “${rplc}”?`);
-        this.pushKeymap(Ymacs_Keymap_ISearch_Replace());
-        let cmds, stop, curr, count = 0;
-        let gotoNext = (quick) => {
-            return this.cmd("bind_variables", {
-                case_fold_search: orig == orig.toLowerCase()
-            }, function() {
-                var found = this.cmd("search_forward", orig);
-                if (found) {
-                    var begin = this.point() - orig.length;
-                    found = { begin: begin, end: this.point() };
-                    if (!quick) {
-                        this.cmd("ensure_caret_visible");
-                        var rc_begin = this._positionToRowCol(begin);
-                        this.setOverlay("isearch", {
-                            line1: rc_begin.row, col1: rc_begin.col,
-                            line2: this._rowcol.row, col2: this._rowcol.col
-                        });
-                    }
-                }
-                if (!quick) {
-                    lazyHighlight.call(this, orig);
-                }
-                return found;
-            });
-        };
-        let queue = [];
-        cmds = this.replaceCommands({
-            query_replace_yes_this_occurrence: Ymacs_Interactive(() => {
-                queue.push(curr);
+        query_replace_yes_all_occurrences: Ymacs_Interactive(() => {
+            var last;
+            while (curr) {
+                last = curr;
                 this._replaceText(curr.begin, curr.end, rplc);
                 count++;
-                curr = gotoNext();
-                if (!curr) stop();
-            }),
-            query_replace_no_this_occurrence: Ymacs_Interactive(() => {
-                curr = gotoNext();
-                if (!curr) stop();
-            }),
-            query_replace_yes_all_occurrences: Ymacs_Interactive(() => {
-                var last;
-                while (curr) {
-                    last = curr;
-                    this._replaceText(curr.begin, curr.end, rplc);
-                    count++;
-                    curr = gotoNext(true);
-                }
-                if (last) {
-                    this.cmd("goto_char", last.begin);
-                    this.cmd("ensure_caret_visible");
-                }
-                stop();
-            }),
-            query_replace_undo_previous: Ymacs_Interactive(() => {
-                let prev = queue.pop();
-                if (prev) {
-                    count--;
-                    this.cmd("undo");
-
-                    // XXX: this is ugly, but oh well.. We'd like to
-                    // pretend this edit/undo operation never exist.
-                    let uptr = this.__undoPointer;
-                    let uq = this.__undoQueue.slice(0, uptr);
-                    setTimeout(() => {
-                        this.__undoPointer = uptr;
-                        this.__undoQueue = uq;
-                    });
-
-                    this.cmd("goto_char", prev.begin);
-                    curr = gotoNext();
-                } else {
-                    this.signalError("No more undo");
-                }
-            }),
-            query_replace_abort: Ymacs_Interactive(enter => {
-                stop();
-                return enter;
-            }),
-        });
-        stop = () => {
-            this.newCommands(cmds);
-            this.deleteOverlay("isearch");
-            this.deleteOverlay("isearch-lazy");
-            this.popKeymap(Ymacs_Keymap_ISearch_Replace());
-            mb.cmd("minibuffer_keyboard_quit");
-            this.signalInfo(`Replaced ${count} occurrences`);
-        };
-        curr = gotoNext();
-        if (!curr) {
+                curr = gotoNext(true);
+            }
+            if (last) {
+                this.cmd("goto_char", last.begin);
+                this.cmd("ensure_caret_visible");
+            }
             stop();
-        } else {
-            mb.listenOnce("abort", stop);
-        }
-    }
+        }),
+        query_replace_undo_previous: Ymacs_Interactive(() => {
+            let prev = queue.pop();
+            if (prev) {
+                count--;
+                this.cmd("undo");
 
-    Ymacs_Buffer.newCommands({
-        query_replace: Ymacs_Interactive(function(){
-            let ctx = this._isearchContext;
-            if (ctx) {
-                this.cmd("isearch_abort");
-                this.caretMarker.swap(this.markMarker);
-                this.whenMinibuffer(mb => {
-                    query_replace_2.call(this, mb, ctx.text);
+                // XXX: this is ugly, but oh well.. We'd like to
+                // pretend this edit/undo operation never exist.
+                let uptr = this.__undoPointer;
+                let uq = this.__undoQueue.slice(0, uptr);
+                setTimeout(() => {
+                    this.__undoPointer = uptr;
+                    this.__undoQueue = uq;
                 });
+
+                this.cmd("goto_char", prev.begin);
+                curr = gotoNext();
             } else {
-                query_replace.call(this);
+                this.signalError("No more undo");
             }
         }),
+        query_replace_abort: Ymacs_Interactive(enter => {
+            stop();
+            return enter;
+        }),
     });
+    stop = () => {
+        this.newCommands(cmds);
+        this.deleteOverlay("isearch");
+        this.deleteOverlay("isearch-lazy");
+        this.popKeymap(Ymacs_Keymap_Query_Replace);
+        mb.cmd("minibuffer_keyboard_quit");
+        this.signalInfo(`Replaced ${count} occurrences`);
+    };
+    curr = gotoNext();
+    if (!curr) {
+        stop();
+    } else {
+        mb.listenOnce("abort", stop);
+    }
+}
 
-})();
+Ymacs_Buffer.newCommands({
+    query_replace: Ymacs_Interactive(function(){
+        let ctx = this._isearchContext;
+        if (ctx) {
+            this.cmd("isearch_abort");
+            this.caretMarker.swap(this.markMarker);
+            this.whenMinibuffer(mb => {
+                query_replace_2.call(this, mb, ctx.text);
+            });
+        } else {
+            query_replace.call(this);
+        }
+    }),
+});

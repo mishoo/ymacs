@@ -390,43 +390,24 @@ parseInt undefined window document alert prototype constructor this");
         toHash(KEYWORDS_BUILTIN)
     ));
 
-    /* -----[ DynarchLIB ]----- */
-
-    var DL_KEYWORDS_BUILTIN = KEYWORDS_BUILTIN.concat(qw("\
-DEFINE_CLASS DEFINE_SINGLETON DEFINE_HIDDEN_CLASS \
-DEFAULT_ARGS DEFAULT_EVENTS \
-FIXARGS CONSTRUCT BEFORE_BASE FINISH_OBJECT_DEF \
-D P $"));
-
-    Ymacs_Tokenizer.define("js-dynarchlib", JS_PARSER.bind(
-        null,
-        toHash(KEYWORDS),
-        toHash(KEYWORDS_TYPE),
-        toHash(KEYWORDS_CONST),
-        toHash(DL_KEYWORDS_BUILTIN)
-    ));
-
 })();
 
 /* -----[ Keymap for C-like language mode ]----- */
 
-DEFINE_SINGLETON("Ymacs_Keymap_JS", Ymacs_Keymap, function(D, P){
-    D.KEYS = {
-        "`"   : [ "paredit_open_pair", "`", "`", /[\`\\]/g ],
-        "'"   : [ "paredit_open_pair", "'", "'", /[\'\\]/g ],
-        "M-`" : [ "paredit_wrap_round", "`", "`", /[\`\\]/g ],
-        "M-'" : [ "paredit_wrap_round", "'", "'", /[\'\\]/g ],
-    };
+let Ymacs_Keymap_JS = Ymacs_Keymap.define("js", {
+    "`"   : [ "paredit_open_pair", "`", "`", /[\`\\]/g ],
+    "'"   : [ "paredit_open_pair", "'", "'", /[\'\\]/g ],
+    "M-`" : [ "paredit_wrap_round", "`", "`", /[\`\\]/g ],
+    "M-'" : [ "paredit_wrap_round", "'", "'", /[\'\\]/g ],
 });
 
 /* -----[ Mode entry point ]----- */
 
-Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
+Ymacs_Buffer.newMode("javascript_mode", function() {
     var tok = this.tokenizer;
-    var keymap = Ymacs_Keymap_JS();
-    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: useDL ? "js-dynarchlib" : "js" }));
+    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js" }));
     var was_paren_match = this.cmd("paren_match_mode", true);
-    this.pushKeymap(keymap);
+    this.pushKeymap(Ymacs_Keymap_JS);
     var changed_vars = this.setq({
         syntax_comment_line: {
             rx: /\s*\x2f+\s?/g,
@@ -438,15 +419,11 @@ Ymacs_Buffer.newMode("javascript_mode", function(useDL) {
         this.setTokenizer(tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
-        this.popKeymap(keymap);
+        this.popKeymap(Ymacs_Keymap_JS);
     };
 });
 
 Ymacs_Buffer.newCommands({
-
-    javascript_dl_mode: Ymacs_Interactive(function() {
-        return this.cmd("javascript_mode", true);
-    }),
 
     c_electric_block: Ymacs_Interactive(function() {
         this.cmd("indent_line");

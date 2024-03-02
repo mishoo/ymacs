@@ -83,191 +83,183 @@ import "./ymacs-keymap.js";
 
 */
 
-DEFINE_SINGLETON("Ymacs_Keymap_Emacs", Ymacs_Keymap, function(D, P){
+import { Ymacs_Keymap } from "./ymacs-keymap.js";
 
-    var TMPL_INFO = String.template(
-        "<table>",
-        "<tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> $ch </tt></td></tr>",
-        "<tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> $code / 0x$codeHex </td></tr>",
-        "<tr><td style='text-align: right; font-weight: bold'>Position:</td><td> $point </td></tr>",
-        "<tr><td style='text-align: right; font-weight: bold'>Mark:</td><td> $mark </td></tr>",
-        "<tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> $sizeKB </td></tr>",
-        "</table>"
-    );
+function TMPL_INFO({
+    ch, code, codeHex, point, mark, sizeKB
+}) {
+    return `<table><tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> ${ch} </tt></td></tr><tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> ${code} / 0x${codeHex} </td></tr><tr><td style='text-align: right; font-weight: bold'>Position:</td><td> ${point} </td></tr><tr><td style='text-align: right; font-weight: bold'>Mark:</td><td> ${mark} </td></tr><tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> ${sizeKB} </td></tr></table>`;
+}
 
-    D.KEYS = {
-        // movement
-        "ArrowUp     && C-p"                      : "backward_line",
-        "ArrowDown   && C-n"                      : "forward_line",
-        "ArrowLeft   && C-b"                      : "backward_char",
-        "ArrowRight  && C-f"                      : "forward_char",
-        "Home"                                    : "beginning_of_indentation_or_line",
-        "End && C-e"                              : "end_of_line",
-        "C-a"                                     : "beginning_of_line",
-        "C-Home && M-<"                           : "beginning_of_buffer",
-        "C-End && M->"                            : "end_of_buffer",
-        "C-ArrowRight && M-f"                     : "forward_word",
-        "C-ArrowLeft && M-b"                      : "backward_word",
-        "C-ArrowDown"                             : "forward_paragraph",
-        "C-ArrowUp"                               : "backward_paragraph",
-        "C-l"                                     : "recenter_top_bottom",
-        "PageUp"                                  : "scroll_up_half",
-        "PageDown"                                : "scroll_down_half",
-        "WheelUp"                                 : "scroll_up",
-        "WheelDown"                               : "scroll_down",
+let emacs_keymap = Ymacs_Keymap.define("emacs", {
+    // movement
+    "ArrowUp     && C-p"                      : "backward_line",
+    "ArrowDown   && C-n"                      : "forward_line",
+    "ArrowLeft   && C-b"                      : "backward_char",
+    "ArrowRight  && C-f"                      : "forward_char",
+    "Home"                                    : "beginning_of_indentation_or_line",
+    "End && C-e"                              : "end_of_line",
+    "C-a"                                     : "beginning_of_line",
+    "C-Home && M-<"                           : "beginning_of_buffer",
+    "C-End && M->"                            : "end_of_buffer",
+    "C-ArrowRight && M-f"                     : "forward_word",
+    "C-ArrowLeft && M-b"                      : "backward_word",
+    "C-ArrowDown"                             : "forward_paragraph",
+    "C-ArrowUp"                               : "backward_paragraph",
+    "C-l"                                     : "recenter_top_bottom",
+    "PageUp"                                  : "scroll_up_half",
+    "PageDown"                                : "scroll_down_half",
+    "WheelUp"                                 : "scroll_up",
+    "WheelDown"                               : "scroll_down",
 
-        // transient mark
-        "S-ArrowUp       && S-C-p"                : "backward_line_mark",
-        "S-ArrowDown     && S-C-n"                : "forward_line_mark",
-        "S-ArrowLeft     && S-C-b"                : "backward_char_mark",
-        "S-ArrowRight    && S-C-f"                : "forward_char_mark",
-        "S-C-ArrowRight  && S-M-f"                : "forward_word_mark",
-        "S-C-ArrowLeft   && S-M-b"                : "backward_word_mark",
-        "S-C-ArrowDown"                           : "forward_paragraph_mark",
-        "S-C-ArrowUp"                             : "backward_paragraph_mark",
-        "S-Home"                                  : "beginning_of_indentation_or_line_mark",
-        "S-C-a"                                   : "beginning_of_line_mark",
-        "S-End && S-C-e"                          : "end_of_line_mark",
-        "S-C-Home"                                : "beginning_of_buffer_mark",
-        "S-C-End"                                 : "end_of_buffer_mark",
+    // transient mark
+    "S-ArrowUp       && S-C-p"                : "backward_line_mark",
+    "S-ArrowDown     && S-C-n"                : "forward_line_mark",
+    "S-ArrowLeft     && S-C-b"                : "backward_char_mark",
+    "S-ArrowRight    && S-C-f"                : "forward_char_mark",
+    "S-C-ArrowRight  && S-M-f"                : "forward_word_mark",
+    "S-C-ArrowLeft   && S-M-b"                : "backward_word_mark",
+    "S-C-ArrowDown"                           : "forward_paragraph_mark",
+    "S-C-ArrowUp"                             : "backward_paragraph_mark",
+    "S-Home"                                  : "beginning_of_indentation_or_line_mark",
+    "S-C-a"                                   : "beginning_of_line_mark",
+    "S-End && S-C-e"                          : "end_of_line_mark",
+    "S-C-Home"                                : "beginning_of_buffer_mark",
+    "S-C-End"                                 : "end_of_buffer_mark",
 
-        // basic editing
-        "Backspace"                               : "backward_delete_char",
-        "Delete && C-d"                           : "delete_char",
-        "Enter && C-m"                            : "newline",
-        "M-d && C-Delete"                         : "kill_word",
-        "C-Backspace && M-Backspace && M-Delete"  : "backward_kill_word",
-        "C-k"                                     : "kill_line",
-        "C-y && S-Insert"                         : "yank",
-        "M-y"                                     : "yank_pop",
-        "C-Space"                                 : "set_mark_command",
-        "C-x C-x"                                 : "exchange_point_and_mark",
-        "C-w"                                     : "kill_region",
-        "M-t"                                     : "transpose_words",
-        "C-t"                                     : "transpose_chars",
-        "C-x C-t"                                 : "transpose_lines",
-        "M-w"                                     : "copy_region_as_kill",
-        "M-c"                                     : "capitalize_word",
-        "M-u"                                     : "upcase_word",
-        "M-l"                                     : "downcase_word",
-        "F11"                                     : "nuke_trailing_whitespace",
-        "Tab"                                     : "indent_line",
-        "C-M-\\"                                  : "indent_region",
-        "M-q"                                     : "fill_paragraph",
-        "C-/ && C-x u && C-_ && C-z"              : "undo",
-        "Insert"                                  : "overwrite_mode",
-        "M-s"                                     : "center_line",
-        "M-/"                                     : "dabbrev_expand",
-        "C-s"                                     : "isearch_forward",
-        "C-r"                                     : "isearch_backward",
-        "C-S-s"                                   : "isearch_yank_word_or_char",
-        "M-C-s"                                   : "isearch_forward_regexp",
-        "M-C-r"                                   : "isearch_backward_regexp",
-        "M-%"                                     : "query_replace",
-        "C-u"                                     : "universal_argument",
-        "M-g"                                     : "goto_line",
-        "C-x h"                                   : "mark_whole_buffer",
-        "C-g"                                     : "keyboard_quit",
-        "M-^"                                     : "delete_indentation",
-        "M-;"                                     : "comment_dwim",
+    // basic editing
+    "Backspace"                               : "backward_delete_char",
+    "Delete && C-d"                           : "delete_char",
+    "Enter && C-m"                            : "newline",
+    "M-d && C-Delete"                         : "kill_word",
+    "C-Backspace && M-Backspace && M-Delete"  : "backward_kill_word",
+    "C-k"                                     : "kill_line",
+    "C-y && S-Insert"                         : "yank",
+    "M-y"                                     : "yank_pop",
+    "C-Space"                                 : "set_mark_command",
+    "C-x C-x"                                 : "exchange_point_and_mark",
+    "C-w"                                     : "kill_region",
+    "M-t"                                     : "transpose_words",
+    "C-t"                                     : "transpose_chars",
+    "C-x C-t"                                 : "transpose_lines",
+    "M-w"                                     : "copy_region_as_kill",
+    "M-c"                                     : "capitalize_word",
+    "M-u"                                     : "upcase_word",
+    "M-l"                                     : "downcase_word",
+    "F11"                                     : "nuke_trailing_whitespace",
+    "Tab"                                     : "indent_line",
+    "C-M-\\"                                  : "indent_region",
+    "M-q"                                     : "fill_paragraph",
+    "C-/ && C-x u && C-_ && C-z"              : "undo",
+    "Insert"                                  : "overwrite_mode",
+    "M-s"                                     : "center_line",
+    "M-/"                                     : "dabbrev_expand",
+    "C-s"                                     : "isearch_forward",
+    "C-r"                                     : "isearch_backward",
+    "C-S-s"                                   : "isearch_yank_word_or_char",
+    "M-C-s"                                   : "isearch_forward_regexp",
+    "M-C-r"                                   : "isearch_backward_regexp",
+    "M-%"                                     : "query_replace",
+    "C-u"                                     : "universal_argument",
+    "M-g"                                     : "goto_line",
+    "C-x h"                                   : "mark_whole_buffer",
+    "C-g"                                     : "keyboard_quit",
+    "M-^"                                     : "delete_indentation",
+    "M-;"                                     : "comment_dwim",
 
-        // vertical editing
-        "C-x r t"                                 : "string_rectangle",
-        "C-x r c"                                 : "clear_rectangle",
-        "C-x r k"                                 : "kill_rectangle",
-        "C-x r y"                                 : "yank_rectangle",
+    // vertical editing
+    "C-x r t"                                 : "string_rectangle",
+    "C-x r c"                                 : "clear_rectangle",
+    "C-x r k"                                 : "kill_rectangle",
+    "C-x r y"                                 : "yank_rectangle",
 
-        // buffers
-        "C-x C-ArrowRight && C-x ArrowRight && C-Tab"    : "next_buffer",
-        "C-x C-ArrowLeft && C-x ArrowLeft && C-S-Tab"    : "previous_buffer",
-        "C-x b"                                          : "switch_to_buffer",
-        "C-x k"                                          : "kill_buffer",
+    // buffers
+    "C-x C-ArrowRight && C-x ArrowRight && C-Tab"    : "next_buffer",
+    "C-x C-ArrowLeft && C-x ArrowLeft && C-S-Tab"    : "previous_buffer",
+    "C-x b"                                          : "switch_to_buffer",
+    "C-x k"                                          : "kill_buffer",
 
-        // frames
-        "C-x 0"                                   : "delete_frame",
-        "C-x 1"                                   : "delete_other_frames",
-        "C-x 2"                                   : "split_frame_vertically",
-        "C-x 3"                                   : "split_frame_horizontally",
-        "C-x o"                                   : "other_frame",
-        "C-x l"                                   : "toggle_line_numbers",
+    // frames
+    "C-x 0"                                   : "delete_frame",
+    "C-x 1"                                   : "delete_other_frames",
+    "C-x 2"                                   : "split_frame_vertically",
+    "C-x 3"                                   : "split_frame_horizontally",
+    "C-x o"                                   : "other_frame",
+    "C-x l"                                   : "toggle_line_numbers",
 
-        // eval
-        "M-x"                                     : "execute_extended_command",
+    // eval
+    "M-x"                                     : "execute_extended_command",
 
-        // necessary evil
-        "C-S-y && C-v"                            : "yank_from_operating_system",
-        "M-S-w"                                   : "copy_for_operating_system",
+    // necessary evil
+    "C-S-y && C-v"                            : "yank_from_operating_system",
+    "M-S-w"                                   : "copy_for_operating_system",
 
-        // my stuff, sorry if these have different meanings in the standard Emacs keys
-        "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
-        "C-c /"                                   : "close_last_xml_tag",
-        "S-Backspace"                             : "backward_delete_whitespace",
-        "S-Delete"                                : "delete_whitespace",
-        "C-M-d"                                   : "delete_region_or_line",
-        "M-Enter"                                 : "start_next_paragraph",
-        "M-S-q"                                   : "fill_paragraph_no_prefix",
-        "C-M-|"                                   : "cperl_lineup",
-        "C-F4"                                    : "kill_buffer",
-        "M-ArrowLeft"                             : [ "windmove", "left" ],
-        "M-ArrowRight"                            : [ "windmove", "right" ],
-        "M-ArrowUp"                               : [ "windmove", "up" ],
-        "M-ArrowDown"                             : [ "windmove", "down" ],
+    // my stuff, sorry if these have different meanings in the standard Emacs keys
+    "M-S-y"                                   : "yank_shift", // that's the reverse of yank_shift
+    "C-c /"                                   : "close_last_xml_tag",
+    "S-Backspace"                             : "backward_delete_whitespace",
+    "S-Delete"                                : "delete_whitespace",
+    "C-M-d"                                   : "delete_region_or_line",
+    "M-Enter"                                 : "start_next_paragraph",
+    "M-S-q"                                   : "fill_paragraph_no_prefix",
+    "C-M-|"                                   : "cperl_lineup",
+    "C-F4"                                    : "kill_buffer",
+    "M-ArrowLeft"                             : [ "windmove", "left" ],
+    "M-ArrowRight"                            : [ "windmove", "right" ],
+    "M-ArrowUp"                               : [ "windmove", "up" ],
+    "M-ArrowDown"                             : [ "windmove", "down" ],
 
-        "C-x e"                                   : "kmacro_end_and_call_macro",
-        "C-x ("                                   : "kmacro_start_macro",
-        "C-x )"                                   : "kmacro_end_macro",
+    "C-x e"                                   : "kmacro_end_and_call_macro",
+    "C-x ("                                   : "kmacro_start_macro",
+    "C-x )"                                   : "kmacro_end_macro",
 
-        // file system commands
-        "C-x C-f"                                 : "find_file",
-        "C-x C-w"                                 : "write_file",
-        "C-x C-s"                                 : "save_buffer",
-        "C-x s"                                   : "save_some_buffers",
+    // file system commands
+    "C-x C-f"                                 : "find_file",
+    "C-x C-w"                                 : "write_file",
+    "C-x C-s"                                 : "save_buffer",
+    "C-x s"                                   : "save_some_buffers",
 
-        // others
-        "C-x =": function() {
-            var ch = this.charAt(), chname = ch;
-            if (ch == " ")
-                chname = "Space";
-            else if (ch == "\n")
-                chname = "Newline";
-            this.signalInfo(TMPL_INFO({
-                ch      : chname.htmlEscape(),
-                code    : ch.charCodeAt(0),
-                codeHex : ch.charCodeAt().hex(),
-                point   : this.point(),
-                mark    : this.markMarker.getPosition(),
-                size    : this.getCodeSize(),
-                sizeKB  : this.getCodeSize().formatBytes(2)
-            }), true);
-        }
-    };
-
-    P.defaultHandler = [ "self_insert_command" ];
-
+    // others
+    "C-x =": function() {
+        var ch = this.charAt(), chname = ch;
+        if (ch == " ")
+            chname = "Space";
+        else if (ch == "\n")
+            chname = "Newline";
+        this.signalInfo(TMPL_INFO({
+            ch      : chname.htmlEscape(),
+            code    : ch.charCodeAt(0),
+            codeHex : ch.charCodeAt().hex(),
+            point   : this.point(),
+            mark    : this.markMarker.getPosition(),
+            size    : this.getCodeSize(),
+            sizeKB  : this.getCodeSize().formatBytes(2)
+        }), true);
+    }
 });
+emacs_keymap.defaultHandler = [ "self_insert_command" ];
 
-DEFINE_SINGLETON("Ymacs_Keymap_UniversalArgument", Ymacs_Keymap, function(D, P){
-
-    P.defaultHandler = [ Ymacs_Interactive("^", function(){
-        var ev = this.interactiveEvent();
-        var ch = ev.key;
-        var prefix = this.getPrefixArg(true);
-        if ((/^[0-9]$/.test(ch) || (ch === "-" && prefix === "")) && !ev.altKey && !ev.ctrlKey) {
-            prefix += ch;
-            this.setPrefixArg(prefix);
-            if (!this.isMinibuffer) {
-                this.whenMinibuffer(function(mb){
-                    mb.cmd("insert", " ", ch);
-                });
-            }
-            return true;
+let keymap_universal_arg = Ymacs_Keymap.define("universal_arg", {});
+keymap_universal_arg.defaultHandler = [ Ymacs_Interactive("^", function(){
+    var ev = this.interactiveEvent();
+    var ch = ev.key;
+    var prefix = this.getPrefixArg(true);
+    if ((/^[0-9]$/.test(ch) || (ch === "-" && prefix === "")) && !ev.altKey && !ev.ctrlKey) {
+        prefix += ch;
+        this.setPrefixArg(prefix);
+        if (!this.isMinibuffer) {
+            this.whenMinibuffer(function(mb){
+                mb.cmd("insert", " ", ch);
+            });
         }
-        this.popKeymap(Ymacs_Keymap_UniversalArgument());
-        return false;
-    }) ];
+        return true;
+    }
+    this.popKeymap(keymap_universal_arg);
+    return false;
+}) ];
+keymap_universal_arg.attached = buffer => buffer.setPrefixArg("");
 
-    P.attached = function(buffer) {
-        buffer.setPrefixArg("");
-    };
-
-});
+export {
+    emacs_keymap as Ymacs_Keymap_Emacs,
+    keymap_universal_arg as Ymacs_Keymap_UniversalArgument,
+};

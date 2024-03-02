@@ -732,11 +732,8 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
 
 })();
 
-DEFINE_SINGLETON("Ymacs_Keymap_LispMode", Ymacs_Keymap, function(D, P){
-    // XXX: keep this?
-    D.KEYS = {
-        '"' : [ "lisp_handle_string_quote" ],
-    };
+let Ymacs_Keymap_LispMode = Ymacs_Keymap.define("lisp", {
+    '"' : [ "lisp_handle_string_quote" ], // XXX: keep this?
 });
 
 Ymacs_Buffer.newMode("lisp_mode", function() {
@@ -751,9 +748,8 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         },
         syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u
     });
-    var keymap = Ymacs_Keymap_LispMode();
     var was_paren_match = this.cmd("paren_match_mode", true);
-    this.pushKeymap(keymap);
+    this.pushKeymap(Ymacs_Keymap_LispMode);
 
     var changed_commands = this.replaceCommands({
         "forward_sexp"            : "lisp_forward_sexp",
@@ -767,7 +763,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         this.newCommands(changed_commands);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
-        this.popKeymap(keymap);
+        this.popKeymap(Ymacs_Keymap_LispMode);
     };
 
 });

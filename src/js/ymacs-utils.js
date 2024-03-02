@@ -81,6 +81,13 @@ export class EventProxy {
             Object.keys(event).forEach(ev => this.removeEventListener(ev, event[ev]));
         }
     }
+    listenOnce(event, handler) {
+        let fn = (...args) => {
+            this.removeEventListener(event, fn);
+            handler.apply(this, args);
+        };
+        this.addEventListener(event, fn);
+    }
     callHooks(ev, ...args) {
         this._getHandlers(ev).forEach(f => f.apply(this, args));
     }

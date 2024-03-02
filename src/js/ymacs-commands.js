@@ -32,6 +32,7 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { delayed } from "./ymacs-utils.js";
+import { Ymacs_Keymap_UniversalArgument } from "./ymacs-keymap-emacs.js";
 import "./ymacs-buffer.js";
 
 Ymacs_Buffer.newCommands({
@@ -174,7 +175,7 @@ Ymacs_Buffer.newCommands({
     }),
 
     universal_argument: Ymacs_Interactive("^", function(){
-        this.pushKeymap(Ymacs_Keymap_UniversalArgument());
+        this.pushKeymap(Ymacs_Keymap_UniversalArgument);
         if (!this.isMinibuffer)
             this.setMinibuffer("C-u");
     }),

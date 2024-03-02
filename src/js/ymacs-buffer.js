@@ -34,6 +34,7 @@
 import "./ymacs-interactive.js";
 import "./ymacs-textprop.js";
 import { EventProxy, remove, delayed } from "./ymacs-utils.js";
+import { Ymacs_Keymap_Emacs } from "./ymacs-keymap-emacs.js";
 
 let GLOBAL_VARS = {
     case_fold_search            : true,
@@ -278,7 +279,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     makeDefaultKeymap() {
-        return Ymacs_Keymap_Emacs();
+        return Ymacs_Keymap_Emacs;
     }
 
     signalError(text, html, timeout) {

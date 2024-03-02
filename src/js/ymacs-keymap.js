@@ -33,20 +33,30 @@
 
 import "./ymacs-buffer.js";
 
-DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
+let KEYMAPS = Object.create(null);
 
-    D.CONSTRUCT = function() {
-        this.definitions = Object.assign({}, this.__originalDefs);
-    };
+export class Ymacs_Keymap {
 
-    P.FINISH_OBJECT_DEF = function() {
-        this.__originalDefs = Object.assign({}, this.__originalDefs);
-        var keys = this.constructor.KEYS;
-        if (keys)
-            this.defineKeys(keys);
-    };
+    constructor(keys) {
+        this.defineKeys(keys);
+    }
 
-    P.parseKey = function(str) {
+    static define(name, keys) {
+        let obj = name && KEYMAPS[name];
+        if (!obj) {
+            obj = keys instanceof this ? keys : new this(keys);
+            if (name) {
+                KEYMAPS[name] = obj;
+            }
+        }
+        return obj;
+    }
+
+    static get(name) {
+        return KEYMAPS[name];
+    }
+
+    static parseKey(str) {
         var key = {};
         var a = str.split(/-/);
         a.reverse();
@@ -66,9 +76,9 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
             key.str += "-";
         key.str += c;
         return key;
-    };
+    }
 
-    D.unparseKey = function(ev) {
+    static unparseKey(ev) {
         var key, a = [];
         if ("wheelDelta" in ev) {
             key = ev.wheelDelta > 0 ? "WheelUp" : "WheelDown";
@@ -86,9 +96,9 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
         a.sort();
         a.push(key);
         return a.join("-");
-    };
+    }
 
-    P.defineKey = function(key, func, args) {
+    defineKey(key, func, args) {
         if (func instanceof Array) {
             args = func.slice(1);
             func = func[0];
@@ -98,7 +108,7 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
             key.forEach(key => this.defineKey(key, func, args));
         } else {
             key = key[0].trim();
-            var dfn = this.definitions || this.__originalDefs;
+            var dfn = this.definitions || (this.definitions = Object.create(null));
             if (key.indexOf(" ") >= 0) {
                 var a = key.split(/\s+/);
                 key = a.pop();
@@ -112,13 +122,13 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
             key = this.parseKey(key);
             dfn[key.str] = [ func, args ];
         }
-    };
+    }
 
-    P.defineKeys = function(map) {
+    defineKeys(map) {
         Object.keys(map).forEach(key => this.defineKey(key, map[key]));
-    };
+    }
 
-    P.getHandler = function(keys) {
+    getHandler(keys) {
         let handler = null, def = this.definitions;
         for (let key of keys) {
             let tmp = handler ? handler[key] : def[key];
@@ -133,9 +143,13 @@ DEFINE_CLASS("Ymacs_Keymap", null, function(D, P){
             }
         }
         return handler;
-    };
+    }
 
-    P.attached = Function.noop;
-    P.detached = Function.noop;
+    attached(){}
+    detached(){}
 
-});
+}
+
+Ymacs_Keymap.prototype.parseKey = Ymacs_Keymap.parseKey;
+
+window.Ymacs_Keymap = Ymacs_Keymap; // XXX.
