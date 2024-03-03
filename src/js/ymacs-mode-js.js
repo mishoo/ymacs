@@ -422,23 +422,3 @@ Ymacs_Buffer.newMode("javascript_mode", function() {
         this.popKeymap(Ymacs_Keymap_JS);
     };
 });
-
-Ymacs_Buffer.newCommands({
-
-    c_electric_block: Ymacs_Interactive(function() {
-        this.cmd("indent_line");
-        this.cmd("insert", "{\n\n}");
-        this.cmd("indent_line");
-        this.cmd("backward_line", 1);
-        this.cmd("indent_line");
-    }),
-
-    c_insert_and_indent: Ymacs_Interactive(function() {
-        var ret;
-        if ((ret = this.cmd("self_insert_command"))) {
-            this.cmd("indent_line");
-            return ret;
-        }
-    })
-
-});
