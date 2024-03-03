@@ -69,19 +69,6 @@
 }
 .Ymacs_Overlay .isearch-lazy {}
 
-.Ymacs_Popup {
-  background-color: wheat;
-  color: #000;
-  border: 1px solid #000;
-  padding: 1em 1.5em;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  max-height: 70%;
-  z-index: 40;
-}
-
 .Ymacs.Ymacs-line-numbers .Ymacs-frame-content:before {
   box-sizing: border-box;
   content: "";
@@ -103,7 +90,7 @@
   display: block;
   position: absolute;
   left: 0;
-  width: 3.3em;
+  width: calc(3.3em - 1px);
   padding-right: 7px;
   content: counter(ymacs-line, decimal);
   text-align: right;
@@ -182,4 +169,36 @@
   animation-iteration-count: infinite;
   animation-timing-function: step-start;
   animation-fill-mode: backwards;
+}
+
+.Ymacs_Popup {
+  background-color: wheat;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 1em 1.5em;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-height: 70%;
+  z-index: 40;
+  overflow: auto;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  scrollbar-color: var(--ymacs-cursor-bg) transparent;
+}
+
+.Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item {
+  padding: 0 1.5em;
+  margin: 0 -1.5em;
+}
+.Ymacs_Popup.Ymacs_Completions:hover .Ymacs_Menu_Item.selected {
+  background-color: transparent;
+  color: inherit;
+}
+.Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item:hover,
+.Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item.selected,
+.Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item.selected:hover {
+  background-color: var(--ymacs-cursor-bg);
+  color: var(--ymacs-cursor-fg);
 }

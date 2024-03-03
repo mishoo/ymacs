@@ -58,20 +58,18 @@ import { Ymacs_Keymap } from "./ymacs-keymap.js";
    notation, with the following notes:
 
    - it is possible to define multiple keys at once for the same
-   operation, by using the "&&" combination (separate with spaces
-   from the actual keys)
+     operation, by using the "&&" combination (separate with spaces
+     from the actual keys)
 
-   - some special characters are named literally; their names contain
-   more than one character.  The available names are defined in
-   DlKeyboard (see keyboard.js in DynarchLIB).  Examples:
-   ARROW_RIGHT, PAGE_UP, etc. but also SPACE and DASH.
+   - some special characters are named literally (see event.key
+     https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
 
    Normally you would define commands using Ymacs_Buffer.newCommands
    (see ymacs-commands.js) and specify the command name for key
-   bindings, but you can specify a function as well, if you want:
+   bindings, but you can directly use a function as well:
 
    "C-8": function() {
-   alert("You pressed CTRL-8");
+     alert("You pressed CTRL-8");
    }
 
    It is advised to define commands for more than simple cases, for
@@ -80,7 +78,7 @@ import { Ymacs_Keymap } from "./ymacs-keymap.js";
    1. they can be used for "non-interactive" calls too
 
    2. the command name is saved in this.currentCommand /
-   this.previousCommand, which is useful in a number of cases.
+      this.previousCommand, which is useful in a number of cases.
 
 */
 

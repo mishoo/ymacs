@@ -76,9 +76,8 @@
   border-top: 1px solid #fff;
 }
 
-.Ymacs.Ymacs-Theme-light.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
+.Ymacs.Ymacs-Theme-light.Ymacs-line-numbers .Ymacs-frame-content:before {
   border-right: 1px dotted #888;
-  color: #777;
   background-color: #eee;
 }
 

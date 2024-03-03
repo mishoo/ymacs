@@ -179,7 +179,7 @@ Ymacs_Buffer.newCommands({
 
     isearch_printing_char: Ymacs_Interactive(function() {
         var ev = this.interactiveEvent();
-        if (ev.key.length == 1 && !ev.ctrlKey && !ev.altKey) {
+        if (ev?.key?.length == 1 && !ev.ctrlKey && !ev.altKey) {
             this.getMinibuffer().cmd("self_insert_command");
             this.cmd("goto_char", this._isearchContext.point);
             isearchText.call(this);

@@ -57,7 +57,7 @@ export let DOM = {
         };
     },
     htmlEscape: function(str) {
-        return str.replace(/&/g, "&amp;")
+        return (str+"").replace(/&/g, "&amp;")
             .replace(/\x22/g, "&quot;")
             .replace(/\x27/g, "&#x27;")
             .replace(/</g, "&lt;")
@@ -128,8 +128,11 @@ export class Widget extends EventProxy {
     getElement() {
         return this.el;
     }
-    add(widget) {
-        this.getContentElement().appendChild(widget.getElement());
+    add(thing) {
+        if (thing instanceof Widget) {
+            thing = thing.getElement();
+        }
+        this.getContentElement().appendChild(thing);
     }
     addClass(cls) {
         DOM.addClass(this.getElement(), cls);
@@ -156,6 +159,10 @@ export class Widget extends EventProxy {
     }
     getBox() {
         return this.getElement().getBoundingClientRect();
+    }
+    destroy() {
+        DOM.trash(this.getElement());
+        super.destroy(...arguments);
     }
 }
 

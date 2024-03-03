@@ -33,7 +33,8 @@
 
 import "./ymacs-buffer.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
-import { common_prefix } from "./ymacs-utils.js";
+import { DOM, common_prefix } from "./ymacs-utils.js";
+import { Ymacs_Popup } from "./ymacs-popup.js";
 
 Ymacs_Buffer.newMode("minibuffer_mode", function(){
     var marker = this.createMarker(0, true);
@@ -51,62 +52,58 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
 
 (function(){
 
-    var $popupActive = false;
-    var $menu = null, $item = null;
+    var $menu = null, $selectedIndex = null, $selectedItem = null;
     function popupCompletionMenu(frame, list) {
-        var self = this;        // minibuffer
-        if ($menu)
-            $menu.destroy();
-        $menu = new DlVMenu({});
-        list.forEach((item, index) => {
-            var data = item;
-            if (typeof item != "string") {
-                data = item.completion;
-                item = item.label;
+        let activeElement = document.activeElement;
+        let ymacs = this.ymacs; // `this` is the minibuffer
+        $menu = new Ymacs_Popup();
+        $menu.addClass("Ymacs_Completions");
+        list.forEach((label, index) => {
+            let value = label;
+            if (typeof label != "string") {
+                value = label.value;
+                label = label.label;
             }
-            new DlMenuItem({ parent: $menu, label: item.htmlEscape(), data: data, name: index })
-                .addEventListener("onMouseEnter", function(){
-                    if ($item != index) {
-                        if ($item != null) {
-                            $menu.children($item).callHooks("onMouseLeave");
-                        }
-                        $item = index;
-                    }
-                });
+            let el = DOM.fromHTML(`<div class="Ymacs_Menu_Item" data-value="${DOM.htmlEscape(value)}"
+                                        data-index="${index}">${DOM.htmlEscape(label)}</div>`);
+            $menu.add(el);
         });
-        $menu.addEventListener({
-            onSelect: function(index, item){
-                $item = index;
-                handle_enter.call(self);
-            }
-        });
-        var popup = Ymacs_Completion_Popup.get();
-        popup.popup({
-            timeout: 0,
-            content: $menu,
-            align: {
-                prefer: "Tr",
-                fallX1: "_r",
-                fallX2: "_L",
-                fallY1: "B_",
-                fallY2: "T_"
+        DOM.on($menu.getContentElement(), {
+            click: ev => {
+                activeElement.focus();
+                let item = ev.target;
+                if (!DOM.hasClass(item, "Ymacs_Menu_Item")) return;
+                select(+item.dataset.index);
+                handle_enter.call(this);
+                handle_enter.call(this);
             },
-            anchor: frame.getCaretElement(),
-            widget: frame,
-            onHide: function() {
-                $popupActive = false;
-                self.popKeymap(KEYMAP_POPUP_ACTIVE);
-                // $menu.destroy();
-                $item = null;
-                $menu = null;
-            },
-            isContext: true
         });
-        $popupActive = true;
-        self.pushKeymap(KEYMAP_POPUP_ACTIVE);
+        ymacs.add($menu);
+        select(0);
 
-        handle_arrow_down.call(self); // autoselect the first one anyway
-    };
+        this.pushKeymap(KEYMAP_POPUP_ACTIVE);
+        $menu.addEventListener("onDestroy", () => this.popKeymap(KEYMAP_POPUP_ACTIVE));
+    }
+
+    function killMenu() {
+        if ($menu) $menu.destroy();
+        $menu = null;
+        $selectedItem = null;
+        $selectedIndex = null;
+    }
+
+    function select(idx) {
+        let cont = $menu.getContentElement();
+        let items = [...cont.querySelectorAll(".Ymacs_Menu_Item")];
+        let n = items.length;
+        $selectedIndex = ((idx % n) + n) % n;
+        items.forEach(el => {
+            let current = el.dataset.index == $selectedIndex;
+            if (current) $selectedItem = el;
+            DOM.condClass(el, current, "selected");
+        });
+        $selectedItem.scrollIntoView({ block: "center" });
+    }
 
     function read_with_continuation(completions, cont, validate) {
         this.whenMinibuffer(function(mb){
@@ -130,17 +127,18 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     };
 
     function filename_completion(mb, str, re, cont) {
-
         var self = this;
         var lastslash = str.lastIndexOf("/");
         var dir = str.slice(0, lastslash+1);
         var partial = str.slice(lastslash+1);
         self.ymacs.fs_getDirectory(dir, function (files) {
-
             function add_trailing_slash_to_dir(name) {
-                return (files[name].type == "directory") ? name+"/" : name;
+                if (files[name].type == "directory") {
+                    return name + "/";
+                } else {
+                    return name;
+                }
             }
-
             if (!files) {
                 mb.signalError("Not found");
                 cont(null);
@@ -156,14 +154,15 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                 } else {
                     var prefix = common_prefix(completions);
                     if (prefix != partial) {
-                        mb.cmd("minibuffer_replace_input", dir+prefix);
+                        mb.cmd("minibuffer_replace_input", dir + prefix);
                         cont(null);
                     } else if (completions.length == 1) {
                         cont([str]);
                     } else {
                         completions = completions.map(function(name){
-                            return {label: name, completion: dir+name};
+                            return { label: name, value: dir + name };
                         });
+                        console.log(completions);
                         popupCompletionMenu.call(mb, self.getMinibufferFrame(), completions);
                         cont(null);
                     }
@@ -254,16 +253,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         minibuffer_read_variable: function(cont) {
             var tmp = Object.assign({}, this.globalVariables, this.variables);
             var completions = Object.keys(tmp).filter(name => !/^\*/.test(name)).sort();
-            read_with_continuation.call(this, completions, cont
-                                        // XXX: seems like a good idea, but it doesn't work
-                                        // XXX: need to refactor the signalInfo stuff.  It doesn't show up
-                                        //      currently because the buffer frame is not active, or something...
-                                        // , function(mb, name){
-                                        //         var val = this.getq(name);
-                                        //         mb.signalInfo("Current value of " + name + ": " + val);
-                                        //         return true;
-                                        // }
-                                       );
+            read_with_continuation.call(this, completions, function(name) {
+                let val = this.getq(name);
+                this.signalInfo(`Current value of <b>${DOM.htmlEscape(name)}</b> = <b>${DOM.htmlEscape(val)}</b>`, true, 3000);
+                return cont.apply(this, arguments);
+            });
         },
 
         minibuffer_read_existing_file: function(cont) {
@@ -399,51 +393,28 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
                     this.getPrefixArg();
                 }, 1);
             });
-            //XXX: DlPopup.clearAllPopups();
+            killMenu();
         }
 
     });
 
-    function handle_completion(how) {
-        var old_item = $item, w;
-        switch (how) {
-          case "next":
-            if ($item == null)
-                $item = -1;
-            $item = $menu.children().rotateIndex(++$item);
-            break;
-          case "prev":
-            if ($item == null)
-                $item = 0;
-            $item = $menu.children().rotateIndex(--$item);
-            break;
-        }
-        if (old_item != null) {
-            w = $menu.children(old_item);
-            w.callHooks("onMouseLeave");
-        }
-        old_item = $item;
-        w = $menu.children($item);
-        w.callHooks("onMouseEnter");
-    };
-
     function handle_arrow_down() {
-        if ($popupActive) {
-            return handle_completion.call(this, "next");
+        if ($menu) {
+            select($selectedIndex + 1);
         }
     };
 
     function handle_arrow_up() {
-        if ($popupActive) {
-            return handle_completion.call(this, "prev");
+        if ($menu) {
+            select($selectedIndex - 1);
         }
     };
 
     function handle_enter() {
-        if ($popupActive) {
-            if ($item != null) {
-                this.cmd("minibuffer_replace_input", $menu.children()[$item].userData);
-                //XXX: DlPopup.clearAllPopups();
+        if ($menu) {
+            if ($selectedItem) {
+                this.cmd("minibuffer_replace_input", $selectedItem.dataset.value);
+                killMenu();
             } else {
                 this.signalError("Select something...");
             }
@@ -453,7 +424,7 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
     };
 
     function handle_tab() {
-        if (!$popupActive)
+        if (!$menu)
             this.cmd("minibuffer_complete");
         else
             handle_arrow_down.call(this);
@@ -489,11 +460,11 @@ Ymacs_Buffer.newMode("minibuffer_mode", function(){
         "ArrowDown && ArrowRight && C-n && C-f" : handle_arrow_down,
         "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
         "Escape"                                : function() {
-            //XXX: DlPopup.clearAllPopups();
+            killMenu();
         }
     }, DEFAULT_KEYS));
     KEYMAP_POPUP_ACTIVE.defaultHandler = [ function() {
-        //XXX: DlPopup.clearAllPopups();
+        killMenu();
         return false; // say it's not handled though
     } ];
 

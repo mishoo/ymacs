@@ -13,6 +13,7 @@ window.addEventListener("beforeunload", ev => {
         height   : "100%"
     });
     ymacs.setColorTheme([ "dark", "material-dark" ]);
+    //ymacs.setColorTheme([ "light", "vim-colors" ]);
     document.body.appendChild(ymacs.getElement());
     let b = ymacs.getActiveBuffer.bind(ymacs);
     b().cmd("load_file", "ymacs-frame.js");

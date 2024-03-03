@@ -1243,6 +1243,7 @@ Ymacs_Buffer.newCommands({
     // this should be moved some level up if it proves to be more
     // generally useful
     function modalTextarea(buffer, type, title, text, cont) {
+        throw new Error("Reimplement this, or drop it?");
         var dlg = buffer.createDialog({
             title     : title,
             quitBtn   : "destroy",
