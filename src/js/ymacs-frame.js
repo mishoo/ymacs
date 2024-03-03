@@ -681,6 +681,7 @@ class Ymacs_SplitCont extends Widget {
     static options = {
         horiz: false
     };
+    #activeElement = null;
     initClassName() {
         return "Ymacs_SplitCont " + (this.o.horiz ? "horiz" : "vert");
     }
@@ -693,6 +694,7 @@ class Ymacs_SplitCont extends Widget {
         DOM.on(this.getElement(), "mousedown", this._onMouseDown.bind(this));
     }
     _onMouseDown(ev) {
+        this.#activeElement = document.activeElement;
         if (ev.target === this.getElement()) {
             let first = this.getContentElement().children[0];
             this._start = this.o.horiz ? ev.clientY : ev.clientX;
@@ -702,12 +704,18 @@ class Ymacs_SplitCont extends Widget {
             ev.stopPropagation();
             DOM.on(window, this._dragHandlers);
             DOM.overlayOn(this.o.horiz ? "Ymacs_Resize_horiz" : "Ymacs_Resize_vert");
+        } else if (this.#activeElement) {
+            this.#activeElement.focus();
         }
     }
     _onMouseUp(ev) {
         DOM.off(window, this._dragHandlers);
         this.delClass("dragging");
         DOM.overlayOff();
+        if (this.#activeElement) {
+            this.#activeElement.focus();
+        }
+        this.#activeElement = null;
     }
     _onMouseMove(ev) {
         let cont = this.getElement();
