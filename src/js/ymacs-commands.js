@@ -33,7 +33,9 @@
 
 import { delayed } from "./ymacs-utils.js";
 import { Ymacs_Keymap_UniversalArgument } from "./ymacs-keymap-emacs.js";
-import "./ymacs-buffer.js";
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
+import { Ymacs_Exception } from "./ymacs-exception.js";
+import { Ymacs_Interactive, Ymacs_Interactive_X } from "./ymacs-interactive.js";
 
 Ymacs_Buffer.newCommands({
 

@@ -33,7 +33,7 @@
 
 import { DOM, EventProxy } from "./ymacs-utils.js";
 
-class Ymacs_Text_Properties extends EventProxy {
+export class Ymacs_Text_Properties extends EventProxy {
 
     constructor({ buffer }) {
         super(...arguments);
@@ -168,5 +168,3 @@ class Ymacs_Text_Properties extends EventProxy {
     }
 
 }
-
-window.Ymacs_Text_Properties = Ymacs_Text_Properties;

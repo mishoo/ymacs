@@ -152,5 +152,3 @@ export class Ymacs_Keymap {
 }
 
 Ymacs_Keymap.prototype.parseKey = Ymacs_Keymap.parseKey;
-
-window.Ymacs_Keymap = Ymacs_Keymap; // XXX.

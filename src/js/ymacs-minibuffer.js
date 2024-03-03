@@ -31,10 +31,11 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs-buffer.js";
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { DOM, common_prefix } from "./ymacs-utils.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
+import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 Ymacs_Buffer.newMode("minibuffer_mode", function(){
     var marker = this.createMarker(0, true);

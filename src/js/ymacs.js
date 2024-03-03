@@ -32,7 +32,10 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { DOM, Widget, remove } from "./ymacs-utils.js";
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
+import { Ymacs_Frame, Ymacs_SplitCont } from "./ymacs-frame.js";
+import { Ymacs_Exception } from "./ymacs-exception.js";
 
 function minElement(array, f, obj, remove) {
     if (array.length == 0)
@@ -79,7 +82,7 @@ function isModifier(key) {
     return /^(?:Alt|AltGraph|CapsLock|Control|Fn|FnLock|Hyper|Meta|NumLock|ScrollLock|Shift|Super|Symbol|SymbolLock)$/.test(key);
 }
 
-class Ymacs extends Widget {
+export class Ymacs extends Widget {
 
     static options = {
         buffers       : [],
@@ -684,5 +687,3 @@ class Ymacs extends Widget {
         }
     }
 }
-
-window.Ymacs = Ymacs; // XXX.

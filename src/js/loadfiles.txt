@@ -1,5 +1,6 @@
+ymacs-utils.js
 ymacs.js
-ymacs-regexp.js
+ymacs-popup.js
 ymacs-frame.js
 ymacs-textprop.js
 ymacs-exception.js

@@ -33,6 +33,7 @@
 
 import { DOM, formatBytes } from "./ymacs-utils.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
+import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 // This is the default keymap, as configured in
 // Ymacs_Buffer::makeDefaultKeymap.  It follows closely the standard

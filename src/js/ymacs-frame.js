@@ -65,7 +65,7 @@ var LINE_DIV = DOM.fromHTML(`<div class="line"><br/></div>`);
 
 var COUNT = 0;
 
-class Ymacs_Frame extends Widget {
+export class Ymacs_Frame extends Widget {
 
     static options = {
         highlightCurrentLine : true,
@@ -677,7 +677,7 @@ class Ymacs_Frame extends Widget {
 
 }
 
-class Ymacs_SplitCont extends Widget {
+export class Ymacs_SplitCont extends Widget {
     static options = {
         horiz: false
     };
@@ -743,6 +743,3 @@ class Ymacs_SplitCont extends Widget {
         }
     }
 }
-
-window.Ymacs_SplitCont = Ymacs_SplitCont; // XXX.
-window.Ymacs_Frame = Ymacs_Frame;

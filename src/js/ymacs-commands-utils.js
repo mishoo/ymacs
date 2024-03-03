@@ -33,6 +33,8 @@
 
 import "./ymacs-buffer.js";
 import { zeroPad } from "./ymacs-utils.js";
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
+import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 Ymacs_Buffer.newCommands({
 

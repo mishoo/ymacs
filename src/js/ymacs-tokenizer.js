@@ -32,9 +32,8 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { delayed, EventProxy } from "./ymacs-utils.js";
-import "./ymacs-buffer.js";
 
-class Ymacs_Stream {
+export class Ymacs_Stream {
 
     constructor({
         buffer = null,
@@ -166,7 +165,7 @@ class Ymacs_Stream {
 Ymacs_Stream.prototype.EOL = {};
 Ymacs_Stream.prototype.EOF = {};
 
-class Ymacs_Simple_Stream {
+export class Ymacs_Simple_Stream {
 
     constructor({
         buffer = null,
@@ -249,7 +248,7 @@ Ymacs_Simple_Stream.prototype.is_whitespace = Ymacs_Simple_Stream.is_whitespace;
 
 let LANGUAGES = Object.create(null);
 
-class Ymacs_Tokenizer extends EventProxy {
+export class Ymacs_Tokenizer extends EventProxy {
 
     static define(name, func) {
         LANGUAGES[name.toLowerCase()] = func;
@@ -428,7 +427,3 @@ class Ymacs_Tokenizer extends EventProxy {
     }
 
 }
-
-window.Ymacs_Stream = Ymacs_Stream; // XXX.
-window.Ymacs_Simple_Stream = Ymacs_Simple_Stream;
-window.Ymacs_Tokenizer = Ymacs_Tokenizer;

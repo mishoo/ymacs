@@ -33,8 +33,9 @@
 
 import { delayed } from "./ymacs-utils.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
-import "./ymacs-buffer.js";
-import "./ymacs-tokenizer.js";
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
+import { Ymacs_Exception } from "./ymacs-exception.js";
+import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "C-c \\"                       : "goto_matching_paren",

@@ -31,7 +31,8 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs-tokenizer.js";
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
+import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
 
 Ymacs_Tokenizer.define("css", function(stream, tok){
 

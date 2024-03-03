@@ -31,7 +31,9 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
+import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Keymap } from  "./ymacs-keymap.js";
+import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let Ymacs_Keymap_ISearch = Ymacs_Keymap.define("isearch", {
     "C-g && Escape": [ "isearch_abort", true ],

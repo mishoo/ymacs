@@ -32,12 +32,11 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { EventProxy, remove } from "./ymacs-utils.js";
-import "./ymacs-buffer.js";
 
 /* markers are objects that hold a position which is automatically
    maintained as text is inserted or removed */
 
-class Ymacs_Marker {
+export class Ymacs_Marker {
 
     constructor({
         pos = null,
@@ -106,5 +105,3 @@ class Ymacs_Marker {
     }
 
 }
-
-window.Ymacs_Marker = Ymacs_Marker;

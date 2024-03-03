@@ -32,9 +32,13 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import "./ymacs-interactive.js";
-import "./ymacs-textprop.js";
-import { DOM, EventProxy, remove, delayed, formatBytes } from "./ymacs-utils.js";
+import { Ymacs_Marker } from "./ymacs-marker.js";
+import { DOM, EventProxy, remove, delayed, formatBytes, backward_regexp } from "./ymacs-utils.js";
+import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Keymap_Emacs } from "./ymacs-keymap-emacs.js";
+import { Ymacs_Text_Properties } from "./ymacs-textprop.js";
+import { Ymacs_Exception } from "./ymacs-exception.js";
+import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let GLOBAL_VARS = {
     case_fold_search            : true,
@@ -250,7 +254,7 @@ export class Ymacs_Buffer extends EventProxy {
 
     lastIndexOfRegexp(str, re, caret, bound) {
         str = str.substring(0, caret);
-        re = Ymacs_Regexp.search_backward(re);
+        re = backward_regexp(re);
         re.lastIndex = bound || 0;
         var m = re.exec(str);
         if (m) {
@@ -1078,5 +1082,3 @@ Ymacs_Buffer.setq =
 Ymacs_Buffer.prototype.setq = Ymacs_Buffer.prototype.setVariable;
 Ymacs_Buffer.prototype.getq = Ymacs_Buffer.prototype.getVariable;
 Ymacs_Buffer.getq = Ymacs_Buffer.getVariable;
-
-window.Ymacs_Buffer = Ymacs_Buffer; // XXX.

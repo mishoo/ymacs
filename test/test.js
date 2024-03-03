@@ -1,3 +1,5 @@
+import { Ymacs } from "../src/js/ymacs.js";
+
 window.addEventListener("beforeunload", ev => {
     ev.preventDefault();
     return ev.returnValue = true;
@@ -194,7 +196,6 @@ to the current one.\n\
 
         var files = [
                 "ymacs.js",
-                "ymacs-regexp.js",
                 "ymacs-frame.js",
                 "ymacs-textprop.js",
                 "ymacs-exception.js",
