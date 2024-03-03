@@ -964,7 +964,7 @@ export class Ymacs_Buffer extends EventProxy {
         var lcwk = this._lastCommandWasKill;
 
         if (this.__nextIsMeta)
-            ev.altKey = true;
+            ev.ymacsMeta = true;
         this.__nextIsMeta = false;
 
         var key = Ymacs_Keymap.unparseKey(ev);

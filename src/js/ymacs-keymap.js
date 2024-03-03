@@ -38,6 +38,7 @@ let KEYMAPS = Object.create(null);
 export class Ymacs_Keymap {
 
     constructor(keys) {
+        this.definitions = Object.create(null);
         this.defineKeys(keys);
     }
 
@@ -89,7 +90,7 @@ export class Ymacs_Keymap {
         }
         if (ev.ctrlKey)
             a.push("C");
-        if (ev.altKey)
+        if (ev.altKey || ev.ymacsMeta)
             a.push("M");
         if (ev.shiftKey && (key.length > 1 || key.toLowerCase() != key.toUpperCase()))
             a.push("S");
@@ -108,7 +109,7 @@ export class Ymacs_Keymap {
             key.forEach(key => this.defineKey(key, func, args));
         } else {
             key = key[0].trim();
-            var dfn = this.definitions || (this.definitions = Object.create(null));
+            var dfn = this.definitions;
             if (key.indexOf(" ") >= 0) {
                 var a = key.split(/\s+/);
                 key = a.pop();
