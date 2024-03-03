@@ -31,7 +31,6 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs.js";
 import { DOM, Widget, delayed } from "./ymacs-utils.js";
 
 function textColX(div, col) {

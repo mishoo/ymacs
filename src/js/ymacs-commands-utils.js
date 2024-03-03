@@ -178,10 +178,7 @@ Ymacs_Buffer.newCommands({
     }),
 
     toggle_line_numbers: Ymacs_Interactive("^", function(){
-        this.ymacs.condClass(
-            !this.ymacs.getElement().classList.contains("Ymacs-line-numbers"),
-            "Ymacs-line-numbers"
-        );
+        this.ymacs.toggleClass("Ymacs-line-numbers");
     }),
 
     save_file: Ymacs_Interactive("FWrite file: ", function(name){

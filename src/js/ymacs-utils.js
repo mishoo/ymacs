@@ -22,6 +22,9 @@ export let DOM = {
             el.classList.toggle(clsFalse, !cond);
         }
     },
+    toggleClass(el, ...args) {
+        el.classList.toggle(...args);
+    },
     trash(el) {
         el && el.remove();
     },
@@ -145,6 +148,9 @@ export class Widget extends EventProxy {
     }
     condClass(cond, clsTrue, clsFalse) {
         DOM.condClass(this.getElement(), cond, clsTrue, clsFalse);
+    }
+    toggleClass(...args) {
+        DOM.toggleClass(this.getElement(), ...args);
     }
     setContent(cont) {
         this.getContentElement().innerHTML = cont;
