@@ -825,7 +825,7 @@ Ymacs_Buffer.newCommands({
             ctx.point = p1;
             ctx.length = this.point() - p1;
             ctx.lastSearch = p1;
-            ctx.encountered = {};
+            ctx.encountered = Object.create(null);
             ctx.forward = false;
             ctx.buffer = this;
             ctx.startBuffer = this;
@@ -890,7 +890,7 @@ Ymacs_Buffer.newCommands({
                     syntax_word: this.getq("syntax_word_dabbrev")
                 }, "forward_word");
                 expansion = this.cmd("buffer_substring", p1, this.point());
-                if (Object.hasOwn(ctx.encountered, expansion))
+                if (ctx.encountered[expansion])
                     repeat.call(this);
             }
         });

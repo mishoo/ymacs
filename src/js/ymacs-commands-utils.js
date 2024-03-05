@@ -83,9 +83,9 @@ Ymacs_Buffer.newCommands({
         if (!mode)
             mode = this.cmd("figure_out_mode") || this.cmd("mode_from_name");
         if (mode) {
-            if (Object.hasOwn(this.COMMANDS, mode)) {
+            if (this.COMMANDS[mode]) {
                 this.cmd(mode, true);
-            } else if (Object.hasOwn(this.COMMANDS, mode + "_mode")) {
+            } else if (this.COMMANDS[mode + "_mode"]) {
                 this.cmd(mode + "_mode", true);
             }
         }

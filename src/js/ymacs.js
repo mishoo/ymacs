@@ -32,7 +32,7 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { DOM, Widget, remove } from "./ymacs-utils.js";
-import { Ymacs_Buffer } from "./ymacs-buffer.js";
+import { Ymacs_Buffer, Ymacs_Minibuffer } from "./ymacs-buffer.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
 import { Ymacs_Frame, Ymacs_SplitCont } from "./ymacs-frame.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
@@ -128,14 +128,13 @@ export class Ymacs extends Widget {
         this.__input_frame = null;
 
         /* -----[ minibuffer ]----- */
-        this.minibuffer = this.createBuffer({ hidden: true, isMinibuffer: true });
+        this.minibuffer = new Ymacs_Minibuffer({ ymacs: this });
         this.minibuffer.cmd("minibuffer_mode");
         this.minibuffer_frame = this.createFrame({
             isMinibuffer         : true,
             buffer               : this.minibuffer,
             hidden               : true,
             highlightCurrentLine : false,
-            className            : "Ymacs_Minibuffer"
         });
 
         /* -----[ main content ]----- */

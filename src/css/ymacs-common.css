@@ -105,7 +105,7 @@
   display: none;
 }
 
-.Ymacs_Frame .minibuffer-prompt { font-weight: bold }
+.Ymacs_Frame .minibuffer-prompt { font-weight: bold; text-decoration: underline; }
 
 .Ymacs_SplitCont {
   display: flex;

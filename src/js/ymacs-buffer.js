@@ -35,7 +35,7 @@ import "./ymacs-interactive.js";
 import { Ymacs_Marker } from "./ymacs-marker.js";
 import { DOM, EventProxy, remove, delayed, formatBytes, backward_regexp } from "./ymacs-utils.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
-import { Ymacs_Keymap_Emacs } from "./ymacs-keymap-emacs.js";
+import { Ymacs_Keymap_Emacs, Ymacs_Keymap_Minibuffer } from "./ymacs-keymap-emacs.js";
 import { Ymacs_Text_Properties } from "./ymacs-textprop.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
@@ -82,7 +82,6 @@ export class Ymacs_Buffer extends EventProxy {
 
     static options = {
         name         : "*scratch*",
-        isMinibuffer : false,
         code         : "",
         ymacs        : null,
         tokenizer    : null,
@@ -95,7 +94,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     static replaceCommands(cmds) {
-        this.COMMANDS = Object.assign(Object.create(null), this.COMMANDS);
+        this.COMMANDS = Object.create(this.COMMANDS);
         let replacements = Object.create(null);
         Object.keys(cmds).forEach(oldcmd => {
             let newcmd = cmds[oldcmd];
@@ -151,8 +150,9 @@ export class Ymacs_Buffer extends EventProxy {
     constructor(...args) {
         super(...args);
 
+        this.isMinibuffer = this instanceof Ymacs_Minibuffer;
+        this.COMMANDS = Object.assign(Object.create(null), this.COMMANDS);
         this.name = this.o.name;
-        this.isMinibuffer = this.o.isMinibuffer;
         this.ymacs = this.o.ymacs;
         this.tokenizer = this.o.tokenizer;
 
@@ -283,7 +283,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     makeDefaultKeymap() {
-        return Ymacs_Keymap_Emacs;
+        return this.isMinibuffer ? Ymacs_Keymap_Minibuffer : Ymacs_Keymap_Emacs;
     }
 
     signalError(text, html, timeout) {
@@ -1014,7 +1014,10 @@ export class Ymacs_Buffer extends EventProxy {
 
         this.callHooks("finishedEvent", handled);
         this.interactiveEvent(null);
-        return handled;
+
+        // XXX: always preventDefault() in minibuffer (return true
+        // here); seems good, objections?
+        return handled || this.isMinibuffer;
     }
 
     _on_tokenizerFoundToken(row, c1, c2, what) {
@@ -1082,3 +1085,23 @@ Ymacs_Buffer.setq =
 Ymacs_Buffer.prototype.setq = Ymacs_Buffer.prototype.setVariable;
 Ymacs_Buffer.prototype.getq = Ymacs_Buffer.prototype.getVariable;
 Ymacs_Buffer.getq = Ymacs_Buffer.getVariable;
+
+export class Ymacs_Minibuffer extends Ymacs_Buffer {
+    constructor(...args) {
+        super(...args);
+        this.promptMarker = this.createMarker(0, true, "prompt");
+        this.setq("minibuffer_validation", whatever => true);
+    }
+
+    prompt(text) {
+        this.setCode(text.trim() + " ");
+        this._textProperties.addLineProps(0, 0, text.length - 1, "css", "minibuffer-prompt");
+        this._repositionCaret(text.length);
+        this.promptMarker.setPosition(text.length, true, true);
+    }
+
+    _boundPosition(pos) {
+        return Math.max(MRK(this.promptMarker),
+                        Math.min(pos, this.getCodeSize()));
+    }
+}

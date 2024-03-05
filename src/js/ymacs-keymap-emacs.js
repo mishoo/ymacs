@@ -89,7 +89,62 @@ function TMPL_INFO({
     return `<table><tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> ${ch} </tt></td></tr><tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> ${code} / 0x${codeHex} </td></tr><tr><td style='text-align: right; font-weight: bold'>Position:</td><td> ${point} </td></tr><tr><td style='text-align: right; font-weight: bold'>Mark:</td><td> ${mark} </td></tr><tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> ${sizeKB} </td></tr></table>`;
 }
 
-let emacs_keymap = Ymacs_Keymap.define("emacs", {
+let minibuffer_keys = {
+    // movement
+    "ArrowLeft   && C-b"                      : "backward_char",
+    "ArrowRight  && C-f"                      : "forward_char",
+    "Home"                                    : "beginning_of_indentation_or_line",
+    "End && C-e"                              : "end_of_line",
+    "C-a"                                     : "beginning_of_line",
+    "C-Home && M-<"                           : "beginning_of_buffer",
+    "C-End && M->"                            : "end_of_buffer",
+    "C-ArrowRight && M-f"                     : "forward_word",
+    "C-ArrowLeft && M-b"                      : "backward_word",
+
+    // transient mark
+    "S-ArrowLeft     && S-C-b"                : "backward_char_mark",
+    "S-ArrowRight    && S-C-f"                : "forward_char_mark",
+    "S-C-ArrowRight  && S-M-f"                : "forward_word_mark",
+    "S-C-ArrowLeft   && S-M-b"                : "backward_word_mark",
+    "S-Home"                                  : "beginning_of_indentation_or_line_mark",
+    "S-C-a"                                   : "beginning_of_line_mark",
+    "S-End && S-C-e"                          : "end_of_line_mark",
+    "S-C-Home"                                : "beginning_of_buffer_mark",
+    "S-C-End"                                 : "end_of_buffer_mark",
+
+    // basic editing
+    "Backspace"                               : "backward_delete_char",
+    "Delete && C-d"                           : "delete_char",
+    "M-d && C-Delete"                         : "kill_word",
+    "C-Backspace && M-Backspace && M-Delete"  : "backward_kill_word",
+    "C-k"                                     : "kill_line",
+    "C-y && S-Insert"                         : "yank",
+    "M-y"                                     : "yank_pop",
+    "C-Space"                                 : "set_mark_command",
+    "C-x C-x"                                 : "exchange_point_and_mark",
+    "C-w"                                     : "kill_region",
+    "M-t"                                     : "transpose_words",
+    "C-t"                                     : "transpose_chars",
+    "M-w"                                     : "copy_region_as_kill",
+    "M-c"                                     : "capitalize_word",
+    "M-u"                                     : "upcase_word",
+    "M-l"                                     : "downcase_word",
+    "F11"                                     : "nuke_trailing_whitespace",
+    "C-/ && C-x u && C-_ && C-z"              : "undo",
+    "Insert"                                  : "overwrite_mode",
+    "M-/"                                     : "dabbrev_expand",
+    "C-g"                                     : "keyboard_quit",
+
+    // necessary evil
+    "C-S-y && C-v"                            : "yank_from_operating_system",
+    "M-S-w"                                   : "copy_for_operating_system",
+
+    "C-c /"                                   : "close_last_xml_tag",
+    "S-Backspace"                             : "backward_delete_whitespace",
+    "S-Delete"                                : "delete_whitespace",
+};
+
+let emacs_keys = Object.assign({}, minibuffer_keys, {
     // movement
     "ArrowUp     && C-p"                      : "backward_line",
     "ArrowDown   && C-n"                      : "forward_line",
@@ -235,6 +290,12 @@ let emacs_keymap = Ymacs_Keymap.define("emacs", {
         }), true);
     }
 });
+
+
+let minibuffer_keymap = Ymacs_Keymap.define("minibuffer", minibuffer_keys);
+minibuffer_keymap.defaultHandler = [ "self_insert_command" ];
+
+let emacs_keymap = Ymacs_Keymap.define("emacs", emacs_keys);
 emacs_keymap.defaultHandler = [ "self_insert_command" ];
 
 let keymap_universal_arg = Ymacs_Keymap.define("universal_arg", {});
@@ -259,5 +320,6 @@ keymap_universal_arg.attached = buffer => buffer.setPrefixArg("");
 
 export {
     emacs_keymap as Ymacs_Keymap_Emacs,
+    minibuffer_keymap as Ymacs_Keymap_Minibuffer,
     keymap_universal_arg as Ymacs_Keymap_UniversalArgument,
 };
