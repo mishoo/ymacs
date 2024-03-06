@@ -828,6 +828,7 @@ Ymacs_Buffer.newCommands({
             ctx.encountered = Object.create(null);
             ctx.forward = false;
             ctx.buffer = this;
+            ctx.seenBuffers = [ this ];
             ctx.startBuffer = this;
         }
         var expansion;
@@ -871,13 +872,14 @@ Ymacs_Buffer.newCommands({
                     p1 = this.point() - ctx.search.length;
                 } else {
                     ctx.buffer = this.whenYmacs("getNextBuffer", this);
-                    if (ctx.buffer === ctx.startBuffer) {
+                    if (ctx.seenBuffers.includes(ctx.buffer)) {
                         expansion = ctx.search;
                         ctx.startBuffer.signalError("No more completions");
                         ctx.lastSearch = ctx.point + ctx.length;
                         ctx.startBuffer.setq("dabbrev_context", null);
                         return;
                     } else {
+                        ctx.seenBuffers.push(ctx.buffer);
                         ctx.lastSearch = 0;
                         ctx.buffer.cmd("save_excursion", repeat);
                         return;
