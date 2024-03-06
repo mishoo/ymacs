@@ -342,6 +342,7 @@ function query_replace_3(mb, orig, rplc) {
         }),
     });
     stop = () => {
+        mb.removeEventListener("abort", stop);
         this.newCommands(cmds);
         this.deleteOverlay("isearch");
         this.deleteOverlay("isearch-lazy");
@@ -353,7 +354,7 @@ function query_replace_3(mb, orig, rplc) {
     if (!curr) {
         stop();
     } else {
-        mb.listenOnce("abort", stop);
+        mb.addEventListener("abort", stop);
     }
 }
 
