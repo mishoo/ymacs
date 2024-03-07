@@ -31,7 +31,6 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs-buffer.js";
 import { zeroPad } from "./ymacs-utils.js";
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";

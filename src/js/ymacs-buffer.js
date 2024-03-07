@@ -31,7 +31,6 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import "./ymacs-interactive.js";
 import { Ymacs_Marker } from "./ymacs-marker.js";
 import { DOM, EventProxy, remove, delayed, formatBytes, backward_regexp } from "./ymacs-utils.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";

@@ -1,4 +1,7 @@
 .Ymacs-Theme-material-dark .Ymacs_Frame { color: #ffffff; background-color: #263238; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.selection div { background-color: #555555; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.isearch div { color: #ffffff; background-color: #8bc34a; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.isearch-lazy div { color: #263238; background-color: #8bc34a; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .type { color: #84ffff; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .builtin { color: #ff8a65; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .function-name { color: #84ffff; }
@@ -32,7 +35,7 @@
 .Ymacs-Theme-material-dark .Ymacs_Frame .xml-cdata { color: #b0bec5; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .xml-cdata-starter { color: #b0bec5; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .xml-cdata-stopper { color: #b0bec5; }
-.Ymacs-Theme-material-dark .Ymacs_Frame .lisp-keyword { color: #8bc34a; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .lisp-keyword { color: #ff8a65; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .markdown-heading1 { color: #84ffff; font-weight: bold; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .markdown-heading2 { color: #84ffff; font-weight: bold; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .markdown-heading3 { color: #84ffff; font-weight: bold; }

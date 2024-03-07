@@ -369,11 +369,10 @@ if throw eval-when multiple-value-prog1 multiple-value-bind unwind-protect let\\
 ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind case \
 labels function symbol-macrolet block tagbody catch locally \
 inc! dec! cons c[ad]{1,4}r list and or not null null\\? \
+loop do while dotimes \
 return return-from setq set! set-car! set-cdr! setf multiple-value-call values", "i");
 
     var ERROR_FORMS = toHash("error warn");
-
-    var COMMON_MACROS = toHash("loop do while dotimes");
 
     var CONSTANTS = toHash("t nil");
 
@@ -419,6 +418,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         "labels"              : "1*",
         "flet"                : "1*",
         "macrolet"            : "1*",
+        "symbol-macrolet"     : "1*",
         "destructuring-bind"  : "2*",
         "unwind-protect"      : "1*",
         "catch"               : "1*",
@@ -561,8 +561,8 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             }
         };
 
-        function isForm(form) {
-            var f = $list && $list.length > 0 && $list[0].id;
+        function isForm(form, list = $list) {
+            var f = list && list.length > 0 && list[0].id;
             if (f) {
                 f = f.toLowerCase();
                 if (form == null)
@@ -634,10 +634,9 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             else if (isConstituentStart(ch) && (tmp = readName())) {
                 var type = ch == ":" ? "lisp-keyword"
                     : ch == "&" ? "type"
-                    : /^#:/.test(tmp.id) ? "constant"
+                    : /^#:/.test(tmp.id) ? "lisp-keyword"
                     : SPECIAL_FORMS.test(tmp.id) ? "keyword"
                     : tmp.id in ERROR_FORMS ? "error"
-                    : tmp.id in COMMON_MACROS ? "builtin"
                     : tmp.id in CONSTANTS ? "constant"
                     : null;
                 if (!type) {

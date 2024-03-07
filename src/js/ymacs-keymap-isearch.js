@@ -57,7 +57,9 @@ function initIsearch(fw) {
     if (!this._isearchContext) {
         this.pushKeymap(Ymacs_Keymap_ISearch);
         this.cmd("set_mark_command", this.point());
-        this.setMinibuffer(fw ? "I-Search: " : "I-Search backward: ");
+        this.whenMinibuffer(mb => {
+            mb.prompt(fw ? "I-Search: " : "I-Search backward: ");
+        });
         this._isearchContext = {
             forward : fw,
             point   : this.point(),

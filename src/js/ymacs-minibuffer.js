@@ -163,7 +163,6 @@ Ymacs_Buffer.newCommands({
             var f = this.getMinibufferFrame();
             this.ymacs.setInputFrame(f);
             mb.prompt(prompt);
-            f._redrawCaret(true);
             if (!nofocus)
                 f.focus();
         });
