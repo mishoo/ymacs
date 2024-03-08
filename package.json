@@ -1,0 +1,45 @@
+{
+    "name": "ymacs",
+    "version": "0.0.0",
+    "description": "Emacs-like editor for the browser",
+
+    "main": "dist/ymacs.mjs",
+    "css": "dist/ymacs.css",
+    "targets": {
+        "main": {
+            "source": "src/index.js",
+            "outputFormat": "esmodule",
+            "optimize": true
+        },
+        "css": {
+            "source": "src/css/ymacs.scss",
+            "optimize": false
+        }
+    },
+
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mishoo/ymacs.git"
+    },
+    "keywords": [
+        "emacs",
+        "editor",
+        "web"
+    ],
+    "author": "Mihai Bazon <mihai.bazon@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/mishoo/ymacs/issues"
+    },
+    "homepage": "https://github.com/mishoo/ymacs#readme",
+    "devDependencies": {
+        "@parcel/transformer-sass": "^2.12.0",
+        "parcel": "^2.12.0"
+    }
+}

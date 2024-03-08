@@ -79,9 +79,17 @@
                          (ymacs-make-font-size
                           (plist-get (font-face-attributes (face-font face)) :height)))))
     (when fg
-      (insert " color: " (ymacs-color-css (face-foreground fg nil t)) ";"))
+      (insert " color: " (ymacs-color-css
+                          (if (face-inverse-video-p fg nil t)
+                              (face-background fg nil t)
+                              (face-foreground fg nil t)))
+              ";"))
     (when bg
-      (insert " background-color: " (ymacs-color-css (face-background bg nil t)) ";"))
+      (insert " background-color: " (ymacs-color-css
+                                     (if (face-inverse-video-p bg nil t)
+                                         (face-foreground bg nil t)
+                                         (face-background bg nil t)))
+              ";"))
     (when bold
       (insert " font-weight: bold;"))
     (when font-size

@@ -1,4 +1,4 @@
-import { Ymacs } from "../src/js/ymacs.js";
+import { Ymacs } from "../src/index.js";
 
 window.addEventListener("beforeunload", ev => {
     ev.preventDefault();
@@ -14,7 +14,8 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    ymacs.setColorTheme([ "dark", "material-dark" ]);
+    //ymacs.setColorTheme([ "dark", "material-dark" ]);
+    ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "light", "vim-colors" ]);
     document.body.appendChild(ymacs.getElement());
     let b = ymacs.getActiveBuffer.bind(ymacs);
