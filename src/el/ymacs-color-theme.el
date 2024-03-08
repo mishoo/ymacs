@@ -11,6 +11,8 @@
     ( ".Ymacs_Overlay.selection div" region )
     ( ".Ymacs_Overlay.isearch div" isearch query-replace )
     ( ".Ymacs_Overlay.isearch-lazy div" lazy-highlight )
+    ( ".Ymacs_Overlay.match-paren div" show-paren-match )
+
     ( ".type"                  font-lock-type-face                                               )
     ( ".builtin"               font-lock-builtin-face                                            )
     ( ".function-name"         font-lock-function-name-face                                      )
@@ -45,10 +47,10 @@
     ( ".xml-cdata-starter"     nxml-cdata-section-delimiter font-lock-comment-delimiter-face     )
     ( ".xml-cdata-stopper"     nxml-cdata-section-delimiter font-lock-comment-delimiter-face     )
     ( ".lisp-keyword"          font-lock-builtin-face font-lock-constant-face                    )
-    ( ".markdown-heading1"     markdown-header-face-1                                            )
-    ( ".markdown-heading2"     markdown-header-face-2                                            )
-    ( ".markdown-heading3"     markdown-header-face-3                                            )
-    ( ".markdown-heading4"     markdown-header-face-4                                            )
+    ( ".markdown-heading1"     info-title-1                                                      )
+    ( ".markdown-heading2"     info-title-2                                                      )
+    ( ".markdown-heading3"     info-title-3                                                      )
+    ( ".markdown-heading4"     info-title-4                                                      )
     ( ".markdown-heading5"     bold-italic                                                       )
     ( ".markdown-heading6"     bold                                                              )
     ( ".markdown-blockquote"   font-lock-comment-face                                            )
@@ -98,14 +100,24 @@
 (defun ymacs-color-theme-print (&optional name)
   (interactive "MTheme name: ")
   (let ((*ymacs-default-font-size* (+ 0.0 ; force float :-/
-                                      (plist-get (font-face-attributes (face-font 'default)) :height))))
+                                      (plist-get (font-face-attributes (face-font 'default)) :height)))
+        (prefix (concat ".Ymacs-Theme-" (or name "NONAME"))))
     (interactive)
     (switch-to-buffer (get-buffer-create "*Ymacs Theme*"))
     (erase-buffer)
-    (insert ".Ymacs-Theme-" (or name "NONAME") " .Ymacs_Frame {")
+
+    ;; cursor
+    (insert prefix " { ")
+    (insert "--ymacs-cursor-bg: " (ymacs-color-css (face-background 'cursor nil t)) "; ")
+    (insert "--ymacs-cursor-fg: " (ymacs-color-css (face-background 'default nil t)) "; ")
+    (insert "}\n")
+
+    ;; main text
+    (insert prefix " .Ymacs_Frame {")
     (ymacs-face-css '(default) t)
     (insert " }\n")
+
     (loop for (class . faces) in *ymacs-faces* do
-      (insert ".Ymacs-Theme-" (or name "NONAME") " .Ymacs_Frame " class " {")
-      (ymacs-face-css faces t)
+      (insert prefix " .Ymacs_Frame " class " {")
+      (ymacs-face-css faces)
       (insert " }\n"))))

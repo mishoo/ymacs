@@ -1,7 +1,9 @@
+.Ymacs-Theme-sanityinc-tomorrow-night { --ymacs-cursor-bg: #cc6666; --ymacs-cursor-fg: #1d1f21; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame { color: #c5c8c6; background-color: #1d1f21; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .Ymacs_Overlay.selection div { background-color: #373b41; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .Ymacs_Overlay.isearch div { color: #1d1f21; background-color: #f0c674; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .Ymacs_Overlay.isearch-lazy div { color: #1d1f21; background-color: #8abeb7; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .type { color: #81a2be; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .builtin { color: #b294bb; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .function-name { color: #de935f; }
@@ -36,10 +38,10 @@
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .xml-cdata-starter { color: #969896; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .xml-cdata-stopper { color: #969896; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .lisp-keyword { color: #b294bb; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading1 { color: #de935f; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading2 { color: #de935f; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading3 { color: #de935f; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading4 { color: #de935f; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading1 { font-weight: bold; font-size: 1.383em; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading2 { font-weight: bold; font-size: 1.192em; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading3 { color: #de935f; font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading4 { color: #b294bb; font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading5 { font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-heading6 { font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame .markdown-blockquote { color: #969896; }

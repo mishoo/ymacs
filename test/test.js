@@ -14,9 +14,10 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    //ymacs.setColorTheme([ "dark", "material-dark" ]);
-    ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
-    //ymacs.setColorTheme([ "light", "vim-colors" ]);
+    ymacs.setColorTheme([ "dark", "material-dark" ]);
+    //ymacs.setColorTheme([ "dark", "base16-apathy" ]);
+    //ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
+    //ymacs.setColorTheme([ "light", "standard" ]);
     document.body.appendChild(ymacs.getElement());
     let b = ymacs.getActiveBuffer.bind(ymacs);
     b().cmd("load_file", "ymacs-frame.js");

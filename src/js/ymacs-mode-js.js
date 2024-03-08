@@ -53,7 +53,7 @@ enum export extends final finally for \
 function goto if implements import in \
 instanceof interface native new package \
 private protected public return static \
-super switch synchronized throw \
+switch synchronized throw \
 throws transient try typeof var void let \
 yield volatile while with");
 
@@ -65,7 +65,7 @@ Array Date Function Math Number Object RegExp String");
     var KEYWORDS_BUILTIN = qw("Infinity NaN \
 Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-parseInt undefined window document alert prototype constructor this");
+parseInt undefined window document alert prototype constructor super this");
 
     var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
 

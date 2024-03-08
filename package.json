@@ -1,6 +1,6 @@
 {
     "name": "ymacs",
-    "version": "0.0.0",
+    "version": "0.6.0",
     "description": "Emacs-like editor for the browser",
 
     "main": "dist/ymacs.mjs",
@@ -8,7 +8,6 @@
     "targets": {
         "main": {
             "source": "src/index.js",
-            "outputFormat": "esmodule",
             "optimize": true
         },
         "css": {

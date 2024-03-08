@@ -94,10 +94,6 @@ export class Ymacs_Marker {
         return this.rowcol || (this.rowcol = this.editor._positionToRowCol(this.position));
     }
 
-    updateMarkers(delta) {
-        this.editor._updateMarkers(this.getPosition(), delta);
-    }
-
     swap(other, noHooks, force) {
         var tmp = this.getPosition();
         this.setPosition(other.getPosition(), noHooks, force);
