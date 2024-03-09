@@ -16,8 +16,8 @@ window.addEventListener("beforeunload", ev => {
     });
     //ymacs.setColorTheme([ "dark", "material-dark" ]);
     //ymacs.setColorTheme([ "dark", "base16-apathy" ]);
-    //ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
-    ymacs.setColorTheme([ "light", "sanityinc-tomorrow-day" ]);
+    ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
+    //ymacs.setColorTheme([ "light", "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "light", "standard" ]);
     //ymacs.setColorTheme([ "light", "spacemacs-light" ]);
     document.body.appendChild(ymacs.getElement());
