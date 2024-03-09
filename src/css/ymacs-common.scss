@@ -35,10 +35,6 @@
   flex-grow: 0;
 }
 
-.Ymacs_Modeline:after {
-  content: "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------";
-}
-
 .Ymacs-frame-content {
   white-space: pre;
   /* padding: 4px; */
@@ -53,10 +49,6 @@
 }
 
 .Ymacs_Minibuffer .Ymacs_Modeline { display: none; }
-
-/* .Ymacs_Frame-hasOverlays .Ymacs-current-line { */
-/*   background: transparent !important; */
-/* } */
 
 .Ymacs_Overlay {}
 .Ymacs_Overlay div {
@@ -122,26 +114,31 @@ $lnwidth: 3em;
   overflow: hidden;
   gap: 5px;
   background-color: #888;
+
+  &.dragging {
+    background-color: #c52;
+  }
+
+  &.horiz {
+    flex-direction: column;
+    cursor: ns-resize;
+
+    > div {
+      height: 50%;
+      width: 100%;
+    }
+  }
+  &.vert {
+    flex-direction: row;
+    cursor: ew-resize;
+
+    > div {
+      width: 50%;
+      height: 100%;
+    }
+  }
 }
-.Ymacs_SplitCont.dragging {
-  background-color: orange;
-}
-.Ymacs_SplitCont.horiz {
-  flex-direction: column;
-  cursor: ns-resize;
-}
-.Ymacs_SplitCont.horiz > div {
-  height: 50%;
-  width: 100%;
-}
-.Ymacs_SplitCont.vert {
-  flex-direction: row;
-  cursor: ew-resize;
-}
-.Ymacs_SplitCont.vert > div {
-  width: 50%;
-  height: 100%;
-}
+
 .Ymacs_Resize_horiz { cursor: ns-resize !important }
 .Ymacs_Resize_vert { cursor: ew-resize !important }
 
@@ -189,7 +186,6 @@ $lnwidth: 3em;
   background-color: wheat;
   color: #000;
   border: 1px solid #000;
-  border-radius: 4px;
   padding: 1em 1.5em;
   position: absolute;
   left: 50%;

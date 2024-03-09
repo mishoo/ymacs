@@ -12,6 +12,9 @@
     ( ".Ymacs_Overlay.isearch div" isearch query-replace )
     ( ".Ymacs_Overlay.isearch-lazy div" lazy-highlight )
     ( ".Ymacs_Overlay.match-paren div" show-paren-match )
+    ( ".Ymacs_Modeline" mode-line-inactive mode-line )
+    ( ".Ymacs_Frame-active .Ymacs_Modeline" mode-line-active mode-line )
+    ( ".minibuffer-prompt" minibuffer-prompt )
 
     ( ".type"                  font-lock-type-face                                               )
     ( ".builtin"               font-lock-builtin-face                                            )

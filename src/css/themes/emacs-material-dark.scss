@@ -3,7 +3,10 @@
 .Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.selection div { background-color: #555555; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.isearch div { color: #ffffff; background-color: #8bc34a; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.isearch-lazy div { color: #263238; background-color: #8bc34a; }
-.Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.match-paren div { color: #263238; background-color: #8bc34a; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .Ymacs_Modeline { color: #a7adba; background-color: #1c1f26; }
+.Ymacs-Theme-material-dark .Ymacs_Frame-active .Ymacs_Modeline { color: #ffffff; background-color: #1c1f26; }
+.Ymacs-Theme-material-dark .Ymacs_Frame .minibuffer-prompt { color: #4dd0e1; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .type { color: #84ffff; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .builtin { color: #ff8a65; }
 .Ymacs-Theme-material-dark .Ymacs_Frame .function-name { color: #84ffff; }
