@@ -53,28 +53,26 @@ Ymacs_Buffer.newCommands({
         }
     },
 
+    // TODO: the mapping from extension to mode should be defined
+    // with each mode.
     mode_from_name: function(name) {
-
-        if (!name)
-            name = this.name;
-
+        if (!name) name = this.name;
         var ext = (/\.[^.]+$/.exec(name) || [""])[0];
-
-        // TODO: the mapping from extension to mode should be defined
-        // with each mode.
-
         switch (ext) {
-
-            case ".css":
+          case ".css":
             return "css";
 
-            case ".js":
+          case ".js":
             return "javascript";
 
-            case ".lisp": case ".scm":
+          case ".lisp":
+          case ".scm":
+          case ".el":
             return "lisp";
-        }
 
+          case ".md":
+            return "markdown";
+        }
         return null;
     },
 
