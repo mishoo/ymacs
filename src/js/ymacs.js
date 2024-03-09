@@ -306,13 +306,11 @@ export class Ymacs extends Widget {
 
     keepOnlyFrame(frame) {
         if (this.frames.length > 1) {
-            var el = frame.getElement();
+            let el = frame.getElement();
             while (el.parentNode != this.getContentElement())
                 el = el.parentNode;
             if (el !== frame) {
                 el.replaceWith(frame.getElement());
-                frame.getElement().style.removeProperty("width");
-                frame.getElement().style.removeProperty("height");
                 this.setActiveFrame(frame);
                 frame.centerOnCaret();
                 this.frames = [ frame ];
@@ -329,8 +327,6 @@ export class Ymacs extends Widget {
                 return obj instanceof Ymacs_SplitCont
                     || (obj instanceof Ymacs_Frame && obj !== frame);
             });
-            other.style.removeProperty("width");
-            other.style.removeProperty("height");
             parent.replaceWith(other);
             if (!DOM.hasClass(other, "Ymacs_Frame")) {
                 other = other.querySelector(".Ymacs_Frame");

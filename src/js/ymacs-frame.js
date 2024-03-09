@@ -284,13 +284,8 @@ export class Ymacs_Frame extends Widget {
         let scroll = ovdiv.scrollTop;
         let fr = this.ymacs.createFrame({ buffer: this.buffer });
         let sc = new Ymacs_SplitCont({ horiz: horiz });
-        sc.el.style.width = this.el.style.width;
-        sc.el.style.height = this.el.style.height;
-        this.el.style.removeProperty("width");
-        this.el.style.removeProperty("height");
         this.getElement().replaceWith(sc.getElement());
-        sc.add(this);
-        sc.add(fr);
+        sc.setSplit(this, fr);
         ovdiv.scrollTop = scroll;
         fr.getOverlaysContainer().scrollTop = scroll;
         this.focus(); // XXX: only if necessary
@@ -690,15 +685,20 @@ export class Ymacs_SplitCont extends Widget {
             mousemove : this._onMouseMove.bind(this),
             mouseup   : this._onMouseUp.bind(this),
         };
-        DOM.on(this.getElement(), "mousedown", this._onMouseDown.bind(this));
+        this._rb = DOM.fromHTML(`<div class="bar"></div>`);
+        DOM.on(this._rb, "mousedown", this._onMouseDown.bind(this));
+    }
+    setSplit(a, b) {
+        this.add(a);
+        this.add(this._rb);
+        this.add(b);
     }
     _onMouseDown(ev) {
         this.#activeElement = document.activeElement;
-        if (ev.target === this.getElement()) {
+        if (ev.target === this._rb) {
             let first = this.getContentElement().children[0];
             this._start = this.o.horiz ? ev.clientY : ev.clientX;
             this._orig_sz = this.o.horiz ? first.offsetHeight : first.offsetWidth;
-            this._orig_frac = this._1stChildFr();
             this.addClass("dragging");
             ev.stopPropagation();
             DOM.on(window, this._dragHandlers);
@@ -720,25 +720,12 @@ export class Ymacs_SplitCont extends Widget {
         let cont = this.getElement();
         let max = this.o.horiz ? cont.offsetHeight : cont.offsetWidth;
         let diff = (this.o.horiz ? ev.clientY : ev.clientX) - this._start;
-        let a = this.getContentElement().children[0];
-        let b = this.getContentElement().children[1];
         let target = Math.min(max, Math.max(0, this._orig_sz + diff));
         let frac = Math.min(0.9, Math.max(0.1, target / max));
         if (this.o.horiz) {
-            a.style.height = (frac * 100) + "%";
-            b.style.height = ((1 - frac) * 100) + "%";
+            cont.style.gridTemplateRows = `${frac}fr auto ${1-frac}fr`;
         } else {
-            a.style.width = (frac * 100) + "%";
-            b.style.width = ((1 - frac) * 100) + "%";
-        }
-    }
-    _1stChildFr() {
-        let a = this.getContentElement().children[0];
-        let b = this.getContentElement().children[1];
-        if (this.o.horiz) {
-            return (a.offsetHeight + b.offsetHeight) / a.offsetHeight;
-        } else {
-            return (a.offsetWidth + b.offsetWidth) / a.offsetWidth;
+            cont.style.gridTemplateColumns = `${frac}fr auto ${1-frac}fr`;
         }
     }
 }
