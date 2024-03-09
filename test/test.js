@@ -24,6 +24,9 @@ window.addEventListener("beforeunload", ev => {
     b().callInteractively("split_frame_horizontally");
     b().cmd("other_frame");
     b().cmd("load_file", "queen-board.lisp");
+    b().callInteractively("split_frame_vertically");
+    b().cmd("load_file", "README.md");
+    b().cmd("toggle_line_numbers");
 }
 
 

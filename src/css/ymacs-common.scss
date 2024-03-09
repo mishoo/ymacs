@@ -69,6 +69,8 @@
 }
 .Ymacs_Overlay .isearch-lazy {}
 
+$lnwidth: 3em;
+
 .Ymacs.Ymacs-line-numbers .Ymacs-frame-content:before {
   box-sizing: border-box;
   content: "";
@@ -77,23 +79,31 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3.3em;
+  width: $lnwidth;
 }
 .Ymacs.Ymacs-line-numbers .Ymacs-frame-content {
   counter-reset: ymacs-line 0;
-  padding-left: calc(3.3em + 7px);
+  padding-left: $lnwidth;
 }
-.Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line { counter-increment: ymacs-line; }
+.Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line {
+  counter-increment: ymacs-line;
+  position: relative;
+  padding-left: 5px;
+}
 .Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
   box-sizing: border-box;
   color: #888;
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: end;
   position: absolute;
-  left: 0;
-  width: calc(3.3em - 1px);
-  padding-right: 7px;
+  left: -$lnwidth;
+  top: 0;
+  bottom: 0;
+  width: calc($lnwidth - 1px);
+  padding-right: 5px;
   content: counter(ymacs-line, decimal);
-  text-align: right;
 }
 
 .Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content {
