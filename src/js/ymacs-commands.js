@@ -279,8 +279,7 @@ Ymacs_Buffer.newCommands({
         }
         var pos = code.indexOf(str, point);
         if (pos >= 0 && (bound == null || pos <= bound)) {
-            this.cmd("goto_char", pos + str.length);
-            return true;
+            return this.cmd("goto_char", pos + str.length);
         }
     }),
 
@@ -294,8 +293,7 @@ Ymacs_Buffer.newCommands({
         if (pos == point)
             pos = code.lastIndexOf(str, point - 1);
         if (pos >= 0 && pos != point && (bound == null || pos >= bound)) {
-            this.cmd("goto_char", pos);
-            return true;
+            return this.cmd("goto_char", pos);
         }
     }),
 
