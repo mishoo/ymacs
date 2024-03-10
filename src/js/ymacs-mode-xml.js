@@ -402,7 +402,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                     zen_parse(
                         this.cmd("buffer_substring", start, point).trim(), 0
                     ),
-                    out => html += out
+                    (...args) => html += args.join("")
                 );
             } catch(ex) {
                 throw new Ymacs_Exception("The Zen is not strong today :-/");
