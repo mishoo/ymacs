@@ -14,7 +14,7 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    //ymacs.setColorTheme([ "dark", "material-dark" ]);
+    //ymacs.setColorTheme([ "dark", "material" ]);
     //ymacs.setColorTheme([ "dark", "base16-apathy" ]);
     ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "light", "sanityinc-tomorrow-day" ]);

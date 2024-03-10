@@ -15,6 +15,7 @@
     ( ".Ymacs_Modeline" mode-line-inactive mode-line )
     ( ".Ymacs_Frame-active .Ymacs_Modeline" mode-line-active mode-line )
     ( ".minibuffer-prompt" minibuffer-prompt )
+    ( ".mode-line-buffer-id" mode-line-buffer-id )
 
     ( ".type"                  font-lock-type-face                                               )
     ( ".builtin"               font-lock-builtin-face                                            )
@@ -75,36 +76,48 @@
       (format "%.3fem" (/ size *ymacs-default-font-size*)))))
 
 (defun ymacs-face-css (faces &optional no-font)
-  (let* ((fg (find-if (lambda (f) (face-foreground f nil t)) faces))
-         (bg (find-if (lambda (f) (face-background f nil t)) faces))
+  (let* ((fgface (find-if (lambda (f) (face-foreground f nil t)) faces))
+         (bgface (find-if (lambda (f) (face-background f nil t)) faces))
+         (boxface (find-if (lambda (f)
+                             (let ((box (face-attribute f :box nil t)))
+                               (and box (not (eq box 'unspecified)))))
+                           faces))
+         (box (and boxface (face-attribute boxface :box nil t)))
          (bold (find-if #'face-bold-p faces))
          (face (first faces))
          (font-size (and face
                          (not no-font)
                          (ymacs-make-font-size
                           (plist-get (font-face-attributes (face-font face)) :height)))))
-    (when fg
+    (when fgface
       (insert " color: " (ymacs-color-css
-                          (if (face-inverse-video-p fg nil t)
-                              (face-background fg nil t)
-                              (face-foreground fg nil t)))
+                          (if (face-inverse-video-p fgface nil t)
+                              (face-background fgface nil t)
+                              (face-foreground fgface nil t)))
               ";"))
-    (when bg
+    (when bgface
       (insert " background-color: " (ymacs-color-css
-                                     (if (face-inverse-video-p bg nil t)
-                                         (face-foreground bg nil t)
-                                         (face-background bg nil t)))
+                                     (if (face-inverse-video-p bgface nil t)
+                                         (face-foreground bgface nil t)
+                                         (face-background bgface nil t)))
               ";"))
+    (destructuring-bind (&key (line-width 1) color) box
+      (when color
+        (insert (format " border: %dpx solid %s;" line-width (ymacs-color-css color)))))
     (when bold
       (insert " font-weight: bold;"))
     (when font-size
       (insert " font-size: " font-size ";"))))
 
 (defun ymacs-color-theme-print (&optional name)
-  (interactive "MTheme name: ")
+  (interactive
+   (list
+    (read-string "Theme name: " (if custom-enabled-themes
+                                    (symbol-name (car custom-enabled-themes))
+                                    "NONAME"))))
   (let ((*ymacs-default-font-size* (+ 0.0 ; force float :-/
                                       (plist-get (font-face-attributes (face-font 'default)) :height)))
-        (prefix (concat ".Ymacs-Theme-" (or name "NONAME"))))
+        (prefix (concat ".Ymacs-Theme-" name)))
     (interactive)
     (switch-to-buffer (get-buffer-create "*Ymacs Theme*"))
     (erase-buffer)
@@ -116,11 +129,32 @@
     (insert "}\n")
 
     ;; main text
-    (insert prefix " .Ymacs_Frame {")
+    (insert prefix " {")
     (ymacs-face-css '(default) t)
     (insert " }\n")
 
+    ;; window divider (the SplitCont resize bar)
+    (let ((main (face-attribute 'window-divider :foreground))
+          (first (face-attribute 'window-divider-first-pixel :foreground))
+          (last (face-attribute 'window-divider-last-pixel :foreground)))
+      (when main
+        (insert prefix " .Ymacs_SplitCont .bar { background-color: " (ymacs-color-css main) "; }\n"))
+
+      (insert prefix " .Ymacs_SplitCont.horiz .bar {")
+      (when first
+        (insert " border-top: 1px solid " (ymacs-color-css first) ";"))
+      (when last
+        (insert " border-bottom: 1px solid " (ymacs-color-css last) ";"))
+      (insert " }\n")
+
+      (insert prefix " .Ymacs_SplitCont.vert .bar {")
+      (when first
+        (insert " border-left: 1px solid " (ymacs-color-css first) ";"))
+      (when last
+        (insert " border-right: 1px solid " (ymacs-color-css last) ";"))
+      (insert " }\n"))
+
     (loop for (class . faces) in *ymacs-faces* do
-      (insert prefix " .Ymacs_Frame " class " {")
+      (insert prefix " " class " {")
       (ymacs-face-css faces)
       (insert " }\n"))))

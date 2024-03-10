@@ -105,27 +105,27 @@ $lnwidth: 3em;
   display: grid;
   overflow: hidden;
 
-  .bar {
+  > .bar {
     background-color: #888;
     z-index: 30;
   }
 
   &.dragging > .bar {
-    background-color: #c52;
+    background-color: var(--ymacs-cursor-bg) !important;
   }
 
   &.horiz {
     grid-template-rows: 1fr auto 1fr;
     cursor: ns-resize;
     > .bar {
-      height: 4px;
+      height: 5px;
     }
   }
   &.vert {
     grid-template-columns: 1fr auto 1fr;
     cursor: ew-resize;
     > .bar {
-      width: 4px;
+      width: 5px;
     }
   }
 }

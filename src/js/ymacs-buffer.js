@@ -662,9 +662,7 @@ export class Ymacs_Buffer extends EventProxy {
 
     renderModelineContent(rc, percent) {
         var ml = (this.__isDirty ? "**" : "--") +
-            " <b>" +
-            DOM.htmlEscape(this.name) +
-            "</b>" +
+            ` <span class="mode-line-buffer-id">${DOM.htmlEscape(this.name)}</span>` +
             "  " + percent + " of " + formatBytes(this.getCodeSize(), 2).toLowerCase() + "  " +
             "(" + (rc.row + 1) + "," + rc.col + ") ";
         var custom = this.getq("modeline_custom_handler");
