@@ -84,6 +84,7 @@
                            faces))
          (box (and boxface (face-attribute boxface :box nil t)))
          (bold (find-if #'face-bold-p faces))
+         (italic (find-if #'face-italic-p faces))
          (face (first faces))
          (font-size (and face
                          (not no-font)
@@ -106,6 +107,8 @@
         (insert (format " border: %dpx solid %s;" line-width (ymacs-color-css color)))))
     (when bold
       (insert " font-weight: bold;"))
+    (when italic
+      (insert " font-style: italic;"))
     (when font-size
       (insert " font-size: " font-size ";"))))
 

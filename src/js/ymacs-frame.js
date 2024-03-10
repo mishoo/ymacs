@@ -305,10 +305,9 @@ export class Ymacs_Frame extends Widget {
     }
 
     _unhoverLine() {
-        if (this.__hoverLine != null) {
-            DOM.delClass(this.getLineDivElement(this.__hoverLine), "Ymacs-current-line");
-            this.__hoverLine = null;
-        }
+        let el = this.__hoverLine != null && this.getLineDivElement(this.__hoverLine);
+        if (el) DOM.delClass(el, "Ymacs-current-line");
+        this.__hoverLine = null;
     }
 
     _redrawCaret(force) {

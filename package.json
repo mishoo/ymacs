@@ -13,6 +13,15 @@
         "css": {
             "source": "src/css/ymacs.scss",
             "optimize": false
+        },
+        "themes": {
+            "source": [
+                "src/css/themes/emacs-sanityinc-tomorrow-day.scss",
+                "src/css/themes/emacs-sanityinc-tomorrow-blue.scss",
+                "src/css/themes/emacs-sanityinc-tomorrow-night.scss",
+                "src/css/themes/emacs-material.scss",
+                "src/css/themes/emacs-base16-apathy.scss"
+            ]
         }
     },
 

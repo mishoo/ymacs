@@ -1,0 +1,57 @@
+.Ymacs-Theme-sanityinc-tomorrow-blue { --ymacs-cursor-bg: #ff9da4; --ymacs-cursor-fg: #002451; }
+.Ymacs-Theme-sanityinc-tomorrow-blue { color: #ffffff; background-color: #002451; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_SplitCont .bar { background-color: #969896; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_SplitCont.horiz .bar { border-top: 1px solid #003f8e; border-bottom: 1px solid #003f8e; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_SplitCont.vert .bar { border-left: 1px solid #003f8e; border-right: 1px solid #003f8e; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Overlay.selection div { background-color: #003f8e; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Overlay.isearch div { color: #002451; background-color: #ffeead; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Overlay.isearch-lazy div { color: #002451; background-color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Modeline { color: #7285b7; background-color: #00346e; border: 1px solid #003f8e; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Frame-active .Ymacs_Modeline { color: #ffffff; background-color: #003f8e; border: 1px solid #003f8e; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .minibuffer-prompt { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .mode-line-buffer-id { color: #ebbbff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .type { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .builtin { color: #ebbbff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .function-name { color: #ffc58f; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .variable-name { color: #ffeead; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .constant { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .string { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .string-starter { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .string-stopper { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .regexp { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .regexp-starter { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .regexp-stopper { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .regexp-modifier { color: #99ffff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .keyword { color: #d1f1a9; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .comment { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .mcomment { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .comment-starter { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .mcomment-starter { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .mcomment-stopper { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .number { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .operator { }
+.Ymacs-Theme-sanityinc-tomorrow-blue .error { color: #ff9da4; font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-open-tag { color: #ffc58f; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-close-tag { color: #ffc58f; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-attribute { color: #ffeead; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-entity-starter { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-entity-stopper { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-entity { color: #bbdaff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-open-bracket { }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-close-bracket { }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-closetag-slash { }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-cdata { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-cdata-starter { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .xml-cdata-stopper { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .lisp-keyword { color: #ebbbff; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-heading1 { font-weight: bold; font-size: 1.383em; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-heading2 { font-weight: bold; font-size: 1.192em; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-heading3 { color: #ffc58f; font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-heading4 { color: #ebbbff; font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-heading5 { font-weight: bold; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-heading6 { font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-blockquote { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-blockquote1 { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-blockquote2 { color: #7285b7; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-blue .markdown-blockquote3 { color: #7285b7; font-style: italic; }

@@ -1,4 +1,6 @@
-import { Ymacs } from "../src/index.js";
+import { Ymacs, Ymacs_Keymap } from "../src/index.js";
+
+window.Ymacs_Keymap = Ymacs_Keymap;
 
 window.addEventListener("beforeunload", ev => {
     ev.preventDefault();
@@ -14,10 +16,11 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    //ymacs.setColorTheme([ "dark", "material" ]);
+    ymacs.setColorTheme([ "dark", "material" ]);
     //ymacs.setColorTheme([ "dark", "base16-apathy" ]);
-    ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
+    //ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "light", "sanityinc-tomorrow-day" ]);
+    //ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-blue" ]);
     //ymacs.setColorTheme([ "light", "standard" ]);
     //ymacs.setColorTheme([ "light", "spacemacs-light" ]);
     document.body.appendChild(ymacs.getElement());

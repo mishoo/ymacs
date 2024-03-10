@@ -11,7 +11,11 @@ export let DOM = {
         el.classList.add(cls);
     },
     delClass(el, cls) {
-        el.classList.remove(cls);
+        if (cls instanceof RegExp) {
+            el.className = el.className.replace(cls, "");
+        } else {
+            el.classList.remove(cls);
+        }
     },
     hasClass(el, cls) {
         return el.classList.contains(cls);

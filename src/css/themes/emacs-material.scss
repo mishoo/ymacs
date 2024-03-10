@@ -10,6 +10,7 @@
 .Ymacs-Theme-material .Ymacs_Modeline { color: #a7adba; background-color: #1c1f26; }
 .Ymacs-Theme-material .Ymacs_Frame-active .Ymacs_Modeline { color: #ffffff; background-color: #1c1f26; }
 .Ymacs-Theme-material .minibuffer-prompt { color: #4dd0e1; }
+.Ymacs-Theme-material .mode-line-buffer-id { color: #ffffff; font-weight: bold; }
 .Ymacs-Theme-material .type { color: #84ffff; }
 .Ymacs-Theme-material .builtin { color: #ff8a65; }
 .Ymacs-Theme-material .function-name { color: #84ffff; }
@@ -48,7 +49,7 @@
 .Ymacs-Theme-material .markdown-heading2 { font-size: 1.442em; }
 .Ymacs-Theme-material .markdown-heading3 { font-size: 1.192em; }
 .Ymacs-Theme-material .markdown-heading4 { font-weight: bold; }
-.Ymacs-Theme-material .markdown-heading5 { font-weight: bold; }
+.Ymacs-Theme-material .markdown-heading5 { font-weight: bold; font-style: italic; }
 .Ymacs-Theme-material .markdown-heading6 { font-weight: bold; }
 .Ymacs-Theme-material .markdown-blockquote { color: #b0bec5; }
 .Ymacs-Theme-material .markdown-blockquote1 { color: #b0bec5; }
