@@ -551,6 +551,27 @@ Ymacs_Buffer.newCommands({
             this.caretMarker.swap(this.markMarker);
     }),
 
+    yank_from_operating_system: Ymacs_Interactive(async function() {
+        try {
+            let code = await navigator.clipboard.readText();
+            this._saveKilledText(code);
+            this.callInteractively("yank");
+        } catch(ex) {
+            console.error(ex);
+            this.signalError("Cannot read the system clipboard. Error in devtools console.");
+        }
+    }),
+
+    copy_for_operating_system: Ymacs_Interactive("r", async function(begin, end) {
+        try {
+            let code = this.cmd("buffer_substring", begin, end);
+            await navigator.clipboard.writeText(code);
+        } catch(ex) {
+            console.error(ex);
+            this.signalError("Cannot write to system clipboard. Error in devtools console.");
+        }
+    }),
+
     yank_pop: Ymacs_Interactive(function() {
         if (/^yank/.test(this.previousCommand)) {
             this.ymacs.rotateKillRing(false);
@@ -1235,75 +1256,6 @@ Ymacs_Buffer.newCommands({
             this.ymacs.runMacro(arg, macro);
         })
     });
-})();
-
-/* -----[ commands to help using the system clipboard ]----- */
-
-(function(){
-
-    // <XXX>
-    // this should be moved some level up if it proves to be more
-    // generally useful
-    function modalTextarea(buffer, type, title, text, cont) {
-        throw new Error("Reimplement this, or drop it?");
-        var dlg = buffer.createDialog({
-            title     : title,
-            quitBtn   : "destroy",
-            modal     : true
-        });
-        var layout = new DlLayout({ parent: dlg, outerSpace: 5 });
-        var entry = new DlEntry({ type: "textarea", fillParent: true, value: text });
-        dlg._focusedWidget = entry;
-        if (type == "copy") {
-            entry.addEventListener("onCopy", delayed(function(){
-                dlg.destroy();
-                cont();
-            }));
-        } else if (type == "paste") {
-            entry.addEventListener("onPaste", delayed(function(){
-                // var code = entry.getValue().replace(/\t/g, "        ");
-                var code = entry.getValue();
-                dlg.destroy();
-                cont(code);
-            }));
-        }
-        layout.packWidget(entry, { pos: "top", fill: "*" });
-        layout.setSize({ x: 350, y: 250 });
-        dlg.show(true);
-        entry.select();
-    };
-    // </XXX>
-
-    Ymacs_Buffer.newCommands({
-
-        yank_from_operating_system: Ymacs_Interactive(async function() {
-            var self = this;
-            try {
-                let code = await navigator.clipboard.readText();
-                next(code);
-            } catch(ex) {
-                modalTextarea(self, "paste", "Paste below (press CTRL-V)", null, next);
-            }
-            function next(code){
-                self._saveKilledText(code);
-                self.callInteractively("yank");
-            }
-        }),
-
-        copy_for_operating_system: Ymacs_Interactive("r", async function(begin, end) {
-            var self = this;
-            try {
-                let code = self.cmd("buffer_substring", begin, end);
-                await navigator.clipboard.writeText(code);
-            } catch(ex) {
-                modalTextarea(self, "copy", "Press CTRL-C to copy", self.cmd("buffer_substring"), function(){
-                    self.cmd("copy_region_as_kill", begin, end);
-                });
-            }
-        })
-
-    });
-
 })();
 
 /* -----[ transient mark extension commands ]----- */
