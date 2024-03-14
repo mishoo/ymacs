@@ -3,6 +3,10 @@
 .Ymacs-Theme-material .Ymacs_SplitCont .bar { background-color: #969896; }
 .Ymacs-Theme-material .Ymacs_SplitCont.horiz .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
 .Ymacs-Theme-material .Ymacs_SplitCont.vert .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
+.Ymacs-Theme-material .Ymacs_Frame-active .Ymacs-current-line { background-color: #37474f63 }
+.Ymacs-Theme-material .Ymacs-frame-content div.line:before {  color: #b0bec5; }
+.Ymacs-Theme-material .Ymacs_Frame-active div.line.Ymacs-current-line:before {  color: #b0bec5; }
+.Ymacs-Theme-material .Ymacs-frame-content:before {  color: #b0bec5; background-color: #263238; }
 .Ymacs-Theme-material .Ymacs_Overlay.selection div { background-color: #555555; }
 .Ymacs-Theme-material .Ymacs_Overlay.isearch div { color: #ffffff; background-color: #8bc34a; }
 .Ymacs-Theme-material .Ymacs_Overlay.isearch-lazy div { color: #263238; background-color: #8bc34a; }

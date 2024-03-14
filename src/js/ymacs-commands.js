@@ -58,7 +58,7 @@ Ymacs_Buffer.newCommands({
         var ret = this.cmd("goto_char",
                            this._rowColToPosition(rc.row + x,
                                                   Math.max(rc.col,
-                                                           this.getq("line_movement_requested_col")))); // starting to look like Lisp, eh?
+                                                           this.getq("line_movement_requested_col"))));
         if (!ret)
             this.setq("line_movement_requested_col", rc.col);
         return ret;
@@ -1217,7 +1217,11 @@ Ymacs_Buffer.newCommands({
             if (kr == null)
                 throw new Ymacs_Exception("No killed rectangle");
             this.cmd("insert_rectangle", point, kr);
-        })
+        }),
+
+        request_full_screen: Ymacs_Interactive(function(){
+            this.ymacs.requestFullScreen();
+        }),
 
     });
 

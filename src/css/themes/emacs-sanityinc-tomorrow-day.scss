@@ -3,6 +3,10 @@
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_SplitCont .bar { background-color: #969896; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_SplitCont.horiz .bar { border-top: 1px solid #d6d6d6; border-bottom: 1px solid #d6d6d6; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_SplitCont.vert .bar { border-left: 1px solid #d6d6d6; border-right: 1px solid #d6d6d6; }
+.Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Frame-active .Ymacs-current-line { background-color: #efefef63 }
+.Ymacs-Theme-sanityinc-tomorrow-day .Ymacs-frame-content div.line:before {  color: #8e908c; }
+.Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Frame-active div.line.Ymacs-current-line:before {  color: #4d4d4c; font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-day .Ymacs-frame-content:before {  color: #8e908c; background-color: #f7f7f7; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Overlay.selection div { background-color: #d6d6d6; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Overlay.isearch div { color: #ffffff; background-color: #eab700; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Overlay.isearch-lazy div { color: #ffffff; background-color: #3e999f; }
@@ -24,11 +28,11 @@
 .Ymacs-Theme-sanityinc-tomorrow-day .regexp-stopper { color: #3e999f; }
 .Ymacs-Theme-sanityinc-tomorrow-day .regexp-modifier { color: #3e999f; }
 .Ymacs-Theme-sanityinc-tomorrow-day .keyword { color: #718c00; }
-.Ymacs-Theme-sanityinc-tomorrow-day .comment { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .mcomment { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .comment-starter { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .mcomment-starter { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .mcomment-stopper { color: #8e908c; }
+.Ymacs-Theme-sanityinc-tomorrow-day .comment { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .mcomment { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .comment-starter { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .mcomment-starter { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .mcomment-stopper { color: #8e908c; font-style: italic; }
 .Ymacs-Theme-sanityinc-tomorrow-day .number { color: #4271ae; }
 .Ymacs-Theme-sanityinc-tomorrow-day .operator { }
 .Ymacs-Theme-sanityinc-tomorrow-day .error { color: #c82829; font-weight: bold; }
@@ -41,17 +45,17 @@
 .Ymacs-Theme-sanityinc-tomorrow-day .xml-open-bracket { }
 .Ymacs-Theme-sanityinc-tomorrow-day .xml-close-bracket { }
 .Ymacs-Theme-sanityinc-tomorrow-day .xml-closetag-slash { }
-.Ymacs-Theme-sanityinc-tomorrow-day .xml-cdata { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .xml-cdata-starter { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .xml-cdata-stopper { color: #8e908c; }
+.Ymacs-Theme-sanityinc-tomorrow-day .xml-cdata { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .xml-cdata-starter { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .xml-cdata-stopper { color: #8e908c; font-style: italic; }
 .Ymacs-Theme-sanityinc-tomorrow-day .lisp-keyword { color: #8959a8; }
 .Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading1 { font-weight: bold; font-size: 1.383em; }
 .Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading2 { font-weight: bold; font-size: 1.192em; }
 .Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading3 { color: #f5871f; font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading4 { color: #8959a8; font-weight: bold; }
-.Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading5 { font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading5 { font-weight: bold; font-style: italic; }
 .Ymacs-Theme-sanityinc-tomorrow-day .markdown-heading6 { font-weight: bold; }
-.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote1 { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote2 { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote3 { color: #8e908c; }
+.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote1 { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote2 { color: #8e908c; font-style: italic; }
+.Ymacs-Theme-sanityinc-tomorrow-day .markdown-blockquote3 { color: #8e908c; font-style: italic; }

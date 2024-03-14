@@ -681,4 +681,13 @@ export class Ymacs extends Widget {
             this.__popup.getElement().remove();
         }
     }
+
+    async requestFullScreen() {
+        try {
+            await this.getElement().requestFullscreen();
+        } catch(ex) {
+            console.error(ex);
+            this.popupMessage("error", "Full-screen denied.", false, 3000);
+        }
+    }
 }

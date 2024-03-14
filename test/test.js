@@ -16,13 +16,11 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    ymacs.setColorTheme([ "dark", "material" ]);
-    //ymacs.setColorTheme([ "dark", "base16-apathy" ]);
-    //ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-night" ]);
-    //ymacs.setColorTheme([ "light", "sanityinc-tomorrow-day" ]);
-    //ymacs.setColorTheme([ "dark", "sanityinc-tomorrow-blue" ]);
-    //ymacs.setColorTheme([ "light", "standard" ]);
-    //ymacs.setColorTheme([ "light", "spacemacs-light" ]);
+    //ymacs.setColorTheme([ "material" ]);
+    //ymacs.setColorTheme([ "base16-apathy" ]);
+    //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
+    //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
+    ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
     document.body.appendChild(ymacs.getElement());
     let b = ymacs.getActiveBuffer.bind(ymacs);
     b().cmd("load_file", "ymacs-frame.js");

@@ -67,7 +67,8 @@
   (let ((rgb (color-values color)))
     (apply 'format "#%02x%02x%02x"
            (mapcar (lambda (x)
-                     (* 255 (/ x 65535.0))) rgb))))
+                     (* 255 (/ x 65535.0)))
+                   rgb))))
 
 (defun ymacs-make-font-size (size)
   (if (= size *ymacs-default-font-size*)
@@ -75,7 +76,7 @@
     (progn
       (format "%.3fem" (/ size *ymacs-default-font-size*)))))
 
-(defun ymacs-face-css (faces &optional no-font)
+(cl-defun ymacs-face-css (faces &key no-font no-bg)
   (let* ((fgface (find-if (lambda (f) (face-foreground f nil t)) faces))
          (bgface (find-if (lambda (f) (face-background f nil t)) faces))
          (boxface (find-if (lambda (f)
@@ -90,27 +91,35 @@
                          (not no-font)
                          (ymacs-make-font-size
                           (plist-get (font-face-attributes (face-font face)) :height)))))
-    (when fgface
-      (insert " color: " (ymacs-color-css
-                          (if (face-inverse-video-p fgface nil t)
-                              (face-background fgface nil t)
-                              (face-foreground fgface nil t)))
-              ";"))
-    (when bgface
-      (insert " background-color: " (ymacs-color-css
-                                     (if (face-inverse-video-p bgface nil t)
-                                         (face-foreground bgface nil t)
-                                         (face-background bgface nil t)))
-              ";"))
-    (destructuring-bind (&key (line-width 1) color) box
-      (when color
-        (insert (format " border: %dpx solid %s;" line-width (ymacs-color-css color)))))
-    (when bold
-      (insert " font-weight: bold;"))
-    (when italic
-      (insert " font-style: italic;"))
-    (when font-size
-      (insert " font-size: " font-size ";"))))
+    (with-output-to-string ()
+      (when fgface
+        (princ (format " color: %s;"
+                       (ymacs-color-css
+                        (if (face-inverse-video-p fgface nil t)
+                            (face-background fgface nil t)
+                            (face-foreground fgface nil t))))))
+      (when (and bgface (not no-bg))
+        (princ (format " background-color: %s;"
+                       (ymacs-color-css
+                        (if (face-inverse-video-p bgface nil t)
+                            (face-foreground bgface nil t)
+                            (face-background bgface nil t))))))
+      (destructuring-bind (&key (line-width 1) color) box
+        (when color
+          (princ (format " border: %dpx solid %s;" line-width (ymacs-color-css color)))))
+      (when bold
+        (princ " font-weight: bold;"))
+      (when italic
+        (princ " font-style: italic;"))
+      (when font-size
+        (princ (format " font-size: %s;" font-size))))))
+
+(defmacro ymacs-style (faces prop)
+  `(let ((face (cl-find-if (lambda (face)
+                             (let ((p ,prop))
+                               (and p (not (eq p 'unspecified)))))
+                           ,faces)))
+     (when face ,prop)))
 
 (defun ymacs-color-theme-print (&optional name)
   (interactive
@@ -121,7 +130,6 @@
   (let ((*ymacs-default-font-size* (+ 0.0 ; force float :-/
                                       (plist-get (font-face-attributes (face-font 'default)) :height)))
         (prefix (concat ".Ymacs-Theme-" name)))
-    (interactive)
     (switch-to-buffer (get-buffer-create "*Ymacs Theme*"))
     (erase-buffer)
 
@@ -133,7 +141,7 @@
 
     ;; main text
     (insert prefix " {")
-    (ymacs-face-css '(default) t)
+    (insert (ymacs-face-css '(default) :no-font t))
     (insert " }\n")
 
     ;; window divider (the SplitCont resize bar)
@@ -157,7 +165,34 @@
         (insert " border-right: 1px solid " (ymacs-color-css last) ";"))
       (insert " }\n"))
 
-    (loop for (class . faces) in *ymacs-faces* do
+    ;; current line and line numbers /highlight
+    (let ((cline (ymacs-style '(hl-line) (face-background face nil t))))
+      (when cline
+        (insert (format "%s .Ymacs_Frame-active .Ymacs-current-line { background-color: %s63 }\n"
+                        prefix (ymacs-color-css cline)))))
+    (insert (format "%s .Ymacs-frame-content div.line:before { %s }\n"
+                    prefix (ymacs-face-css '(line-number) :no-bg t)))
+    (insert (format "%s .Ymacs_Frame-active div.line.Ymacs-current-line:before { %s }\n"
+                    prefix (ymacs-face-css '(line-number-current-line) :no-bg t)))
+    (insert (format "%s .Ymacs-frame-content:before { %s }\n"
+                    prefix (ymacs-face-css '(line-number))))
+
+    (cl-loop for (class . faces) in *ymacs-faces* do
       (insert prefix " " class " {")
-      (ymacs-face-css faces)
+      (insert (ymacs-face-css faces))
       (insert " }\n"))))
+
+(defun ymacs-generate-themes ()
+  (let ((names '(base16-apathy
+                 material
+                 sanityinc-tomorrow-blue
+                 sanityinc-tomorrow-day
+                 sanityinc-tomorrow-night)))
+    (loop for theme in names
+          do (load-theme theme t t)
+             (mapc (lambda (theme)
+                     (disable-theme theme))
+                   custom-enabled-themes)
+             (enable-theme theme)
+             (ymacs-color-theme-print (symbol-name theme))
+             (write-file (format "~/ymacs/src/css/themes/emacs-%s.scss" theme)))))
