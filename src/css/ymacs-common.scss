@@ -109,8 +109,16 @@ $lnwidth: 3.1em;
   overflow: hidden;
 
   > .bar {
+    position: relative;
     background-color: #888;
     z-index: 30;
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0; top: 0;
+      right: 0; bottom: 0;
+    }
   }
 
   &.dragging > .bar {
@@ -122,6 +130,10 @@ $lnwidth: 3.1em;
     cursor: ns-resize;
     > .bar {
       height: 5px;
+      &:before {
+        top: -5px;
+        bottom: -5px;
+      }
     }
   }
   &.vert {
@@ -129,6 +141,10 @@ $lnwidth: 3.1em;
     cursor: ew-resize;
     > .bar {
       width: 5px;
+      &:before {
+        left: -5px;
+        right: -5px;
+      }
     }
   }
 }
