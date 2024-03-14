@@ -1,0 +1,61 @@
+.Ymacs-Theme-standard-light { --ymacs-cursor-bg: #000000; --ymacs-cursor-fg: #ffffff; }
+.Ymacs-Theme-standard-light { color: #000000; background-color: #ffffff; }
+.Ymacs-Theme-standard-light .Ymacs_SplitCont .bar { background-color: #999999; }
+.Ymacs-Theme-standard-light .Ymacs_SplitCont.horiz .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
+.Ymacs-Theme-standard-light .Ymacs_SplitCont.vert .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
+.Ymacs-Theme-standard-light .Ymacs_Frame-active .Ymacs-current-line { background-color: #b4eeb463 }
+.Ymacs-Theme-standard-light .Ymacs-frame-content div.line:before {  color: #7f7f7f; }
+.Ymacs-Theme-standard-light .Ymacs_Frame-active div.line.Ymacs-current-line:before {  color: #7f7f7f; }
+.Ymacs-Theme-standard-light .Ymacs-frame-content:before {  color: #7f7f7f; background-color: #ffffff; }
+.Ymacs-Theme-standard-light .Ymacs_Overlay.selection div { background-color: #eedc82; }
+.Ymacs-Theme-standard-light .Ymacs_Overlay.isearch div { color: #b0e2ff; background-color: #cd00cd; }
+.Ymacs-Theme-standard-light .Ymacs_Overlay.isearch-lazy div { background-color: #afeeee; }
+.Ymacs-Theme-standard-light .Ymacs_Overlay.match-paren div { background-color: #40e0d0; }
+.Ymacs-Theme-standard-light .Ymacs_Modeline { color: #333333; background-color: #e5e5e5; border: 1px solid #bfbfbf; }
+.Ymacs-Theme-standard-light .Ymacs_Frame-active .Ymacs_Modeline { color: #000000; background-color: #bfbfbf; border: 1px outset #bfbfbf; }
+.Ymacs-Theme-standard-light .minibuffer-prompt { color: #0000cd; }
+.Ymacs-Theme-standard-light .mode-line-buffer-id { font-weight: bold; }
+.Ymacs-Theme-standard-light .type { color: #228b22; }
+.Ymacs-Theme-standard-light .builtin { color: #483d8b; }
+.Ymacs-Theme-standard-light .function-name { color: #0000ff; }
+.Ymacs-Theme-standard-light .variable-name { color: #a0522d; }
+.Ymacs-Theme-standard-light .constant { color: #008b8b; }
+.Ymacs-Theme-standard-light .string { color: #8b2252; }
+.Ymacs-Theme-standard-light .string-starter { color: #8b2252; }
+.Ymacs-Theme-standard-light .string-stopper { color: #8b2252; }
+.Ymacs-Theme-standard-light .regexp { color: #8b2252; }
+.Ymacs-Theme-standard-light .regexp-starter { color: #8b2252; }
+.Ymacs-Theme-standard-light .regexp-stopper { color: #8b2252; }
+.Ymacs-Theme-standard-light .regexp-modifier { color: #8b2252; }
+.Ymacs-Theme-standard-light .keyword { color: #a020f0; }
+.Ymacs-Theme-standard-light .comment { color: #b22222; }
+.Ymacs-Theme-standard-light .mcomment { color: #b22222; }
+.Ymacs-Theme-standard-light .comment-starter { color: #b22222; }
+.Ymacs-Theme-standard-light .mcomment-starter { color: #b22222; }
+.Ymacs-Theme-standard-light .mcomment-stopper { color: #b22222; }
+.Ymacs-Theme-standard-light .number { color: #008b8b; }
+.Ymacs-Theme-standard-light .operator { }
+.Ymacs-Theme-standard-light .error { color: #ff0000; }
+.Ymacs-Theme-standard-light .xml-open-tag { color: #0000ff; }
+.Ymacs-Theme-standard-light .xml-close-tag { color: #0000ff; }
+.Ymacs-Theme-standard-light .xml-attribute { color: #a0522d; }
+.Ymacs-Theme-standard-light .xml-entity-starter { color: #008b8b; }
+.Ymacs-Theme-standard-light .xml-entity-stopper { color: #008b8b; }
+.Ymacs-Theme-standard-light .xml-entity { color: #008b8b; }
+.Ymacs-Theme-standard-light .xml-open-bracket { }
+.Ymacs-Theme-standard-light .xml-close-bracket { }
+.Ymacs-Theme-standard-light .xml-closetag-slash { }
+.Ymacs-Theme-standard-light .xml-cdata { color: #b22222; }
+.Ymacs-Theme-standard-light .xml-cdata-starter { color: #b22222; }
+.Ymacs-Theme-standard-light .xml-cdata-stopper { color: #b22222; }
+.Ymacs-Theme-standard-light .lisp-keyword { color: #483d8b; }
+.Ymacs-Theme-standard-light .markdown-heading1 { font-size: 1.692em; }
+.Ymacs-Theme-standard-light .markdown-heading2 { font-size: 1.442em; }
+.Ymacs-Theme-standard-light .markdown-heading3 { font-size: 1.192em; }
+.Ymacs-Theme-standard-light .markdown-heading4 { font-weight: bold; }
+.Ymacs-Theme-standard-light .markdown-heading5 { font-weight: bold; font-style: italic; }
+.Ymacs-Theme-standard-light .markdown-heading6 { font-weight: bold; }
+.Ymacs-Theme-standard-light .markdown-blockquote { color: #b22222; }
+.Ymacs-Theme-standard-light .markdown-blockquote1 { color: #b22222; }
+.Ymacs-Theme-standard-light .markdown-blockquote2 { color: #b22222; }
+.Ymacs-Theme-standard-light .markdown-blockquote3 { color: #b22222; }

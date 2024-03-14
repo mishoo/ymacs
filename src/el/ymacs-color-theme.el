@@ -104,9 +104,17 @@
                         (if (face-inverse-video-p bgface nil t)
                             (face-foreground bgface nil t)
                             (face-background bgface nil t))))))
-      (destructuring-bind (&key (line-width 1) color) box
-        (when color
-          (princ (format " border: %dpx solid %s;" line-width (ymacs-color-css color)))))
+      (when box
+        (destructuring-bind (&key (line-width 1) color style) box
+          (princ (format " border: %dpx %s %s;"
+                         (abs line-width)
+                         (cond
+                           ((eq 'released-button style)
+                            (unless color
+                              (setf color (face-background bgface nil t)))
+                            "outset")
+                           (t "solid"))
+                         (ymacs-color-css color)))))
       (when bold
         (princ " font-weight: bold;"))
       (when italic
@@ -188,6 +196,7 @@
                  sanityinc-tomorrow-blue
                  sanityinc-tomorrow-day
                  sanityinc-tomorrow-night)))
+    (load-library "hl-line")
     (loop for theme in names
           do (load-theme theme t t)
              (mapc (lambda (theme)

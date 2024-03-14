@@ -129,7 +129,7 @@ $lnwidth: 3.1em;
     grid-template-rows: 1fr auto 1fr;
     cursor: ns-resize;
     > .bar {
-      height: 5px;
+      height: 3px;
       &:before {
         top: -5px;
         bottom: -5px;
@@ -140,7 +140,7 @@ $lnwidth: 3.1em;
     grid-template-columns: 1fr auto 1fr;
     cursor: ew-resize;
     > .bar {
-      width: 5px;
+      width: 3px;
       &:before {
         left: -5px;
         right: -5px;

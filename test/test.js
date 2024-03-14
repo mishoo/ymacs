@@ -20,7 +20,8 @@ window.addEventListener("beforeunload", ev => {
     //ymacs.setColorTheme([ "base16-apathy" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
-    ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
+    //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
+    ymacs.setColorTheme([ "standard-light" ]);
     document.body.appendChild(ymacs.getElement());
     let b = ymacs.getActiveBuffer.bind(ymacs);
     b().cmd("load_file", "ymacs-frame.js");
