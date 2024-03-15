@@ -223,29 +223,32 @@
 
 (defun ymacs-generate-themes ()
   (interactive)
-  (let ((names '(base16-apathy
+  (let ((names '(whiteboard
+                 base16-apathy
                  material
                  sanityinc-tomorrow-blue
                  sanityinc-tomorrow-day
                  sanityinc-tomorrow-night
                  sanityinc-tomorrow-eighties
-                 sanityinc-tomorrow-bright)))
+                 sanityinc-tomorrow-bright
+                 standard-dark
+                 standard-light)))
     (load-library "hl-line")
     (loop for theme in names
           for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (load-theme theme t t)
-             (mapc (lambda (theme)
-                     (disable-theme theme))
-                   custom-enabled-themes)
-             (enable-theme theme)
-             (ymacs-color-theme-print (symbol-name theme))
-             (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))
-             (let ((cust (format "~/ymacs/src/css/themes/%s.scss" theme)))
-               (unless (file-exists-p cust)
-                 (with-current-buffer (get-buffer-create "*Ymacs Theme*")
-                   (erase-buffer)
-                   (insert (format "@use \"./_%s.scss\" as theme;\n" theme)
-                           prefix " {\n"
-                           "    @import \"./_customize.scss\";\n"
-                           "}\n")
-                   (write-file cust)))))))
+          (mapc (lambda (theme)
+                  (disable-theme theme))
+                custom-enabled-themes)
+          (enable-theme theme)
+          (ymacs-color-theme-print (symbol-name theme))
+          (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))
+          (let ((cust (format "~/ymacs/src/css/themes/%s.scss" theme)))
+            (unless (file-exists-p cust)
+              (with-current-buffer (get-buffer-create "*Ymacs Theme*")
+                (erase-buffer)
+                (insert (format "@use \"./_%s.scss\" as theme;\n" theme)
+                        prefix " {\n"
+                        "    @import \"./_customize.scss\";\n"
+                        "}\n")
+                (write-file cust)))))))

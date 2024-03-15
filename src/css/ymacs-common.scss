@@ -215,6 +215,6 @@ $lnwidth: 3.1em;
 .Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item:hover,
 .Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item.selected,
 .Ymacs_Popup.Ymacs_Completions .Ymacs_Menu_Item.selected:hover {
-  background-color: var(--ymacs-cursor-bg);
-  color: var(--ymacs-cursor-fg);
+  // background-color: var(--ymacs-cursor-bg);
+  // color: var(--ymacs-cursor-fg);
 }

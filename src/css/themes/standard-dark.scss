@@ -1,0 +1,4 @@
+@use "./_standard-dark.scss" as theme;
+.Ymacs-Theme-standard-dark {
+    @import "./_customize.scss";
+}
