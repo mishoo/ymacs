@@ -17,8 +17,13 @@ $cursor_fg: #1d1f21;
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #c5c8c6; font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs-frame-content:before { color: #969896; background-color: #222427; }
 .Ymacs-Theme-sanityinc-tomorrow-night {
-.Ymacs_Popup { color: #c5c8c6; background-color: #373b41; scrollbar-color: #282a2e #373b41; }
-.Ymacs_Popup.Ymacs_Completions {
+.Ymacs_Popup {
+  --ymacs-popup-bg: #373b41;
+  --ymacs-popup-fg: #c5c8c6;
+  --ymacs-popup-scrollbar-thumb: #373b41;
+  --ymacs-popup-scrollbar-track: #282a2e;
+}
+.Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #969896; }
 }
 .Ymacs_Overlay.selection div { background-color: #373b41; }

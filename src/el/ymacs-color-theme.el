@@ -205,15 +205,21 @@
     (insert prefix " {\n")
 
     (insert
-     (format ".Ymacs_Popup {%s scrollbar-color: %s %s; }\n"
-             (ymacs-face-css '(company-tooltip default))
-             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-track) (face-background face nil t)))
-             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-thumb) (face-background face nil t))))
-     ".Ymacs_Popup.Ymacs_Completions {\n"
+     (format ".Ymacs_Popup {
+  --ymacs-popup-bg: %s;
+  --ymacs-popup-fg: %s;
+  --ymacs-popup-scrollbar-thumb: %s;
+  --ymacs-popup-scrollbar-track: %s;
+}\n"
+             (ymacs-color-css (ymacs-style '(company-tooltip default) (face-background face nil t)))
+             (ymacs-color-css (ymacs-style '(company-tooltip default) (face-foreground face nil t)))
+             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-thumb) (face-background face nil t)))
+             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-track) (face-background face nil t))))
+
+     ".Ymacs_Popup .Ymacs_Menu {\n"
      (format ".Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover {%s }\n"
              (ymacs-face-css '(company-tooltip-selection)))
-     "}\n"
-     )
+     "}\n")
 
     (cl-loop for (class . faces) in *ymacs-faces* do
           (insert class " {")
@@ -243,6 +249,7 @@
           (enable-theme theme)
           (ymacs-color-theme-print (symbol-name theme))
           (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))
+          (kill-buffer)
           (let ((cust (format "~/ymacs/src/css/themes/%s.scss" theme)))
             (unless (file-exists-p cust)
               (with-current-buffer (get-buffer-create "*Ymacs Theme*")

@@ -17,8 +17,13 @@ $cursor_fg: #031a16;
 .Ymacs-Theme-base16-apathy .Ymacs_Frame-active div.line.Ymacs-current-line:before { }
 .Ymacs-Theme-base16-apathy .Ymacs-frame-content:before { color: #2b685e; background-color: #0b342d; }
 .Ymacs-Theme-base16-apathy {
-.Ymacs_Popup { color: #81b5ac; background-color: #0b342d; scrollbar-color: #d2e7e4 #5f9c92; }
-.Ymacs_Popup.Ymacs_Completions {
+.Ymacs_Popup {
+  --ymacs-popup-bg: #0b342d;
+  --ymacs-popup-fg: #81b5ac;
+  --ymacs-popup-scrollbar-thumb: #5f9c92;
+  --ymacs-popup-scrollbar-track: #d2e7e4;
+}
+.Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { color: #96883e; background-color: #184e45; }
 }
 .Ymacs_Overlay.selection div { background-color: #184e45; }

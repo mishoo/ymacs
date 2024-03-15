@@ -5,6 +5,12 @@ export class Ymacs_Popup extends Widget {
 
     constructor(...args) {
         super(...args);
+        this._cont = DOM.fromHTML(`<div class="Ymacs_Menu"></div>`);
+        this.getElement().appendChild(this._cont);
+    }
+
+    getContentElement() {
+        return this._cont;
     }
 
     initClassName() {

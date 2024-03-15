@@ -42,7 +42,7 @@ function popupCompletionMenu(frame, list) {
     let activeElement = document.activeElement;
     let ymacs = this.ymacs; // `this` is the minibuffer
     $menu = new Ymacs_Popup();
-    $menu.addClass("Ymacs_Completions");
+    $menu.addClass("with-arrow");
     list.forEach((label, index) => {
         let value = label;
         if (typeof label != "string") {
@@ -50,7 +50,7 @@ function popupCompletionMenu(frame, list) {
             label = label.label;
         }
         let el = DOM.fromHTML(`<div class="Ymacs_Menu_Item" data-value="${DOM.htmlEscape(value)}"
-                                        data-index="${index}">${DOM.htmlEscape(label)}</div>`);
+                                          data-index="${index}">${DOM.htmlEscape(label)}</div>`);
         $menu.add(el);
     });
     DOM.on($menu.getContentElement(), {

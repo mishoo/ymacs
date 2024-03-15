@@ -17,8 +17,13 @@ $cursor_fg: #000000;
 .Ymacs-Theme-standard-dark .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #ffffff; }
 .Ymacs-Theme-standard-dark .Ymacs-frame-content:before { color: #a6a6a6; background-color: #000000; }
 .Ymacs-Theme-standard-dark {
-.Ymacs_Popup { color: #ffffff; background-color: #141414; scrollbar-color: #606060 #ffffff; }
-.Ymacs_Popup.Ymacs_Completions {
+.Ymacs_Popup {
+  --ymacs-popup-bg: #141414;
+  --ymacs-popup-fg: #ffffff;
+  --ymacs-popup-scrollbar-thumb: #ffffff;
+  --ymacs-popup-scrollbar-track: #606060;
+}
+.Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #254b5f; }
 }
 .Ymacs_Overlay.selection div { background-color: #20009d; }

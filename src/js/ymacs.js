@@ -693,7 +693,7 @@ export class Ymacs extends Widget {
 
     _popupAtCaret(el) {
         el.style.visibility = "hidden";
-        DOM.delClass(el, /popup-[a-z]+/g);
+        DOM.delClass(el, /pppos-[a-z-]+/ig);
         this.add(el);
         let mybox = this.getElement().getBoundingClientRect();
         let caret = this.__input_frame.getCaretElement();
@@ -704,14 +704,18 @@ export class Ymacs extends Widget {
                              y: (mybox.top + mybox.bottom) / 2 };
         if (cbox_center.y > mybox_center.y) {
             if (cbox_center.x < mybox_center.x) {
+                DOM.addClass(el, "ppos-top-right");
                 el.style.transform = `translate(-${cbox.width / 2}px, calc(-100% - ${cbox.height / 2}px))`;
             } else {
-                el.style.transform = `translate(-100% + ${cbox.width / 2}px, calc(-100% - ${cbox.height / 2}px))`;
+                DOM.addClass(el, "ppos-top-left");
+                el.style.transform = `translate(calc(-100% + ${cbox.width / 2}px), calc(-100% - ${cbox.height / 2}px))`;
             }
         } else {
             if (cbox_center.x < mybox_center.x) {
+                DOM.addClass(el, "ppos-bot-right");
                 el.style.transform = `translate(-${cbox.width / 2}px, ${cbox.height / 2}px)`;
             } else {
+                DOM.addClass(el, "ppos-bot-left");
                 el.style.transform = `translate(calc(-100% + ${cbox.width / 2}px), ${cbox.height / 2}px)`;
             }
         }

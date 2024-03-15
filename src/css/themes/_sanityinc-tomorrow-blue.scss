@@ -17,8 +17,13 @@ $cursor_fg: #002451;
 .Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #ffffff; font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-blue .Ymacs-frame-content:before { color: #7285b7; background-color: #002c5f; }
 .Ymacs-Theme-sanityinc-tomorrow-blue {
-.Ymacs_Popup { color: #ffffff; background-color: #003f8e; scrollbar-color: #00346e #003f8e; }
-.Ymacs_Popup.Ymacs_Completions {
+.Ymacs_Popup {
+  --ymacs-popup-bg: #003f8e;
+  --ymacs-popup-fg: #ffffff;
+  --ymacs-popup-scrollbar-thumb: #003f8e;
+  --ymacs-popup-scrollbar-track: #00346e;
+}
+.Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #7285b7; }
 }
 .Ymacs_Overlay.selection div { background-color: #003f8e; }
