@@ -690,4 +690,33 @@ export class Ymacs extends Widget {
             this.popupMessage("error", "Full-screen denied.", false, 3000);
         }
     }
+
+    _popupAtCaret(el) {
+        el.style.visibility = "hidden";
+        DOM.delClass(el, /popup-[a-z]+/g);
+        this.add(el);
+        let mybox = this.getElement().getBoundingClientRect();
+        let caret = this.__input_frame.getCaretElement();
+        let cbox = caret.getBoundingClientRect();
+        let cbox_center = { x: (cbox.left + cbox.right) / 2,
+                            y: (cbox.top + cbox.bottom) / 2 };
+        let mybox_center = { x: (mybox.left + mybox.right) / 2,
+                             y: (mybox.top + mybox.bottom) / 2 };
+        if (cbox_center.y > mybox_center.y) {
+            if (cbox_center.x < mybox_center.x) {
+                el.style.transform = `translate(-${cbox.width / 2}px, calc(-100% - ${cbox.height / 2}px))`;
+            } else {
+                el.style.transform = `translate(-100% + ${cbox.width / 2}px, calc(-100% - ${cbox.height / 2}px))`;
+            }
+        } else {
+            if (cbox_center.x < mybox_center.x) {
+                el.style.transform = `translate(-${cbox.width / 2}px, ${cbox.height / 2}px)`;
+            } else {
+                el.style.transform = `translate(calc(-100% + ${cbox.width / 2}px), ${cbox.height / 2}px)`;
+            }
+        }
+        el.style.left = (cbox_center.x - mybox.left) + "px";
+        el.style.top = (cbox_center.y - mybox.top) + "px";
+        el.style.removeProperty("visibility");
+    }
 }

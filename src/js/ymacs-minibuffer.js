@@ -63,7 +63,7 @@ function popupCompletionMenu(frame, list) {
             handle_enter.call(this);
         },
     });
-    ymacs.add($menu);
+    ymacs._popupAtCaret($menu.getElement());
     select(0);
 
     this.pushKeymap(KEYMAP_POPUP_ACTIVE);
