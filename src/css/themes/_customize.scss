@@ -1,0 +1,8 @@
+&.Ymacs-line-numbers {
+  .Ymacs-frame-content:before {
+    border-right: 1px solid darken(theme.$general_bg, 5%);
+  }
+  .Ymacs_Frame-active .Ymacs-frame-content:before {
+    box-shadow: #0004 3px 0px 7px -3px;
+  }
+}

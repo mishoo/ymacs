@@ -16,11 +16,13 @@
         },
         "themes": {
             "source": [
-                "src/css/themes/emacs-sanityinc-tomorrow-day.scss",
-                "src/css/themes/emacs-sanityinc-tomorrow-blue.scss",
-                "src/css/themes/emacs-sanityinc-tomorrow-night.scss",
-                "src/css/themes/emacs-material.scss",
-                "src/css/themes/emacs-base16-apathy.scss"
+                "src/css/themes/sanityinc-tomorrow-day.scss",
+                "src/css/themes/sanityinc-tomorrow-blue.scss",
+                "src/css/themes/sanityinc-tomorrow-night.scss",
+                "src/css/themes/sanityinc-tomorrow-bright.scss",
+                "src/css/themes/sanityinc-tomorrow-eighties.scss",
+                "src/css/themes/material.scss",
+                "src/css/themes/base16-apathy.scss"
             ]
         }
     },

@@ -1,0 +1,9 @@
+@use "./_material.scss" as theme;
+.Ymacs-Theme-material {
+  @import "./_customize.scss";
+  .Ymacs_Frame-active {
+    .Ymacs-frame-content:before {
+      background-color: darken(theme.$general_bg, 1%);
+    }
+  }
+}

@@ -91,19 +91,15 @@
                          (not no-font)
                          (ymacs-make-font-size
                           (plist-get (font-face-attributes (face-font face)) :height)))))
-    (with-output-to-string ()
+    (with-output-to-string
       (when fgface
-        (princ (format " color: %s;"
-                       (ymacs-color-css
-                        (if (face-inverse-video-p fgface nil t)
-                            (face-background fgface nil t)
-                            (face-foreground fgface nil t))))))
+        (princ (format " %s: %s;"
+                       (if (face-inverse-video-p fgface nil t) "background-color" "color")
+                       (ymacs-color-css (face-foreground fgface nil t)))))
       (when (and bgface (not no-bg))
-        (princ (format " background-color: %s;"
-                       (ymacs-color-css
-                        (if (face-inverse-video-p bgface nil t)
-                            (face-foreground bgface nil t)
-                            (face-background bgface nil t))))))
+        (princ (format " %s: %s;"
+                       (if (face-inverse-video-p bgface nil t) "color" "background-color")
+                       (ymacs-color-css (face-background bgface nil t)))))
       (when box
         (destructuring-bind (&key (line-width 1) color style) box
           (princ (format " border: %dpx %s %s;"
@@ -129,17 +125,38 @@
                            ,faces)))
      (when face ,prop)))
 
+
+
 (defun ymacs-color-theme-print (&optional name)
   (interactive
    (list
     (read-string "Theme name: " (if custom-enabled-themes
                                     (symbol-name (car custom-enabled-themes))
-                                    "NONAME"))))
+                                  "NONAME"))))
   (let ((*ymacs-default-font-size* (+ 0.0 ; force float :-/
                                       (plist-get (font-face-attributes (face-font 'default)) :height)))
         (prefix (concat ".Ymacs-Theme-" name)))
     (switch-to-buffer (get-buffer-create "*Ymacs Theme*"))
     (erase-buffer)
+
+    ;; SASS variables
+    (insert
+     (format "$general_bg: %s;\n" (ymacs-color-css (ymacs-style '(default)
+                                                                (face-background face nil t))))
+     (format "$general_fg: %s;\n" (ymacs-color-css (ymacs-style '(default)
+                                                                (face-foreground face nil t))))
+     (format "$modeline_in_bg: %s;\n" (ymacs-color-css (ymacs-style '(mode-line-inactive mode-line)
+                                                                    (face-background face nil t))))
+     (format "$modeline_in_fg: %s;\n" (ymacs-color-css (ymacs-style '(mode-line-inactive mode-line)
+                                                                    (face-foreground face nil t))))
+     (format "$modeline_ac_bg: %s;\n" (ymacs-color-css (ymacs-style '(mode-line-active mode-line)
+                                                                    (face-background face nil t))))
+     (format "$modeline_ac_fg: %s;\n" (ymacs-color-css (ymacs-style '(mode-line-active mode-line)
+                                                                    (face-foreground face nil t))))
+     (format "$cursor_bg: %s;\n" (ymacs-color-css (face-background 'cursor nil t)))
+     (format "$cursor_fg: %s;\n" (ymacs-color-css (face-background 'default nil t)))
+
+     "\n")
 
     ;; cursor
     (insert prefix " { ")
@@ -178,30 +195,57 @@
       (when cline
         (insert (format "%s .Ymacs_Frame-active .Ymacs-current-line { background-color: %s63 }\n"
                         prefix (ymacs-color-css cline)))))
-    (insert (format "%s .Ymacs-frame-content div.line:before { %s }\n"
+    (insert (format "%s .Ymacs-frame-content div.line:before {%s }\n"
                     prefix (ymacs-face-css '(line-number) :no-bg t)))
-    (insert (format "%s .Ymacs_Frame-active div.line.Ymacs-current-line:before { %s }\n"
+    (insert (format "%s .Ymacs_Frame-active div.line.Ymacs-current-line:before {%s }\n"
                     prefix (ymacs-face-css '(line-number-current-line) :no-bg t)))
-    (insert (format "%s .Ymacs-frame-content:before { %s }\n"
+    (insert (format "%s .Ymacs-frame-content:before {%s }\n"
                     prefix (ymacs-face-css '(line-number))))
 
+    (insert prefix " {\n")
+
+    (insert
+     (format ".Ymacs_Popup {%s scrollbar-color: %s %s; }\n"
+             (ymacs-face-css '(company-tooltip default))
+             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-track) (face-background face nil t)))
+             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-thumb) (face-background face nil t))))
+     ".Ymacs_Popup.Ymacs_Completions {\n"
+     (format ".Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover {%s }\n"
+             (ymacs-face-css '(company-tooltip-selection)))
+     "}\n"
+     )
+
     (cl-loop for (class . faces) in *ymacs-faces* do
-      (insert prefix " " class " {")
-      (insert (ymacs-face-css faces))
-      (insert " }\n"))))
+          (insert class " {")
+          (insert (ymacs-face-css faces))
+          (insert " }\n"))
+    (insert "}\n")))
 
 (defun ymacs-generate-themes ()
+  (interactive)
   (let ((names '(base16-apathy
                  material
                  sanityinc-tomorrow-blue
                  sanityinc-tomorrow-day
-                 sanityinc-tomorrow-night)))
+                 sanityinc-tomorrow-night
+                 sanityinc-tomorrow-eighties
+                 sanityinc-tomorrow-bright)))
     (load-library "hl-line")
     (loop for theme in names
+          for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (load-theme theme t t)
              (mapc (lambda (theme)
                      (disable-theme theme))
                    custom-enabled-themes)
              (enable-theme theme)
              (ymacs-color-theme-print (symbol-name theme))
-             (write-file (format "~/ymacs/src/css/themes/emacs-%s.scss" theme)))))
+             (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))
+             (let ((cust (format "~/ymacs/src/css/themes/%s.scss" theme)))
+               (unless (file-exists-p cust)
+                 (with-current-buffer (get-buffer-create "*Ymacs Theme*")
+                   (erase-buffer)
+                   (insert (format "@use \"./_%s.scss\" as theme;\n" theme)
+                           prefix " {\n"
+                           "    @import \"./_customize.scss\";\n"
+                           "}\n")
+                   (write-file cust)))))))
