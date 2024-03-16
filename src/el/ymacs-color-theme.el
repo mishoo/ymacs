@@ -174,16 +174,16 @@
           (first (face-attribute 'window-divider-first-pixel :foreground))
           (last (face-attribute 'window-divider-last-pixel :foreground)))
       (when main
-        (insert prefix " .Ymacs_SplitCont .bar { background-color: " (ymacs-color-css main) "; }\n"))
+        (insert prefix " .Ymacs_SplitCont > .bar { background-color: " (ymacs-color-css main) "; }\n"))
 
-      (insert prefix " .Ymacs_SplitCont.horiz .bar {")
+      (insert prefix " .Ymacs_SplitCont.horiz > .bar {")
       (when first
         (insert " border-top: 1px solid " (ymacs-color-css first) ";"))
       (when last
         (insert " border-bottom: 1px solid " (ymacs-color-css last) ";"))
       (insert " }\n")
 
-      (insert prefix " .Ymacs_SplitCont.vert .bar {")
+      (insert prefix " .Ymacs_SplitCont.vert > .bar {")
       (when first
         (insert " border-left: 1px solid " (ymacs-color-css first) ";"))
       (when last

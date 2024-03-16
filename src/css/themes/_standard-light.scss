@@ -9,9 +9,9 @@ $cursor_fg: #ffffff;
 
 .Ymacs-Theme-standard-light { --ymacs-cursor-bg: #000000; --ymacs-cursor-fg: #ffffff; }
 .Ymacs-Theme-standard-light { color: #000000; background-color: #ffffff; }
-.Ymacs-Theme-standard-light .Ymacs_SplitCont .bar { background-color: #969896; }
-.Ymacs-Theme-standard-light .Ymacs_SplitCont.horiz .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
-.Ymacs-Theme-standard-light .Ymacs_SplitCont.vert .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
+.Ymacs-Theme-standard-light .Ymacs_SplitCont > .bar { background-color: #969896; }
+.Ymacs-Theme-standard-light .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
+.Ymacs-Theme-standard-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
 .Ymacs-Theme-standard-light .Ymacs_Frame-active .Ymacs-current-line { background-color: #b4eeb463 }
 .Ymacs-Theme-standard-light .Ymacs-frame-content div.line:before { color: #7f7f7f; }
 .Ymacs-Theme-standard-light .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #000000; }

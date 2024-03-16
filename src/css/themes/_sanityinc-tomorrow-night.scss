@@ -9,9 +9,9 @@ $cursor_fg: #1d1f21;
 
 .Ymacs-Theme-sanityinc-tomorrow-night { --ymacs-cursor-bg: #cc6666; --ymacs-cursor-fg: #1d1f21; }
 .Ymacs-Theme-sanityinc-tomorrow-night { color: #c5c8c6; background-color: #1d1f21; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_SplitCont .bar { background-color: #969896; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_SplitCont.horiz .bar { border-top: 1px solid #373b41; border-bottom: 1px solid #373b41; }
-.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_SplitCont.vert .bar { border-left: 1px solid #373b41; border-right: 1px solid #373b41; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_SplitCont > .bar { background-color: #969896; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #373b41; border-bottom: 1px solid #373b41; }
+.Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #373b41; border-right: 1px solid #373b41; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame-active .Ymacs-current-line { background-color: #282a2e63 }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs-frame-content div.line:before { color: #969896; }
 .Ymacs-Theme-sanityinc-tomorrow-night .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #c5c8c6; font-weight: bold; }

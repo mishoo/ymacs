@@ -114,7 +114,7 @@ $lnwidth: 3.1em;
 
 .Ymacs_Frame .minibuffer-prompt { font-weight: bold; text-decoration: underline; }
 
-.Ymacs_SplitCont {
+.Ymacs .Ymacs_SplitCont {
   display: grid;
   overflow: hidden;
 
@@ -132,7 +132,7 @@ $lnwidth: 3.1em;
   }
 
   &.dragging > .bar {
-    background-color: var(--ymacs-cursor-bg) !important;
+    background-color: var(--ymacs-cursor-bg);
   }
 
   &.horiz {
@@ -159,8 +159,8 @@ $lnwidth: 3.1em;
   }
 }
 
-.Ymacs_Resize_horiz { cursor: ns-resize !important }
-.Ymacs_Resize_vert { cursor: ew-resize !important }
+.Ymacs_Resize_horiz { cursor: ns-resize }
+.Ymacs_Resize_vert { cursor: ew-resize }
 
 @keyframes ymacs-caret-blink {
   0% { background-color: unset; }

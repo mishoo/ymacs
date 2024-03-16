@@ -109,7 +109,7 @@ function read_with_continuation(completions, cont, validate) {
             },
         });
     });
-};
+}
 
 function filename_completion(mb, str, re, cont) {
     var self = this;
@@ -154,7 +154,7 @@ function filename_completion(mb, str, re, cont) {
             }
         }
     });
-};
+}
 
 Ymacs_Buffer.newCommands({
 
@@ -381,13 +381,25 @@ function handle_arrow_down() {
     if ($menu) {
         select($selectedIndex + 1);
     }
-};
+}
 
 function handle_arrow_up() {
     if ($menu) {
         select($selectedIndex - 1);
     }
-};
+}
+
+function handle_popup_home() {
+    if ($menu) {
+        select(0);
+    }
+}
+
+function handle_popup_end() {
+    if ($menu) {
+        select(-1);
+    }
+}
 
 function handle_enter() {
     if ($menu) {
@@ -400,28 +412,28 @@ function handle_enter() {
     } else {
         this.cmd("minibuffer_complete_and_exit");
     }
-};
+}
 
 function handle_tab() {
     if (!$menu)
         this.cmd("minibuffer_complete");
     else
         handle_arrow_down.call(this);
-};
+}
 
 function handle_s_tab() {
     handle_arrow_up.call(this);
-};
+}
 
 function handle_home() {
     this.cmd("goto_char", this.promptMarker);
-};
+}
 
 function handle_home_mark() {
     this.ensureTransientMark();
     this.cmd("goto_char", this.promptMarker);
     this.ensureTransientMark();
-};
+}
 
 var DEFAULT_KEYS = {
     "Tab"                                : handle_tab,
@@ -438,6 +450,10 @@ var KEYMAP_POPUP_ACTIVE = Ymacs_Keymap.define(null, Object.assign({
     "S-Tab"                                 : handle_s_tab,
     "ArrowDown && ArrowRight && C-n && C-f" : handle_arrow_down,
     "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
+    "PageDown"                              : handle_arrow_down,
+    "PageUp"                                : handle_arrow_up,
+    "C-End"                                 : handle_popup_end,
+    "C-Home"                                : handle_popup_home,
     "Escape"                                : function() {
         killMenu();
     }
