@@ -200,7 +200,6 @@ Ymacs_Buffer.newCommands({
                     this.cmd("delete_char", Math.min(left, repeat || 1));
             }
             this.cmd("insert", ch);
-            ev.domStop = true;
             return true;
         }
         return false;

@@ -298,7 +298,7 @@ Ymacs_Buffer.newCommands({
     paredit_backward_delete_char: Ymacs_Interactive("^p", function(n){
         if (n != null) return this.cmd("backward_delete_char", n);
         if (!this.deleteTransientRegion()) {
-            if (this.cmd("looking_back", /[\(\[\{\"\❰\«]/g)) {
+            if (this.cmd("looking_back", /[\(\[\{\"\❰\«\`\']/g)) {
                 var close = PARENS[this.matchData[0]];
                 if (close) {
                     var rx = new RegExp("\\s*\\" + close, "my");
@@ -315,7 +315,7 @@ Ymacs_Buffer.newCommands({
     paredit_delete_char: Ymacs_Interactive("^p", function(n){
         if (n != null) return this.cmd("delete_char", n);
         if (!this.deleteTransientRegion()) {
-            if (this.cmd("looking_at", /[\]\}\)\"\❱\»]/y)) {
+            if (this.cmd("looking_at", /[\]\}\)\"\❱\»\`\']/y)) {
                 var open = R_PARENS[this.matchData[0]];
                 if (open) {
                     var rx = new RegExp("\\" + open + "\\s*", "mg");

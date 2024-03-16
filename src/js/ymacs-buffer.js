@@ -346,6 +346,7 @@ export class Ymacs_Buffer extends EventProxy {
         this.tokenizer = tok;
         if (tok) {
             tok.addEventListener(this._tokenizerEvents);
+            tok.reset();
         } else {
             this._textProperties.reset();
             this.callHooks("onResetCode", this.code);

@@ -255,7 +255,7 @@ export class Ymacs_Tokenizer extends EventProxy {
     }
 
     constructor({ buffer, type }) {
-        super(...arguments);
+        super();
 
         if (typeof type == "string") {
             type = LANGUAGES[type.toLowerCase()];
@@ -263,29 +263,6 @@ export class Ymacs_Tokenizer extends EventProxy {
 
         this.buffer = buffer;
         this.type = type;
-
-        var smallest = null;
-        var timer = null;
-        this.quickUpdate = function(offset) {
-            var row = this.buffer._positionToRowCol(offset).row;
-            this.parsers.splice(row - 1, this.parsers.length + 1);
-
-            if (smallest != null) {
-                smallest = Math.min(row, smallest);
-            } else {
-                smallest = row;
-            }
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                this._do_quickUpdate(smallest);
-                smallest = null;
-            }, 1);
-        };
-        this._stopQuickUpdate = function() {
-            clearTimeout(timer);
-            clearTimeout(this.timerUpdate);
-        };
-        this.reset();
     }
 
     reset() {
@@ -295,6 +272,16 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.parsers[-1] = this.theParser.copy();
         this.timerUpdate = null;
         this.quickUpdate(0);
+    }
+
+    quickUpdate(offset) {
+        let row = this.buffer._positionToRowCol(offset).row;
+        this.parsers.splice(row, this.parsers.length + 1);
+        this._do_quickUpdate(row);
+    }
+
+    _stopQuickUpdate() {
+        clearTimeout(this.timerUpdate);
     }
 
     getLanguage(name, options) {

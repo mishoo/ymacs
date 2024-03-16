@@ -639,7 +639,6 @@ export class Ymacs_Frame extends Widget {
 
     _on_mouseWheel(ev) {
         this.buffer._handleKeyEvent(ev);
-        ev.domStop = true;
     }
 
     firstLineVisible() {

@@ -188,7 +188,7 @@ Ymacs_Buffer.newCommands({
             this.cmd("goto_char", this._isearchContext.point);
             isearchText.call(this);
             doSearch.call(this, this._isearchContext.text);
-            return ev.domStop = true;
+            return true;
         } else {
             this.cmd("isearch_abort");
             return false;
