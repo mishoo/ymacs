@@ -208,7 +208,7 @@ Ymacs_Buffer.newCommands({
                 this.cmd("goto_char", end);
             this.ensureTransientMark();
             this.cmd("forward_sexp");
-            this.cmd("set_mark_command", this.point());
+            this.setMark(this.point());
             this.transientMarker.swap(this.caretMarker);
         });
         this.ensureTransientMark();

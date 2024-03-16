@@ -45,6 +45,7 @@ let GLOBAL_VARS = {
     fill_column                 : 78,
     tab_width                   : 8,
     indent_level                : 4,
+    sticky_mark                 : false,
 
     // syntax variables
     syntax_word                 : /^[0-9\p{L}]$/u,
@@ -423,8 +424,9 @@ export class Ymacs_Buffer extends EventProxy {
         this.preventUpdates();
         try {
             this.callHooks("beforeInteractiveCommand", cmd, func);
-            if (!func.ymacsMarkExtend)
+            if (!func.ymacsMarkExtend && !this.getq("sticky_mark")) {
                 this.clearTransientMark();
+            }
             return func.apply(this, args);
         } catch(ex) {
             if (ex instanceof Ymacs_Exception) {
@@ -433,6 +435,9 @@ export class Ymacs_Buffer extends EventProxy {
                 throw ex;
             }
         } finally {
+            if (this.getq("sticky_mark")) {
+                this.ensureTransientMark();
+            }
             if (cmd != "undo") {
                 this.__undoPointer = this.__undoQueue.length;
             }
@@ -586,6 +591,10 @@ export class Ymacs_Buffer extends EventProxy {
         this.callHooks("onOverlayDelete", name);
     }
 
+    setMark(pos) {
+        this.markMarker.setPosition(pos);
+    }
+
     ensureTransientMark() {
         var rc = this._rowcol, tm;
         if (!this.transientMarker) {
@@ -608,6 +617,7 @@ export class Ymacs_Buffer extends EventProxy {
             this.transientMarker.destroy();
             this.transientMarker = null;
             this.deleteOverlay("selection");
+            this.setq("sticky_mark", false);
         }
     }
 
@@ -986,7 +996,7 @@ export class Ymacs_Buffer extends EventProxy {
             else if (h) {
                 handled = foundPrefix = true;
             }
-            else if (key === "Escape") {
+            else if (key === "Escape" && this.currentKeys.length == 1) {
                 this.__nextIsMeta = true;
                 handled = true;
             }

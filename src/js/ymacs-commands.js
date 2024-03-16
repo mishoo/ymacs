@@ -546,7 +546,7 @@ Ymacs_Buffer.newCommands({
         this.deleteTransientRegion();
         var point = this.point();
         this._insertText(this.ymacs.killRingText());
-        this.cmd("set_mark_command", point);
+        this.setMark(point);
         if (atStart)
             this.caretMarker.swap(this.markMarker);
     }),
@@ -597,15 +597,18 @@ Ymacs_Buffer.newCommands({
     },
 
     set_mark_command: Ymacs_Interactive("d", function(x){
-        if (this.currentCommand == "set_mark_command")
+        this.setMark(x);
+        if (this.currentCommand == "set_mark_command") {
             this.signalInfo("Mark set", null, 1000);
-        this.markMarker.setPosition(x);
+            this.setq("sticky_mark", true);
+        }
     }),
 
     exchange_point_and_mark: Ymacs_Interactive("^", function(){
         this.transientMarker = this.createMarker();
         this.caretMarker.swap(this.markMarker);
         this.ensureTransientMark();
+        this.setq("sticky_mark", true);
     }),
 
     mark_whole_buffer: Ymacs_Interactive(function(){
@@ -1199,7 +1202,7 @@ Ymacs_Buffer.newCommands({
 
         insert_rectangle: function(point, rect) {
             var col = this._positionToRowCol(point).col;
-            this.cmd("set_mark_command", point);
+            this.setMark(point);
             rect.forEach((text, i) => {
                 if (i > 0) {
                     if (!this.cmd("forward_line")) {

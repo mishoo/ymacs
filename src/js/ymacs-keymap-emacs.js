@@ -134,6 +134,7 @@ let minibuffer_keys = {
     "Insert"                                  : "overwrite_mode",
     "M-/"                                     : "dabbrev_expand",
     "C-g"                                     : "keyboard_quit",
+    "M-Escape Escape"                         : "keyboard_quit",
 
     // necessary evil
     "C-S-y && C-v"                            : "yank_from_operating_system",

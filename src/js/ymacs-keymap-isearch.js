@@ -56,7 +56,7 @@ Ymacs_Keymap_ISearch.defaultHandler = [ "isearch_printing_char" ];
 function initIsearch(fw) {
     if (!this._isearchContext) {
         this.pushKeymap(Ymacs_Keymap_ISearch);
-        this.cmd("set_mark_command", this.point());
+        this.setMark(this.point());
         this.whenMinibuffer(mb => {
             mb.prompt(fw ? "I-Search: " : "I-Search backward: ");
         });
