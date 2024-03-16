@@ -84,8 +84,8 @@
                                (and box (not (eq box 'unspecified)))))
                            faces))
          (box (and boxface (face-attribute boxface :box nil t)))
-         (bold (find-if #'face-bold-p faces))
-         (italic (find-if #'face-italic-p faces))
+         (bold (find-if (lambda (f) (face-bold-p f nil t)) faces))
+         (italic (find-if (lambda (f) (face-italic-p f nil t)) faces))
          (face (first faces))
          (font-size (and face
                          (not no-font)
@@ -208,13 +208,10 @@
      (format ".Ymacs_Popup {
   --ymacs-popup-bg: %s;
   --ymacs-popup-fg: %s;
-  --ymacs-popup-scrollbar-thumb: %s;
-  --ymacs-popup-scrollbar-track: %s;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }\n"
              (ymacs-color-css (ymacs-style '(company-tooltip default) (face-background face nil t)))
-             (ymacs-color-css (ymacs-style '(company-tooltip default) (face-foreground face nil t)))
-             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-thumb) (face-background face nil t)))
-             (ymacs-color-css (ymacs-style '(company-tooltip-scrollbar-track) (face-background face nil t))))
+             (ymacs-color-css (ymacs-style '(company-tooltip default) (face-foreground face nil t))))
 
      ".Ymacs_Popup .Ymacs_Menu {\n"
      (format ".Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover {%s }\n"
@@ -229,6 +226,9 @@
 
 (defun ymacs-generate-themes ()
   (interactive)
+  (load-library "hl-line")
+  (load-library "company")
+  (load-library "ef-themes")
   (let ((names '(whiteboard
                  base16-apathy
                  material
@@ -238,8 +238,9 @@
                  sanityinc-tomorrow-eighties
                  sanityinc-tomorrow-bright
                  standard-dark
-                 standard-light)))
-    (load-library "hl-line")
+                 standard-light
+                 ef-deuteranopia-light
+                 ef-cyprus)))
     (loop for theme in names
           for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (load-theme theme t t)

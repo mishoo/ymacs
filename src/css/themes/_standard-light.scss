@@ -14,14 +14,13 @@ $cursor_fg: #ffffff;
 .Ymacs-Theme-standard-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
 .Ymacs-Theme-standard-light .Ymacs_Frame-active .Ymacs-current-line { background-color: #b4eeb463 }
 .Ymacs-Theme-standard-light .Ymacs-frame-content div.line:before { color: #7f7f7f; }
-.Ymacs-Theme-standard-light .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #000000; }
+.Ymacs-Theme-standard-light .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #000000; font-weight: bold; }
 .Ymacs-Theme-standard-light .Ymacs-frame-content:before { color: #7f7f7f; background-color: #ffffff; }
 .Ymacs-Theme-standard-light {
 .Ymacs_Popup {
   --ymacs-popup-bg: #f5f5f5;
   --ymacs-popup-fg: #000000;
-  --ymacs-popup-scrollbar-thumb: #000000;
-  --ymacs-popup-scrollbar-track: #bfbfbf;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #bfe8ff; }
@@ -33,7 +32,7 @@ $cursor_fg: #ffffff;
 .Ymacs_Modeline { color: #7f7f7f; background-color: #e5e5e5; border: 1px solid #bababa; }
 .Ymacs_Frame-active .Ymacs_Modeline { color: #000000; background-color: #b3b3b3; border: 1px outset #b3b3b3; }
 .minibuffer-prompt { color: #0000ff; }
-.mode-line-buffer-id { }
+.mode-line-buffer-id { font-weight: bold; }
 .type { color: #228b22; }
 .builtin { color: #483d8b; }
 .function-name { color: #0000ff; }
@@ -68,11 +67,11 @@ $cursor_fg: #ffffff;
 .xml-cdata-starter { color: #b22222; }
 .xml-cdata-stopper { color: #b22222; }
 .lisp-keyword { color: #483d8b; }
-.markdown-heading1 { color: #0000ff; }
-.markdown-heading2 { color: #a0522d; }
-.markdown-heading3 { color: #800080; }
-.markdown-heading4 { color: #b22222; }
-.markdown-heading5 { }
+.markdown-heading1 { color: #0000ff; font-weight: bold; }
+.markdown-heading2 { color: #a0522d; font-weight: bold; }
+.markdown-heading3 { color: #800080; font-weight: bold; }
+.markdown-heading4 { color: #b22222; font-weight: bold; }
+.markdown-heading5 { font-weight: bold; font-style: italic; }
 .markdown-heading6 { font-weight: bold; }
 .markdown-blockquote { color: #b22222; }
 .markdown-blockquote1 { color: #b22222; }

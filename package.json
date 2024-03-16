@@ -25,7 +25,9 @@
                 "src/css/themes/base16-apathy.scss",
                 "src/css/themes/whiteboard.scss",
                 "src/css/themes/standard-light.scss",
-                "src/css/themes/standard-dark.scss"
+                "src/css/themes/standard-dark.scss",
+                "src/css/themes/ef-deuteranopia-light.scss",
+                "src/css/themes/ef-cyprus.scss"
             ]
         }
     },

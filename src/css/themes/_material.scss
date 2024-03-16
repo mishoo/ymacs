@@ -20,8 +20,7 @@ $cursor_fg: #263238;
 .Ymacs_Popup {
   --ymacs-popup-bg: #78909c;
   --ymacs-popup-fg: #1c1f26;
-  --ymacs-popup-scrollbar-thumb: #c0c0c0;
-  --ymacs-popup-scrollbar-track: #f0f0f0;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { color: #ffffff; background-color: #37474f; font-weight: bold; }
@@ -68,9 +67,9 @@ $cursor_fg: #263238;
 .xml-cdata-starter { color: #b0bec5; }
 .xml-cdata-stopper { color: #b0bec5; }
 .lisp-keyword { color: #ff8a65; }
-.markdown-heading1 { font-size: 1.692em; }
-.markdown-heading2 { font-size: 1.442em; }
-.markdown-heading3 { font-size: 1.192em; }
+.markdown-heading1 { font-weight: bold; font-size: 1.692em; }
+.markdown-heading2 { font-weight: bold; font-size: 1.442em; }
+.markdown-heading3 { font-weight: bold; font-size: 1.192em; }
 .markdown-heading4 { font-weight: bold; }
 .markdown-heading5 { font-weight: bold; font-style: italic; }
 .markdown-heading6 { font-weight: bold; }

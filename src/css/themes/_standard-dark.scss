@@ -14,14 +14,13 @@ $cursor_fg: #000000;
 .Ymacs-Theme-standard-dark .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
 .Ymacs-Theme-standard-dark .Ymacs_Frame-active .Ymacs-current-line { background-color: #33481563 }
 .Ymacs-Theme-standard-dark .Ymacs-frame-content div.line:before { color: #a6a6a6; }
-.Ymacs-Theme-standard-dark .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #ffffff; }
+.Ymacs-Theme-standard-dark .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #ffffff; font-weight: bold; }
 .Ymacs-Theme-standard-dark .Ymacs-frame-content:before { color: #a6a6a6; background-color: #000000; }
 .Ymacs-Theme-standard-dark {
 .Ymacs_Popup {
   --ymacs-popup-bg: #141414;
   --ymacs-popup-fg: #ffffff;
-  --ymacs-popup-scrollbar-thumb: #ffffff;
-  --ymacs-popup-scrollbar-track: #606060;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #254b5f; }
@@ -33,7 +32,7 @@ $cursor_fg: #000000;
 .Ymacs_Modeline { color: #a6a6a6; background-color: #323232; border: 1px solid #606070; }
 .Ymacs_Frame-active .Ymacs_Modeline { color: #ffffff; background-color: #505050; border: 1px outset #505050; }
 .minibuffer-prompt { color: #87ceff; }
-.mode-line-buffer-id { }
+.mode-line-buffer-id { font-weight: bold; }
 .type { color: #98fb98; }
 .builtin { color: #b0c4de; }
 .function-name { color: #87cefa; }
@@ -68,11 +67,11 @@ $cursor_fg: #000000;
 .xml-cdata-starter { color: #ff7f24; }
 .xml-cdata-stopper { color: #ff7f24; }
 .lisp-keyword { color: #b0c4de; }
-.markdown-heading1 { color: #87cefa; }
-.markdown-heading2 { color: #eedd82; }
-.markdown-heading3 { color: #00ffff; }
-.markdown-heading4 { color: #ff7f24; }
-.markdown-heading5 { }
+.markdown-heading1 { color: #87cefa; font-weight: bold; }
+.markdown-heading2 { color: #eedd82; font-weight: bold; }
+.markdown-heading3 { color: #00ffff; font-weight: bold; }
+.markdown-heading4 { color: #ff7f24; font-weight: bold; }
+.markdown-heading5 { font-weight: bold; font-style: italic; }
 .markdown-heading6 { font-weight: bold; }
 .markdown-blockquote { color: #ff7f24; }
 .markdown-blockquote1 { color: #ff7f24; }

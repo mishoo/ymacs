@@ -20,8 +20,7 @@ $cursor_fg: #ffffff;
 .Ymacs_Popup {
   --ymacs-popup-bg: #d6d6d6;
   --ymacs-popup-fg: #4d4d4c;
-  --ymacs-popup-scrollbar-thumb: #d6d6d6;
-  --ymacs-popup-scrollbar-track: #efefef;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
 .Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #8e908c; }
