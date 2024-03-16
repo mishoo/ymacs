@@ -66,11 +66,24 @@
     right: 0;
     left: 0;
   }
-  &.isearch {
-    > div {
-      z-index: 10;
-    }
-  }
+  // &.isearch {
+  //   opacity: 0.6;
+  //   > div {
+  //     z-index: 25;
+  //   }
+  // }
+  // &.isearch-lazy {
+  //   opacity: 0.6;
+  //   > div {
+  //     z-index: 24;
+  //   }
+  // }
+  // &.match-paren {
+  //   opacity: 0.6;
+  //   > div {
+  //     z-index: 23;
+  //   }
+  // }
 }
 
 $lnwidth: 3.1em;

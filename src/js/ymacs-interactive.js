@@ -92,7 +92,7 @@ export function Ymacs_Interactive(args, func) {
                 let next = execute;
                 execute = createArgumentFunction(args.pop(), function(...rest) {
                     collect = collect.concat(rest);
-                    next.call(this);
+                    return next.call(this);
                 });
             }
             func.ymacsCallInteractively = function(){
@@ -122,25 +122,25 @@ function prompt(arg) {
     if (pr) {
         arg = pr + " " + arg;
     }
-    this.cmd("minibuffer_prompt", arg);
+    return this.cmd("minibuffer_prompt", arg);
 }
 
 function read_function_name(arg, cont) {
     console.log("read_function_name", arg);
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_function", cont);
+    return this.cmd("minibuffer_read_function", cont);
     // XXX: enforce it!
 }
 
 function read_existing_buffer_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_buffer", cont);
+    return this.cmd("minibuffer_read_buffer", cont);
     // XXX: enforce it!
 }
 
 function read_buffer_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_buffer", cont);
+    return this.cmd("minibuffer_read_buffer", cont);
 }
 
 function read_character(arg, cont) {
@@ -149,12 +149,12 @@ function read_character(arg, cont) {
 
 function read_command_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_command", cont);
+    return this.cmd("minibuffer_read_command", cont);
     // XXX: enforce it!
 }
 
 function get_point(arg, cont) {
-    cont.call(this, this.point());
+    return cont.call(this, this.point());
 }
 
 function get_mouse_event(arg, cont) {
@@ -162,7 +162,7 @@ function get_mouse_event(arg, cont) {
 }
 
 function irrelevant(arg, cont) {
-    cont.call(this, null);
+    return cont.call(this, null);
 }
 
 function read_key_sequence(arg, cont) {
@@ -174,44 +174,44 @@ function read_key_sequence2(arg, cont) {
 }
 
 function get_mark(arg, cont) {
-    cont.call(this, this.markMarker.getPosition());
+    return cont.call(this, this.markMarker.getPosition());
 }
 
 function read_arbitrary_text(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_string", null, cont);
+    return this.cmd("minibuffer_read_string", null, cont);
 }
 
 function read_number(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_number", cont);
+    return this.cmd("minibuffer_read_number", cont);
 }
 
 function read_number_or_prefix(arg, cont) {
     var n = parseInt(this.getPrefixArg(), 10);
     if (!isNaN(n))
-        cont.call(this, n);
+        return cont.call(this, n);
     else
-        read_number.call(this, arg, cont);
+        return read_number.call(this, arg, cont);
 }
 
 function get_numeric_prefix(arg, cont) {
     var n = parseInt(this.getPrefixArg(), 10);
     if (isNaN(n))
         n = null;
-    cont.call(this, n);
+    return cont.call(this, n);
 }
 
 function get_raw_prefix(arg, cont) {
     arg = this.getPrefixArg();
     if (arg === "")
         arg = $TRUE;
-    cont.call(this, arg);
+    return cont.call(this, arg);
 }
 
 function get_point_and_mark(arg, cont) {
     var r = this.getRegion();
-    cont.call(this, r.begin, r.end);
+    return cont.call(this, r.begin, r.end);
 }
 
 function read_key_sequence3(arg, cont) {
@@ -220,27 +220,27 @@ function read_key_sequence3(arg, cont) {
 
 function read_variable_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_variable", cont);
+    return this.cmd("minibuffer_read_variable", cont);
 }
 
 function read_existing_file_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_existing_file", cont);
+    return this.cmd("minibuffer_read_existing_file", cont);
 }
 
 function read_file_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_file", cont);
+    return this.cmd("minibuffer_read_file", cont);
 }
 
 function read_file_or_directory_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_file_or_directory", cont);
+    return this.cmd("minibuffer_read_file_or_directory", cont);
 }
 
 function read_existing_directory_name(arg, cont) {
     prompt.call(this, arg);
-    this.cmd("minibuffer_read_directory", cont);
+    return this.cmd("minibuffer_read_directory", cont);
 }
 
 var ARG_READERS = {

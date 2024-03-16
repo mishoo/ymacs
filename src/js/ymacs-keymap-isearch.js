@@ -64,27 +64,27 @@ function initIsearch(fw) {
             forward : fw,
             point   : this.point(),
             mbMark  : this.getMinibuffer().createMarker(null, true),
-            text    : "",
+            query   : "",
         };
         return true;
     }
-};
+}
 
 function isearchText() {
-    return this._isearchContext.text = this.getMinibuffer()._bufferSubstring(this._isearchContext.mbMark);
+    return this._isearchContext.query = this.getMinibuffer()._bufferSubstring(this._isearchContext.mbMark);
 }
 
 function updateIsearch(fw) {
     this._isearchContext.forward = fw;
     this._isearchContext.point = this.point();
-    var text = this._isearchContext.text;
-    if (!/\S/.test(text) && this.getq("isearch_last_text")) {
-        text = this._isearchContext.text = this.getq("isearch_last_text");
+    var query = this._isearchContext.query;
+    if (!/\S/.test(query) && this.getq("isearch_last_query")) {
+        query = this._isearchContext.query = this.getq("isearch_last_query");
         this.getMinibuffer()._placeUndoBoundary();
-        this.getMinibuffer().cmd("insert", text);
+        this.getMinibuffer().cmd("insert", query);
     }
-    return doSearch.call(this, text);
-};
+    return doSearch.call(this, query);
+}
 
 function _lazyHighlight(str) {
     this.deleteOverlay("isearch-lazy");
@@ -134,7 +134,7 @@ function doSearch(str) {
         lazyHighlight.call(this, str);
         return found;
     });
-};
+}
 
 Ymacs_Buffer.newCommands({
 
@@ -187,7 +187,7 @@ Ymacs_Buffer.newCommands({
             this.getMinibuffer().cmd("self_insert_command");
             this.cmd("goto_char", this._isearchContext.point);
             isearchText.call(this);
-            doSearch.call(this, this._isearchContext.text);
+            doSearch.call(this, this._isearchContext.query);
             return true;
         } else {
             this.cmd("isearch_abort");
@@ -197,7 +197,7 @@ Ymacs_Buffer.newCommands({
 
     isearch_abort: Ymacs_Interactive(function(cancelled) {
         if (!cancelled)
-            this.setGlobal("isearch_last_text", this._isearchContext.text);
+            this.setGlobal("isearch_last_query", this._isearchContext.query);
         this.setMinibuffer("");
         this.popKeymap(Ymacs_Keymap_ISearch);
         this._isearchContext.mbMark.destroy();
@@ -367,7 +367,7 @@ Ymacs_Buffer.newCommands({
             this.cmd("isearch_abort");
             this.caretMarker.swap(this.markMarker);
             this.whenMinibuffer(mb => {
-                query_replace_2.call(this, mb, ctx.text);
+                query_replace_2.call(this, mb, ctx.query);
             });
         } else {
             query_replace.call(this);

@@ -78,10 +78,6 @@ function ensureLocalStorage() {
         throw new Ymacs_Exception("Local storage facility not available in this browser");
 }
 
-function isModifier(key) {
-    return /^(?:Alt|AltGraph|CapsLock|Control|Fn|FnLock|Hyper|Meta|NumLock|ScrollLock|Shift|Super|Symbol|SymbolLock)$/.test(key);
-}
-
 export class Ymacs extends Widget {
 
     static options = {
@@ -621,7 +617,7 @@ export class Ymacs extends Widget {
                 return;
             }
             var ev = this.__running_macro[this.__macro_step];
-            this.processKeyEvent(ev, ev.wasKeypress);
+            this.processKeyEvent(ev);
             this.__macro_step++;
         }
     }
@@ -638,26 +634,14 @@ export class Ymacs extends Widget {
         return true;
     }
 
-    processKeyEvent(ev, press) {
+    processKeyEvent(ev) {
         var frame = this.__input_frame;
         var buffer = frame.buffer;
 
-        ev.wasKeypress = press;
-
-        if (press) {
-            if (this.__macro_recording) {
-                this.__macro_recording.push(ev);
-            }
-            return buffer._handleKeyEvent(ev);
-        } else {
-            if (isModifier(ev.key) || ev.key.length == 1 && !(ev.ctrlKey || ev.altKey)) {
-                return false; // to be handled by the upcoming keypress event
-            }
-            if (this.__macro_recording) {
-                this.__macro_recording.push(ev);
-            }
-            return buffer._handleKeyEvent(ev);
+        if (this.__macro_recording) {
+            this.__macro_recording.push(ev);
         }
+        return buffer._handleKeyEvent(ev);
     }
 
     #timer_popupMessage = null;

@@ -137,7 +137,6 @@ export class Ymacs_Frame extends Widget {
             focus       : this._on_focus.bind(this),
             blur        : this._on_blur.bind(this),
             keydown     : this._on_keyDown.bind(this),
-            keypress    : this._on_keyPress.bind(this),
             keyup       : this._on_keyUp.bind(this),
             wheel       : this._on_mouseWheel.bind(this),
         });
@@ -619,14 +618,10 @@ export class Ymacs_Frame extends Widget {
     }
 
     _on_keyDown(ev) {
-        if (this.ymacs.processKeyEvent(ev, false)) {
-            ev.preventDefault();
-        }
-    }
-
-    _on_keyPress(ev) {
-        if (this.ymacs.processKeyEvent(ev, true)) {
-            ev.preventDefault();
+        if (!isModifier(ev.key)) {
+            if (this.ymacs.processKeyEvent(ev)) {
+                ev.preventDefault();
+            }
         }
     }
 
@@ -666,7 +661,10 @@ export class Ymacs_Frame extends Widget {
         div.scrollTop = line.offsetTop;
         this.__ensureCaretVisible = false;
     }
+}
 
+function isModifier(key) {
+    return /^(?:Alt|AltGraph|CapsLock|Control|Fn|FnLock|Hyper|Meta|NumLock|ScrollLock|Shift|Super|Symbol|SymbolLock)$/.test(key);
 }
 
 export class Ymacs_SplitCont extends Widget {
