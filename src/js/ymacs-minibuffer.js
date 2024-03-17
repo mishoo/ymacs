@@ -90,7 +90,7 @@ function select(idx) {
     $selectedItem.scrollIntoView({ block: "center" });
 }
 
-function read_with_continuation(completions, cont, validate) {
+export function read_with_continuation(completions, cont, validate) {
     this.whenMinibuffer(function(mb){
         var changed_vars = mb.setq({
             completion_list: completions,

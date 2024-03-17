@@ -4,7 +4,7 @@ import { Ymacs_Keymap } from "./js/ymacs-keymap.js";
 import { Ymacs_Keymap_Emacs } from "./js/ymacs-keymap-emacs.js";
 import { Ymacs_Tokenizer } from "./js/ymacs-tokenizer.js";
 import { Ymacs_Interactive } from "./js/ymacs-interactive.js";
-import { Ymacs_Exception } from "./js/ymacs-exception.js";;
+import { Ymacs_Exception } from "./js/ymacs-exception.js";
 
 import "./js/ymacs-commands.js";
 import "./js/ymacs-commands-utils.js";

@@ -276,3 +276,26 @@ export function backward_regexp(rx) {
     cached.lastIndex = 0;
     return cached;
 }
+
+export function getYmacsThemes() {
+    let themes = [];
+    for (let st of document.styleSheets) digStyle(st);
+    return themes;
+
+    function digStyle(st) {
+        for (let rule of st.cssRules) digRule(rule);
+    }
+
+    function digRule(rule) {
+        if (rule instanceof CSSImportRule) {
+            digStyle(rule.styleSheet);
+        } else {
+            let m = /\.Ymacs-Theme-([\p{L}0-9_-]+)/u.exec(rule.selectorText);
+            if (m) {
+                if (themes.indexOf(m[1]) < 0) {
+                    themes.push(m[1]);
+                }
+            }
+        }
+    }
+}

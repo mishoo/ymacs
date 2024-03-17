@@ -31,9 +31,10 @@
 //> ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
-import { zeroPad } from "./ymacs-utils.js";
+import { zeroPad, getYmacsThemes } from "./ymacs-utils.js";
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
+import { read_with_continuation } from "./ymacs-minibuffer.js";
 
 Ymacs_Buffer.newCommands({
 
@@ -347,6 +348,17 @@ Ymacs_Buffer.newCommands({
         self.ymacs.fs_getFileContents(name, false, function (code, stamp) {
             self.cmd("eval_string", code);
         });
+    }),
+
+    set_color_theme: Ymacs_Interactive(function(theme){
+        if (theme) {
+            this.ymacs.setColorTheme(theme);
+        } else {
+            this.cmd("minibuffer_prompt", "Color theme: ");
+            read_with_continuation.call(this, getYmacsThemes().sort(), theme => {
+                this.ymacs.setColorTheme(theme);
+            });
+        }
     })
 
 });
