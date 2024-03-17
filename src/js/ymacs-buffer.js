@@ -94,7 +94,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     static replaceCommands(cmds) {
-        this.COMMANDS = Object.create(this.COMMANDS);
+        this.COMMANDS = Object.assign(Object.create(null), this.COMMANDS);
         let replacements = Object.create(null);
         Object.keys(cmds).forEach(oldcmd => {
             let newcmd = cmds[oldcmd];

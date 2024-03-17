@@ -194,7 +194,7 @@ Ymacs_Buffer.newCommands({
     },
 
     minibuffer_read_command: function(cont) {
-        var completions = Object.keys(Ymacs_Buffer.COMMANDS).filter(cmd => this.COMMANDS[cmd].ymacsInteractive).sort();
+        var completions = Object.keys(this.COMMANDS).filter(cmd => this.COMMANDS[cmd].ymacsInteractive).sort();
         read_with_continuation.call(this, completions, cont, function(mb, name, cont2){
             var cmd = this.COMMANDS[name],
                 ret = cmd && cmd.ymacsInteractive;
