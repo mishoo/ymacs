@@ -1221,10 +1221,6 @@ Ymacs_Buffer.newCommands({
             this.cmd("insert_rectangle", point, kr);
         }),
 
-        request_full_screen: Ymacs_Interactive(function(){
-            this.ymacs.requestFullScreen();
-        }),
-
     });
 
 })();

@@ -461,8 +461,8 @@ export class Ymacs_Frame extends Widget {
         this.condClass(om, "Ymacs-overwrite-mode");
     }
 
-    _on_bufferMessage(type, text, html, timeout) {
-        this.ymacs.popupMessage(type, text, html, timeout);
+    _on_bufferMessage(args) {
+        this.ymacs.popupMessage(args);
     }
 
     _on_bufferBeforeInteractiveCommand() {

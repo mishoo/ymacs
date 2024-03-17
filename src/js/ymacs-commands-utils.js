@@ -350,6 +350,15 @@ Ymacs_Buffer.newCommands({
         });
     }),
 
+    request_full_screen: Ymacs_Interactive(async function(){
+        try {
+            this.ymacs.requestFullScreen();
+        } catch(ex) {
+            console.error(ex);
+            this.signalError("Full-screen denied", false, 3000);
+        }
+    }),
+
     set_color_theme: Ymacs_Interactive(function(theme){
         if (theme) {
             this.ymacs.setColorTheme(theme);
@@ -370,6 +379,6 @@ Ymacs_Buffer.newCommands({
                 }
             });
         }
-    })
+    }),
 
 });

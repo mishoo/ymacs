@@ -286,14 +286,18 @@ export class Ymacs_Buffer extends EventProxy {
         return this.isMinibuffer ? Ymacs_Keymap_Minibuffer : Ymacs_Keymap_Emacs;
     }
 
-    signalError(text, html, timeout) {
+    signalError(text, isHtml, timeout) {
         // Terminates a running macro
         this.ymacs.indicateError();
-        this.callHooks("onMessage", "error", text, html, timeout);
+        this.callHooks("onMessage", { type: "error", text, isHtml, timeout });
     }
 
-    signalInfo(text, html, timeout) {
-        this.callHooks("onMessage", "info", text, html, timeout);
+    signalInfo(text, isHtml, timeout) {
+        this.callHooks("onMessage", { type: "info", text, isHtml, timeout });
+    }
+
+    popupMessage(args) {
+        this.callHooks("onMessage", args);
     }
 
     createMarker(pos, before, name) {

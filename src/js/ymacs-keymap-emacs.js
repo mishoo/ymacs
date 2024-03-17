@@ -280,15 +280,19 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
             chname = "Space";
         else if (ch == "\n")
             chname = "Newline";
-        this.signalInfo(TMPL_INFO({
-            ch      : DOM.htmlEscape(chname),
-            code    : ch.charCodeAt(0),
-            codeHex : ch.charCodeAt().toString(16).toUpperCase(),
-            point   : this.point(),
-            mark    : this.markMarker.getPosition(),
-            size    : this.getCodeSize(),
-            sizeKB  : formatBytes(this.getCodeSize(), 2)
-        }), true);
+        this.popupMessage({
+            isHtml: true,
+            atCaret: true,
+            text: TMPL_INFO({
+                ch      : DOM.htmlEscape(chname),
+                code    : ch.charCodeAt(0),
+                codeHex : ch.charCodeAt().toString(16).toUpperCase(),
+                point   : this.point(),
+                mark    : this.markMarker.getPosition(),
+                size    : this.getCodeSize(),
+                sizeKB  : formatBytes(this.getCodeSize(), 2)
+            }),
+        });
     }
 });
 

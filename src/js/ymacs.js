@@ -645,16 +645,32 @@ export class Ymacs extends Widget {
     }
 
     #timer_popupMessage = null;
-    popupMessage(type, text, isHtml, timeout) {
-        if (!this.__popup) {
-            this.__popup = new Ymacs_Popup();
-            this.__popup.addClass("with-arrow");
+    popupMessage({
+        type = "info",
+        text,
+        isHtml = false,
+        atCaret = false,
+        timeout
+    }) {
+        let popup = this.__popup || (this.__popup = new Ymacs_Popup());
+        let el = popup.getElement();
+        popup.condClass(atCaret, "with-arrow");
+        if (!atCaret) {
+            el.style.removeProperty("left");
+            el.style.removeProperty("top");
+            el.style.removeProperty("bottom");
+            el.style.removeProperty("right");
+            el.style.removeProperty("transform");
         }
         if (!isHtml) {
             text = DOM.htmlEscape(text);
         }
-        this.__popup.setContent(text);
-        this._popupAtCaret(this.__popup.getElement());
+        popup.setContent(text);
+        if (atCaret) {
+            this._popupAtCaret(popup.getElement());
+        } else {
+            this.add(popup);
+        }
         clearTimeout(this.#timer_popupMessage);
         if (timeout) {
             this.#timer_popupMessage = setTimeout(this.clearPopupMessage.bind(this), timeout);
@@ -667,13 +683,8 @@ export class Ymacs extends Widget {
         }
     }
 
-    async requestFullScreen() {
-        try {
-            await this.getElement().requestFullscreen();
-        } catch(ex) {
-            console.error(ex);
-            this.popupMessage("error", "Full-screen denied.", false, 3000);
-        }
+    requestFullScreen() {
+        return this.getElement().requestFullscreen();
     }
 
     _popupAtCaret(el) {
@@ -690,18 +701,18 @@ export class Ymacs extends Widget {
         if (cbox_center.y > mybox_center.y) {
             if (cbox_center.x < mybox_center.x) {
                 DOM.addClass(el, "ppos-top-right");
-                el.style.transform = `translate(-${cbox.width / 2}px, calc(-100% - ${cbox.height / 2}px))`;
+                el.style.transform = `translate(0, calc(-100% - ${cbox.height / 2}px))`;
             } else {
                 DOM.addClass(el, "ppos-top-left");
-                el.style.transform = `translate(calc(-100% + ${cbox.width / 2}px), calc(-100% - ${cbox.height / 2}px))`;
+                el.style.transform = `translate(-100%, calc(-100% - ${cbox.height / 2}px))`;
             }
         } else {
             if (cbox_center.x < mybox_center.x) {
                 DOM.addClass(el, "ppos-bot-right");
-                el.style.transform = `translate(-${cbox.width / 2}px, ${cbox.height / 2}px)`;
+                el.style.transform = `translate(0, ${cbox.height / 2}px)`;
             } else {
                 DOM.addClass(el, "ppos-bot-left");
-                el.style.transform = `translate(calc(-100% + ${cbox.width / 2}px), ${cbox.height / 2}px)`;
+                el.style.transform = `translate(-100%, ${cbox.height / 2}px)`;
             }
         }
         el.style.left = (cbox_center.x - mybox.left) + "px";

@@ -235,26 +235,25 @@ $lnwidth: 3.1em;
 
     &.ppos-top-right {
       margin-top: -12px;
-      margin-left: -28px;
+      margin-left: -32px;
       &:before { top: 100%; left: 20px; }
       &:after { top: 100%; left: 21px; }
     }
     &.ppos-top-left {
       margin-top: -12px;
-      margin-left: 28px;
+      margin-left: 32px;
       &:before { top: 100%; right: 20px; }
       &:after { top: 100%; right: 21px; }
     }
-
     &.ppos-bot-right {
       margin-top: 12px;
-      margin-left: -28px;
+      margin-left: -32px;
       &:before { bottom: 100%; left: 20px; }
       &:after { bottom: 100%; left: 21px; }
     }
     &.ppos-bot-left {
       margin-top: 12px;
-      margin-left: 28px;
+      margin-left: 32px;
       &:before { bottom: 100%; right: 20px; }
       &:after { bottom: 100%; right: 21px; }
     }
