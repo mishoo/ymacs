@@ -648,12 +648,13 @@ export class Ymacs extends Widget {
     popupMessage(type, text, isHtml, timeout) {
         if (!this.__popup) {
             this.__popup = new Ymacs_Popup();
+            this.__popup.addClass("with-arrow");
         }
         if (!isHtml) {
             text = DOM.htmlEscape(text);
         }
         this.__popup.setContent(text);
-        this.add(this.__popup);
+        this._popupAtCaret(this.__popup.getElement());
         clearTimeout(this.#timer_popupMessage);
         if (timeout) {
             this.#timer_popupMessage = setTimeout(this.clearPopupMessage.bind(this), timeout);
@@ -677,7 +678,7 @@ export class Ymacs extends Widget {
 
     _popupAtCaret(el) {
         el.style.visibility = "hidden";
-        DOM.delClass(el, /pppos-[a-z-]+/ig);
+        DOM.delClass(el, /ppos-[a-z-]+/ig);
         this.add(el);
         let mybox = this.getElement().getBoundingClientRect();
         let caret = this.__input_frame.getCaretElement();
