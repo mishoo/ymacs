@@ -899,9 +899,9 @@ export class Ymacs_Buffer extends EventProxy {
             this.ymacs.killRingToMaster();
         this.ymacs.pushToKillRing(text, prepend);
         this._lastCommandWasKill++;
-        if (this.interactiveEvent()) {
+        if (this.interactiveEvent()) try {
             navigator.clipboard.writeText(this.ymacs.killRingText());
-        }
+        } catch {}
     }
 
     _positionToRowCol(pos) {
