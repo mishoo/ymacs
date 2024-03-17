@@ -27,7 +27,8 @@
                 "src/css/themes/standard-light.scss",
                 "src/css/themes/standard-dark.scss",
                 "src/css/themes/ef-deuteranopia-light.scss",
-                "src/css/themes/ef-cyprus.scss"
+                "src/css/themes/ef-cyprus.scss",
+                "src/css/themes/ef-elea-dark.scss"
             ]
         }
     },

@@ -239,6 +239,7 @@
                  sanityinc-tomorrow-bright
                  standard-dark
                  standard-light
+                 ef-elea-dark
                  ef-deuteranopia-light
                  ef-cyprus)))
     (loop for theme in names
