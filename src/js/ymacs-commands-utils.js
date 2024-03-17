@@ -354,9 +354,20 @@ Ymacs_Buffer.newCommands({
         if (theme) {
             this.ymacs.setColorTheme(theme);
         } else {
+            let names = getYmacsThemes().sort();
             this.cmd("minibuffer_prompt", "Color theme: ");
-            read_with_continuation.call(this, getYmacsThemes().sort(), theme => {
+            read_with_continuation.call(this, names, theme => {
                 this.ymacs.setColorTheme(theme);
+            }, (mb, theme, cont) => {
+                theme = theme.trim();
+                if (!theme) {
+                    mb.cmd("minibuffer_complete");
+                } else if (names.indexOf(theme) < 0) {
+                    mb.signalError("No such theme");
+                    return cont(false);
+                } else {
+                    return cont(true);
+                }
             });
         }
     })
