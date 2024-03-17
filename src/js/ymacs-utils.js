@@ -59,8 +59,8 @@ export let DOM = {
     mousePos(ev, el) {
         let box = el.getBoundingClientRect();
         return {
-            x: ev.pageX - box.left,
-            y: ev.pageY - box.top
+            x: ev.clientX - box.left,
+            y: ev.clientY - box.top
         };
     },
     htmlEscape: function(str) {
