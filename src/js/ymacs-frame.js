@@ -188,9 +188,7 @@ export class Ymacs_Frame extends Widget {
     ensureCaretVisible() {
         // return true if the scroll position was changed (that is, if
         // the caren't wasn't visible before the call).
-        if (this.__redrawCaret) {
-            this.redrawCaret();
-        }
+        this.redrawCaret();
         var ret = false;
 
         var caret = this.getCaretElement();
@@ -433,9 +431,6 @@ export class Ymacs_Frame extends Widget {
     _on_bufferLineChange(row) {
         var div = this.getLineDivElement(row);
         if (div) {
-            if (row == this.caretMarker.getRowCol().row) {
-                this.__redrawCaret = false;
-            }
             //console.log("Redrawing line %d [%s]", row, this.buffer.code[row]);
             //console.log(new Error().stack);
             div.innerHTML = this._getLineHTML(row);
@@ -472,7 +467,6 @@ export class Ymacs_Frame extends Widget {
 
     _on_bufferBeforeInteractiveCommand() {
         this.__ensureCaretVisible = true;
-        this.__redrawCaret = true;
         this._unhoverLine();
         this.ymacs.clearPopupMessage();
     }
