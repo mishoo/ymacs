@@ -293,7 +293,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
 });
 
 
-let minibuffer_keymap = Ymacs_Keymap.define("minibuffer", minibuffer_keys);
+let minibuffer_keymap = Ymacs_Keymap.define("emacs_mb", minibuffer_keys);
 minibuffer_keymap.defaultHandler = [ "self_insert_command" ];
 
 let emacs_keymap = Ymacs_Keymap.define("emacs", emacs_keys);

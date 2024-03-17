@@ -291,7 +291,7 @@ Ymacs_Buffer.newCommands({
     minibuffer_replace_input: function(value) {
         this.whenMinibuffer(function(mb){
             mb._replaceText(mb.promptMarker, mb.getCodeSize(), value);
-            this.getMinibufferFrame()._redrawCaret(true);
+            this.getMinibufferFrame().redrawCaret(true);
         });
     },
 
@@ -452,8 +452,8 @@ var KEYMAP_POPUP_ACTIVE = Ymacs_Keymap.define(null, Object.assign({
     "ArrowUp && ArrowLeft && C-p && C-b"    : handle_arrow_up,
     "PageDown"                              : handle_arrow_down,
     "PageUp"                                : handle_arrow_up,
-    "C-End"                                 : handle_popup_end,
-    "C-Home"                                : handle_popup_home,
+    "C-End && M->"                          : handle_popup_end,
+    "C-Home && M-<"                         : handle_popup_home,
     "Escape"                                : function() {
         killMenu();
     }

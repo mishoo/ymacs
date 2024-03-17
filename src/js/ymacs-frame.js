@@ -188,7 +188,9 @@ export class Ymacs_Frame extends Widget {
     ensureCaretVisible() {
         // return true if the scroll position was changed (that is, if
         // the caren't wasn't visible before the call).
-        this._redrawCaret();
+        if (this.__redrawCaret) {
+            this.redrawCaret();
+        }
         var ret = false;
 
         var caret = this.getCaretElement();
@@ -251,7 +253,7 @@ export class Ymacs_Frame extends Widget {
                 this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition(), false, "framecaret");
             }
             this._redrawBuffer();
-            this._redrawCaret(true);
+            this.redrawCaret(true);
             this.centerOnCaret();
         }
     }
@@ -309,7 +311,7 @@ export class Ymacs_Frame extends Widget {
         this.__hoverLine = null;
     }
 
-    _redrawCaret(force) {
+    redrawCaret(force) {
         if (this.o.isMinibuffer) force = true;
         var isActive = this.ymacs.getActiveFrame() === this;
         if (!force && !isActive)
@@ -431,7 +433,11 @@ export class Ymacs_Frame extends Widget {
     _on_bufferLineChange(row) {
         var div = this.getLineDivElement(row);
         if (div) {
+            if (row == this.caretMarker.getRowCol().row) {
+                this.__redrawCaret = false;
+            }
             //console.log("Redrawing line %d [%s]", row, this.buffer.code[row]);
+            //console.log(new Error().stack);
             div.innerHTML = this._getLineHTML(row);
         }
     }
@@ -449,7 +455,7 @@ export class Ymacs_Frame extends Widget {
     }
 
     _on_bufferPointChange(rc, pos) {
-        this._redrawCaret();
+        this.redrawCaret();
     }
 
     _on_bufferResetCode() {
@@ -466,6 +472,7 @@ export class Ymacs_Frame extends Widget {
 
     _on_bufferBeforeInteractiveCommand() {
         this.__ensureCaretVisible = true;
+        this.__redrawCaret = true;
         this._unhoverLine();
         this.ymacs.clearPopupMessage();
     }
@@ -556,7 +563,7 @@ export class Ymacs_Frame extends Widget {
             this.buffer.cmd("goto_char", this.caretMarker.getPosition());
         }
         this.buffer.addEventListener(this._moreBufferEvents);
-        this._redrawCaret();
+        this.redrawCaret();
     }
 
     _on_blur() {

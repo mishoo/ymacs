@@ -143,7 +143,7 @@ export class Ymacs extends Widget {
         this.add(this.minibuffer_frame);
 
         this.setActiveFrame(frame);
-        frame._redrawCaret();
+        frame.redrawCaret();
     }
 
     initClassName() {
