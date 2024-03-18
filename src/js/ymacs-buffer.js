@@ -1001,10 +1001,6 @@ export class Ymacs_Buffer extends EventProxy {
             else if (h) {
                 handled = foundPrefix = true;
             }
-            else if (key === "Escape" && this.currentKeys.length == 1) {
-                this.__nextIsMeta = true;
-                handled = true;
-            }
             else if (km.defaultHandler && cc.length == 1) {
                 handled = this.callInteractively(km.defaultHandler[0], km.defaultHandler[1]);
             }

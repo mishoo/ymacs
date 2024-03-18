@@ -1221,6 +1221,13 @@ Ymacs_Buffer.newCommands({
             this.cmd("insert_rectangle", point, kr);
         }),
 
+        _next_is_meta: function() {
+            if (!this.__nextIsMeta) {
+                this.__nextIsMeta = true;
+                this.currentKeys.pop();
+            }
+        },
+
     });
 
 })();
