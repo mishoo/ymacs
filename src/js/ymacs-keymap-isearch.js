@@ -37,7 +37,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let Ymacs_Keymap_ISearch = Ymacs_Keymap.define("isearch", {
     "C-g && Escape": [ "isearch_abort", true ],
-    "C-w && M-w && C-S-s": "isearch_yank_word_or_char",
+    "C-w && C-S-s": "isearch_yank_word_or_char",
     "C-s": "isearch_forward",
     "C-r": "isearch_backward",
     "M-%": "query_replace",
