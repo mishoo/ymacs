@@ -896,6 +896,7 @@ export class Ymacs_Buffer extends EventProxy {
         this._saveKilledText(text, prepend);
         if (!noDelete)
             this._deleteText(p1, p2);
+        this.clearTransientMark();
     }
 
     _saveKilledText(text, prepend) {
