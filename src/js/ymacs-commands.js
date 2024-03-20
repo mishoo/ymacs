@@ -360,7 +360,7 @@ Ymacs_Buffer.newCommands({
     backward_paragraph: Ymacs_Interactive_X(function(){
         this.cmd("backward_whitespace");
         if (this.cmd("search_backward_regexp", this.getq("syntax_paragraph_sep")))
-            this.cmd("goto_char", this.cmd("match_end") - 1);
+            this.cmd("goto_char", this.cmd("match_end"));
         else
             this.cmd("beginning_of_buffer");
     }),
@@ -633,14 +633,20 @@ Ymacs_Buffer.newCommands({
 
     /* -----[ paragraphs ]----- */
 
-    fill_paragraph: Ymacs_Interactive("P", function(noPrefix) {
+    fill_paragraph: Ymacs_Interactive("^rP", function(begin, end, noPrefix) {
         this.cmd("save_excursion", function(){
-            if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
-                this.cmd("forward_paragraph");
-            var eop = this.createMarker(this.point() - 1);
-            this.cmd("backward_paragraph");
-            if (this.point() > 0)
-                this.cmd("forward_char");
+            if (!this.transientMarker) {
+                if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
+                    this.cmd("forward_paragraph");
+                end = this.point() - 1;
+                this.cmd("backward_paragraph");
+                begin = this.point();
+            } else {
+                this.clearTransientMark();
+            }
+
+            this.cmd("goto_char", begin);
+            var eop = this.createMarker(end);
 
             // identify the prefix to use for each line
             var prefix = "", del = /\s+/y;
@@ -706,17 +712,11 @@ Ymacs_Buffer.newCommands({
         });
     }),
 
-    fill_paragraph_no_prefix: Ymacs_Interactive(function() {
-        return this.cmd("fill_paragraph", true);
-    }),
-
     // this looks at the style of the current paragraph and starts
     // a similar one, i.e. using same indentation level and prefix
     // (list-like prefixes are incremented)
     start_next_paragraph: Ymacs_Interactive(function() {
         this.cmd("backward_paragraph");
-        if (this.point() > 0)
-            this.cmd("forward_char");
 
         // identify the prefix to use for each line
         var prefix = "";

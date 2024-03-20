@@ -411,8 +411,9 @@ Ymacs_Buffer.newMode("javascript_mode", function() {
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_JS);
     var changed_vars = this.setq({
+        syntax_paragraph_sep: /\n[^\S\r\n]*(?:\/\/+|\*+)?[^\S\r\n]*\n/g,
         syntax_comment_line: {
-            rx: /\s*\x2f+\s?/g,
+            rx: /[^\S\r\n]*\/\/+[^\S\r\n]*/gu,
             ch: "//"
         }
     });
@@ -422,5 +423,6 @@ Ymacs_Buffer.newMode("javascript_mode", function() {
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_JS);
+        this.setq(changed_vars);
     };
 });

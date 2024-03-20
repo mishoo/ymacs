@@ -50,7 +50,7 @@ let GLOBAL_VARS = {
     // syntax variables
     syntax_word                 : /^[0-9\p{L}]$/u,
     syntax_word_dabbrev         : /^[0-9_$\p{L}]$/u,
-    syntax_paragraph_sep        : /\n\s*\n/g
+    syntax_paragraph_sep        : /\n[^\S\r\n]*\n/g
 };
 
 const MAX_UNDO_RECORDS = 50000; // XXX: should we not limit?

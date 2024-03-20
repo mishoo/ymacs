@@ -258,7 +258,6 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "S-Delete"                                : "delete_whitespace",
     "C-M-d"                                   : "delete_region_or_line",
     "M-Enter"                                 : "start_next_paragraph",
-    "M-S-q"                                   : "fill_paragraph_no_prefix",
     "C-M-|"                                   : "cperl_lineup",
     "C-F4"                                    : "kill_buffer",
     "M-ArrowLeft"                             : [ "windmove", "left" ],
