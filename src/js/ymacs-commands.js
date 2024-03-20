@@ -652,12 +652,12 @@ Ymacs_Buffer.newCommands({
                 prefix = " ".repeat(this.matchData[0].length);
                 del = /\s*\**\s*/y;
             }
-            else if (this.cmd("looking_at", /\s*([-*]|[0-9]+\.|\(?[a-z][\).])?\s+/iy)) {
-                prefix = " ".repeat(this.matchData[0].length);
-                del = /\s*[#>;\s]*\s*/y;
-            }
             else if (this.cmd("looking_at", /\s*[#>;\s]+\s*/y)) {
                 prefix = this.matchData[0];
+                del = /\s*[#>;\s]*\s*/y;
+            }
+            else if (this.cmd("looking_at", /\s*([-*]|[0-9]+\.|\(?[a-z][\).])?\s+/iy)) {
+                prefix = " ".repeat(this.matchData[0].length);
                 del = /\s*[#>;\s]*\s*/y;
             }
 
@@ -681,26 +681,28 @@ Ymacs_Buffer.newCommands({
             this.cmd("beginning_of_line");
 
             // main operation
-            var max = 5000;
-            while (this.point() < eop.getPosition()) {
-                if (--max == 0) break; // whatever is screwed, do not freeze.
+            var bol = this.point(), done = false;
+            while (!done) {
                 var p = this.point();
-                if (!this.cmd("search_forward_regexp", /\s/g))
-                    break;
+                if (!this.cmd("search_forward_regexp", /\s/g)) {
+                    done = true;
+                }
                 if (this.point() > eop.getPosition()) {
-                    break;
+                    this.cmd("goto_char", eop);
+                    done = true;
                 }
                 if (this._rowcol.col > this.getq("fill_column")) {
-                    this.cmd("goto_char", p);
+                    if (p > bol) {
+                        this.cmd("goto_char", p);
+                    }
                     this.cmd("backward_delete_whitespace");
                     this.cmd("newline");
                     this.cmd("insert", prefix);
+                    bol = this.point();
                 }
             }
 
             eop.destroy();
-
-            this.cmd("recenter_top_bottom");
         });
     }),
 
