@@ -596,6 +596,7 @@ Ymacs_Buffer.newCommands({
     },
 
     set_mark_command: Ymacs_Interactive("d", function(x){
+        this.clearTransientMark();
         this.setMark(x);
         if (this.currentCommand == "set_mark_command") {
             this.signalInfo("Mark set", null, 1000);
