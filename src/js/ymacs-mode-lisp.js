@@ -276,9 +276,9 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
             cont_exp: function() {
                 return cont_exp;
             },
-            list: function() {
+            sexp: function() {
                 var tok = cont_exp;
-                while (tok && (tok.type != "list" || tok.end == caret))
+                while (tok && (!/^(?:list|string)$/.test(tok.type) || tok.end == caret))
                     tok = tok.parent;
                 return tok;
             }
@@ -320,7 +320,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
         lisp_backward_up_list: Ymacs_Interactive(function(){
             var p = QuickParser(this);
             p.parse(this.point());
-            var list = p.list();
+            var list = p.sexp();
             if (list && list.parent) this.cmd("goto_char", list.start);
         }),
 
@@ -531,10 +531,16 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             var ch, esc = false, start = stream.col;
             while (!stream.eol()) {
                 ch = stream.peek();
-                if (ch === end && !esc) {
+                if (!esc && ch === end) {
                     $cont.pop();
                     $inString = null;
                     foundToken(start, stream.col, type);
+                    var p = $parens.at(-1);
+                    if (p && p.type == ch) {
+                        $parens.pop();
+                        p.closed = { line: stream.line, col: stream.col, opened: p };
+                        $passedParens.push(p);
+                    }
                     foundToken(stream.col, ++stream.col, type + "-stopper");
                     return true;
                 }
@@ -607,6 +613,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             else if (ch === '"') {
                 newArg();
                 $inString = { line: stream.line, c1: stream.col };
+                $parens.push({ line: stream.line, col: stream.col, type: ch });
                 foundToken(stream.col, ++stream.col, "string-starter");
                 $cont.push(readString.bind(null, ch, "string"));
             }

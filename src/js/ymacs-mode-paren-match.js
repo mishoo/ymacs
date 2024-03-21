@@ -43,6 +43,8 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "C-M-f && C-M-n"               : "forward_sexp",
     "C-M-b && C-M-p"               : "backward_sexp",
     "C-M-u && M-a && C-M-ArrowUp"  : "backward_up_list",
+    "C-M-a"                        : "beginning_of_defun",
+    "C-M-e"                        : "end_of_defun",
     "M-e"                          : "up_list",
     "C-M-ArrowDown"                : "down_list",
     "M-C-k"                        : "kill_sexp",
@@ -252,7 +254,9 @@ Ymacs_Buffer.newCommands({
         if (tok) {
             let rc = this._rowcol;
             let lc = { line: rc.row, col: rc.col };
-            let p = getPP(tok).filter(p => p.closed).sort(compareRowCol).findLast(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
+            let p = getPP(tok).filter(p => p.closed)
+                .sort(compareRowCol)
+                .findLast(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
             if (p != null) {
                 this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
             } else {
@@ -264,6 +268,40 @@ Ymacs_Buffer.newCommands({
     up_list: Ymacs_Interactive(function(){
         this.cmd("backward_up_list");
         this.cmd("forward_sexp");
+    }),
+
+    beginning_of_defun: Ymacs_Interactive(function(){
+        let tok = this.tokenizer.finishParsing();
+        if (tok) {
+            let rc = this._rowcol;
+            let lc = { line: rc.row, col: rc.col };
+            let p = getPP(tok).filter(p => p.closed)
+                .sort(compareRowCol)
+                .find(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
+            if (p != null) {
+                this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
+                this.cmd("back_to_indentation");
+            } else {
+                this.cmd("backward_sexp");
+            }
+        }
+    }),
+
+    end_of_defun: Ymacs_Interactive(function(){
+        let tok = this.tokenizer.finishParsing();
+        if (tok) {
+            let rc = this._rowcol;
+            let lc = { line: rc.row, col: rc.col };
+            let p = getPP(tok).filter(p => p.closed)
+                .sort(compareRowCol)
+                .find(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
+            if (p != null) {
+                p = p.closed;
+                this.cmd("goto_char", this._rowColToPosition(p.line, p.col + 1));
+            } else {
+                this.cmd("forward_sexp");
+            }
+        }
     }),
 
     paredit_raise_sexp: Ymacs_Interactive(function(){
