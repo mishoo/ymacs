@@ -88,32 +88,39 @@
 
 $lnwidth: 3.1em;
 
-.Ymacs.Ymacs-line-numbers .Ymacs-frame-content:before {
-  box-sizing: border-box;
-  content: "";
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: $lnwidth;
-  z-index: -1;
-  font-size: 80%;
-}
-.Ymacs.Ymacs-line-numbers .Ymacs-frame-content {
-  counter-reset: ymacs-line 0;
-}
-.Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line { counter-increment: ymacs-line; }
-.Ymacs.Ymacs-line-numbers .Ymacs-frame-content div.line:before {
-  box-sizing: border-box;
-  display: inline-block;
-  width: $lnwidth;
-  margin-right: 7px;
-  padding-right: 7px;
-  content: counter(ymacs-line, decimal);
-  text-align: right;
-  position: relative;
-  font-size: 80%;
+.Ymacs.Ymacs-line-numbers {
+  .Ymacs-frame-content {
+    counter-reset: ymacs-line 0;
+
+    &:before {
+      box-sizing: border-box;
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: $lnwidth;
+      z-index: -1;
+      font-size: 80%;
+    }
+
+    > div.line {
+      counter-increment: ymacs-line;
+
+      &:before {
+        box-sizing: border-box;
+        display: inline-block;
+        width: $lnwidth;
+        margin-right: 7px;
+        padding-right: 7px;
+        content: counter(ymacs-line, decimal);
+        text-align: right;
+        position: relative;
+        font-size: 80%;
+      }
+    }
+  }
 }
 
 .Ymacs .Ymacs_Frame.Ymacs_Minibuffer .Ymacs-frame-content {
