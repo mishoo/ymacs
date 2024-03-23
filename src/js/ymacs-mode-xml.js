@@ -39,22 +39,33 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
-    var $tags       = [];
-    var $cont       = [];
-    var $inTag      = null;
-    var $inComment  = null;
-    var PARSER      = { next: next, copy: copy, indentation: indentation };
+    var $tags = [];
+    var $cont = [];
+    var $parens = [];
+    var $passedParens = [];
+    var $inTag = null;
+    var $inComment = null;
+    var $inString = false;
+    var PARSER = { next: next, copy: copy, indentation: indentation };
 
     function copy() {
-        var _tags = $tags.slice(0),
-        _cont = $cont.slice(0),
-        _inTag = $inTag,
-        _inComment = $inComment;
+        let context = resume.context = {
+            tags: $tags.slice(0),
+            cont: $cont.slice(0),
+            parens: $parens.slice(0),
+            passedParens: $passedParens.slice(0),
+            inTag: $inTag,
+            inComment: $inComment,
+            inString: $inString,
+        };
         function resume() {
-            $cont = _cont.slice(0);
-            $tags = _tags.slice(0);
-            $inTag = _inTag;
-            $inComment = _inComment;
+            $cont = context.cont.slice(0);
+            $tags = context.tags.slice(0);
+            $parens = context.parens.slice(0);
+            $passedParens = context.passedParens.slice(0);
+            $inTag = context.inTag;
+            $inComment = context.inComment;
+            $inString = context.inString;
             return PARSER;
         };
         return resume;
@@ -94,12 +105,20 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
     };
 
     function readString(end) {
+        $inString = true;
         var ch, esc = false, start = stream.col;
         while (!stream.eol()) {
             ch = stream.peek();
-            if (ch === end && !esc) {
+            if (!esc && ch === end) {
                 $cont.pop();
+                $inString = false;
                 foundToken(start, stream.col, "string");
+                var p = $parens.at(-1);
+                if (p && p.type == ch) {
+                    $parens.pop();
+                    p.closed = { line: stream.line, col: stream.col, opened: p };
+                    $passedParens.push(p);
+                }
                 foundToken(stream.col, ++stream.col, "string-stopper");
                 return;
             }
@@ -111,13 +130,25 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
     function readTag() {
         var ch = stream.peek(), name;
-        if (stream.lookingAt(/^\x2f>/)) {
+        if (stream.lookingAt(/^\/>/)) {
+            let p = $parens.at(-1);
+            if (p && p.type == "<") {
+                $parens.pop();
+                p.closed = { line: stream.line, col: stream.col + 1, opened: p };
+                $passedParens.push(p);
+            }
             $cont.pop();
             $inTag = null;
             foundToken(stream.col, ++stream.col, "xml-closetag-slash");
             foundToken(stream.col, ++stream.col, "xml-close-bracket");
         }
         else if (ch === ">") {
+            let p = $parens.at(-1);
+            if (p && p.type == "<") {
+                $parens.pop();
+                p.closed = { line: stream.line, col: stream.col, opened: p };
+                $passedParens.push(p);
+            }
             $cont.pop();
             $tags.push($inTag);
             $inTag = null;
@@ -127,6 +158,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             foundToken(name.c1, name.c2, "xml-attribute");
         }
         else if (ch === '"' || ch === "'") {
+            $parens.push({ line: stream.line, col: stream.col, type: ch });
             foundToken(stream.col, ++stream.col, "string-starter");
             $cont.push(readString.bind(null, ch));
         }
@@ -153,6 +185,9 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             if (m[1])
                 foundToken(stream.col, stream.col += m[1].length, null);
             if (m[2]) {
+                let p = $parens.pop();
+                p.closed = { line: stream.line, col: stream.col, opened: p };
+                $passedParens.push(p);
                 foundToken(stream.col, stream.col += m[2].length, "xml-close-bracket");
                 $cont.pop();
             }
@@ -165,7 +200,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         stream.checkStop();
         if ($cont.length > 0)
             return $cont.at(-1)();
-        var ch = stream.peek(), m;
+        let ch = stream.peek(), m;
         if (stream.lookingAt("<![CDATA[")) {
             foundToken(stream.col, stream.col += 9, "xml-cdata-starter");
             $inComment = { line: stream.line, c1: stream.col };
@@ -176,18 +211,26 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             $inComment = { line: stream.line, c1: stream.col };
             $cont.push(readComment.bind(null, "mcomment", "-->"));
         }
-        else if (stream.lookingAt(/^<\x2f/) && isNameStart(stream.peek(+2))) {
+        else if (stream.lookingAt(/^<\//) && isNameStart(stream.peek(+2))) {
+            $parens.push({ line: stream.line, c1: stream.col, c2: stream.col + 2, type: "</" });
             foundToken(stream.col, ++stream.col, "xml-open-bracket");
             foundToken(stream.col, ++stream.col, "xml-closetag-slash");
-            var tag = readName(), prev = $tags.pop();
+            let tag = readName(), prev = $tags.pop();
             foundToken(tag.c1, tag.c2, ( prev && prev.id == tag.id
                                          ? "xml-close-tag"
                                          : "error" ));
+            if (prev) {
+                let popen = { line: prev.line, c1: prev.c1, c2: prev.c2, type: prev.id };
+                let pclose = { line: tag.line, c1: tag.c1, c2: tag.c2, opened: popen };
+                popen.closed = pclose;
+                $passedParens.push(popen);
+            }
             $cont.push(readCloseBracket);
         }
         else if (ch === "<" && isNameStart(stream.peek(+1))) {
+            $parens.push({ line: stream.line, col: stream.col, type: ch });
             foundToken(stream.col, ++stream.col, "xml-open-bracket");
-            var tag = readName();
+            let tag = readName();
             foundToken(tag.c1, tag.c2, "xml-open-tag");
             $inTag = tag;
             $cont.push(readTag);
@@ -241,10 +284,13 @@ Ymacs_Buffer.newMode("xml_mode", function(){
 
     var tok = this.tokenizer;
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
+    var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_XML);
     var changed_vars = this.setq({ indent_level: 2 });
     return function() {
         this.setTokenizer(tok);
+        if (!was_paren_match)
+            this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_XML);
         this.setq(changed_vars);
     };

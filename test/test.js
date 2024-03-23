@@ -23,15 +23,19 @@ window.addEventListener("beforeunload", ev => {
     ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-bright" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
-    document.body.appendChild(ymacs.getElement());
     let b = ymacs.getActiveBuffer.bind(ymacs);
-    b().cmd("load_file", "ymacs-frame.js");
-    b().callInteractively("split_frame_horizontally");
-    b().cmd("other_frame");
-    b().cmd("load_file", "queen-board.lisp");
-    b().callInteractively("split_frame_vertically");
-    b().cmd("load_file", "README.md");
+    b().cmd("load_file", "index.html");
+
+    // b().cmd("load_file", "ymacs-frame.js");
+    // b().callInteractively("split_frame_horizontally");
+    // b().cmd("other_frame");
+    // b().cmd("load_file", "queen-board.lisp");
+    // b().callInteractively("split_frame_vertically");
+    // b().cmd("load_file", "README.md");
+
+    document.body.appendChild(ymacs.getElement());
     b().cmd("toggle_line_numbers");
+    ymacs.focus();
 }
 
 

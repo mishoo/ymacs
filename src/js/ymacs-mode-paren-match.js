@@ -38,7 +38,7 @@ import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
-    "C-c \\"                       : "goto_matching_paren",
+    "C-M-x"                        : "goto_matching_paren",
     "C-M-q"                        : "indent_sexp",
     "C-M-f && C-M-n"               : "forward_sexp",
     "C-M-b && C-M-p"               : "backward_sexp",
@@ -87,7 +87,7 @@ function compareRowCol(p1, p2) {
         ? -1
         : p1.line > p2.line
         ? 1
-        : p1.col - p2.col;
+        : (p1.col ?? p1.c1) - (p2.col ?? p2.c1);
 };
 
 var PARENS = {
@@ -120,8 +120,40 @@ function ERROR(o) {
 
 function getPP(tok) {
     var pp = tok.context.passedParens;
-    return pp instanceof Function ? pp() : pp;
+    pp = pp instanceof Function ? pp() : pp;
+    if (pp) pp = [...pp].sort(compareRowCol);
+    return pp;
 };
+
+function caretInOP(caret, paren) {
+    if (caret.row == paren.line) {
+        if (paren.col != null) {
+            return caret.col == paren.col;
+        } else {
+            return paren.c1 <= caret.col
+                && caret.col <= paren.c2;
+        }
+    }
+}
+
+function caretInCP(caret, paren) {
+    if (caret.row == paren.line) {
+        if (paren.col != null) {
+            return caret.col == paren.col + 1;
+        } else {
+            return paren.c1 <= caret.col
+                && caret.col <= paren.c2;
+        }
+    }
+}
+
+function startOf(paren) {
+    return paren.c1 ?? paren.col;
+}
+
+function endOf(paren) {
+    return paren.c2 ?? paren.col + 1;
+}
 
 Ymacs_Buffer.newCommands({
 
@@ -130,12 +162,12 @@ Ymacs_Buffer.newCommands({
         if (parser) {
             let rc = this._rowcol;
             let parens = getPP(parser);
-            for (let p of parens) {
-                let match = p.closed;
-                if (p.line == rc.row && p.col == rc.col) {
-                    return this._rowColToPosition(match.line, match.col + 1);
-                } else if (match.line == rc.row && match.col == rc.col - 1) {
-                    return this._rowColToPosition(p.line, p.col);
+            for (let op of parens) {
+                let cp = op.closed;
+                if (caretInOP(rc, op)) {
+                    return this._rowColToPosition(cp.line, endOf(cp));
+                } else if (caretInCP(rc, cp)) {
+                    return this._rowColToPosition(op.line, startOf(op));
                 }
             }
         }
@@ -167,7 +199,7 @@ Ymacs_Buffer.newCommands({
             let next = null;
             for (let i = 0; i < parens.length; ++i) {
                 let p = parens[i];
-                if (p.line > rc.row || (p.line == rc.row && p.col >= rc.col)) {
+                if (p.line > rc.row || (p.line == rc.row && startOf(p) >= rc.col)) {
                     next = p;
                     break;
                 }
@@ -176,7 +208,7 @@ Ymacs_Buffer.newCommands({
                 ERROR(this);
                 return;
             }
-            this.cmd("goto_char", this._rowColToPosition(next.closed.line, next.closed.col) + 1);
+            this.cmd("goto_char", this._rowColToPosition(next.closed.line, endOf(next.closed)));
             return true;
         }
     }),
@@ -190,7 +222,7 @@ Ymacs_Buffer.newCommands({
             let prev = null;
             for (let i = parens.length; --i >= 0;) {
                 let p = parens[i];
-                if (p.line < rc.row || (p.line == rc.row && p.col < rc.col)) {
+                if (p.line < rc.row || (p.line == rc.row && startOf(p) < rc.col)) {
                     prev = p;
                     break;
                 }
@@ -199,7 +231,7 @@ Ymacs_Buffer.newCommands({
                 ERROR(this);
                 return;
             }
-            this.cmd("goto_char", this._rowColToPosition(prev.opened.line, prev.opened.col));
+            this.cmd("goto_char", this._rowColToPosition(prev.opened.line, startOf(prev.opened)));
             return true;
         }
     }),
@@ -242,7 +274,7 @@ Ymacs_Buffer.newCommands({
             let lc = { line: rc.row, col: rc.col };
             let p = getPP(tok).filter(p => p.closed).sort(compareRowCol).find(p => compareRowCol(p, lc) >= 0);
             if (p != null) {
-                this.cmd("goto_char", this._rowColToPosition(p.line, p.col) + p.type.length);
+                this.cmd("goto_char", this._rowColToPosition(p.line, endOf(p)));
             } else {
                 ERROR(this);
             }
@@ -258,7 +290,7 @@ Ymacs_Buffer.newCommands({
                 .sort(compareRowCol)
                 .findLast(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
             if (p != null) {
-                this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
+                this.cmd("goto_char", this._rowColToPosition(p.line, startOf(p)));
             } else {
                 ERROR(this);
             }
@@ -279,7 +311,7 @@ Ymacs_Buffer.newCommands({
                 .sort(compareRowCol)
                 .find(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
             if (p != null) {
-                this.cmd("goto_char", this._rowColToPosition(p.line, p.col));
+                this.cmd("goto_char", this._rowColToPosition(p.line, startOf(p)));
                 this.cmd("back_to_indentation");
             } else {
                 this.cmd("backward_sexp");
@@ -297,7 +329,7 @@ Ymacs_Buffer.newCommands({
                 .find(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
             if (p != null) {
                 p = p.closed;
-                this.cmd("goto_char", this._rowColToPosition(p.line, p.col + 1));
+                this.cmd("goto_char", this._rowColToPosition(p.line, endOf(p)));
             } else {
                 this.cmd("forward_sexp");
             }
@@ -420,24 +452,6 @@ Ymacs_Buffer.newCommands({
         m.destroy();
     }),
 
-    // paredit_close_all_pairs: Ymacs_Interactive(function() {
-    //     var p = this.tokenizer.getParserForLine(this._rowcol.row);
-    //     if (p) {
-    //         // this kind of sucks, we need to rewind the stream to that location..
-    //         var s = this.tokenizer.stream;
-    //         s.line = this._rowcol.row;
-    //         s.col = 0;
-    //         try {
-    //             while (s.col < this._rowcol.col)
-    //                 p.next();
-    //         } catch(ex) {}
-    //         p = p.copy().context.parens; // these are still-to-close
-    //         p.r_foreach(function(p){
-    //             this.cmd("paredit_close_pair", PARENS[p.type]);
-    //         }, this);
-    //     }
-    // }),
-
     paredit_newline_and_indent: Ymacs_Interactive(function(){
         var inparens = this.looking_at(/[ \t]*([\]\}])/y)
             && this.looking_back(new RegExp("\\" + R_PARENS[this.matchData[1]] + "[ \\t]*"));
@@ -471,30 +485,30 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
     }.bind(this);
 
     function inside(a, b, c) {
-        return b >= a && b < a + c;
+        return b >= a && b < c;
     }
 
-    var events = {
+    let events = {
         beforeInteractiveCommand: function() {
             clearOvl();
         },
         afterInteractiveCommand: delayed(() => {
-            var p = this.tokenizer.getLastParser(), rc = this._rowcol;
-            var hl = [];
-            if (p) {
-                getPP(p).forEach(par_a => {
-                    var par_b = par_a.closed;
-                    if ((par_a.line == rc.row && inside(par_a.col, rc.col, par_a.type.length)) ||
-                        (par_b.line == rc.row && inside(par_b.col, rc.col - 1, 1))) {
-                        hl.push({
-                            line1: par_a.line, col1: par_a.col,
-                            line2: par_a.line, col2: par_a.col + par_a.type.length
-                        }, {
-                            line1: par_b.line, col1: par_b.col,
-                            line2: par_b.line, col2: par_b.col + 1
-                        });
-                    }
-                });
+            let p = this.tokenizer.getLastParser(), rc = this._rowcol;
+            let hl = [];
+            if (p) for (let par_a of getPP(p)) {
+                let par_b = par_a.closed;
+                let ac1 = par_a.c1 ?? par_a.col, ac2 = par_a.c2 ?? (par_a.col + par_a.type.length);
+                let bc1 = par_b.c1 ?? par_b.col, bc2 = par_b.c2 ?? (par_b.col + 1);
+                if (caretInOP(rc, par_a) || caretInCP(rc, par_b)) {
+                    hl.push({
+                        line1: par_a.line, col1: ac1,
+                        line2: par_a.line, col2: ac2
+                    }, {
+                        line1: par_b.line, col1: bc1,
+                        line2: par_b.line, col2: bc2
+                    });
+                    break;
+                }
             }
             this.setOverlay("match-paren", hl);
         }, 100)
