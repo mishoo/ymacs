@@ -92,7 +92,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
     };
 
     function readName() {
-        var col = stream.col, ch = stream.get(),
+        var col = stream.col, ch = stream.next(),
         name = ch;
         while (!stream.eol()) {
             ch = stream.peek();
@@ -276,8 +276,10 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
 let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
     "C-c /"   : "xml_close_tag",
+    "/"       : "xml_slash_complete_tag",
+    ">"       : "xml_gt_complete_tag",
     "C-Enter" : "xml_zen_expand",
-    "Enter"   : "newline_and_indent"
+    "Enter"   : "xml_newline_and_indent"
 });
 
 Ymacs_Buffer.newMode("xml_mode", function(){
@@ -431,6 +433,33 @@ Ymacs_Buffer.newMode("xml_mode", function(){
             this.cmd("indent_line");
         }),
 
+        xml_slash_complete_tag: Ymacs_Interactive(function() {
+            this.cmd("self_insert_command");
+            if (this.looking_back("</")) {
+                let rc = this._rowcol;
+                let parser = this.tokenizer.getParserForLine(rc.row, rc.col);
+                let ctx = parser.copy().context;
+                let tag = ctx.tags.at(-1);
+                if (tag) {
+                    this.cmd("insert", tag.id, ">");
+                    this.cmd("indent_line");
+                }
+            }
+        }),
+
+        xml_gt_complete_tag: Ymacs_Interactive(function() {
+            this.cmd("self_insert_command");
+            let rc = this._rowcol;
+            let parser = this.tokenizer.getParserForLine(rc.row, rc.col);
+            let ctx = parser.copy().context;
+            let tag = ctx.tags.at(-1);
+            if (tag) {
+                let pos = this.point();
+                this.cmd("insert", "</", tag.id, ">");
+                this.cmd("goto_char", pos);
+            }
+        }),
+
         xml_zen_expand: Ymacs_Interactive(function() {
             this.cmd("xml_zen_stop");
             var html = "";
@@ -514,7 +543,17 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                     break;
                 }
             }
-        })
+        }),
+
+        xml_newline_and_indent: Ymacs_Interactive(function(){
+            let inparens = this.looking_at("</") && this.looking_back(">");
+            this.cmd("newline_and_indent");
+            if (inparens) {
+                this.cmd("newline_and_indent");
+                this.cmd("backward_line");
+                this.cmd("indent_line");
+            }
+        }),
 
     });
 

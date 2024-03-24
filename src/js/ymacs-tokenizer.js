@@ -63,22 +63,28 @@ export class Ymacs_Stream {
         this.col = 0;
     }
 
-    peek(n) {
-        if (n == null) n = 0;
-        return this.buffer.code[this.line].charAt(this.col + n);
+    peek(n = 0) {
+        if (this.line < this.buffer.code.length) {
+            let pos = this.col + n;
+            let line = this.buffer.code[this.line];
+            if (pos < line.length) return line.charAt(pos);
+            if (pos == line.length) return "\n";
+        }
     }
 
     next() {
-        var ch = this.peek();
+        let ch = this.peek();
         this.nextCol();
-        if (this.col >= this.buffer.code[this.line].length)
+        if (this.col > this.buffer.code[this.line].length)
             this.nextLine();
-        return ch;
-    }
-
-    get() {
-        var ch = this.peek();
-        this.nextCol();
+        let stop = this.__stop;
+        if (stop) {
+            if (this.line > stop.line
+                || (this.line == stop.line && this.col >= stop.col)) {
+                this.__stop = null;
+                throw stop.stop ?? this.EOF;
+            }
+        }
         return ch;
     }
 
@@ -128,6 +134,10 @@ export class Ymacs_Stream {
     eof() {
         var n = this.buffer.code.length, l = this.line;
         return l >= n || l == n - 1 && this.eol();
+    }
+
+    stopAt(line, col, stop = this.EOF) {
+        this.__stop = { line, col, stop };
     }
 
     length() {
@@ -352,7 +362,7 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.callHooks("onFoundToken", line, c1, c2, type);
     }
 
-    getParserForLine(row) {
+    getParserForLine(row, col) {
         this._stopQuickUpdate();
         var s = this.stream, p, a = this.parsers, n;
         var currentLine = s.line;
@@ -360,11 +370,14 @@ export class Ymacs_Tokenizer extends EventProxy {
         while (!(p = a[s.line]))
             s.prevLine();
         s.nextLine();
+        if (col != null) {
+            s.stopAt(row, col);
+        }
         p = p();
         try {
             this.buffer.preventUpdates();
             while (true) {
-                if (s.line == row) {
+                if (col == null && s.line == row) {
                     return p;
                 }
                 try {
@@ -375,7 +388,7 @@ export class Ymacs_Tokenizer extends EventProxy {
                         s.nextLine();
                     }
                     else if (ex === s.EOF) {
-                        break;
+                        return p;
                     }
                     else {
                         throw ex;

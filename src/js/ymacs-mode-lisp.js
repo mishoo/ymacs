@@ -514,7 +514,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
         function INDENT_LEVEL() { return stream.buffer.getq("indent_level"); };
 
         function readName() {
-            var col = stream.col, ch = stream.get(),
+            var col = stream.col, ch = stream.next(),
             name = ch;
             while (!stream.eol()) {
                 ch = stream.peek();

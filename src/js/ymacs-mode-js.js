@@ -142,7 +142,7 @@ parseInt undefined window document alert prototype constructor super this");
         };
 
         function readName() {
-            var col = stream.col, ch = stream.get(),
+            var col = stream.col, ch = stream.next(),
             name = ch;
             while (!stream.eol()) {
                 ch = stream.peek();

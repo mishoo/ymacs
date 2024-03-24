@@ -78,7 +78,7 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "M-s"                          : "paredit_splice_sexp",
     "Backspace"                    : "paredit_backward_delete_char",
     "Delete && C-d"                : "paredit_delete_char",
-    "Enter && C-j && C-m"          : "paredit_newline_and_indent",
+    "Enter"                        : "paredit_newline_and_indent",
     "; && : && , && ."             : "paredit_electric_char",
 });
 

@@ -16,11 +16,11 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    //ymacs.setColorTheme([ "material" ]);
+    ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "base16-apathy" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
-    ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
+    //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-bright" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
     let b = ymacs.getActiveBuffer.bind(ymacs);
