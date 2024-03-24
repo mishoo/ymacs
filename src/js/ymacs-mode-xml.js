@@ -196,6 +196,32 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         }
     };
 
+    let OPEN_PAREN = {
+        "(" : ")",
+        "{" : "}",
+        "[" : "]",
+        "«" : "»",
+        "❰" : "❱",
+        "“" : "”",
+    };
+
+    let CLOSE_PAREN = {
+        ")" : "(",
+        "}" : "{",
+        "]" : "[",
+        "»" : "«",
+        "❱" : "❰",
+        "”" : "“",
+    };
+
+    function isOpenParen(ch) {
+        return OPEN_PAREN[ch];
+    };
+
+    function isCloseParen(ch) {
+        return CLOSE_PAREN[ch];
+    };
+
     function next() {
         stream.checkStop();
         if ($cont.length > 0)
@@ -242,6 +268,20 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         }
         else if (ch === "&") {
             foundToken(stream.col, ++stream.col, "error");
+        }
+        else if ((m = isOpenParen(ch))) {
+            $parens.push({ line: stream.line, col: stream.col, type: ch });
+            foundToken(stream.col, ++stream.col, "open-paren");
+        }
+        else if ((m = isCloseParen(ch))) {
+            let p = $parens.pop();
+            if (!p || p.type != m) {
+                foundToken(stream.col, ++stream.col, "error");
+            } else {
+                p.closed = { line: stream.line, col: stream.col, opened: p };
+                $passedParens.push(p);
+                foundToken(stream.col, ++stream.col, "close-paren");
+            }
         }
         else {
             foundToken(stream.col, ++stream.col, null);
