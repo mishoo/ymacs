@@ -163,6 +163,14 @@ export class Ymacs_Stream {
     checkStop() {
         if (this.eof()) throw this.EOF;
         if (this.eol()) throw this.EOL;
+        let stop = this.__stop;
+        if (stop) {
+            if (this.line > stop.line
+                || (this.line == stop.line && this.col >= stop.col)) {
+                this.__stop = null;
+                throw stop.stop ?? this.EOF;
+            }
+        }
     }
 
     skip_ws() {

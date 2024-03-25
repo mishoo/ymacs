@@ -34,8 +34,9 @@ window.addEventListener("beforeunload", ev => {
     // b().cmd("load_file", "README.md");
 
     document.body.appendChild(ymacs.getElement());
-    b().cmd("toggle_line_numbers");
     ymacs.focus();
+
+    b().cmd("toggle_line_numbers");
 }
 
 

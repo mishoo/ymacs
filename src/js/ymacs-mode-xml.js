@@ -130,7 +130,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
     function readTag() {
         var ch = stream.peek(), name;
-        if (stream.lookingAt(/^\/>/)) {
+        if (stream.lookingAt("/>")) {
             let p = $parens.at(-1);
             if (p && p.type == "<") {
                 $parens.pop();
@@ -150,6 +150,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 $passedParens.push(p);
             }
             $cont.pop();
+            $inTag.inner = { l1: stream.line, c1: stream.col + 1 };
             $tags.push($inTag);
             $inTag = null;
             foundToken(stream.col, ++stream.col, "xml-close-bracket");
@@ -179,7 +180,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         }
     };
 
-    function readCloseBracket() {
+    function readCloseBracket(tag) {
         var m = stream.lookingAt(/^([\s\xA0]*)(>?)/);
         if (m && m[0]) {
             if (m[1])
@@ -190,6 +191,10 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 $passedParens.push(p);
                 foundToken(stream.col, stream.col += m[2].length, "xml-close-bracket");
                 $cont.pop();
+                if (tag) {
+                    tag.outer.l2 = stream.line;
+                    tag.outer.c2 = stream.col;
+                }
             }
         } else {
             foundToken(stream.col, ++stream.col, "error");
@@ -237,26 +242,34 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             $inComment = { line: stream.line, c1: stream.col };
             $cont.push(readComment.bind(null, "mcomment", "-->"));
         }
-        else if (stream.lookingAt(/^<\//) && isNameStart(stream.peek(+2))) {
+        else if (stream.lookingAt("</") && isNameStart(stream.peek(+2))) {
+            let otag = $tags.pop();
+            if (otag) {
+                otag.inner.l2 = stream.line;
+                otag.inner.c2 = stream.col;
+            }
             $parens.push({ line: stream.line, c1: stream.col, c2: stream.col + 2, type: "</" });
             foundToken(stream.col, ++stream.col, "xml-open-bracket");
             foundToken(stream.col, ++stream.col, "xml-closetag-slash");
-            let tag = readName(), prev = $tags.pop();
-            foundToken(tag.c1, tag.c2, ( prev && prev.id == tag.id
+            let ctag = readName();
+            foundToken(ctag.c1, ctag.c2, ( otag && otag.id == ctag.id
                                          ? "xml-close-tag"
                                          : "error" ));
-            if (prev) {
-                let popen = { line: prev.line, c1: prev.c1, c2: prev.c2, type: prev.id };
-                let pclose = { line: tag.line, c1: tag.c1, c2: tag.c2, opened: popen };
+            if (otag) {
+                let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
+                              inner: otag.inner, outer: otag.outer };
+                let pclose = { line: ctag.line, c1: ctag.c1, c2: ctag.c2, opened: popen };
                 popen.closed = pclose;
                 $passedParens.push(popen);
             }
-            $cont.push(readCloseBracket);
+            $cont.push(readCloseBracket.bind(null, otag));
         }
         else if (ch === "<" && isNameStart(stream.peek(+1))) {
+            let outer = { l1: stream.line, c1: stream.col };
             $parens.push({ line: stream.line, col: stream.col, type: ch });
             foundToken(stream.col, ++stream.col, "xml-open-bracket");
             let tag = readName();
+            tag.outer = outer;
             foundToken(tag.c1, tag.c2, "xml-open-tag");
             $inTag = tag;
             $cont.push(readTag);
@@ -481,6 +494,7 @@ Ymacs_Buffer.newMode("xml_mode", function(){
                 let ctx = parser.copy().context;
                 let tag = ctx.tags.at(-1);
                 if (tag) {
+                    this._placeUndoBoundary();
                     this.cmd("insert", tag.id, ">");
                     this.cmd("indent_line");
                 }
@@ -493,7 +507,8 @@ Ymacs_Buffer.newMode("xml_mode", function(){
             let parser = this.tokenizer.getParserForLine(rc.row, rc.col);
             let ctx = parser.copy().context;
             let tag = ctx.tags.at(-1);
-            if (tag) {
+            if (tag?.inner?.l1 == rc.row && tag.inner.c1 == rc.col) {
+                this._placeUndoBoundary();
                 let pos = this.point();
                 this.cmd("insert", "</", tag.id, ">");
                 this.cmd("goto_char", pos);
