@@ -75,8 +75,10 @@ Ymacs_Buffer.newCommands({
             return "markdown";
 
           case ".xml":
-          case ".html":
             return "xml";
+
+          case ".html":
+            return "html";
         }
         return null;
     },

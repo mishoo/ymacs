@@ -350,6 +350,11 @@ parseInt undefined window document alert prototype constructor super this");
                         indent -= INDENT_LEVEL();
                 }
             }
+            else {
+                let i = row, m;
+                while (i-- > 0) if ((m = /\S/.exec(stream.lineText(i)))) break;
+                if (m) indent = m.index;
+            }
 
             // Some more adjustments for continued statements.  Since we don't really have a
             // rigorous parser, we have to rely on other regexps here, which sucks but will do for

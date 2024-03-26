@@ -117,12 +117,18 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
         var ch, esc = false, start = stream.col;
         while (!stream.eol()) {
             ch = stream.peek();
-            if (ch === end && !esc) {
+            if (!esc && ch === end) {
                 $cont.pop();
                 $inString = null;
                 foundToken(start, stream.col, type);
+                var p = $parens.at(-1);
+                if (p && p.type == ch) {
+                    $parens.pop();
+                    p.closed = { line: stream.line, col: stream.col, opened: p };
+                    $passedParens.push(p);
+                }
                 foundToken(stream.col, ++stream.col, type + "-stopper");
-                return true;
+                return;
             }
             esc = !esc && ch === "\\";
             stream.nextCol();
@@ -140,7 +146,12 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
             foundToken(stream.col, stream.col += 2, "mcomment-starter");
             $cont.push(readComment);
         }
+        else if (stream.lookingAt("//")) {
+            foundToken(stream.col, stream.col += 2, "comment-starter");
+            foundToken(stream.col, stream.col = stream.lineLength(), "comment");
+        }
         else if (ch === '"' || ch === "'") {
+            $parens.push({ line: stream.line, col: stream.col, type: ch });
             $inString = { line: stream.line, c1: stream.col };
             foundToken(stream.col, ++stream.col, "string-starter");
             $cont.push(readString.bind(null, ch, "string"));
@@ -154,30 +165,29 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
             if (!p || p.type != tmp) {
                 foundToken(stream.col, ++stream.col, "error");
             } else {
-                // circular reference; poor browsers will leak.  mwuhahahaha
                 p.closed = { line: stream.line, col: stream.col, opened: p };
                 $passedParens.push(p);
                 foundToken(stream.col, ++stream.col, "close-paren");
             }
         }
-        else if ((tmp = stream.lookingAt(/^([a-zA-z-]+):/))) {
-            foundToken(stream.col, stream.col += tmp[1].length, "keyword");
+        else if ((tmp = stream.lookingAt(/^(--+|\$)?([\p{L}\p{N}-]+):/u))) {
+            foundToken(stream.col, stream.col += tmp[0].length - 1, tmp[1] ? "variable-name" : "keyword");
             foundToken(stream.col, ++stream.col, "operator");
         }
-        else if ((tmp = stream.lookingAt(/^([0-9.]+)(px|pt|em|ex|in|cm|mm|%)/))) {
+        else if ((tmp = stream.lookingAt(/^([0-9.]+)(px|pt|em|ex|in|cm|mm|rem|vw|vh|fr|%)/))) {
             foundToken(stream.col, stream.col += tmp[1].length, "number");
             foundToken(stream.col, stream.col += tmp[2].length, "type");
         }
-        else if ((tmp = stream.lookingAt(/^(\.[a-zA-Z0-9_:-]+)/))) {
+        else if ((tmp = stream.lookingAt(/^(\.[\p{L}\p{N}_:-]+)/u))) {
             foundToken(stream.col, stream.col += tmp[1].length, "function-name");
         }
-        else if ((tmp = stream.lookingAt(/^(#[a-zA-Z0-9_:-]+)/))) {
+        else if ((tmp = stream.lookingAt(/^(#[\p{L}\p{N}_:-]+)/u))) {
             foundToken(stream.col, stream.col += tmp[1].length, "constant");
         }
-        else if ((tmp = stream.lookingAt(/^(@[a-zA-Z0-9_:-]+)/))) {
+        else if ((tmp = stream.lookingAt(/^(@[\p{L}\p{N}_:-]+)/u))) {
             foundToken(stream.col, stream.col += tmp[1].length, "builtin");
         }
-        else if ((tmp = stream.lookingAt(/^(url|none|auto|bold|italic|normal|inherit|print|screen|all)/))) {
+        else if ((tmp = stream.lookingAt(/^(url|none|auto|bold|italic|normal|inherit|print|screen|all|important|calc|var)/))) {
             foundToken(stream.col, stream.col += tmp[1].length, "builtin");
         }
         else {
@@ -232,6 +242,11 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
                 if (thisLineCloses)
                     indent -= INDENT_LEVEL();
             }
+        }
+        else {
+            let i = row, m;
+            while (i-- > 0) if ((m = /\S/.exec(stream.lineText(i)))) break;
+            if (m) indent = m.index;
         }
 
         return indent;

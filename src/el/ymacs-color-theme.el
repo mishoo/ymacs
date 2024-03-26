@@ -17,6 +17,7 @@
     ( ".minibuffer-prompt" minibuffer-prompt )
     ( ".mode-line-buffer-id" mode-line-buffer-id )
 
+    ( ".directive"             font-lock-preprocessor-face                                       )
     ( ".type"                  font-lock-type-face                                               )
     ( ".builtin"               font-lock-builtin-face                                            )
     ( ".function-name"         font-lock-function-name-face                                      )

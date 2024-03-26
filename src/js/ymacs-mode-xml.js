@@ -37,8 +37,36 @@ import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
-Ymacs_Tokenizer.define("xml", function(stream, tok) {
+Ymacs_Tokenizer.define("xml", xml_tokenizer);
+Ymacs_Tokenizer.define("html", html_tokenizer);
 
+let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
+    "C-c /"   : "xml_close_tag",
+    "/"       : "xml_slash_complete_tag",
+    ">"       : "xml_gt_complete_tag",
+    "C-Enter" : "xml_zen_expand",
+    "Enter"   : "xml_newline_and_indent"
+});
+
+let markup_mode = tok_type => function(){
+    var tok = this.tokenizer;
+    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: tok_type }));
+    var was_paren_match = this.cmd("paren_match_mode", true);
+    this.pushKeymap(Ymacs_Keymap_XML);
+    var changed_vars = this.setq({ indent_level: 2 });
+    return function() {
+        this.setTokenizer(tok);
+        if (!was_paren_match)
+            this.cmd("paren_match_mode", false);
+        this.popKeymap(Ymacs_Keymap_XML);
+        this.setq(changed_vars);
+    };
+};
+
+Ymacs_Buffer.newMode("xml_mode", markup_mode("xml"));
+Ymacs_Buffer.newMode("html_mode", markup_mode("html"));
+
+function xml_tokenizer(stream, tok, { emptyTags } = {}) {
     var $tags = [];
     var $cont = [];
     var $parens = [];
@@ -46,7 +74,8 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
     var $inTag = null;
     var $inComment = null;
     var $inString = false;
-    var PARSER = { next: next, copy: copy, indentation: indentation };
+    var PARSER = { next: next, copy: copy, indentation: indentation,
+                   get tags() { return $tags } };
 
     function copy() {
         let context = resume.context = {
@@ -69,27 +98,27 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             return PARSER;
         };
         return resume;
-    };
+    }
 
     function INDENT_LEVEL() {
         return stream.buffer.getq("indent_level");
-    };
+    }
 
     function foundToken(c1, c2, type) {
         tok.onToken(stream.line, c1, c2, type);
-    };
+    }
 
     function isLetter(ch) {
         return ch.toLowerCase() != ch.toUpperCase();
-    };
+    }
 
     function isNameStart(ch) {
         return ch && (isLetter(ch) || /^[:_-]$/.test(ch));
-    };
+    }
 
     function isNameChar(ch) {
         return ch && (isLetter(ch) || /^[0-9:_-]$/.test(ch));
-    };
+    }
 
     function readName() {
         var col = stream.col, ch = stream.next(),
@@ -102,7 +131,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             stream.nextCol();
         }
         return ch && { line: stream.line, c1: col, c2: stream.col, id: name };
-    };
+    }
 
     function readString(end) {
         $inString = true;
@@ -126,7 +155,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             stream.nextCol();
         }
         foundToken(start, stream.col, "string");
-    };
+    }
 
     function readTag() {
         var ch = stream.peek(), name;
@@ -150,8 +179,10 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 $passedParens.push(p);
             }
             $cont.pop();
-            $inTag.inner = { l1: stream.line, c1: stream.col + 1 };
-            $tags.push($inTag);
+            if (!emptyTags?.test($inTag.id)) {
+                $inTag.inner = { l1: stream.line, c1: stream.col + 1 };
+                $tags.push($inTag);
+            }
             $inTag = null;
             foundToken(stream.col, ++stream.col, "xml-close-bracket");
         }
@@ -164,7 +195,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             $cont.push(readString.bind(null, ch));
         }
         else foundToken(stream.col, ++stream.col, null);
-    };
+    }
 
     function readComment(type, end) {
         var line = stream.lineText(), pos = line.indexOf(end, stream.col);
@@ -178,7 +209,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             foundToken(stream.col, line.length, type);
             stream.col = line.length;
         }
-    };
+    }
 
     function readCloseBracket(tag) {
         var m = stream.lookingAt(/^([\s\xA0]*)(>?)/);
@@ -199,7 +230,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         } else {
             foundToken(stream.col, ++stream.col, "error");
         }
-    };
+    }
 
     let OPEN_PAREN = {
         "(" : ")",
@@ -221,11 +252,11 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
 
     function isOpenParen(ch) {
         return OPEN_PAREN[ch];
-    };
+    }
 
     function isCloseParen(ch) {
         return CLOSE_PAREN[ch];
-    };
+    }
 
     function next() {
         stream.checkStop();
@@ -241,6 +272,9 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
             foundToken(stream.col, stream.col += 4, "mcomment-starter");
             $inComment = { line: stream.line, c1: stream.col };
             $cont.push(readComment.bind(null, "mcomment", "-->"));
+        }
+        else if ((m = stream.lookingAt(/^<!.*?>/))) {
+            foundToken(stream.col, stream.col += m[0].length, "directive");
         }
         else if (stream.lookingAt("</") && isNameStart(stream.peek(+2))) {
             let otag = $tags.pop();
@@ -299,7 +333,7 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
         else {
             foundToken(stream.col, ++stream.col, null);
         }
-    };
+    }
 
     function indentation() {
         var indent, lastTag;
@@ -321,36 +355,86 @@ Ymacs_Tokenizer.define("xml", function(stream, tok) {
                 indent -= INDENT_LEVEL();
         }
         return indent;
-    };
+    }
 
     return PARSER;
+}
 
-});
+const RX_EMPTY_TAG = /^(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 
-let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
-    "C-c /"   : "xml_close_tag",
-    "/"       : "xml_slash_complete_tag",
-    ">"       : "xml_gt_complete_tag",
-    "C-Enter" : "xml_zen_expand",
-    "Enter"   : "xml_newline_and_indent"
-});
+function html_tokenizer(stream, tok){
+    let PARSER = { next: next, copy: copy, indentation: indentation };
 
-Ymacs_Buffer.newMode("xml_mode", function(){
+    let $cont = [];
+    let $xml = tok.getLanguage("xml", { emptyTags: RX_EMPTY_TAG });
+    let $js = tok.getLanguage("js");
+    let $css = tok.getLanguage("css");
+    let $mode = $xml;
 
-    var tok = this.tokenizer;
-    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "xml" }));
-    var was_paren_match = this.cmd("paren_match_mode", true);
-    this.pushKeymap(Ymacs_Keymap_XML);
-    var changed_vars = this.setq({ indent_level: 2 });
-    return function() {
-        this.setTokenizer(tok);
-        if (!was_paren_match)
-            this.cmd("paren_match_mode", false);
-        this.popKeymap(Ymacs_Keymap_XML);
-        this.setq(changed_vars);
-    };
+    function next() {
+        stream.checkStop();
+        if ($cont.length > 0)
+            return $cont.at(-1)();
 
-});
+        if ($mode === $xml) {
+            let tag = $xml.tags.at(-1);
+            if (tag?.id == "script") {
+                $mode = $js;
+            } else if (tag?.id == "style") {
+                $mode = $css;
+            }
+        }
+        if ($mode === $js) {
+            if (stream.lookingAt("</script")) {
+                $mode = $xml;
+            }
+        }
+        if ($mode === $css) {
+            if (stream.lookingAt("</style")) {
+                $mode = $xml;
+            }
+        }
+
+        $mode.next();
+    }
+
+    function copy() {
+        let _cont = [...$cont];
+        let _main = $xml.copy();
+        let _js = $js.copy();
+        let _css = $css.copy();
+        let _mode = $mode;
+        function resume() {
+            $cont = [..._cont];
+            $xml = _main();
+            $js = _js();
+            $css = _css();
+            $mode = _mode;
+            return PARSER;
+        }
+        resume.context = {
+            get passedParens() {
+                return [
+                    ..._main.context.passedParens,
+                    ..._js.context.passedParens,
+                    ..._css.context.passedParens,
+                ];
+            },
+            get tags() {
+                return _main.context.tags;
+            }
+        };
+        return resume;
+    }
+
+    function indentation() {
+        if (/^\s*<\//.test(stream.lineText()))
+            return $xml.indentation();
+        return $mode.indentation();
+    }
+
+    return PARSER;
+}
 
 (function(){
 
