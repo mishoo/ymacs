@@ -418,9 +418,13 @@ Ymacs_Buffer.newMode("javascript_mode", function() {
     var changed_vars = this.setq({
         syntax_paragraph_sep: /\n[^\S\r\n]*(?:\/\/+|\*+)?[^\S\r\n]*\n/g,
         syntax_comment_line: {
-            rx: /[^\S\r\n]*\/\/+[^\S\r\n]*/gu,
+            rx: /[^\S\r\n]*\/\/+ ?/ygu,
             ch: "//"
-        }
+        },
+        syntax_comment_multi: {
+            rx: /[^\S\r\n]*\/\*+(.*?)\*+\//ygu,
+            ch: [ "/*", "*/" ]
+        },
     });
 
     return function() {

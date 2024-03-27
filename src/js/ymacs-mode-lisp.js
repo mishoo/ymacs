@@ -754,7 +754,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         indent_level: 2,
         syntax_paragraph_sep: /\n[^\S\r\n]*;*[^\S\r\n]*\n/g,
         syntax_comment_line: {
-            rx: /[^\S\r\n]*;+[^\S\r\n]*/gu,
+            rx: /[^\S\r\n]*;+ ?/gu,
             ch: ";;"
         },
         syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u

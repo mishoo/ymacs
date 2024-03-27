@@ -53,7 +53,13 @@ let markup_mode = tok_type => function(){
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: tok_type }));
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_XML);
-    var changed_vars = this.setq({ indent_level: 2 });
+    var changed_vars = this.setq({
+        indent_level: 2,
+        syntax_comment_multi: {
+            rx: /[^\S\r\n]*<!--+[^\S\r\n]*(.*?)[^\S\r\n]*-->/ygu,
+            ch: [ "<!--", "-->" ]
+        },
+    });
     return function() {
         this.setTokenizer(tok);
         if (!was_paren_match)
