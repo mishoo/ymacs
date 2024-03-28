@@ -32,7 +32,7 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { Ymacs_Marker } from "./ymacs-marker.js";
-import { DOM, EventProxy, remove, delayed, formatBytes, backward_regexp } from "./ymacs-utils.js";
+import { DOM, EventProxy, remove, delayed, formatBytes } from "./ymacs-utils.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Keymap_Emacs, Ymacs_Keymap_Minibuffer } from "./ymacs-keymap-emacs.js";
 import { Ymacs_Text_Properties } from "./ymacs-textprop.js";
@@ -253,18 +253,18 @@ export class Ymacs_Buffer extends EventProxy {
 
     /* -----[ public API ]----- */
 
-    lastIndexOfRegexp(str, re, caret, bound) {
+    // XXX: bound?
+    lastIndexOfRegexp(str, rx, caret, bound) {
+        if (!rx.global) {
+            rx = new RegExp(rx.source, rx.flags + "g");
+        } else {
+            rx.lastIndex = 0;
+        }
         str = str.substring(0, caret);
-        re = backward_regexp(re);
-        re.lastIndex = bound || 0;
-        var m = re.exec(str);
+        let m = [...str.matchAll(rx)].at(-1);
         if (m) {
-            var a = [...m].slice(2);
-            a.index = m.index + m[1].length;
-            a.after = m.index + m[0].length;
-            a[0] = str.substring(a.index, a.after);
-            this.matchData = a;
-            return a;
+            m.after = m.index + m.length;
+            return this.matchData = m;
         }
     }
 

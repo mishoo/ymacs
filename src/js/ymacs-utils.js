@@ -244,39 +244,6 @@ export function common_prefix(strings) {
     }
 }
 
-function getPatternAndFlags(rx) {
-    if (rx instanceof RegExp)
-        rx = rx.toString();
-    var pos = rx.lastIndexOf("/"), flags = "";
-    flags = rx.substr(pos + 1);
-    rx = rx.substring(1, pos);
-    return { pattern: rx, flags: flags };
-}
-
-var SEARCH_BACKWARD = Object.create(null);
-
-// Prepends to the regexp a token that will greedily eat any characters in
-// front of the pattern.  This is useful to get the last occurrence of the
-// pattern in a string.  The returned regexp is cached, so it's not
-// reconstructed a second time.
-//
-// A function using such regexp must be aware that m.index will always be zero,
-// because it matches from the beginning of the string.  To find the index of
-// the real match, it should use m[0].length (where m is an array returned by
-// rx.exec()).
-export function backward_regexp(rx) {
-    var key = rx.toString();
-    var cached = SEARCH_BACKWARD[key];
-    if (!cached) {
-        rx = getPatternAndFlags(key);
-        rx.flags = rx.flags.replace(/g/g, "") + "g"; // make sure it's global
-        cached = new RegExp("([^]*)(" + rx.pattern + ")", rx.flags);
-        SEARCH_BACKWARD[key] = cached;
-    }
-    cached.lastIndex = 0;
-    return cached;
-}
-
 export function getYmacsThemes() {
     let themes = [];
     for (let st of document.styleSheets) digStyle(st);

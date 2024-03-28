@@ -298,9 +298,9 @@ Ymacs_Buffer.newCommands({
 
     make_regexp: function(rx) {
         if (!(rx instanceof RegExp)) {
-            var matchCase = rx.toLowerCase() != rx.toUpperCase();
+            var matchCase = !this.getq("case_fold_search");
             try {
-                rx = new RegExp(rx, matchCase ? "ig" : "g");
+                rx = new RegExp(rx, matchCase ? "g" : "ig");
             } catch(ex) {
                 throw new Ymacs_Exception("Invalid regexp");
             }

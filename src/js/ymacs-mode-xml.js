@@ -610,7 +610,7 @@ function html_tokenizer(stream, tok){
             var html = "";
             var start = this.cmd("save_excursion", function() {
                 this.cmd("backward_whitespace");
-                while (!this.cmd("looking_back", /[\x20\xa0\s\t\n;&]/))
+                while (!this.cmd("looking_back", /[\x20\xa0\s\t\n;&]/g))
                     if (!this.cmd("backward_char"))
                         break;
                 return this.point();

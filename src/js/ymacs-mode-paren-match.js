@@ -452,7 +452,7 @@ Ymacs_Buffer.newCommands({
 
     paredit_newline_and_indent: Ymacs_Interactive(function(){
         var inparens = this.looking_at(/[ \t]*([\]\}])/y)
-            && this.looking_back(new RegExp("\\" + R_PARENS[this.matchData[1]] + "[ \\t]*"));
+            && this.looking_back(new RegExp("\\" + R_PARENS[this.matchData[1]] + "[ \\t]*", "g"));
         this.cmd("newline_and_indent");
         if (inparens) {
             this.cmd("newline_and_indent");
