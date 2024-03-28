@@ -48,8 +48,9 @@ let GLOBAL_VARS = {
     sticky_mark                 : false,
 
     // syntax variables
-    syntax_word                 : /^[0-9\p{L}]$/u,
-    syntax_word_dabbrev         : /^[0-9_$\p{L}]$/u,
+    syntax_word                 : /^[\p{N}\p{L}]$/u,
+    syntax_word_dabbrev         : /^[\p{N}_$\p{L}]$/u,
+    syntax_word_sexp            : /^[\p{N}_$\p{L}]$/u,
     syntax_paragraph_sep        : /\n[^\S\r\n]*\n/g
 };
 

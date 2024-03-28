@@ -77,15 +77,15 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "M-r"                          : "paredit_raise_sexp",
     "M-s"                          : "paredit_splice_sexp",
     "Backspace"                    : "paredit_backward_delete_char",
-    "Delete && C-d"                : "paredit_delete_char",
+    //"Delete && C-d"                : "paredit_delete_char",
     "Enter"                        : "paredit_newline_and_indent",
     "; && : && , && ."             : "paredit_electric_char",
 });
 
 function compareRowCol(p1, p2) {
-    return (p1.line < p2.line)
+    return ((p1.row ?? p1.line) < (p2.row ?? p2.line))
         ? -1
-        : p1.line > p2.line
+        : (p1.row ?? p1.line) > (p2.row ?? p2.line)
         ? 1
         : (p1.col ?? p1.c1) - (p2.col ?? p2.c1);
 };
@@ -152,7 +152,7 @@ function startOf(paren) {
 }
 
 function endOf(paren) {
-    return paren.c2 ?? paren.col + 1;
+    return paren.c2 ?? (paren.col + 1);
 }
 
 Ymacs_Buffer.newCommands({
@@ -191,12 +191,11 @@ Ymacs_Buffer.newCommands({
     }),
 
     forward_sexp: Ymacs_Interactive(function() {
-        let parser = this.tokenizer.finishParsing();
+        let parser = this.tokenizer.finishParsing(), next;
         if (parser) {
             // find next paren
             let rc = this._rowcol;
             let parens = getPP(parser).sort(compareRowCol);
-            let next = null;
             for (let i = 0; i < parens.length; ++i) {
                 let p = parens[i];
                 if (p.line > rc.row || (p.line == rc.row && startOf(p) >= rc.col)) {
@@ -204,22 +203,21 @@ Ymacs_Buffer.newCommands({
                     break;
                 }
             }
-            if (!next || !next.closed) {
-                ERROR(this);
-                return;
-            }
+        }
+        this.withVariables({
+            syntax_word: this.getq("syntax_word_sexp"),
+        }, "forward_word");
+        if (next && next.closed && compareRowCol(this._rowcol, next) > 0) {
             this.cmd("goto_char", this._rowColToPosition(next.closed.line, endOf(next.closed)));
-            return true;
         }
     }),
 
     backward_sexp: Ymacs_Interactive(function() {
-        let parser = this.tokenizer.finishParsing();
+        let parser = this.tokenizer.finishParsing(), prev;
         if (parser) {
             // find next paren
             let rc = this._rowcol;
             let parens = getPP(parser).filter(p => p.closed).map(p => p.closed).sort(compareRowCol);
-            let prev = null;
             for (let i = parens.length; --i >= 0;) {
                 let p = parens[i];
                 if (p.line < rc.row || (p.line == rc.row && startOf(p) < rc.col)) {
@@ -227,12 +225,12 @@ Ymacs_Buffer.newCommands({
                     break;
                 }
             }
-            if (!prev) {
-                ERROR(this);
-                return;
-            }
+        }
+        this.withVariables({
+            syntax_word: this.getq("syntax_word_sexp"),
+        }, "backward_word");
+        if (prev && prev.opened && compareRowCol(this._rowcol, { line: prev.line, col: endOf(prev) }) < 0) {
             this.cmd("goto_char", this._rowColToPosition(prev.opened.line, startOf(prev.opened)));
-            return true;
         }
     }),
 
