@@ -174,9 +174,11 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
             foundToken(stream.col, stream.col += tmp[0].length - 1, tmp[1] ? "variable-name" : "keyword");
             foundToken(stream.col, ++stream.col, "operator");
         }
-        else if ((tmp = stream.lookingAt(/^([0-9.]+)(px|pt|em|ex|in|cm|mm|rem|vw|vh|fr|%)/))) {
+        else if ((tmp = stream.lookingAt(/^((?:\d*\.)?\d+)(px|pt|em|ex|in|cm|mm|rem|vw|vh|fr|s|%)?/))) {
             foundToken(stream.col, stream.col += tmp[1].length, "number");
-            foundToken(stream.col, stream.col += tmp[2].length, "type");
+            if (tmp[2]) {
+                foundToken(stream.col, stream.col += tmp[2].length, "type");
+            }
         }
         else if ((tmp = stream.lookingAt(/^(\.[\p{L}\p{N}_:-]+)/u))) {
             foundToken(stream.col, stream.col += tmp[1].length, "function-name");
