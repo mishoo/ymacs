@@ -222,29 +222,30 @@ Ymacs_Buffer.newCommands({
     }),
 
     indent_line: Ymacs_Interactive("P", function(noEmpty) {
-        if (this.tokenizer) {
-            var indent = this.tokenizer.getIndentation(this._rowcol.row, this);
-            if (!noEmpty || /\S/.test(this.getLine())) {
-                var pos = this.cmd("save_excursion", function(){
-                    this.cmd("back_to_indentation");
-                    if (indent != null && this._rowcol.col != indent) {
-                        this.cmd("beginning_of_line");
-                        this.cmd("delete_whitespace", true);
-                        this.cmd("insert", " ".repeat(indent));
+        if (!this.tokenizer) {
+            this.cmd("insert", " ".repeat(this.getq("indent_line")));
+        } else {
+            let indent = this.tokenizer.getIndentation(this._rowcol.row, this);
+            if (indent != null) {
+                let line = this.getLine();
+                if (!noEmpty || /\S/.test(line)) {
+                    let rc = this._rowcol;
+                    let pos = this.point() - rc.col;
+                    let ci = /[^\S\r\n]*/.exec(line)[0].length;
+                    if (ci > indent) {
+                        this._deleteText(pos, pos + ci - indent);
+                    } else if (indent > ci) {
+                        this._insertText(" ".repeat(indent - ci), pos);
                     }
-                    return this.point();
-                });
-                // when point is before the indentation, go there.
-                if (this.point() < pos)
-                    this.cmd("goto_char", pos);
+                    if (rc.col <= ci) {
+                        this.cmd("goto_char", pos + indent);
+                    }
+                }
             }
-            return;
         }
-        this.cmd("insert", " ".repeat(this.getq("indent_line")));
     }),
 
     indent_region: Ymacs_Interactive("r", function(begin, end) {
-        if (end < begin) { var tmp = begin; begin = end; end = tmp; }
         this.cmd("save_excursion", function() {
             var m = this.createMarker(end);
             this.cmd("goto_char", begin);
@@ -504,7 +505,7 @@ Ymacs_Buffer.newCommands({
         } else if (prefix != null) {
             this._killingAction(
                 this.point(),
-                this._saveExcursion(() => {
+                this.cmd("save_excursion", () => {
                     this.cmd("forward_line", prefix);
                     this.cmd("beginning_of_line");
                     return this.point();
