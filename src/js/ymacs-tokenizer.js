@@ -289,16 +289,10 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.parsers = [];
         this.parsers[-1] = this.theParser.copy();
         this.timerUpdate = null;
-        this.quickUpdate(0);
+        this.start();
     }
 
-    quickUpdate(offset) {
-        let row = this.buffer._positionToRowCol(offset).row;
-        this.parsers.splice(row, this.parsers.length + 1);
-        this._do_quickUpdate(row);
-    }
-
-    _stopQuickUpdate() {
+    stop() {
         clearTimeout(this.timerUpdate);
     }
 
@@ -313,57 +307,51 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.buffer.updateProgress("Syntax highlighting", p);
     }
 
-    _do_quickUpdate(row) {
-        this._stopQuickUpdate();
-        var s = this.stream, p, a = this.parsers, n;
-        s.line = row - 1;
-        while (!(p = a[s.line]))
-            s.prevLine();
-        s.nextLine();
+    start() {
+        this.stop();
+        let stream = this.stream, p, a = this.parsers;
+        stream.line = a.length;
+        while (!(p = a[stream.line]))
+            stream.prevLine();
+        stream.nextLine();
         p = p();
-        var iteration = 0;
-        var first = true;
-        var doit = () => {
+        let doit = () => {
             this.buffer.preventUpdates();
-            n = 100;
-            if (++iteration > 10)
-                this.showProgress(this.stream.line);
+            let n = 100;
+            // this.showProgress(this.stream.line);
             while (true) {
                 try {
                     while (true) p.next();
                 }
                 catch(ex) {
-                    if (ex === s.EOL) {
-                        a[s.line] = p.copy();
-                        s.nextLine();
+                    if (ex === stream.EOL) {
+                        a[stream.line] = p.copy();
+                        stream.nextLine();
                         if  (--n == 0) {
                             this.buffer.resumeUpdates();
                             this.timerUpdate = setTimeout(doit, 25);
-                            first = false;
                             return;
                         }
                     }
-                    else if (ex === s.EOF) {
-                        a[s.line] = p.copy();
+                    else if (ex === stream.EOF) {
+                        a[stream.line] = p.copy();
                         this.buffer.resumeUpdates();
-                        if (p.on_EOF)
-                            p.on_EOF();
                         break;
                     }
                     else throw ex;
                 }
             }
-            this.showProgress();
+            // this.showProgress();
         };
         doit();
     }
 
     quickInsertLine(row) {
-        this.parsers.splice(row, this.parsers.length + 1);
+        this.truncate(row);
     }
 
     quickDeleteLine(row) {
-        this.parsers.splice(row, this.parsers.length + 1);
+        this.truncate(row);
     }
 
     onToken(line, c1, c2, type) {
@@ -371,31 +359,30 @@ export class Ymacs_Tokenizer extends EventProxy {
     }
 
     getParserForLine(row, col) {
-        this._stopQuickUpdate();
-        var s = this.stream, p, a = this.parsers, n;
-        var currentLine = s.line;
-        s.line = row - 1;
-        while (!(p = a[s.line]))
-            s.prevLine();
-        s.nextLine();
+        this.stop();
+        let stream = this.stream, p, a = this.parsers;
+        stream.line = row - 1;
+        while (!(p = a[stream.line]))
+            stream.prevLine();
+        stream.nextLine();
         if (col != null) {
-            s.stopAt(row, col);
+            stream.stopAt(row, col);
         }
         p = p();
         try {
             this.buffer.preventUpdates();
             while (true) {
-                if (col == null && s.line == row) {
+                if (col == null && stream.line == row) {
                     return p;
                 }
                 try {
                     while (true) p.next();
                 } catch(ex) {
-                    if (ex === s.EOL) {
-                        a[s.line] = p.copy();
-                        s.nextLine();
+                    if (ex === stream.EOL) {
+                        a[stream.line] = p.copy();
+                        stream.nextLine();
                     }
-                    else if (ex === s.EOF) {
+                    else if (ex === stream.EOF) {
                         return p;
                     }
                     else {
@@ -405,17 +392,13 @@ export class Ymacs_Tokenizer extends EventProxy {
             }
         } finally {
             this.buffer.resumeUpdates();
-            // if (currentLine < s.length()) {
-            //         // resume lazy tokenizer if it was interrupted
-            //         this.timerUpdate = this._do_quickUpdate.delayed(50, this, Math.min(row, currentLine));
-            // }
-            if (s.line < s.length())
-                this.timerUpdate = setTimeout(this._do_quickUpdate.bind(this, s.line), 50);
+            if (stream.line < stream.length())
+                this.timerUpdate = setTimeout(this.start.bind(this, stream.line), 25);
         }
     }
 
     reparseAll() {
-        this.parsers.splice(0, this.parsers.length);
+        this.truncate(0);
         return this.finishParsing();
     }
 
@@ -432,6 +415,10 @@ export class Ymacs_Tokenizer extends EventProxy {
         var p = this.getParserForLine(row);
         if (p && p.indentation instanceof Function)
             return p.indentation(buffer);
+    }
+
+    truncate(row) {
+        if (this.parsers.length > row) this.parsers.length = row;
     }
 
 }

@@ -181,7 +181,7 @@ export class Ymacs_Buffer extends EventProxy {
         this.caretMarker.onChange.push(function(pos) {
             this._rowcol = this.caretMarker.getRowCol();
             // XXX: this shouldn't be needed
-            if (this.__preventUpdates == 0) {
+            if (!this.__preventUpdates) {
                 this.callHooks("onPointChange", this._rowcol, this.point());
             }
         });
@@ -451,6 +451,9 @@ export class Ymacs_Buffer extends EventProxy {
             this.callHooks("afterInteractiveCommand", cmd, func);
             this.previousCommand = cmd;
             this.sameCommandCount(+1);
+            if (this.tokenizer) {
+                this.tokenizer.start();
+            }
         }
     }
 
@@ -761,7 +764,7 @@ export class Ymacs_Buffer extends EventProxy {
     _replaceLine(row, text) {
         this.code[row] = text;
         this._textProperties.replaceLine(row, text);
-        if (this.__preventUpdates == 0) {
+        if (!this.__preventUpdates) {
             this.callHooks("onLineChange", row);
         } else {
             this.__dirtyLines[row] = true;
@@ -782,7 +785,7 @@ export class Ymacs_Buffer extends EventProxy {
         this._textProperties.insertLine(row);
         if (this.tokenizer)
             this.tokenizer.quickInsertLine(row);
-        var drawIt = this.__preventUpdates == 0;
+        var drawIt = !this.__preventUpdates;
         this.callHooks("onInsertLine", row, drawIt);
         if (!drawIt) {
             if (this.__dirtyLines.length <= row)
@@ -947,14 +950,15 @@ export class Ymacs_Buffer extends EventProxy {
         return pos != p;
     }
 
-    _updateMarkers(offset, delta, min) {
+    _updateMarkers(offset, delta, min = 0) {
         this.__size = null;
         this.__code = null;
         // if (this.__undoInProgress == 0) {
-        this.markers.map(m => m.editorChange(offset, delta, min || 0));
+        this.markers.map(m => m.editorChange(offset, delta, min));
         // }
         if (this.tokenizer) {
-            this.tokenizer.quickUpdate(Math.min(offset, offset + delta));
+            let row = this._positionToRowCol(Math.min(offset, offset + delta)).row;
+            this.tokenizer.truncate(row);
         }
     }
 
@@ -1042,7 +1046,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     _on_textPropertiesChange(row) {
-        if (this.__preventUpdates == 0) {
+        if (!this.__preventUpdates) {
             this.callHooks("onLineChange", row);
         } else {
             this.__dirtyLines[row] = true;
