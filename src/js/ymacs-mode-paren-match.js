@@ -244,6 +244,7 @@ Ymacs_Buffer.newCommands({
             this.transientMarker.swap(this.caretMarker);
         });
         this.ensureTransientMark();
+        this.setq("sticky_mark", true);
     }),
 
     kill_sexp: Ymacs_Interactive(function() {
