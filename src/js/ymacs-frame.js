@@ -186,44 +186,18 @@ export class Ymacs_Frame extends Widget {
     }
 
     ensureCaretVisible() {
-        // return true if the scroll position was changed (that is, if
-        // the caren't wasn't visible before the call).
+        // return true if the scroll position has changed
+        let div = this.getOverlaysContainer();
+        let st = div.scrollTop;
         this.redrawCaret();
-        var ret = false;
-
-        var caret = this.getCaretElement();
-        if (!caret)
-            return ret;
-        var div = this.getOverlaysContainer(), line = this.getLineDivElement(this.buffer._rowcol.row);
-
-        // vertical
-        var diff = line.offsetTop + line.offsetHeight - (div.scrollTop + div.clientHeight);
-        if (diff > 0) {
-            div.scrollTop += diff;
-            ret = true;
-        } else {
-            diff = line.offsetTop - div.scrollTop;
-            if (diff < 0) {
-                div.scrollTop += diff;
-                ret = true;
+        let caret = this.getCaretElement();
+        if (caret) {
+            caret.scrollIntoView({ block: "nearest", inline: "nearest" });
+            if (caret.offsetLeft < div.clientWidth / 2) {
+                div.scrollLeft = 0;
             }
         }
-
-        // horizontal
-        diff = caret.offsetLeft + caret.offsetWidth - (div.scrollLeft + div.clientWidth);
-        // if (caret.offsetLeft + caret.offsetWidth < div.clientWidth)
-        //         div.scrollLeft = 0;
-        if (diff > 0) {
-            div.scrollLeft += diff;
-            ret = true;
-        } else {
-            diff = caret.offsetLeft - div.scrollLeft;
-            if (diff < 0) {
-                div.scrollLeft += diff;
-                ret = true;
-            }
-        }
-        return ret;
+        return st != div.scrollTop;
     }
 
     focusInside() {

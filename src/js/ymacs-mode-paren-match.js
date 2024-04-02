@@ -36,6 +36,7 @@ import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
+import { getPP, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
 
 let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "C-M-x"                        : "goto_matching_paren",
@@ -82,14 +83,6 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "; && : && , && ."             : "paredit_electric_char",
 });
 
-function compareRowCol(p1, p2) {
-    return ((p1.row ?? p1.line) < (p2.row ?? p2.line))
-        ? -1
-        : (p1.row ?? p1.line) > (p2.row ?? p2.line)
-        ? 1
-        : (p1.col ?? p1.c1) - (p2.col ?? p2.c1);
-};
-
 var PARENS = {
     "(" : ")",
     "[" : "]",
@@ -116,13 +109,6 @@ var R_PARENS = {
 
 function ERROR(o) {
     throw new Ymacs_Exception("Balanced expression not found");
-};
-
-function getPP(tok) {
-    var pp = tok.context.passedParens;
-    pp = pp instanceof Function ? pp() : pp;
-    if (pp) pp = [...pp].sort(compareRowCol);
-    return pp;
 };
 
 function caretInOP(caret, paren) {
@@ -195,7 +181,7 @@ Ymacs_Buffer.newCommands({
         if (parser) {
             // find next paren
             let rc = this._rowcol;
-            let parens = getPP(parser).sort(compareRowCol);
+            let parens = getPP(parser);
             for (let i = 0; i < parens.length; ++i) {
                 let p = parens[i];
                 if (p.line > rc.row || (p.line == rc.row && startOf(p) >= rc.col)) {
@@ -271,7 +257,7 @@ Ymacs_Buffer.newCommands({
         if (tok) {
             let rc = this._rowcol;
             let lc = { line: rc.row, col: rc.col };
-            let p = getPP(tok).filter(p => p.closed).sort(compareRowCol).find(p => compareRowCol(p, lc) >= 0);
+            let p = getPP(tok).filter(p => p.closed).find(p => compareRowCol(p, lc) >= 0);
             if (p != null) {
                 this.cmd("goto_char", this._rowColToPosition(p.line, endOf(p)));
             } else {
@@ -284,10 +270,7 @@ Ymacs_Buffer.newCommands({
         let tok = this.tokenizer.finishParsing();
         if (tok) {
             let rc = this._rowcol;
-            let lc = { line: rc.row, col: rc.col };
-            let p = getPP(tok).filter(p => p.closed)
-                .sort(compareRowCol)
-                .findLast(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
+            let p = getPP(tok).filter(caretInside(rc)).at(-1);
             if (p != null) {
                 this.cmd("goto_char", this._rowColToPosition(p.line, startOf(p)));
             } else {
@@ -305,10 +288,7 @@ Ymacs_Buffer.newCommands({
         let tok = this.tokenizer.finishParsing();
         if (tok) {
             let rc = this._rowcol;
-            let lc = { line: rc.row, col: rc.col };
-            let p = getPP(tok).filter(p => p.closed)
-                .sort(compareRowCol)
-                .find(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
+            let p = getPP(tok).filter(caretInside(rc))[0];
             if (p != null) {
                 this.cmd("goto_char", this._rowColToPosition(p.line, startOf(p)));
                 this.cmd("back_to_indentation");
@@ -322,10 +302,7 @@ Ymacs_Buffer.newCommands({
         let tok = this.tokenizer.finishParsing();
         if (tok) {
             let rc = this._rowcol;
-            let lc = { line: rc.row, col: rc.col };
-            let p = getPP(tok).filter(p => p.closed)
-                .sort(compareRowCol)
-                .find(p => compareRowCol(p, lc) < 0 && compareRowCol(p.closed, lc) >= 0);
+            let p = getPP(tok).filter(caretInside(rc))[0];
             if (p != null) {
                 p = p.closed;
                 this.cmd("goto_char", this._rowColToPosition(p.line, endOf(p)));

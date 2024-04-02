@@ -32,10 +32,13 @@
 //> THE POSSIBILITY OF SUCH DAMAGE.
 
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
-import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
+import { Ymacs_Tokenizer, getPP, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
+
+const RX_EMPTY_TAG = /^(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
+const RX_BLOCK_TAG = /^(?:article|aside|blockquote|body|button|caption|col|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h[1-6]|header|hgroup|li|ol|p|pre|section|table|tbody|textarea|tfoot|th|thead|td|tr|ul)$/i;
 
 Ymacs_Tokenizer.define("xml", xml_tokenizer);
 Ymacs_Tokenizer.define("html", html_tokenizer);
@@ -60,19 +63,49 @@ let markup_mode = tok_type => function(){
             ch: [ "<!--", "-->" ]
         },
     });
+    var changed_commands = this.replaceCommands({
+        get_fill_paragraph_region: function() {
+            let r1 = changed_commands.get_fill_paragraph_region.call(this);
+            let blk = getPP(this.tokenizer.finishParsing())
+                .filter(caretInside(this._rowcol, true))
+                .findLast(p => RX_BLOCK_TAG.test(p.type));
+            if (blk) {
+                let r2 = {
+                    begin: this._rowColToPosition(blk.inner.l1, blk.inner.c1),
+                    end: this._rowColToPosition(blk.inner.l2, blk.inner.c2)
+                };
+                this.cmd("save_excursion", () => {
+                    this.cmd("goto_char", r2.begin);
+                    if (this.cmd("looking_at", /[^\S\r\n]*\n/gy)) {
+                        this.cmd("goto_char", this.matchData.after);
+                        r2.begin = this.point();
+                    }
+                    this.cmd("goto_char", r2.end);
+                    if (this.cmd("looking_back", /\n[^\S\r\n]*/g)) {
+                        this.cmd("backward_whitespace");
+                        r2.end = this.point();
+                    }
+                });
+                return { begin: Math.max(r1.begin, r2.begin),
+                         end: Math.min(r1.end, r2.end) };
+            }
+            return r1;
+        }
+    });
     return function() {
         this.setTokenizer(tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_XML);
         this.setq(changed_vars);
+        this.newCommands(changed_commands);
     };
 };
 
 Ymacs_Buffer.newMode("xml_mode", markup_mode("xml"));
 Ymacs_Buffer.newMode("html_mode", markup_mode("html"));
 
-function xml_tokenizer(stream, tok, { emptyTags } = {}) {
+function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
     var $tags = [];
     var $cont = [];
     var $parens = [];
@@ -366,16 +399,30 @@ function xml_tokenizer(stream, tok, { emptyTags } = {}) {
     return PARSER;
 }
 
-const RX_EMPTY_TAG = /^(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
-
 function html_tokenizer(stream, tok){
-    let PARSER = { next: next, copy: copy, indentation: indentation };
-
     let $cont = [];
-    let $xml = tok.getLanguage("xml", { emptyTags: RX_EMPTY_TAG });
+    let $xml = tok.getLanguage("xml", {
+        emptyTags: RX_EMPTY_TAG,
+        blockTags: RX_BLOCK_TAG,
+    });
     let $js = tok.getLanguage("js");
     let $css = tok.getLanguage("css");
     let $mode = $xml;
+
+    let PARSER = {
+        next: next,
+        copy: copy,
+        get mode() {
+            return $mode === $xml ? "markup"
+                :  $mode === $css ? "css"
+                :  $mode === $js ? "js"
+                :  null;
+        },
+        get tags() {
+            return $xml.tags;
+        },
+        indentation: indentation
+    };
 
     function next() {
         stream.checkStop();

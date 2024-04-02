@@ -254,16 +254,16 @@ export class Ymacs_Buffer extends EventProxy {
     /* -----[ public API ]----- */
 
     // XXX: bound?
-    lastIndexOfRegexp(str, rx, caret, bound) {
+    lastIndexOfRegexp(str, rx, caret, bound = 0) {
         if (!rx.global) {
             rx = new RegExp(rx.source, rx.flags + "g");
         } else {
-            rx.lastIndex = 0;
+            rx.lastIndex = bound;
         }
         str = str.substring(0, caret);
         let m = [...str.matchAll(rx)].at(-1);
         if (m) {
-            m.after = m.index + m.length;
+            m.after = m.index + m[0].length;
             return this.matchData = m;
         }
     }
@@ -572,9 +572,7 @@ export class Ymacs_Buffer extends EventProxy {
         }
     }
 
-    getRegion(begin, end) {
-        if (begin == null) begin = this.caretMarker;
-        if (end == null) end = this.markMarker;
+    getRegion(begin = this.caretMarker, end = this.markMarker) {
         begin = MRK(begin);
         end = MRK(end);
         if (end < begin) { var tmp = begin; begin = end; end = tmp; }

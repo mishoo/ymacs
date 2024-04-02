@@ -422,3 +422,29 @@ export class Ymacs_Tokenizer extends EventProxy {
     }
 
 }
+
+export function compareRowCol(p1, p2) {
+    return ((p1.row ?? p1.line) < (p2.row ?? p2.line))
+        ? -1
+        : (p1.row ?? p1.line) > (p2.row ?? p2.line)
+        ? 1
+        : (p1.col ?? p1.c1) - (p2.col ?? p2.c1);
+}
+
+export function getPP(tok) {
+    var pp = tok.context.passedParens;
+    pp = pp instanceof Function ? pp() : pp;
+    if (pp) pp = [...pp].sort(compareRowCol);
+    return pp;
+}
+
+export function caretInside(caret, useOuter) {
+    return p => (p.closed &&
+                 useOuter && p.outer ? (
+                     compareRowCol({ line: p.outer.l1, col: p.outer.c1 }, caret) < 0
+                         && compareRowCol({ line: p.outer.l2, col: p.outer.c2 }, caret) >= 0
+                 ) : (
+                     compareRowCol(p, caret) < 0
+                         && compareRowCol(p.closed, caret) >= 0
+                 ));
+}

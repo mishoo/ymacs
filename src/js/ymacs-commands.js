@@ -635,14 +635,23 @@ Ymacs_Buffer.newCommands({
 
     /* -----[ paragraphs ]----- */
 
+    get_fill_paragraph_region: function() {
+        return this.cmd("save_excursion", () => {
+            if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
+                this.cmd("forward_paragraph");
+            let end = this.point() - 1;
+            this.cmd("backward_paragraph");
+            let begin = this.point();
+            return { begin, end };
+        });
+    },
+
     fill_paragraph: Ymacs_Interactive("^rP", function(begin, end, noPrefix) {
         this.cmd("save_excursion", function(){
             if (!this.transientMarker) {
-                if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
-                    this.cmd("forward_paragraph");
-                end = this.point() - 1;
-                this.cmd("backward_paragraph");
-                begin = this.point();
+                let r = this.cmd("get_fill_paragraph_region");
+                begin = r.begin;
+                end = r.end;
             } else {
                 this.clearTransientMark();
             }
@@ -695,7 +704,7 @@ Ymacs_Buffer.newCommands({
                 if (!this.cmd("search_forward_regexp", /\s/g)) {
                     done = true;
                 }
-                if (this.point() > eop.getPosition()) {
+                if (this.point() >= eop.getPosition()) {
                     this.cmd("goto_char", eop);
                     done = true;
                 }

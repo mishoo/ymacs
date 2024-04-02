@@ -16,8 +16,8 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
-    ymacs.setColorTheme([ "material" ]);
-    //ymacs.setColorTheme([ "base16-apathy" ]);
+    //ymacs.setColorTheme([ "material" ]);
+    ymacs.setColorTheme([ "ef-cyprus" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
