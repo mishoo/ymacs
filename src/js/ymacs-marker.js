@@ -81,6 +81,10 @@ export class Ymacs_Marker {
         return this.position;
     }
 
+    valueOf() {
+        return this.position;
+    }
+
     setPosition(pos, noHooks, force) {
         if (force || this.position != pos) {
             this.rowcol = null;

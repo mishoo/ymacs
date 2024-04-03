@@ -67,7 +67,7 @@ let markup_mode = tok_type => function(){
         get_fill_paragraph_region: function() {
             let r1 = changed_commands.get_fill_paragraph_region.call(this);
             let blk = getPP(this.tokenizer.finishParsing())
-                .filter(caretInside(this._rowcol, true))
+                .filter(caretInside(this._rowcol, "outer"))
                 .findLast(p => RX_BLOCK_TAG.test(p.type));
             if (blk) {
                 let r2 = {

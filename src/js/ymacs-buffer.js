@@ -562,6 +562,15 @@ export class Ymacs_Buffer extends EventProxy {
         });
     }
 
+    withMarkers(cont, ...args) {
+        let a = args.map(arg => this.createMarker(arg));
+        try {
+            return cont.apply(this, a);
+        } finally {
+            a.forEach(m => m.destroy());
+        }
+    }
+
     preventUpdates() {
         ++this.__preventUpdates;
     }

@@ -438,12 +438,17 @@ export function getPP(tok) {
     return pp;
 }
 
-export function caretInside(caret, useOuter) {
+export function caretInside(caret, zone) {
     return p => (p.closed &&
-                 useOuter && p.outer ? (
+                 zone == "outer" && p.outer ? (
                      compareRowCol({ line: p.outer.l1, col: p.outer.c1 }, caret) < 0
                          && compareRowCol({ line: p.outer.l2, col: p.outer.c2 }, caret) >= 0
-                 ) : (
+                 )
+                 : zone == "inner" && p.inner ? (
+                     compareRowCol({ line: p.inner.l1, col: p.inner.c1 }, caret) <= 0
+                         && compareRowCol({ line: p.inner.l2, col: p.inner.c2 }, caret) >= 0
+                 )
+                 : (
                      compareRowCol(p, caret) < 0
                          && compareRowCol(p.closed, caret) >= 0
                  ));

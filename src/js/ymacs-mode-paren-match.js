@@ -329,16 +329,32 @@ Ymacs_Buffer.newCommands({
     }),
 
     paredit_splice_sexp: Ymacs_Interactive(function(){
-        this.cmd("save_excursion", function(){
-            this.cmd("backward_up_list");
-            var start = this.point();
-            this.cmd("forward_sexp");
-            this.cmd("backward_delete_char");
-            var end = this.point();
-            this.cmd("goto_char", start);
-            this.cmd("delete_char");
-            this.cmd("indent_region", start, end - 1);
-        });
+        let p = getPP(this.tokenizer.finishParsing())
+            .filter(caretInside(this._rowcol, "inner")).at(-1);
+        if (p.inner && p.outer) {
+            this.cmd("save_excursion", function(){
+                let outer_begin = this._rowColToPosition(p.outer.l1, p.outer.c1);
+                let outer_end = this._rowColToPosition(p.outer.l2, p.outer.c2);
+                let inner_begin = this._rowColToPosition(p.inner.l1, p.inner.c1);
+                let inner_end = this._rowColToPosition(p.inner.l2, p.inner.c2);
+                this.withMarkers((m1, m2) => {
+                    this._deleteText(inner_end, outer_end);
+                    this._deleteText(outer_begin, inner_begin);
+                    this.cmd("indent_region", m1, m2);
+                }, inner_begin, inner_end);
+            });
+        } else {
+            this.cmd("save_excursion", function(){
+                this.cmd("backward_up_list");
+                var start = this.point();
+                this.cmd("forward_sexp");
+                this.cmd("backward_delete_char");
+                var end = this.point();
+                this.cmd("goto_char", start);
+                this.cmd("delete_char");
+                this.cmd("indent_region", start, end - 1);
+            });
+        }
     }),
 
     paredit_backward_delete_char: Ymacs_Interactive("^p", function(n){
