@@ -752,12 +752,12 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "lisp" }));
     var changed_vars = this.setq({
         indent_level: 2,
-        syntax_paragraph_sep: /\n[^\S\r\n]*;*[^\S\r\n]*\n/g,
+        syntax_paragraph_sep: /\n(?:[ \t;]*\n)+/g,
         syntax_comment_line: {
             rx: /[^\S\r\n]*;+ ?/gu,
             ch: ";;"
         },
-        syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u
+        syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u,
     });
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_LispMode);

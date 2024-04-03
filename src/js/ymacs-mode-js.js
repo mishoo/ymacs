@@ -416,7 +416,7 @@ Ymacs_Buffer.newMode("javascript_mode", function() {
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_JS);
     var changed_vars = this.setq({
-        syntax_paragraph_sep: /\n[^\S\r\n]*(?:\/\/+|\*+)?[^\S\r\n]*\n/g,
+        syntax_paragraph_sep: /\n(?:[ \t\/\*]*\n)+/g,
         syntax_comment_line: {
             rx: /[^\S\r\n]*\/\/+ ?/ygu,
             ch: "//"

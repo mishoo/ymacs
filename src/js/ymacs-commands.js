@@ -311,11 +311,11 @@ Ymacs_Buffer.newCommands({
 
     search_forward_regexp: Ymacs_Interactive("sRegExp search: ", function(rx) {
         rx = this.cmd("make_regexp", rx);
-        var code = this.getCode(),
-        pos = rx.lastIndex = this.point(),
-        ret = this.matchData = rx.exec(code);
-        if (ret && rx.lastIndex != pos) {
-            ret.after = rx.lastIndex;
+        let pos = rx.lastIndex = this.point();
+        let m = rx.exec(this.getCode());
+        if (m && rx.lastIndex != pos) {
+            m.after = rx.lastIndex;
+            this.matchData = m;
             this.cmd("goto_char", rx.lastIndex);
             return true;
         }
@@ -351,19 +351,49 @@ Ymacs_Buffer.newCommands({
     }),
 
     forward_paragraph: Ymacs_Interactive_X(function(){
-        this.cmd("forward_whitespace");
-        if (this.cmd("search_forward_regexp", this.getq("syntax_paragraph_sep")))
+        let rx = this.getq("syntax_paragraph_sep");
+        this.cmd("beginning_of_line");
+        this.cmd("backward_char");
+        if (this.cmd("looking_at", rx)) {
+            this.cmd("goto_char", this.cmd("match_end"));
+        }
+        if (this.cmd("search_forward_regexp", rx)) {
             this.cmd("goto_char", this.cmd("match_beginning") + 1);
-        else
+        } else {
             this.cmd("end_of_buffer");
+        }
     }),
 
     backward_paragraph: Ymacs_Interactive_X(function(){
-        this.cmd("backward_whitespace");
-        if (this.cmd("search_backward_regexp", this.getq("syntax_paragraph_sep")))
+        let rx = this.getq("syntax_paragraph_sep");
+        this.cmd("beginning_of_line");
+        if (this.cmd("looking_back", rx)) {
+            this.cmd("goto_char", this.cmd("match_beginning"));
+        }
+        if (this.cmd("search_backward_regexp", rx)) {
             this.cmd("goto_char", this.cmd("match_end"));
-        else
+        } else {
             this.cmd("beginning_of_buffer");
+        }
+    }),
+
+    mark_paragraph: Ymacs_Interactive("^r", function(begin, end){
+        if (!this.transientMarker) {
+            this.cmd("forward_paragraph");
+            this.setMark(this.point());
+            this.ensureTransientMark();
+            this.cmd("backward_paragraph");
+        }
+        else this.cmd("save_excursion", function(){
+            if (this.transientMarker)
+                this.cmd("goto_char", end);
+            this.ensureTransientMark();
+            this.cmd("forward_paragraph");
+            this.setMark(this.point());
+            this.transientMarker.swap(this.caretMarker);
+        });
+        this.ensureTransientMark();
+        this.setq("sticky_mark", true);
     }),
 
     transpose_words: Ymacs_Interactive_X(function() {

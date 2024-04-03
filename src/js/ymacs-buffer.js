@@ -51,7 +51,7 @@ let GLOBAL_VARS = {
     syntax_word                 : /^[\p{N}\p{L}]$/u,
     syntax_word_dabbrev         : /^[\p{N}_$\p{L}]$/u,
     syntax_word_sexp            : /^[\p{N}_$\p{L}]$/u,
-    syntax_paragraph_sep        : /\n[^\S\r\n]*\n/g
+    syntax_paragraph_sep        : /\n(?:[^\S\r\n]*\n)+/g,
 };
 
 const MAX_UNDO_RECORDS = 50000; // XXX: should we not limit?
@@ -253,18 +253,18 @@ export class Ymacs_Buffer extends EventProxy {
 
     /* -----[ public API ]----- */
 
-    // XXX: bound?
     lastIndexOfRegexp(str, rx, caret, bound = 0) {
-        if (!rx.global) {
-            rx = new RegExp(rx.source, rx.flags + "g");
-        } else {
-            rx.lastIndex = bound;
+        if (!rx.global) rx = new RegExp(rx.source, rx.flags + "g");
+        rx.lastIndex = bound;
+        let match;
+        while (true) {
+            let m = rx.exec(str);
+            if (!m || rx.lastIndex > caret) break;
+            match = m;
+            match.after = rx.lastIndex;
         }
-        str = str.substring(0, caret);
-        let m = [...str.matchAll(rx)].at(-1);
-        if (m) {
-            m.after = m.index + m[0].length;
-            return this.matchData = m;
+        if (match) {
+            return this.matchData = match;
         }
     }
 

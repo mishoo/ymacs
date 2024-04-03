@@ -163,6 +163,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "C-ArrowLeft && M-b"                      : "backward_word",
     "C-ArrowDown"                             : "forward_paragraph",
     "C-ArrowUp"                               : "backward_paragraph",
+    "M-h"                                     : "mark_paragraph",
     "C-l"                                     : "recenter_top_bottom",
     "PageUp"                                  : "scroll_up_half",
     "PageDown"                                : "scroll_down_half",
