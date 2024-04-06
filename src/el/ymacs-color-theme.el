@@ -243,7 +243,8 @@
                  standard-light
                  ef-elea-dark
                  ef-deuteranopia-light
-                 ef-cyprus)))
+                 ef-cyprus
+                 ef-autumn)))
     (loop for theme in names
           for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (load-theme theme t t)
