@@ -666,7 +666,7 @@ Ymacs_Buffer.newCommands({
     /* -----[ paragraphs ]----- */
 
     get_fill_paragraph_region: function() {
-        return this.cmd("save_excursion", () => {
+        let r1 = this.cmd("save_excursion", () => {
             if (!this.cmd("looking_at", this.getq("syntax_paragraph_sep")))
                 this.cmd("forward_paragraph");
             let end = this.point() - 1;
@@ -674,6 +674,12 @@ Ymacs_Buffer.newCommands({
             let begin = this.point();
             return { begin, end };
         });
+        let r2 = this.cmd("xml_get_fill_paragraph_region");
+        if (r2) {
+            return { begin: Math.max(r1.begin, r2.begin),
+                     end: Math.min(r1.end, r2.end) };
+        }
+        return r1;
     },
 
     fill_paragraph: Ymacs_Interactive("^rP", function(begin, end, noPrefix) {
