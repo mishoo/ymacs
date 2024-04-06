@@ -17,7 +17,7 @@ window.addEventListener("beforeunload", ev => {
         height   : "100%"
     });
     //ymacs.setColorTheme([ "material" ]);
-    ymacs.setColorTheme([ "ef-cyprus" ]);
+    ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);

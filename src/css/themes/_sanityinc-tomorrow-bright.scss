@@ -55,6 +55,7 @@ $cursor_fg: #000000;
 .number { color: #7aa6da; }
 .operator { }
 .error { color: #d54e53; font-weight: bold; }
+.isearch-fail { background-color: #d54e53; color: #000000; font-weight: bold; }
 .xml-open-tag { color: #e78c45; }
 .xml-close-tag { color: #e78c45; }
 .xml-attribute { color: #e7c547; }

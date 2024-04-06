@@ -39,6 +39,7 @@
     ( ".number"                font-lock-constant-face                                           )
     ( ".operator"                                                                                )
     ( ".error"                 font-lock-warning-face                                            )
+    ( ".isearch-fail"          isearch-fail                                                      )
     ( ".xml-open-tag"          font-lock-function-name-face                                      )
     ( ".xml-close-tag"         font-lock-function-name-face                                      )
     ( ".xml-attribute"         font-lock-variable-name-face                                      )

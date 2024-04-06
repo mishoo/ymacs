@@ -36,7 +36,8 @@ import { Ymacs_Keymap } from  "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let Ymacs_Keymap_ISearch = Ymacs_Keymap.define("isearch", {
-    "C-g && Escape": [ "isearch_abort", true ],
+    "Escape": [ "isearch_abort", true ],
+    "C-g": "isearch_reset_or_abort",
     "C-w && C-S-s": "isearch_yank_word_or_char",
     "C-s": "isearch_forward",
     "C-r": "isearch_backward",
@@ -124,6 +125,7 @@ function doSearch(str) {
     }, function() {
         var found = this.cmd(this._isearchContext.forward ? "search_forward" : "search_backward", str);
         if (found) {
+            this._isearchContext.lastFoundQuery = str;
             this.cmd("ensure_caret_visible");
             var rc_begin = this._positionToRowCol(this.point() + (this._isearchContext.forward ? -1 : 1) * str.length);
             this.setOverlay("isearch", {
@@ -184,10 +186,15 @@ Ymacs_Buffer.newCommands({
     isearch_printing_char: Ymacs_Interactive(function() {
         var ev = this.interactiveEvent();
         if (ev?.key?.length == 1 && !ev.ctrlKey && !ev.altKey) {
-            this.getMinibuffer().cmd("self_insert_command");
-            this.cmd("goto_char", this._isearchContext.point);
-            isearchText.call(this);
-            doSearch.call(this, this._isearchContext.query);
+            this.whenMinibuffer(mb => {
+                mb.cmd("self_insert_command");
+                this.cmd("goto_char", this._isearchContext.point);
+                isearchText.call(this);
+                if (!doSearch.call(this, this._isearchContext.query)) {
+                    let rc = mb._rowcol;
+                    mb._textProperties.addLineProps(rc.row, rc.col - 1, rc.col, "css", "isearch-fail");
+                }
+            });
             return true;
         } else {
             this.cmd("isearch_abort");
@@ -207,6 +214,18 @@ Ymacs_Buffer.newCommands({
         this.deleteOverlay("isearch");
         this.deleteOverlay("isearch-lazy");
         return true;
+    }),
+
+    isearch_reset_or_abort: Ymacs_Interactive(function(){
+        let ctx = this._isearchContext;
+        if (!ctx.lastFoundQuery || ctx.query == ctx.lastFoundQuery) {
+            this.cmd("isearch_abort", true);
+        } else {
+            this.whenMinibuffer(mb => {
+                mb._replaceText(ctx.mbMark, mb.getCode().length, ctx.lastFoundQuery);
+                doSearch.call(this, ctx.query = ctx.lastFoundQuery);
+            });
+        }
     }),
 });
 

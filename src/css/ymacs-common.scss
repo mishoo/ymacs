@@ -76,21 +76,14 @@
     left: 0;
   }
   &.isearch {
-    opacity: 0.5;
     > div {
-      z-index: 25;
-    }
-  }
-  &.isearch-lazy {
-    opacity: 0.5;
-    > div {
-      z-index: 24;
+      z-index: 1;
     }
   }
   &.match-paren {
-    opacity: 0.5;
+    opacity: 0.6;
     > div {
-      z-index: 23;
+      z-index: 30;
     }
   }
 }
