@@ -29,6 +29,15 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+
+  &.Ymacs_Frame-hasOverlays {
+    &[data-ymacs-overlays~="selection"],
+    &[data-ymacs-overlays~="isearch"] {
+      .Ymacs-current-line {
+        background-color: inherit;
+      }
+    }
+  }
 }
 
 .Ymacs-frame-overlays {

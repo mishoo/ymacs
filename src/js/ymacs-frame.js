@@ -495,7 +495,7 @@ export class Ymacs_Frame extends Widget {
                 }
             }
         });
-        return str ? `<div id="${this.getOverlayId(name)}" class="Ymacs_Overlay ${name}">${str}</div>` : null;
+        return str ? `<div id="${this.getOverlayId(name)}" data-ymacs-overlay="${name}" class="Ymacs_Overlay ${name}">${str}</div>` : null;
     }
 
     getOverlaysCount() {
@@ -508,7 +508,7 @@ export class Ymacs_Frame extends Widget {
             let div = DOM.fromHTML(html);
             let old = document.getElementById(this.getOverlayId(name));
             old ? old.replaceWith(div) : this.getOverlaysContainer().appendChild(div);
-            this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+            this._setOverlayClasses();
         } else {
             this._on_bufferOverlayDelete(name);
         }
@@ -516,7 +516,15 @@ export class Ymacs_Frame extends Widget {
 
     _on_bufferOverlayDelete(name) {
         DOM.trash(document.getElementById(this.getOverlayId(name)));
-        this.condClass(this.getOverlaysCount() > 0, "Ymacs_Frame-hasOverlays");
+        this._setOverlayClasses();
+    }
+
+    _setOverlayClasses() {
+        let names = [
+            ...this.getOverlaysContainer().querySelectorAll(":scope > [data-ymacs-overlay]")
+        ].map(el => el.dataset.ymacsOverlay);
+        this.condClass(names.length > 0, "Ymacs_Frame-hasOverlays");
+        this.getElement().dataset.ymacsOverlays = names.join(" ");
     }
 
     /* -----[ self events ]----- */
