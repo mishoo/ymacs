@@ -218,6 +218,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "M-C-s"                                   : "isearch_forward_regexp",
     "M-C-r"                                   : "isearch_backward_regexp",
     "M-%"                                     : "query_replace",
+    "C-M-%"                                   : "query_replace_regexp",
     "C-u"                                     : "universal_argument",
     "M-g"                                     : "goto_line",
     "C-x h"                                   : "mark_whole_buffer",

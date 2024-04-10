@@ -61,7 +61,7 @@ export class Ymacs_Text_Properties extends EventProxy {
         var p = this.props[row];
         if (p && p.length > text.length) {
             // remove extra-properties
-            p.splice(text.length, p.length);
+            p.splice(text.length);
         }
     }
 
@@ -97,6 +97,17 @@ export class Ymacs_Text_Properties extends EventProxy {
                 this.callHooks("onChange", row);
         }
         return changed;
+    }
+
+    spliceLineProps(row, i, diff) {
+        let p = this.props[row];
+        if (p) {
+            if (diff > 0) {
+                p.splice(i, 0, ...new Array(diff));
+            } else if (diff < 0) {
+                p.splice(i, -diff);
+            }
+        }
     }
 
     // this uses the "css" text property to intercalate <span class="$css"> ... </span> tags in the given text.

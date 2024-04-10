@@ -40,7 +40,8 @@ import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let GLOBAL_VARS = {
-    case_fold_search            : true,
+    case_fold_search            : null,
+    case_replace                : true,
     line_movement_requested_col : 0,
     fill_column                 : 78,
     tab_width                   : 8,
@@ -49,6 +50,7 @@ let GLOBAL_VARS = {
 
     // syntax variables
     syntax_word                 : /^[\p{N}\p{L}]$/u,
+    syntax_capitalize_word      : /([\p{N}\p{L}])([\p{N}\p{L}]*)/ug,
     syntax_word_dabbrev         : /^[\p{N}_$\p{L}]$/u,
     syntax_word_sexp            : /^[\p{N}_$\p{L}]$/u,
     syntax_paragraph_sep        : /\n(?:[^\S\r\n]*\n)+/g,
@@ -258,10 +260,21 @@ export class Ymacs_Buffer extends EventProxy {
         rx.lastIndex = bound;
         let match;
         while (true) {
+            let pos = rx.lastIndex;
             let m = rx.exec(str);
             if (!m || rx.lastIndex > caret) break;
             match = m;
             match.after = rx.lastIndex;
+            if (rx.lastIndex <= pos) {
+                // this can happer when rx matches the empty string in the middle of an unicode
+                // surrogate pair (which we don't properly support for now). the browser will rewind
+                // lastIndex to the proper start of the code point (:-o I'm impressed!), so let's
+                // skip it to avoid an endless loop.
+                let skipOne = /[^]/ug;
+                skipOne.lastIndex = rx.lastIndex;
+                skipOne.exec(str);
+                rx.lastIndex = skipOne.lastIndex;
+            }
         }
         if (match) {
             return this.matchData = match;
@@ -487,18 +500,17 @@ export class Ymacs_Buffer extends EventProxy {
         return this.COMMANDS[cmd].apply(this, args);
     }
 
-    createDialog(args) {
-        if (!args.parent) {
-            args.parent = this.getActiveFrame() && this.getActiveFrame().getParentDialog();
-            if (!("noShadows" in args)) {
-                args.noShadows = true;
-            }
+    forEachLine(func, begin = this.markMarker(), end = this.point()) {
+        begin = MRK(begin);
+        end = MRK(end);
+        if (end < begin) { let tmp = begin; begin = end; end = tmp; }
+        begin = this._positionToRowCol(begin);
+        end = this._positionToRowCol(end);
+        for (let i = begin.row; i <= end.row; ++i) {
+            let c1 = i == begin.row ? begin.col : 0;
+            let c2 = i == end.row ? end.col : this.getLine(i).length;
+            func(i, c1, c2);
         }
-        var dlg = new DlDialog(args);
-        this.whenActiveFrame(function(frame){
-            dlg.addEventListener("onDestroy", delayed(frame.focus.bind(frame)));
-        });
-        return dlg;
     }
 
     getActiveFrame() {
@@ -809,7 +821,7 @@ export class Ymacs_Buffer extends EventProxy {
             pos = this.caretMarker.getPosition();
         pos = MRK(pos);
         // *** UNDO RECORDING
-        if (this.__preventUndo == 0)
+        if (!this.__preventUndo)
             this._recordChange(1, pos, text.length);
         var rc = pos == this.point() ? this._rowcol : this._positionToRowCol(pos),
             i = rc.row;
@@ -842,7 +854,7 @@ export class Ymacs_Buffer extends EventProxy {
             return;
         if (end < begin) { var tmp = begin; begin = end; end = tmp; }
         // *** UNDO RECORDING
-        if (this.__preventUndo == 0)
+        if (!this.__preventUndo)
             this._recordChange(2, begin, end - begin, this._bufferSubstring(begin, end));
         var brc = this._positionToRowCol(begin),
             erc = this._positionToRowCol(end);
@@ -1094,6 +1106,11 @@ export class Ymacs_Buffer extends EventProxy {
             return haystack.substr(this.point() - needle.length, needle.length) == needle;
         }
     }
+
+    capitalize(str) {
+        return str.replace(this.getq("syntax_capitalize_word"),
+                           (_, a, b) => a.toUpperCase() + b.toLowerCase());
+    }
 }
 
 // XXX: what a mess..
@@ -1117,11 +1134,26 @@ export class Ymacs_Minibuffer extends Ymacs_Buffer {
         this.setq("minibuffer_validation", whatever => true);
     }
 
+    // prompt(text) {
+    //     text = text.trim() + " ";
+    //     this._disableUndo(() => {
+    //         this.setCode(text);
+    //         this._textProperties.addLineProps(0, 0, text.length - 1, "css", "minibuffer-prompt");
+    //         this._repositionCaret(text.length);
+    //         this.promptMarker.setPosition(text.length, true, true);
+    //     });
+    // }
+
     prompt(text) {
-        this.setCode(text.trim() + " ");
-        this._textProperties.addLineProps(0, 0, text.length - 1, "css", "minibuffer-prompt");
-        this._repositionCaret(text.length);
-        this.promptMarker.setPosition(text.length, true, true);
+        text = text.trim() + " ";
+        this._disableUndo(() => {
+            let pos = this.promptMarker.getPosition();
+            this.promptMarker.setPosition(0, true, true);
+            this._replaceText(0, pos, text);
+            this.promptMarker.setPosition(text.length, true, true);
+            this._textProperties.spliceLineProps(0, 0, text.length - pos);
+            this._textProperties.addLineProps(0, 0, text.length - 1, "css", "minibuffer-prompt");
+        });
     }
 
     _boundPosition(pos) {

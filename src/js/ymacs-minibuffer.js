@@ -225,8 +225,8 @@ Ymacs_Buffer.newCommands({
         });
     },
 
-    minibuffer_read_string: function(completions, cont) {
-        read_with_continuation.call(this, completions, cont);
+    minibuffer_read_string: function(completions, cont, validate) {
+        read_with_continuation.call(this, completions, cont, validate);
     },
 
     minibuffer_read_variable: function(cont) {
