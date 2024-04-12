@@ -230,6 +230,19 @@ export class Ymacs_Frame extends Widget {
         }
     }
 
+    recenterTopBottom() {
+        let row = this.buffer._rowcol.row;
+        let line = this.getLineDivElement(row);
+        let div = this.getOverlaysContainer();
+        let st = div.scrollTop;
+        let center = Math.round(line.offsetTop - div.clientHeight / 2 + line.offsetHeight / 2);
+        let top = Math.round(line.offsetTop) - 1;
+        let bottom = Math.round(line.offsetTop - div.clientHeight + line.offsetHeight) + 1;
+        if (st == top) div.scrollTop = bottom;
+        else if (st == center) div.scrollTop = top;
+        else div.scrollTop = center;
+    }
+
     centerOnCaret() {
         this.centerOnLine(this.buffer._rowcol.row);
     }

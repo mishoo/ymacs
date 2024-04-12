@@ -652,6 +652,12 @@ Ymacs_Buffer.newCommands({
 
     recenter_top_bottom: Ymacs_Interactive(function() {
         this.whenActiveFrame(function(frame){
+            frame.recenterTopBottom();
+        });
+    }),
+
+    recenter: Ymacs_Interactive(function() {
+        this.whenActiveFrame(function(frame){
             frame.centerOnCaret();
         });
     }),
@@ -797,7 +803,7 @@ Ymacs_Buffer.newCommands({
         this.whenActiveFrame(function(frame){
             var hl = frame.heightInLines();
             this.cmd("forward_line", Math.round(hl / 1.33));
-            this.cmd("recenter_top_bottom");
+            this.cmd("recenter");
         });
     }),
 
@@ -805,7 +811,7 @@ Ymacs_Buffer.newCommands({
         this.whenActiveFrame(function(frame){
             var hl = frame.heightInLines();
             this.cmd("backward_line", Math.round(hl / 1.33));
-            this.cmd("recenter_top_bottom");
+            this.cmd("recenter");
         });
     }),
 
