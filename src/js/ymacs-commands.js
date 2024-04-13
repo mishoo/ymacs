@@ -1059,7 +1059,9 @@ Ymacs_Buffer.newCommands({
         if (!this.deleteTransientRegion()) {
             this.cmd("beginning_of_line");
             var pos = this.point();
-            if (this.cmd("forward_line") || this.cmd("end_of_line")) {
+            this.cmd("end_of_line");
+            this.cmd("forward_char");
+            if (this.point() != pos) {
                 this._deleteText(pos, this.point());
                 return true;
             }
