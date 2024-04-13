@@ -29,7 +29,9 @@
                 "src/css/themes/ef-deuteranopia-light.scss",
                 "src/css/themes/ef-cyprus.scss",
                 "src/css/themes/ef-elea-dark.scss",
-                "src/css/themes/ef-autumn.scss"
+                "src/css/themes/ef-autumn.scss",
+                "src/css/themes/ef-maris-light.scss",
+                "src/css/themes/ef-maris-dark.scss"
             ]
         }
     },

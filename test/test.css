@@ -13,6 +13,8 @@
 @import url("../dist/themes/ef-cyprus.css");
 @import url("../dist/themes/ef-elea-dark.css");
 @import url("../dist/themes/ef-autumn.css");
+@import url("../dist/themes/ef-maris-light.css");
+@import url("../dist/themes/ef-maris-dark.css");
 
 html, body {
   background-color: #997;

@@ -244,7 +244,9 @@
                  ef-elea-dark
                  ef-deuteranopia-light
                  ef-cyprus
-                 ef-autumn)))
+                 ef-autumn
+                 ef-maris-dark
+                 ef-maris-light)))
     (loop for theme in names
           for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (load-theme theme t t)
