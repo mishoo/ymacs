@@ -103,8 +103,8 @@ function updateIsearch({ forward } = {}) {
         this.getMinibuffer()._placeUndoBoundary();
         this.getMinibuffer().cmd("insert", query);
         this._isearchContext.point = this.point();
+        this._isearchContext.current = { begin: this.point(), end: this.point() };
     }
-    this._isearchContext.current = this.point();
     if (forward != null) {
         this._isearchContext.forward = forward;
     }
@@ -180,22 +180,26 @@ function resetPrompt(count, current, ctx = this._isearchContext) {
     });
 }
 
-function doSearch() {
+function doSearch({ forward } = this._isearchContext) {
     let ctx = this._isearchContext;
     let query = ctx.query;
     let found = false;
     try {
         let rx = searchRegExp.call(this);
-        found = this.cmd(ctx.forward ? "search_forward_regexp" : "search_backward_regexp", rx);
+        found = this.cmd(forward ? "search_forward_regexp" : "search_backward_regexp", rx);
         if (found) {
             ctx.lastFoundQuery = query;
             this.cmd("ensure_caret_visible");
-            var rc_begin = this._positionToRowCol(this.point() + (ctx.forward ? -1 : 1) * this.matchData[0].length);
+            let p1 = this.point();
+            let p2 = p1 + (forward ? -1 : 1) * this.matchData[0].length;
+            if (forward) [ p1, p2 ] = [ p2, p1 ];
+            ctx.current = { begin: p1, end: p2 };
+            let p1rc = this._positionToRowCol(p1);
+            let p2rc = this._positionToRowCol(p2);
             this.setOverlay("isearch", {
-                line1: rc_begin.row, col1: rc_begin.col,
-                line2: this._rowcol.row, col2: this._rowcol.col
+                line1: p1rc.row, col1: p1rc.col,
+                line2: p2rc.row, col2: p2rc.col,
             });
-            if (!ctx.forward) ctx.current = this.point();
         }
         lazyHighlight.call(this, rx);
     } catch {};
@@ -264,8 +268,10 @@ Ymacs_Buffer.newCommands({
         if (!this._isearchContext) {
             initIsearch.call(this, { forward: true });
         }
-        var pos = this.point();
+        let ctx = this._isearchContext;
+        var pos = ctx.current.end;
         var pos2 = this.cmd("save_excursion", function(){
+            this.cmd("goto_char", pos);
             this.cmd("forward_word");
             return this.point();
         });
@@ -274,9 +280,8 @@ Ymacs_Buffer.newCommands({
             this.getMinibuffer()._placeUndoBoundary();
             this.getMinibuffer().cmd("insert", word.toLowerCase());
             word = isearchText.call(this);
-            if (this._isearchContext.forward)
-                this.cmd("goto_char", pos2 - word.length);
-            doSearch.call(this);
+            this.cmd("goto_char", ctx.current.begin);
+            doSearch.call(this, { forward: true });
         }
     }),
 
@@ -285,7 +290,7 @@ Ymacs_Buffer.newCommands({
         ctx.word = !ctx.word;
         if (ctx.word) ctx.regexp = false;
         this.signalInfo(`Search word: ${ctx.word ? "ON" : "OFF"}`, false, 2000);
-        this.cmd("goto_char", this._isearchContext.current);
+        this.cmd("goto_char", this._isearchContext.current.begin);
         doSearch.call(this);
     }),
 
@@ -295,7 +300,7 @@ Ymacs_Buffer.newCommands({
         else if (ctx.case_fold === false) ctx.case_fold = true;
         else if (ctx.case_fold === true) ctx.case_fold = null;
         this.signalInfo(`Case sensitive: ${ctx.case_fold == null ? "AUTO" : ctx.case_fold ? "OFF" : "ON"}`, false, 2000);
-        this.cmd("goto_char", this._isearchContext.current);
+        this.cmd("goto_char", this._isearchContext.current.begin);
         doSearch.call(this);
     }),
 
@@ -304,7 +309,7 @@ Ymacs_Buffer.newCommands({
         if (ev?.key?.length == 1 && !ev.ctrlKey && !ev.altKey) {
             this.whenMinibuffer(mb => {
                 mb.cmd("self_insert_command");
-                this.cmd("goto_char", this._isearchContext.current);
+                this.cmd("goto_char", this._isearchContext.current.begin);
                 isearchText.call(this);
                 doSearch.call(this);
             });
@@ -402,7 +407,7 @@ function query_replace_2() {
     let query = ctx.query;
     let rxorig = searchRegExp.call(this);
     lazyHighlight.call(this, rxorig);
-    this.cmd("goto_char", ctx.region ? ctx.region.begin : ctx.current);
+    this.cmd("goto_char", ctx.region ? ctx.region.begin : ctx.current.begin);
     if (rxorig) {
         this.cmd("minibuffer_prompt", `Replace ${ctx.regexp ? "regexp " : ""}“${query}” with: `);
         let onQuit = () => {
