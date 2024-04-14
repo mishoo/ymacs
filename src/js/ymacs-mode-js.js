@@ -219,7 +219,7 @@ parseInt undefined window document alert prototype constructor super this");
                     $cont.pop();
                     foundToken(start, stream.col, "regexp");
                     foundToken(stream.col, ++stream.col, "regexp-stopper");
-                    var m = stream.lookingAt(/^[gmsiy]+/);
+                    var m = stream.lookingAt(/^[gmsiyu]+/);
                     if (m)
                         foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
                     return true;

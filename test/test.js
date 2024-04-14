@@ -18,7 +18,7 @@ window.addEventListener("beforeunload", ev => {
     });
     //ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
-    ymacs.setColorTheme([ "ef-maris-light" ]);
+    ymacs.setColorTheme([ "ef-maris-dark" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
@@ -26,6 +26,7 @@ window.addEventListener("beforeunload", ev => {
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
     let b = window.b = ymacs.getActiveBuffer.bind(ymacs);
     b().cmd("load_file", "test.html");
+    b().setVariable("fill_column", 80);
 
     // b().cmd("load_file", "ymacs-frame.js");
     // b().callInteractively("split_frame_horizontally");

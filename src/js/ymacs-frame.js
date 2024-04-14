@@ -677,7 +677,7 @@ export class Ymacs_SplitCont extends Widget {
             mousemove : this._onMouseMove.bind(this),
             mouseup   : this._onMouseUp.bind(this),
         };
-        this._rb = DOM.fromHTML(`<div class="bar"></div>`);
+        this._rb = DOM.fromHTML(`<div class="bar" tabindex="0"></div>`);
         DOM.on(this._rb, "mousedown", this._onMouseDown.bind(this));
     }
     setSplit(a, b) {

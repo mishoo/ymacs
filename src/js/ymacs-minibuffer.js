@@ -87,7 +87,7 @@ function select(idx) {
         if (current) $selectedItem = el;
         DOM.condClass(el, current, "selected");
     });
-    $selectedItem.scrollIntoView({ block: "center" });
+    $selectedItem.scrollIntoView({ block: "nearest" });
 }
 
 export function read_with_continuation(completions, cont, validate) {
