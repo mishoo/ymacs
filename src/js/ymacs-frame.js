@@ -629,6 +629,7 @@ export class Ymacs_Frame extends Widget {
     }
 
     _on_mouseWheel(ev) {
+        ev.preventDefault();
         this.buffer._handleKeyEvent(ev);
     }
 
