@@ -223,7 +223,7 @@ to the current one.\n\
                 "ymacs-commands-utils.js",
                 "ymacs-keymap.js",
                 "ymacs-keymap-emacs.js",
-                "ymacs-keymap-isearch.js",
+                "ymacs-isearch.js",
                 "ymacs-minibuffer.js",
                 "ymacs-tokenizer.js",
                 "ymacs-mode-paren-match.js",

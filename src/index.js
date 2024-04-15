@@ -9,7 +9,7 @@ import { Ymacs_Exception } from "./js/ymacs-exception.js";
 import "./js/ymacs-commands.js";
 import "./js/ymacs-commands-utils.js";
 import "./js/ymacs-frame.js";
-import "./js/ymacs-keymap-isearch.js";
+import "./js/ymacs-isearch.js";
 import "./js/ymacs-marker.js";
 import "./js/ymacs-minibuffer.js";
 import "./js/ymacs-mode-css.js";
