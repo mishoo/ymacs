@@ -2,7 +2,6 @@
 /// Copyright (c) 2009-2024 Mihai Bazon <mihai.bazon@gmail.com>
 /// License: MIT
 
-import { DOM, formatBytes } from "./ymacs-utils.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
@@ -54,12 +53,6 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 */
 
-function TMPL_INFO({
-    ch, code, codeHex, point, mark, sizeKB
-}) {
-    return `<table><tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> ${ch} </tt></td></tr><tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> ${code} / 0x${codeHex} </td></tr><tr><td style='text-align: right; font-weight: bold'>Position:</td><td> ${point} </td></tr><tr><td style='text-align: right; font-weight: bold'>Mark:</td><td> ${mark} </td></tr><tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> ${sizeKB} </td></tr></table>`;
-}
-
 let minibuffer_keys = {
     // movement
     "ArrowLeft   && C-b"                      : "backward_char",
@@ -110,13 +103,14 @@ let minibuffer_keys = {
     // "Escape"                                  : "_next_is_meta",
     // "M-Escape Escape"                         : "keyboard_quit",
 
-    // necessary evil
     "C-S-y && C-v"                            : "yank_from_operating_system",
     "M-S-w"                                   : "copy_for_operating_system",
 
     "C-c /"                                   : "close_last_xml_tag",
     "S-Backspace"                             : "backward_delete_whitespace",
     "S-Delete"                                : "delete_whitespace",
+
+    "C-x ="                                   : "what_cursor_position",
 };
 
 let emacs_keys = Object.assign({}, minibuffer_keys, {
@@ -196,6 +190,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "C-g"                                     : "keyboard_quit",
     "M-^"                                     : "delete_indentation",
     "M-;"                                     : "comment_dwim",
+    "C-x ="                                   : "what_cursor_position",
 
     // vertical editing
     "C-x r t"                                 : "string_rectangle",
@@ -220,7 +215,6 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     // eval
     "M-x"                                     : "execute_extended_command",
 
-    // necessary evil
     "C-S-y && C-v"                            : "yank_from_operating_system",
     "M-S-w"                                   : "copy_for_operating_system",
 
@@ -247,30 +241,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "C-x C-w"                                 : "write_file",
     "C-x C-s"                                 : "save_buffer",
     "C-x s"                                   : "save_some_buffers",
-
-    // others
-    "C-x =": function() {
-        var ch = this.charAt(), chname = ch;
-        if (ch == " ")
-            chname = "Space";
-        else if (ch == "\n")
-            chname = "Newline";
-        this.popupMessage({
-            isHtml: true,
-            atCaret: true,
-            text: TMPL_INFO({
-                ch      : DOM.htmlEscape(chname),
-                code    : ch.charCodeAt(0),
-                codeHex : ch.charCodeAt().toString(16).toUpperCase(),
-                point   : this.point(),
-                mark    : this.markMarker.getPosition(),
-                size    : this.getCodeSize(),
-                sizeKB  : formatBytes(this.getCodeSize(), 2)
-            }),
-        });
-    }
 });
-
 
 let minibuffer_keymap = Ymacs_Keymap.define("emacs_mb", minibuffer_keys);
 minibuffer_keymap.defaultHandler = [ "self_insert_command" ];

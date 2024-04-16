@@ -2,11 +2,25 @@
 /// Copyright (c) 2009-2024 Mihai Bazon <mihai.bazon@gmail.com>
 /// License: MIT
 
-import { delayed } from "./ymacs-utils.js";
+import { DOM, delayed, formatBytes } from "./ymacs-utils.js";
 import { Ymacs_Keymap_UniversalArgument } from "./ymacs-keymap-emacs.js";
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Interactive, Ymacs_Interactive_X } from "./ymacs-interactive.js";
+
+function TMPL_CHAR_INFO({
+    ch, code, codeHex, point, sizeKB
+}) {
+    return `
+<table>
+  <tr><td style='text-align: right; font-weight: bold'>Char:</td><td><tt> ${ch} </tt></td></tr>
+  ${code != null ? `
+    <tr><td style='text-align: right; font-weight: bold'>Char code:</td><td> ${code} / 0x${codeHex} </td></tr>
+  ` : ""}
+  <tr><td style='text-align: right; font-weight: bold'>Position:</td><td> ${point} </td></tr>
+  <tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> ${sizeKB} </td></tr>
+</table>`;
+}
 
 Ymacs_Buffer.newCommands({
 
@@ -1184,7 +1198,29 @@ Ymacs_Buffer.newCommands({
             }
             this.cmd("indent_line");
         }
-    })
+    }),
+
+    what_cursor_position: Ymacs_Interactive("^", function(){
+        var ch = this.charAt(), chname = ch;
+        if (ch == null)
+            chname = "EOF";
+        else if (ch == " ")
+            chname = "Space";
+        else if (ch == "\n")
+            chname = "Newline";
+        this.popupMessage({
+            isHtml: true,
+            atCaret: true,
+            text: TMPL_CHAR_INFO({
+                ch      : DOM.htmlEscape(chname),
+                code    : ch ? ch.charCodeAt(0) : null,
+                codeHex : ch ? ch.charCodeAt().toString(16).toUpperCase() : null,
+                point   : this.point(),
+                size    : this.getCodeSize(),
+                sizeKB  : formatBytes(this.getCodeSize(), 2)
+            }),
+        });
+    }),
 
 });
 

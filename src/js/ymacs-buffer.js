@@ -362,12 +362,11 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     charAtRowCol(row, col) {
-        var n = this.code.length;
-        if (row >= n--)
-            return null;
+        let n = this.code.length;
+        if (row >= n--) return null;
         var line = this.code[row];
         if (col == line.length)
-            return row == n && line.charAt(col) || "\n";
+            return row == n ? null : "\n";
         return line.charAt(col);
     }
 
