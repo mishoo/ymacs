@@ -33,6 +33,8 @@ let markup_mode = tok_type => function(){
             rx: /[^\S\r\n]*<!--+[^\S\r\n]*(.*?)[^\S\r\n]*-->/ygu,
             ch: [ "<!--", "-->" ]
         },
+        syntax_word_dabbrev: /^[\p{N}_$\p{L}:#-]$/u,
+        syntax_word_sexp: /^[\p{N}_$\p{L}:#-]$/u,
     });
     return function() {
         this.setTokenizer(tok);

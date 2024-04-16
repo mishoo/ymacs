@@ -21,7 +21,7 @@ let Ymacs_Keymap_ISearch = Ymacs_Keymap.define("isearch", {
     "Backspace"    : function() {
         if (this.getMinibuffer().point() > this._isearchContext.mbMark.getPosition()) {
             this.getMinibuffer().cmd("backward_delete_char");
-            this.cmd("goto_char", this._isearchContext.point);
+            this.cmd("goto_char", this._isearchContext.livepoint);
             isearchText.call(this);
             updateIsearch.call(this);
         }
@@ -47,8 +47,9 @@ function initIsearch({
             word         : word,
             case_fold    : case_fold,
             case_replace : case_replace,
-            point        : this.point(),
-            current      : this.point(),
+            livepoint    : this.point(),
+            origpoint    : this.point(),
+            current      : { begin: this.point(), end: this.point() },
             mbMark       : this.getMinibuffer().promptMarker,
             query        : "",
             qreplace     : qreplace,
@@ -73,9 +74,10 @@ function updateIsearch({ forward } = {}) {
         query = this._isearchContext.query;
         this.getMinibuffer()._placeUndoBoundary();
         this.getMinibuffer().cmd("insert", query);
-        this._isearchContext.point = this.point();
+        this._isearchContext.origpoint = this.point();
         this._isearchContext.current = { begin: this.point(), end: this.point() };
     }
+    this._isearchContext.livepoint = this.point();
     if (forward != null) {
         this._isearchContext.forward = forward;
     }
@@ -99,7 +101,7 @@ function lazyHighlight(qrx, noPrompt) {
     let ctx = this._isearchContext;
     let point = this.point();
     let count = 0;
-    let current = 0;
+    let crnt = 0;
     qrx.lastIndex = ctx.region?.begin || 0;
     while (true) {
         let m = qrx.exec(code);
@@ -117,22 +119,22 @@ function lazyHighlight(qrx, noPrompt) {
                 });
             }
             if (point >= m.index && point < qrx.lastIndex || (point == qrx.lastIndex && ctx.forward)) {
-                current = count;
+                crnt = count;
             }
         } else {
             break;
         }
     }
     if (!noPrompt) {
-        resetPrompt.call(this, count, current);
+        resetPrompt.call(this, count, crnt);
     }
     this.setOverlay("isearch-lazy", hl);
 }
 
-function resetPrompt(count, current, ctx = this._isearchContext) {
+function resetPrompt(count, crnt, ctx = this._isearchContext) {
     this.whenMinibuffer(mb => {
         let pos = ctx.qreplace && count ? `[${count}] `
-            : (count && current) ? `[${current}/${count}] `
+            : (count && crnt) ? `[${crnt}/${count}] `
             : "";
         mb.prompt(`${pos}${
   ctx.qreplace ? "Query replace" : "I-search"}${
@@ -276,11 +278,12 @@ Ymacs_Buffer.newCommands({
     }),
 
     isearch_printing_char: Ymacs_Interactive(function() {
+        let ctx = this._isearchContext;
         var ev = this.interactiveEvent();
         if (ev?.key?.length == 1 && !ev.ctrlKey && !ev.altKey) {
             this.whenMinibuffer(mb => {
                 mb.cmd("self_insert_command");
-                this.cmd("goto_char", this._isearchContext.current.begin);
+                this.cmd("goto_char", ctx.livepoint);
                 isearchText.call(this);
                 doSearch.call(this);
             });
@@ -297,9 +300,9 @@ Ymacs_Buffer.newCommands({
         this.setMinibuffer("");
         this.popKeymap(Ymacs_Keymap_ISearch);
         if (cancelled) {
-            this.cmd("goto_char", this._isearchContext.point);
+            this.cmd("goto_char", this._isearchContext.origpoint);
         } else {
-            this.markMarker.setPosition(this._isearchContext.point);
+            this.markMarker.setPosition(this._isearchContext.origpoint);
         }
         this._isearchContext = null;
         this.deleteOverlay("isearch");
