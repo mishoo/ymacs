@@ -12,7 +12,7 @@
         },
         "css": {
             "source": "src/css/ymacs.scss",
-            "optimize": false
+            "optimize": true
         },
         "themes": {
             "source": [
