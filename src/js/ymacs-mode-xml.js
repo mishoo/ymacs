@@ -363,6 +363,13 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
             if (/^\s*<\x2f/.test(stream.lineText()))
                 indent -= INDENT_LEVEL();
         }
+
+        if (indent == null) {
+            let line = stream.line;
+            while (line > 0 && !/\S/.test(stream.lineText(line))) line--;
+            indent = stream.lineIndentation(line);
+        }
+
         return indent;
     }
 

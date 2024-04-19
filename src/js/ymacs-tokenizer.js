@@ -59,13 +59,11 @@ export class Ymacs_Stream {
         return ch;
     }
 
-    lineText(row) {
-        if (row == null)
-            row = this.line;
+    lineText(row = this.line) {
         return this.buffer.code[row];
     }
 
-    lineIndentation(row) {
+    lineIndentation(row = this.line) {
         return /^\s*/.exec(this.lineText(row))[0].length;
     }
 
