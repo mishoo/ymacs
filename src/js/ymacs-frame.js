@@ -588,6 +588,7 @@ export class Ymacs_Frame extends Widget {
         if (!isModifier(ev.key)) {
             if (this.ymacs.processKeyEvent(ev)) {
                 ev.preventDefault();
+                ev.stopPropagation();
             }
         }
     }
