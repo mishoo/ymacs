@@ -308,3 +308,9 @@ $lnwidth: 3.1em;
     }
   }
 }
+
+.Ymacs-frame-content {
+  .italic { font-style: italic; }
+  .bold  { font-weight: bold; }
+  .link { text-decoration: underline; }
+}

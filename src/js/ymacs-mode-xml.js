@@ -75,7 +75,7 @@ Ymacs_Buffer.newCommands({
     }
 });
 
-function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
+function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
     var $tags = [];
     var $cont = [];
     var $parens = [];
@@ -83,6 +83,7 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
     var $inTag = null;
     var $inComment = null;
     var $inString = false;
+    var $inline = 0;
     var PARSER = { next: next, copy: copy, indentation: indentation,
                    get tags() { return $tags } };
 
@@ -95,6 +96,7 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
             inTag: $inTag,
             inComment: $inComment,
             inString: $inString,
+            inline: $inline,
         };
         function resume() {
             $cont = context.cont.slice(0);
@@ -104,6 +106,7 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
             $inTag = context.inTag;
             $inComment = context.inComment;
             $inString = context.inString;
+            $inline = context.inline;
             return PARSER;
         };
         return resume;
@@ -113,8 +116,14 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
         return stream.buffer.getq("indent_level");
     }
 
-    function foundToken(c1, c2, type) {
+    function foundToken(c1, c2, type, addInline) {
+        if (addInline && inline) {
+            let cls = inline && inline.cls($inline) || "";
+            if (type) cls += " " + type;
+            tok.onToken(stream.line, c1, c2, cls || null);
+        } else {
         tok.onToken(stream.line, c1, c2, type);
+    }
     }
 
     function isLetter(ch) {
@@ -188,12 +197,15 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
                 $passedParens.push(p);
             }
             $cont.pop();
+            foundToken(stream.col, ++stream.col, "xml-close-bracket");
             if (!emptyTags?.test($inTag.id)) {
-                $inTag.inner = { l1: stream.line, c1: stream.col + 1 };
+                $inTag.inner = { l1: stream.line, c1: stream.col };
                 $tags.push($inTag);
+                if (inline) {
+                    $inline ^= inline.code($inTag.id);
+                }
             }
             $inTag = null;
-            foundToken(stream.col, ++stream.col, "xml-close-bracket");
         }
         else if (isNameStart(ch) && (name = readName())) {
             foundToken(name.c1, name.c2, "xml-attribute");
@@ -290,6 +302,9 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
             if (otag) {
                 otag.inner.l2 = stream.line;
                 otag.inner.c2 = stream.col;
+                if (inline) {
+                    $inline ^= inline.code(otag.id);
+                }
             }
             $parens.push({ line: stream.line, c1: stream.col, c2: stream.col + 2, type: "</" });
             foundToken(stream.col, ++stream.col, "xml-open-bracket");
@@ -327,7 +342,7 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
         }
         else if ((m = isOpenParen(ch))) {
             $parens.push({ line: stream.line, col: stream.col, type: ch });
-            foundToken(stream.col, ++stream.col, "open-paren");
+            foundToken(stream.col, ++stream.col, "open-paren", true);
         }
         else if ((m = isCloseParen(ch))) {
             let p = $parens.pop();
@@ -336,11 +351,11 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
             } else {
                 p.closed = { line: stream.line, col: stream.col, opened: p };
                 $passedParens.push(p);
-                foundToken(stream.col, ++stream.col, "close-paren");
+                foundToken(stream.col, ++stream.col, "close-paren", true);
             }
         }
         else {
-            foundToken(stream.col, ++stream.col, null);
+            foundToken(stream.col, ++stream.col, null, ch != " ");
         }
     }
 
@@ -376,11 +391,34 @@ function xml_tokenizer(stream, tok, { emptyTags, blockTags = /[^]/ } = {}) {
     return PARSER;
 }
 
+function inlineCode(tag) {
+    return (tag == "i" || tag == "em" ? 1 :
+            tag == "b" || tag == "strong" ? 2 :
+            tag == "a" ? 4 :
+            tag == "h1" ? 8 :
+            tag == "h2" ? 16 :
+            tag == "h3" ? 32 :
+            tag == "h4" ? 64 :
+            0);
+}
+
+function inlineCls(inline) {
+    let out = "";
+    if (inline & 1) out += " italic";
+    if (inline & 2) out += " bold";
+    if (inline & 4) out += " link";
+    if (inline & 8) out += " heading1";
+    if (inline & 16) out += " heading2";
+    if (inline & 32) out += " heading3";
+    if (inline & 64) out += " heading4";
+    return out.trim() || null;
+}
+
 function html_tokenizer(stream, tok){
     let $cont = [];
     let $xml = tok.getLanguage("xml", {
         emptyTags: RX_EMPTY_TAG,
-        blockTags: RX_BLOCK_TAG,
+        inline: { code: inlineCode, cls: inlineCls },
     });
     let $js = tok.getLanguage("js");
     let $css = tok.getLanguage("css");

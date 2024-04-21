@@ -135,10 +135,10 @@ function resetPrompt(count, crnt, prompt) {
         if (prompt) {
             mb.prompt(prompt.call(this, count, crnt, ctx));
         } else {
-        let pos = ctx.qreplace && count ? `[${count}] `
-            : (count && crnt) ? `[${crnt}/${count}] `
-            : "";
-        mb.prompt(`${pos}${
+            let pos = ctx.qreplace && count ? `[${count}] `
+                : (count && crnt) ? `[${crnt}/${count}] `
+                : "";
+            mb.prompt(`${pos}${
   ctx.qreplace ? "Query replace" : "I-search"}${
   ctx.regexp ? " regexp" : ctx.word ? " word" : ""}${
   ctx.forward ? "" : " backward"}:`);

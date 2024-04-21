@@ -69,12 +69,10 @@ $cursor_fg: #000000;
 .xml-cdata-starter { color: #969896; font-style: italic; }
 .xml-cdata-stopper { color: #969896; font-style: italic; }
 .lisp-keyword { color: #c397d8; }
-.markdown-heading1 { font-weight: bold; font-size: 1.383em; }
-.markdown-heading2 { font-weight: bold; font-size: 1.192em; }
-.markdown-heading3 { color: #e78c45; font-weight: bold; }
-.markdown-heading4 { color: #c397d8; font-weight: bold; }
-.markdown-heading5 { font-weight: bold; font-style: italic; }
-.markdown-heading6 { font-weight: bold; }
+.heading1 { font-weight: bold; font-size: 1.383em; }
+.heading2 { font-weight: bold; font-size: 1.192em; }
+.heading3 { color: #e78c45; font-weight: bold; }
+.heading4 { color: #c397d8; font-weight: bold; }
 .markdown-blockquote { color: #969896; font-style: italic; }
 .markdown-blockquote1 { color: #969896; font-style: italic; }
 .markdown-blockquote2 { color: #969896; font-style: italic; }
