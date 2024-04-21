@@ -92,7 +92,7 @@ function caseFold() {
     );
 }
 
-function lazyHighlight(qrx, noPrompt) {
+function lazyHighlight(qrx, prompt) {
     let cursor = this._rowcol;
     let minpos = this._rowColToPosition(cursor.row - 50, 0);
     let maxpos = this._rowColToPosition(cursor.row + 50, Infinity);
@@ -125,14 +125,16 @@ function lazyHighlight(qrx, noPrompt) {
             break;
         }
     }
-    if (!noPrompt) {
-        resetPrompt.call(this, count, crnt);
-    }
+    resetPrompt.call(this, count, crnt, prompt);
     this.setOverlay("isearch-lazy", hl);
 }
 
-function resetPrompt(count, crnt, ctx = this._isearchContext) {
+function resetPrompt(count, crnt, prompt) {
+    let ctx = this._isearchContext;
     this.whenMinibuffer(mb => {
+        if (prompt) {
+            mb.prompt(prompt.call(this, count, crnt, ctx));
+        } else {
         let pos = ctx.qreplace && count ? `[${count}] `
             : (count && crnt) ? `[${crnt}/${count}] `
             : "";
@@ -140,6 +142,7 @@ function resetPrompt(count, crnt, ctx = this._isearchContext) {
   ctx.qreplace ? "Query replace" : "I-search"}${
   ctx.regexp ? " regexp" : ctx.word ? " word" : ""}${
   ctx.forward ? "" : " backward"}:`);
+        }
         let start = ctx.mbMark;
         let mid = start + ctx.lastFoundQuery?.length;
         if (mid != null) {
@@ -381,7 +384,6 @@ function query_replace_2() {
     let query = ctx.query;
     let rxorig = searchRegExp.call(this);
     lazyHighlight.call(this, rxorig);
-    this.cmd("goto_char", ctx.region ? ctx.region.begin : ctx.current.begin);
     if (rxorig) {
         this.cmd("minibuffer_prompt", `Replace ${ctx.regexp ? "regexp " : ""}“${query}” with: `);
         let onQuit = () => {
@@ -414,6 +416,7 @@ function query_replace_3(mb, rxorig, replacement) {
     let cmds, stop, curr, count = 0;
     let queue = [];
     let end = ctx.region && this.createMarker(ctx.region.end);
+    this.cmd("goto_char", ctx.region ? ctx.region.begin : ctx.current.begin);
 
     let domatch = replacement => {
         if (ctx.regexp) {
@@ -453,8 +456,8 @@ function query_replace_3(mb, rxorig, replacement) {
             }
         }
         if (!all) {
-            lazyHighlight.call(this, rxorig, true);
-            mb.prompt(`Replace with “${domatch(replacement)}”? (y/n/u/!)`);
+            lazyHighlight.call(this, rxorig, (count, crnt) =>
+                `[${count}] Replace with “${domatch(replacement)}”? (y/n/u/!)`);
         }
         return found;
     };
