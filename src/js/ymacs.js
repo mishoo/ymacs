@@ -118,7 +118,7 @@ export class Ymacs extends Widget {
     }
 
     initClassName() {
-        return "Ymacs";
+        return "Ymacs Ymacs-cursor-block";
     }
 
     _addBufferListeners(buf) {

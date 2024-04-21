@@ -184,33 +184,55 @@ $lnwidth: 3.1em;
 .Ymacs_Resize_horiz { cursor: ns-resize }
 .Ymacs_Resize_vert { cursor: ew-resize }
 
-@keyframes ymacs-caret-blink {
-  0% { background-color: unset; }
-  50% { background-color: var(--ymacs-cursor-bg); color: var(--ymacs-cursor-fg); }
-}
-
-.Ymacs-overwrite-mode .Ymacs-caret {
-  border-radius: 15px;
-}
-
-.Ymacs_Frame .Ymacs-caret {
-  outline: 1px solid var(--ymacs-cursor-bg);
-  outline-offset: -1px;
-}
-
-.Ymacs_Minibuffer .Ymacs-caret { background-color: inherit; color: inherit; outline: none; }
-
 .Ymacs_Frame:focus {
   outline: none;
 }
-.Ymacs_Frame:focus .Ymacs-caret {
-  outline: none;
-  animation-name: ymacs-caret-blink;
-  animation-duration: 0.8s;
-  /* animation-delay: 1s; */
-  animation-iteration-count: infinite;
-  animation-timing-function: step-start;
-  animation-fill-mode: backwards;
+
+.Ymacs-cursor-block {
+  @keyframes ymacs-caret-block-blink {
+    0% { background-color: unset; }
+    50% { background-color: var(--ymacs-cursor-bg); color: var(--ymacs-cursor-fg); }
+  }
+  .Ymacs-overwrite-mode .Ymacs-caret {
+    border-radius: 15px;
+  }
+  .Ymacs_Frame .Ymacs-caret {
+    outline: 1px solid var(--ymacs-cursor-bg);
+    outline-offset: -1px;
+  }
+  .Ymacs_Minibuffer .Ymacs-caret {
+    background-color: inherit;
+    color: inherit;
+    outline: none;
+  }
+  .Ymacs_Frame:focus .Ymacs-caret {
+    outline: none;
+    animation-name: ymacs-caret-block-blink;
+    animation-duration: 0.8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: step-start;
+    animation-fill-mode: backwards;
+  }
+}
+
+.Ymacs-cursor-bar {
+  --ymacs-cursor-bar: var(--ymacs-cursor-bg);
+  @keyframes ymacs-caret-bar-blink {
+    0% { --ymacs-cursor-bar: var(--ymacs-cursor-bg); }
+    50% { --ymacs-cursor-bar: #0000; }
+  }
+  .Ymacs_Minibuffer .Ymacs-caret {
+    box-shadow: none;
+  }
+  .Ymacs_Frame:focus .Ymacs-caret {
+    box-shadow: -1px 0px 0px 0px var(--ymacs-cursor-bar),
+                inset 1px 0px 0px 0px var(--ymacs-cursor-bar);
+    animation-duration: 0.8s;
+    animation-name: ymacs-caret-bar-blink;
+    animation-iteration-count: infinite;
+    animation-timing-function: step-start;
+    animation-delay: 0.8s;
+  }
 }
 
 .Ymacs_Popup {
