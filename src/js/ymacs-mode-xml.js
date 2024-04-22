@@ -122,8 +122,8 @@ function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
             if (type) cls += " " + type;
             tok.onToken(stream.line, c1, c2, cls || null);
         } else {
-        tok.onToken(stream.line, c1, c2, type);
-    }
+            tok.onToken(stream.line, c1, c2, type);
+        }
     }
 
     function isLetter(ch) {

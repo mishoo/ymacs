@@ -7,18 +7,19 @@ import { Ymacs_Keymap } from  "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 let Ymacs_Keymap_ISearch = Ymacs_Keymap.define("isearch", {
-    "Escape"       : [ "isearch_abort", true ],
-    "C-g"          : "isearch_reset_or_abort",
-    "C-w && C-S-s" : "isearch_yank_word_or_char",
-    "C-s"          : "isearch_forward",
-    "C-r"          : "isearch_backward",
-    "M-%"          : "query_replace",
-    "C-M-%"        : "query_replace_regexp",
-    "M-s w && M-w" : "isearch_toggle_word",
-    "M-c"          : "isearch_toggle_case_fold",
-    "Enter"        : "isearch_abort",
-    "C-l"          : "recenter_top_bottom",
-    "Backspace"    : function() {
+    "Escape"                : [ "isearch_abort", true ],
+    "C-g"                   : "isearch_reset_or_abort",
+    "C-w && C-S-s"          : "isearch_yank_word_or_char",
+    "C-s"                   : "isearch_forward",
+    "C-r"                   : "isearch_backward",
+    "M-%"                   : "query_replace",
+    "C-M-%"                 : "query_replace_regexp",
+    "M-s w && M-w"          : "isearch_toggle_word",
+    "M-s c && M-c"          : "isearch_toggle_case_fold",
+    "M-s Space && M-Space"  : "isearch_toggle_lax_whitespace",
+    "Enter"                 : "isearch_abort",
+    "C-l"                   : "recenter_top_bottom",
+    "Backspace"             : function() {
         if (this.getMinibuffer().point() > this._isearchContext.mbMark.getPosition()) {
             this.getMinibuffer().cmd("backward_delete_char");
             this.cmd("goto_char", this._isearchContext.livepoint);
@@ -192,15 +193,13 @@ function searchRegExp({
     let searchRX = query;
     if (!regexp) {
         searchRX = query.replace(/[\]\[\}\{\)\(\*\+\?\.\\\^\$\|]/g, "\\$&");
-        if (lax) {
-            searchRX = searchRX.replace(/\s+/g, "\\s+");
-        } else {
-            searchRX = searchRX.replace(/\s/g, "\\$&");
-        }
         if (word) {
             // XXX: I guess it would be nice to use syntax_word / syntax_word_dabbrev
             searchRX = "\\b" + searchRX + "\\b";
         }
+    }
+    if (lax) {
+        searchRX = searchRX.replace(/\s+/g, "\\s+");
     }
     return new RegExp(searchRX, caseFold.call(this) ? "ugi" : "ug");
 }
@@ -276,6 +275,14 @@ Ymacs_Buffer.newCommands({
         else if (ctx.case_fold === false) ctx.case_fold = true;
         else if (ctx.case_fold === true) ctx.case_fold = null;
         this.signalInfo(`Case sensitive: ${ctx.case_fold == null ? "AUTO" : ctx.case_fold ? "OFF" : "ON"}`, false, 2000);
+        this.cmd("goto_char", this._isearchContext.current.begin);
+        doSearch.call(this);
+    }),
+
+    isearch_toggle_lax_whitespace: Ymacs_Interactive(function(){
+        let ctx = this._isearchContext;
+        ctx.lax = !ctx.lax;
+        this.signalInfo(`Loose whitespace: ${ctx.lax ? "ON" : "OFF"}`, false, 2000);
         this.cmd("goto_char", this._isearchContext.current.begin);
         doSearch.call(this);
     }),
