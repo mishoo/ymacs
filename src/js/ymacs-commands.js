@@ -735,7 +735,7 @@ Ymacs_Buffer.newCommands({
                     this.cmd("goto_char", eop);
                     done = true;
                 }
-                if (this._rowcol.col > this.getq("fill_column")) {
+                if (this._rowcol.col > this.getq("fill_column") + 1) {
                     if (p > bol) {
                         this.cmd("goto_char", p);
                     }
@@ -1220,6 +1220,26 @@ Ymacs_Buffer.newCommands({
                 sizeKB  : formatBytes(this.getCodeSize(), 2)
             }),
         });
+    }),
+
+    set_fill_column: Ymacs_Interactive("p", function(value){
+        let next = value => {
+            let prev = this.getq("fill_column");
+            this.setq("fill_column", +value);
+            this.signalInfo(`Fill column set to ${value} (was ${prev})`, false, 5000);
+        };
+        if (value == null) {
+            this.whenMinibuffer(mb => {
+                this.cmd("minibuffer_prompt", "Set fill column to: ");
+                mb.setMark();
+                mb.transientMarker = mb.createMarker(mb.point(), true);
+                mb.cmd("insert", String(this._rowcol.col));
+                mb.ensureTransientMark();
+                this.cmd("minibuffer_read_number", next);
+            });
+        } else {
+            next(value);
+        }
     }),
 
 });

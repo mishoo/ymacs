@@ -589,7 +589,7 @@ export class Ymacs_Buffer extends EventProxy {
         this.callHooks("onOverlayDelete", name);
     }
 
-    setMark(pos) {
+    setMark(pos = this.point()) {
         this.markMarker.setPosition(pos);
     }
 

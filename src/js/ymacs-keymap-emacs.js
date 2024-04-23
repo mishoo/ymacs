@@ -191,6 +191,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "M-^"                                     : "delete_indentation",
     "M-;"                                     : "comment_dwim",
     "C-x ="                                   : "what_cursor_position",
+    "C-x f"                                   : "set_fill_column",
 
     // vertical editing
     "C-x r t"                                 : "string_rectangle",
