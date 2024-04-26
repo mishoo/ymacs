@@ -218,12 +218,14 @@ function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
         else foundToken(stream.col, ++stream.col, null);
     }
 
-    function readComment(type, end) {
+    function readComment(type, end, op) {
         var line = stream.lineText(), pos = line.indexOf(end, stream.col);
         if (pos >= 0) {
             $cont.pop();
             foundToken(stream.col, pos, type);
             $inComment = null;
+            op.closed = { line: stream.line, c1: pos, c2: pos + end.length, opened: op };
+            $passedParens.push(op);
             foundToken(pos, pos += end.length, type + "-stopper");
             stream.col = pos;
         } else {
@@ -285,14 +287,18 @@ function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
             return $cont.at(-1)();
         let ch = stream.peek(), m;
         if (stream.lookingAt("<![CDATA[")) {
+            let op = { line: stream.line, c1: stream.col, c2: stream.col + 9, type: "<![CDATA[" };
+            $parens.push(op);
             foundToken(stream.col, stream.col += 9, "xml-cdata-starter");
             $inComment = { line: stream.line, c1: stream.col };
-            $cont.push(readComment.bind(null, "xml-cdata", "]]>"));
+            $cont.push(readComment.bind(null, "xml-cdata", "]]>", op));
         }
         else if (stream.lookingAt("<!--")) {
+            let op = { line: stream.line, c1: stream.col, c2: stream.col + 4, type: "<!--" };
+            $parens.push(op);
             foundToken(stream.col, stream.col += 4, "mcomment-starter");
             $inComment = { line: stream.line, c1: stream.col };
-            $cont.push(readComment.bind(null, "mcomment", "-->"));
+            $cont.push(readComment.bind(null, "mcomment", "-->", op));
         }
         else if ((m = stream.lookingAt(/^<!.*?>/))) {
             foundToken(stream.col, stream.col += m[0].length, "directive");
@@ -415,7 +421,6 @@ function inlineCls(inline) {
 }
 
 function html_tokenizer(stream, tok){
-    let $cont = [];
     let $xml = tok.getLanguage("xml", {
         emptyTags: RX_EMPTY_TAG,
         inline: { code: inlineCode, cls: inlineCls },
@@ -441,9 +446,6 @@ function html_tokenizer(stream, tok){
 
     function next() {
         stream.checkStop();
-        if ($cont.length > 0)
-            return $cont.at(-1)();
-
         if ($mode === $xml) {
             let tag = $xml.tags.at(-1);
             if (tag?.id == "script") {
@@ -467,14 +469,12 @@ function html_tokenizer(stream, tok){
     }
 
     function copy() {
-        let _cont = [...$cont];
-        let _main = $xml.copy();
+        let _xml = $xml.copy();
         let _js = $js.copy();
         let _css = $css.copy();
         let _mode = $mode;
         function resume() {
-            $cont = [..._cont];
-            $xml = _main();
+            $xml = _xml();
             $js = _js();
             $css = _css();
             $mode = _mode;
@@ -483,13 +483,13 @@ function html_tokenizer(stream, tok){
         resume.context = {
             get passedParens() {
                 return [
-                    ..._main.context.passedParens,
+                    ..._xml.context.passedParens,
                     ..._js.context.passedParens,
                     ..._css.context.passedParens,
                 ];
             },
             get tags() {
-                return _main.context.tags;
+                return _xml.context.tags;
             }
         };
         return resume;

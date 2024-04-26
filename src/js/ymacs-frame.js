@@ -523,7 +523,6 @@ export class Ymacs_Frame extends Widget {
             this.buffer.cmd("goto_char", this.caretMarker.getPosition());
         }
         this.buffer.addEventListener(this._moreBufferEvents);
-        this.redrawCaret();
     }
 
     _on_blur() {
