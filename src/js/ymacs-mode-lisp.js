@@ -11,20 +11,20 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
     function Partial(value) {
         this.value = value;
-    };
+    }
 
     function QuickParser(buffer, pos) {
         var input = new Ymacs_Simple_Stream({ buffer: buffer, pos: pos });
-        function peek() { return input.peek() };
-        function next() { return input.next() };
+        function peek() { return input.peek() }
+        function next() { return input.next() }
         function skip_ws() {
             return input.read_while(function(ch){
                 if (!caret_token && caret != null && input.pos == caret) return false;
                 return input.is_whitespace(ch);
             });
-        };
-        function skip(ch) { next() };
-        function read_while(pred) { return input.read_while(pred) };
+        }
+        function skip(ch) { next() }
+        function read_while(pred) { return input.read_while(pred) }
         function read_escaped(start, end, inces) {
             skip(start);
             var escaped = false;
@@ -45,20 +45,20 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                 }
             }
             return str;
-        };
+        }
         function read_comment() {
             return read_while(function(ch){ return ch && ch != "\n" });
-        };
+        }
         function read_multiline_comment() {
             var comment = read_while(function(){
                 return !input.looking_at("|#");
             });
             skip(); skip();
             return comment;
-        };
+        }
         function read_string() {
             return read_escaped("\"", "\"");
-        };
+        }
         function read_list(beg, end) {
             var save_list_index = list_index;
             list_index = 0;
@@ -80,7 +80,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
             } finally {
                 list_index = save_list_index;
             }
-        };
+        }
         function read_regexp() {
             var str = read_escaped("/", "/", true);
             var mods = read_while(function(ch){
@@ -93,7 +93,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                 }
             }).toLowerCase();
             return { pattern: str, modifiers: mods };
-        };
+        }
         function read_symbol() {
             return read_while(function(ch){
                 switch (ch) {
@@ -121,7 +121,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                 };
                 return true;
             });
-        };
+        }
         function read_char() {
             return next() + read_while(function(ch){
                 return (ch >= "a" && ch <= "z") ||
@@ -129,7 +129,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                     (ch >= "0" && ch <= "9") ||
                     ch == "-" || ch == "_";
             });
-        };
+        }
         function read_sharp() {
             skip("#");
             switch (peek()) {
@@ -141,7 +141,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
               default:
                 return token("unknown", read_token);
             }
-        };
+        }
         function read_token() {
             skip_ws();
             if (!caret_token && caret != null && input.pos == caret && (!parent || parent.type == "list")) {
@@ -167,7 +167,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
               case null : return null; // EOF
             }
             return token("symbol", read_symbol);
-        };
+        }
         function read_all() {
             var ret = [];
             while (peek() != null) {
@@ -177,7 +177,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                 ++list_index;
             }
             return ret;
-        };
+        }
         var caret_token = null;
         var list_index = 0;
         var caret = null;
@@ -223,7 +223,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
             } finally {
                 parent = save_parent;
             }
-        };
+        }
         return {
             parse: function(pos) {
                 caret = pos;
@@ -254,7 +254,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                 return tok;
             }
         };
-    };
+    }
 
     Ymacs_Buffer.newCommands({
 
@@ -414,11 +414,11 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
 
     function isOpenParen(ch) {
         return OPEN_PAREN[ch];
-    };
+    }
 
     function isCloseParen(ch) {
         return CLOSE_PAREN[ch];
-    };
+    }
 
     // the tokenizer function
     Ymacs_Tokenizer.define("lisp", function(stream, tok, options){
@@ -430,59 +430,64 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                 return false;
             return ch.toLowerCase() != ch.toUpperCase() ||
                 /^[-|0-9!#$%&*+./:<=>?@\^_~]$/i.test(ch);
-        };
+        }
 
         function isConstituentStart(ch) {
             //return ch != "#" && isConstituent(ch);
             return isConstituent(ch);
-        };
+        }
 
-        var $cont          = [],
-        $inString      = false,
-        $inComment     = false,
-        $quote         = null,
-        $parens        = [],
-        $passedParens  = [],
-        $backList      = [],
-        $list          = [],
-        PARSER         = { next: next, copy: copy, indentation: indentation };
+        let $cont = [];
+        let $inString = false;
+        let $inComment = false;
+        let $quote = null;
+        let $parens = [];
+        let $passedParens = [];
+        let $backList = [];
+        let $list = [];
+        let PARSER = {
+            next: next,
+            copy: copy,
+            indentation: indentation,
+            get passedParens() {
+                return $passedParens;
+            },
+        };
 
         function copy() {
-            var context = restore.context = {
-                cont         : $cont.slice(0),
-                quote        : $quote,
-                inString     : $inString,
-                inComment    : $inComment,
-                parens       : $parens.slice(0),
-                passedParens : $passedParens.slice(0),
-                backList     : $backList.slice(0),
-                list         : $list.slice(0)
-            };
-            function restore() {
-                $cont          = context.cont.slice(0);
-                $inString      = context.inString;
-                $quote         = context.quote;
-                $inComment     = context.inComment;
-                $parens        = context.parens.slice(0);
-                $passedParens  = context.passedParens.slice(0);
-                $backList      = context.backList.slice(0),
-                $list          = context.list.slice(0);
+            let _cont = $cont.slice(0);
+            let _quote = $quote;
+            let _inString = $inString;
+            let _inComment = $inComment;
+            let _parens = $parens.slice(0);
+            let _passedParens = $passedParens.slice(0);
+            let _backList = $backList.slice(0);
+            let _list = $list.slice(0);
+            return resume;
+            function resume() {
+                $cont = _cont.slice(0);
+                $inString = _inString;
+                $quote = _quote;
+                $inComment = _inComment;
+                $parens = _parens.slice(0);
+                $passedParens = _passedParens.slice(0);
+                $backList = _backList.slice(0),
+                $list = _list.slice(0);
                 return PARSER;
-            };
-            return restore;
-        };
+            }
+        }
 
         function foundToken(c1, c2, type) {
             tok.onToken(stream.line, c1, c2, type);
-        };
+        }
 
         function newArg(what) {
             if (what == null)
                 what = { c1: stream.col };
             $list.push(what);
-        };
+        }
 
-        function INDENT_LEVEL() { return stream.buffer.getq("indent_level"); };
+        function INDENT_LEVEL() { return stream.buffer.getq("indent_level"); }
 
         function readName() {
             var col = stream.col, ch = stream.next(),
@@ -496,7 +501,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             }
             var tok = ch && { line: stream.line, c1: col, c2: stream.col, id: name.toLowerCase() };
             if (tok.c2 > tok.c1) return tok;
-        };
+        }
 
         function readString(end, type) {
             var ch, esc = false, start = stream.col;
@@ -519,7 +524,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                 stream.nextCol();
             }
             foundToken(start, stream.col, type);
-        };
+        }
 
         function readComment() {
             var line = stream.lineText(), pos = line.indexOf("|#", stream.col);
@@ -537,7 +542,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                 foundToken(stream.col, line.length, "mcomment");
                 stream.col = line.length;
             }
-        };
+        }
 
         function isForm(form, list = $list) {
             var f = list && list.length > 0 && list[0].id;
@@ -547,7 +552,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                     return f;
                 return typeof form == "string" ? f == form : f in form;
             }
-        };
+        }
 
         function next() {
             stream.checkStop();
@@ -637,7 +642,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             else {
                 foundToken(stream.col, ++stream.col, null);
             }
-        };
+        }
 
         function indentation() {
             var currentLine = stream.lineText();
@@ -706,7 +711,7 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
             }
 
             return indent;
-        };
+        }
 
         return PARSER;
     });

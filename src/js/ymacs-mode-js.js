@@ -82,35 +82,36 @@ parseInt undefined window document alert prototype constructor super this");
         var PARSER = {
             next        : next,
             copy        : copy,
-            indentation : indentation
+            indentation : indentation,
+            get passedParens() {
+                return $passedParens;
+            },
         };
 
         function INDENT_LEVEL() {
             return stream.buffer.getq("indent_level");
-        };
+        }
 
         function copy() {
-            var context = restore.context = {
-                cont         : $cont.slice(0),
-                inComment    : $inComment,
-                inString     : $inString,
-                parens       : $parens.slice(0),
-                passedParens : $passedParens.slice(0),
-            };
-            function restore() {
-                $cont          = context.cont.slice(0);
-                $inComment     = context.inComment;
-                $inString      = context.inString;
-                $parens        = context.parens.slice(0);
-                $passedParens  = context.passedParens.slice(0);
+            let _cont = [...$cont];
+            let _parens = [...$parens];
+            let _passedParens = [...$passedParens];
+            let _inComment = $inComment;
+            let _inString = $inString;
+            return resume;
+            function resume() {
+                $cont = [..._cont];
+                $parens = [..._parens];
+                $passedParens = [..._passedParens];
+                $inComment = _inComment;
+                $inString = _inString;
                 return PARSER;
-            };
-            return restore;
-        };
+            }
+        }
 
         function foundToken(c1, c2, type) {
             tok.onToken(stream.line, c1, c2, type);
-        };
+        }
 
         function readName() {
             var col = stream.col, ch = stream.next(),
@@ -123,7 +124,7 @@ parseInt undefined window document alert prototype constructor super this");
                 stream.nextCol();
             }
             return ch && { line: stream.line, c1: col, c2: stream.col, id: name };
-        };
+        }
 
         function readComment() {
             var line = stream.lineText(), pos = line.indexOf("*/", stream.col);
@@ -141,7 +142,7 @@ parseInt undefined window document alert prototype constructor super this");
                 foundToken(stream.col, line.length, "mcomment");
                 stream.col = line.length;
             }
-        };
+        }
 
         function readString(end, type) {
             $inString = true;
@@ -173,7 +174,7 @@ parseInt undefined window document alert prototype constructor super this");
                 stream.nextCol();
             }
             foundToken(start, stream.col, type);
-        };
+        }
 
         function readLiteralRegexp() {
             var ch, esc = false, inset = 0, start = stream.col;
@@ -199,7 +200,7 @@ parseInt undefined window document alert prototype constructor super this");
                 stream.nextCol();
             }
             foundToken(start, stream.col, "regexp");
-        };
+        }
 
         function readToken() {
             var ch = stream.peek(), m, tmp;
@@ -265,7 +266,7 @@ parseInt undefined window document alert prototype constructor super this");
             if ($cont.length > 0)
                 return $cont.at(-1)();
             readToken();
-        };
+        }
 
         function indentation() {
             var row = stream.line;
@@ -354,7 +355,7 @@ parseInt undefined window document alert prototype constructor super this");
                 indent -= INDENT_LEVEL() / 2;
 
             return indent;
-        };
+        }
 
         return PARSER;
 

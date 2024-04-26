@@ -118,7 +118,6 @@ function filename_completion(mb, str, re, cont) {
                     completions = completions.map(function(name){
                         return { label: name, value: dir + name };
                     });
-                    console.log(completions);
                     popupCompletionMenu.call(mb, self.getMinibufferFrame(), completions);
                     cont(null);
                 }

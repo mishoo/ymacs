@@ -366,6 +366,10 @@ export class Ymacs_Tokenizer extends EventProxy {
         }
     }
 
+    parseUntil(row, col) {
+        return this.getParserForLine(row, col);
+    }
+
     reparseAll() {
         this.truncate(0);
         return this.finishParsing();
@@ -390,6 +394,12 @@ export class Ymacs_Tokenizer extends EventProxy {
         if (this.parsers.length > row) this.parsers.length = row;
     }
 
+    getPP() {
+        let pp = this.theParser.passedParens;
+        if (pp instanceof Function) pp = pp();
+        return pp ? [...pp].sort(compareRowCol) : [];
+    }
+
 }
 
 export function compareRowCol(p1, p2) {
@@ -398,13 +408,6 @@ export function compareRowCol(p1, p2) {
         : (p1.row ?? p1.line) > (p2.row ?? p2.line)
         ? 1
         : (p1.col ?? p1.c1) - (p2.col ?? p2.c1);
-}
-
-export function getPP(tok) {
-    var pp = tok.context.passedParens;
-    pp = pp instanceof Function ? pp() : pp;
-    if (pp) pp = [...pp].sort(compareRowCol);
-    return pp;
 }
 
 export function caretInside(caret, zone) {

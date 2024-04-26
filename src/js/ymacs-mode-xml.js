@@ -3,7 +3,7 @@
 /// License: MIT
 
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
-import { Ymacs_Tokenizer, getPP, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
+import { Ymacs_Tokenizer, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
@@ -50,7 +50,8 @@ Ymacs_Buffer.newMode("html_mode", markup_mode("html"));
 
 Ymacs_Buffer.newCommands({
     xml_get_fill_paragraph_region: function() {
-        let blk = getPP(this.tokenizer.finishParsing())
+        this.tokenizer.finishParsing();
+        let blk = this.tokenizer.getPP()
             .filter(caretInside(this._rowcol, "outer"))
             .findLast(p => RX_BLOCK_TAG.test(p.type));
         if (blk) {
@@ -84,32 +85,39 @@ function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
     var $inComment = null;
     var $inString = false;
     var $inline = 0;
-    var PARSER = { next: next, copy: copy, indentation: indentation,
-                   get tags() { return $tags } };
+    var PARSER = {
+        next: next,
+        copy: copy,
+        indentation: indentation,
+        get tags() {
+            return $tags;
+        },
+        get passedParens() {
+            return $passedParens;
+        },
+    };
 
     function copy() {
-        let context = resume.context = {
-            tags: $tags.slice(0),
-            cont: $cont.slice(0),
-            parens: $parens.slice(0),
-            passedParens: $passedParens.slice(0),
-            inTag: $inTag,
-            inComment: $inComment,
-            inString: $inString,
-            inline: $inline,
-        };
-        function resume() {
-            $cont = context.cont.slice(0);
-            $tags = context.tags.slice(0);
-            $parens = context.parens.slice(0);
-            $passedParens = context.passedParens.slice(0);
-            $inTag = context.inTag;
-            $inComment = context.inComment;
-            $inString = context.inString;
-            $inline = context.inline;
-            return PARSER;
-        };
+        let _cont = [...$cont];
+        let _tags = [...$tags];
+        let _parens = [...$parens];
+        let _passedParens = [...$passedParens];
+        let _inTag = $inTag;
+        let _inComment = $inComment;
+        let _inString = $inString;
+        let _inline = $inline;
         return resume;
+        function resume() {
+            $cont = [..._cont];
+            $tags = [..._tags];
+            $parens = [..._parens];
+            $passedParens = [..._passedParens];
+            $inTag = _inTag;
+            $inComment = _inComment;
+            $inString = _inString;
+            $inline = _inline;
+            return PARSER;
+        }
     }
 
     function INDENT_LEVEL() {
@@ -432,6 +440,7 @@ function html_tokenizer(stream, tok){
     let PARSER = {
         next: next,
         copy: copy,
+        indentation: indentation,
         get mode() {
             return $mode === $xml ? "markup"
                 :  $mode === $css ? "css"
@@ -441,7 +450,13 @@ function html_tokenizer(stream, tok){
         get tags() {
             return $xml.tags;
         },
-        indentation: indentation
+        get passedParens() {
+            return [
+                ...$xml.passedParens,
+                ...$js.passedParens,
+                ...$css.passedParens,
+            ];
+        },
     };
 
     function next() {
@@ -464,7 +479,6 @@ function html_tokenizer(stream, tok){
                 $mode = $xml;
             }
         }
-
         $mode.next();
     }
 
@@ -480,18 +494,6 @@ function html_tokenizer(stream, tok){
             $mode = _mode;
             return PARSER;
         }
-        resume.context = {
-            get passedParens() {
-                return [
-                    ..._xml.context.passedParens,
-                    ..._js.context.passedParens,
-                    ..._css.context.passedParens,
-                ];
-            },
-            get tags() {
-                return _xml.context.tags;
-            }
-        };
         return resume;
     }
 
@@ -642,9 +644,8 @@ function html_tokenizer(stream, tok){
             this.cmd("self_insert_command");
             if (this.looking_back("</")) {
                 let rc = this._rowcol;
-                let parser = this.tokenizer.getParserForLine(rc.row, rc.col);
-                let ctx = parser.copy().context;
-                let tag = ctx.tags.at(-1);
+                this.tokenizer.parseUntil(rc.row, rc.col);
+                let tag = this.tokenizer.theParser.tags.at(-1);
                 if (tag) {
                     this._placeUndoBoundary();
                     this.cmd("insert", tag.id, ">");
@@ -656,9 +657,8 @@ function html_tokenizer(stream, tok){
         xml_gt_complete_tag: Ymacs_Interactive(function() {
             this.cmd("self_insert_command");
             let rc = this._rowcol;
-            let parser = this.tokenizer.getParserForLine(rc.row, rc.col);
-            let ctx = parser.copy().context;
-            let tag = ctx.tags.at(-1);
+            this.tokenizer.parseUntil(rc.row, rc.col);
+            let tag = this.tokenizer.theParser.tags.at(-1);
             if (tag?.inner?.l1 == rc.row && tag.inner.c1 == rc.col) {
                 this._placeUndoBoundary();
                 let pos = this.point();

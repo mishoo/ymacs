@@ -8,9 +8,12 @@ import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
 Ymacs_Tokenizer.define("css", function(stream, tok){
 
     var PARSER = {
-        next        : next,
-        copy        : copy,
-        indentation : indentation
+        next: next,
+        copy: copy,
+        indentation: indentation,
+        get passedParens() {
+            return $passedParens;
+        },
     };
 
     var $parens = [];
@@ -20,27 +23,25 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
     var $inComment = null;
 
     function copy() {
-        var c = resume.context = {
-            parens       : $parens.slice(0),
-            passedParens : $passedParens.slice(0),
-            cont         : $cont.slice(0),
-            inString     : $inString,
-            inComment    : $inComment
-        };
-        function resume() {
-            $parens       = c.parens.slice(0);
-            $passedParens = c.passedParens.slice(0);
-            $cont         = c.cont.slice(0);
-            $inString     = c.inString;
-            $inComment    = c.inComment;
-            return PARSER;
-        };
+        let _parens = [...$parens];
+        let _passedParens = [...$passedParens];
+        let _cont = [...$cont];
+        let _inString = $inString;
+        let _inComment = $inComment;
         return resume;
-    };
+        function resume() {
+            $parens = [..._parens];
+            $passedParens = [..._passedParens];
+            $cont = [..._cont];
+            $inString = _inString;
+            $inComment = _inComment;
+            return PARSER;
+        }
+    }
 
     function INDENT_LEVEL() {
         return tok.buffer.getq("indent_level");
-    };
+    }
 
     var OPEN_PAREN = {
         "(" : ")",
@@ -56,15 +57,15 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
 
     function isOpenParen(ch) {
         return OPEN_PAREN[ch];
-    };
+    }
 
     function isCloseParen(ch) {
         return CLOSE_PAREN[ch];
-    };
+    }
 
     function foundToken(c1, c2, type) {
         tok.onToken(stream.line, c1, c2, type);
-    };
+    }
 
     function readComment() {
         var line = stream.lineText(), pos = line.indexOf("*/", stream.col);
@@ -82,7 +83,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
             foundToken(stream.col, line.length, "mcomment");
             stream.col = line.length;
         }
-    };
+    }
 
     function readString(end, type) {
         var ch, esc = false, start = stream.col;
@@ -105,7 +106,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
             stream.nextCol();
         }
         foundToken(start, stream.col, type);
-    };
+    }
 
     function next() {
         stream.checkStop();
@@ -166,7 +167,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
         else {
             foundToken(stream.col, ++stream.col, null);
         }
-    };
+    }
 
     function indentation() {
         // no indentation for continued strings
@@ -223,7 +224,7 @@ Ymacs_Tokenizer.define("css", function(stream, tok){
         }
 
         return indent;
-    };
+    }
 
     return PARSER;
 

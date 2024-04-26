@@ -7,28 +7,32 @@ import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
 
 Ymacs_Tokenizer.define("markdown", function(stream, tok) {
 
-    let PARSER = { next: next, copy: copy };
     let $inline = [];
     let $parens = [];
     let $cont = [];
     let $passedParens = [];
+    let PARSER = {
+        next: next,
+        copy: copy,
+        get passedParens() {
+            return $passedParens;
+        },
+    };
 
     function copy() {
-        let context = restore.context = {
-            cont         : [...$cont],
-            inline       : [...$inline],
-            parens       : [...$parens],
-            passedParens : [...$passedParens],
-        };
-        function restore() {
-            $cont         = [...context.cont];
-            $inline       = [...context.inline];
-            $parens       = [...context.parens];
-            $passedParens = [...context.passedParens];
+        let _cont = [...$cont];
+        let _inline = [...$inline];
+        let _parens = [...$parens];
+        let _passedParens = [...$passedParens];
+        return resume;
+        function resume() {
+            $cont = [..._cont];
+            $inline = [..._inline];
+            $parens = [..._parens];
+            $passedParens = [..._passedParens];
             return PARSER;
-        };
-        return restore;
-    };
+        }
+    }
 
     let OPEN_PAREN = {
         "(" : ")",
@@ -50,31 +54,31 @@ Ymacs_Tokenizer.define("markdown", function(stream, tok) {
 
     function foundToken(c1, c2, type) {
         tok.onToken(stream.line, c1, c2, type);
-    };
+    }
 
     function isOpenParen(ch) {
         return OPEN_PAREN[ch];
-    };
+    }
 
     function isCloseParen(ch) {
         return CLOSE_PAREN[ch];
-    };
+    }
 
     function next() {
         stream.checkStop();
         if ($cont.length > 0)
             return $cont.at(-1)();
         readToken();
-    };
+    }
 
     function readToken() {
         let ch = stream.peek(), tmp;
         if (stream.col == 0 && (tmp = stream.lookingAt(/^(#+)/))) {
-            foundToken(0, stream.col = stream.lineLength(), "markdown-heading" + tmp[0].length);
+            foundToken(0, stream.col = stream.lineLength(), "heading" + tmp[0].length);
         }
         else if (stream.line > 0 && stream.col == 0 && (tmp = stream.lookingAt(/^[=-]+$/)) && /\S/.test(stream.lineText(stream.line - 1))) {
             tmp = tmp[0].charAt(0) == "=" ? 1 : 2;
-            tmp = "markdown-heading" + tmp;
+            tmp = "heading" + tmp;
             tok.onToken(stream.line - 1, 0, stream.lineLength(stream.line - 1), tmp);
             foundToken(0, stream.col = stream.lineLength(), tmp);
         }
@@ -102,7 +106,7 @@ Ymacs_Tokenizer.define("markdown", function(stream, tok) {
         else {
             foundToken(stream.col, ++stream.col, null);
         }
-    };
+    }
 
     return PARSER;
 
