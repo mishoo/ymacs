@@ -19,6 +19,7 @@ import { Ymacs_Keymap } from "./ymacs-keymap.js";
     }
 
     var KEYWORDS = qw("abstract break case catch class const \
+async await \
 continue debugger default delete do else \
 enum export extends final finally for \
 function goto if implements import in \
@@ -38,7 +39,7 @@ Packages decodeURI decodeURIComponent \
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
 parseInt undefined window document alert prototype constructor super this");
 
-    var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|return\s+$|typeof\s+$/;
+    var ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|(?:return|typeof|case)\s+$/;
 
     function isLetter(ch) {
         return ch.toLowerCase() != ch.toUpperCase();
@@ -176,7 +177,7 @@ parseInt undefined window document alert prototype constructor super this");
             foundToken(start, stream.col, type);
         }
 
-        function readLiteralRegexp() {
+        function readLiteralRegexp(sp) {
             var ch, esc = false, inset = 0, start = stream.col;
             while (!stream.eol()) {
                 ch = stream.peek();
@@ -188,12 +189,15 @@ parseInt undefined window document alert prototype constructor super this");
                         inset = 0;
                 }
                 if (ch === "/" && !esc && !inset) {
+                    let c1 = stream.col;
                     $cont.pop();
                     foundToken(start, stream.col, "regexp");
                     foundToken(stream.col, ++stream.col, "regexp-stopper");
-                    var m = stream.lookingAt(/^[gmsiyu]+/);
+                    var m = stream.lookingAt(/^[dgimsuvy]+/);
                     if (m)
                         foundToken(stream.col, stream.col += m[0].length, "regexp-modifier");
+                    sp.closed = { line: stream.line, c1: c1, c2: stream.col, opened: sp };
+                    $passedParens.push(sp);
                     return true;
                 }
                 esc = !esc && ch === "\\";
@@ -250,8 +254,9 @@ parseInt undefined window document alert prototype constructor super this");
                 }
             }
             else if (ch === "/" && ALLOW_REGEXP_AFTER.test(stream.textBefore())) {
+                let start = { line: stream.line, col: stream.col, type: "/" };
                 foundToken(stream.col, ++stream.col, "regexp-starter");
-                $cont.push(readLiteralRegexp);
+                $cont.push(readLiteralRegexp.bind(null, start));
             }
             else if ((m = stream.lookingAt(/^\s+$/))) {
                 foundToken(stream.col, stream.col += m[0].length, "trailing-whitespace");
