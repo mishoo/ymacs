@@ -94,33 +94,34 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
             }).toLowerCase();
             return { pattern: str, modifiers: mods };
         }
+        function is_symbol_char(ch) {
+            switch (ch) {
+              case null:
+              case "(":
+              case ")":
+              case "{":
+              case "}":
+              case "[":
+              case "]":
+              case "#":
+              case ";":
+              case "`":
+              case "'":
+              case "\"":
+              case "|":
+              case " ":
+              case "\n":
+              case "\t":
+              case "\x0C":
+              case "\u2028":
+              case "\u2029":
+              case "\xA0":
+                return false;
+            }
+            return true;
+        }
         function read_symbol() {
-            return read_while(function(ch){
-                switch (ch) {
-                  case null:
-                  case "(":
-                  case ")":
-                  case "{":
-                  case "}":
-                  case "[":
-                  case "]":
-                  case "#":
-                  case ";":
-                  case "`":
-                  case "'":
-                  case "\"":
-                  case "|":
-                  case " ":
-                  case "\n":
-                  case "\t":
-                  case "\x0C":
-                  case "\u2028":
-                  case "\u2029":
-                  case "\xA0":
-                    return false;
-                };
-                return true;
-            });
+            return read_while(is_symbol_char);
         }
         function read_char() {
             return next() + read_while(function(ch){
@@ -130,13 +131,18 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                     ch == "-" || ch == "_";
             });
         }
+        function read_elisp_char() {
+            skip("?");
+            if (peek() == "\\") next();
+            return next();
+        }
         function read_sharp() {
             skip("#");
             switch (peek()) {
               case "\\": next(); return token("char", read_char);
               case "/": return token("regexp", read_regexp);
               case "(": return token("vector", read_list.bind(null, "(", ")"));
-              case "'": next(); return token("function", read_symbol);
+              case "'": next(); return token("function", read_token);
               case "|": next(); return token("comment", read_multiline_comment);
               default:
                 return token("unknown", read_token);
@@ -154,6 +160,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
               case "{"  : return token("list", read_list.bind(null, "{", "}"));
               case "["  : return token("list", read_list.bind(null, "[", "]"));
               case "#"  : return token("sharp", read_sharp);
+              case "?"  : return token("char", read_elisp_char);
               case "`"  : next(); return token("qq", read_token, -1);
               case ","  :
                 next();
@@ -200,7 +207,7 @@ import { Ymacs_Interactive } from "./ymacs-interactive.js";
                 try {
                     if (reader) {
                         tok.value = reader();
-                        if (tok.value === "") {
+                        if (tok.value === "" && type != "string") {
                             // couldn't figure this out, but let's not crash the browser.
                             next();
                         }
@@ -366,6 +373,8 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
     var DEFINES_FUNCTION = toHash("defun defmacro defgeneric defmethod");
 
     var DEFINES_TYPE = toHash("deftype defclass defstruct");
+
+    var DEFINES_VARIABLE = toHash("defvar defparameter defconstant defconst")
 
     var FORM_ARGS = {
         "if"                  : "3+",
@@ -550,7 +559,9 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                 f = f.toLowerCase();
                 if (form == null)
                     return f;
-                return typeof form == "string" ? f == form : f in form;
+                return typeof form == "string" ? f == form
+                    :  form instanceof RegExp ? form.test(f)
+                    :  f in form;
             }
         }
 
@@ -615,6 +626,11 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                     foundToken(stream.col, ++stream.col, "close-paren");
                 }
             }
+            else if ((tmp = stream.lookingAt(/^\?(?:\\?.)/u))) {
+                // elisp char syntax
+                newArg();
+                foundToken(stream.col, stream.col += tmp[0].length, "constant");
+            }
             else if (isConstituentStart(ch) && (tmp = readName())) {
                 var type = ch == ":" ? "lisp-keyword"
                     : ch == "&" ? "type"
@@ -631,8 +647,15 @@ return return-from setq set! set-car! set-cdr! setf multiple-value-call values",
                     else if (isForm(DEFINES_TYPE) && $list.length == 1) {
                         type = "type";
                     }
+                    else if (isForm(DEFINES_VARIABLE) && $list.length == 1) {
+                        type = "variable-name";
+                    }
+                    else if (isForm(/^def/)) {
+                        if ($list.length == 1) type = "function-name";
+                        if ($list.length == 2) type = "type";
+                    }
                     // there are a lot of macros starting with "with-", so let's highlight this
-                    else if (/^with(out)?[-\x2f]|:with(out)?[-\x2f]/i.test(tmp.id)) {
+                    else if (/^(?::?with(out)?[-\x2f]|def)/i.test(tmp.id)) {
                         type = "builtin";
                     }
                 }
