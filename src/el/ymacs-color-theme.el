@@ -127,17 +127,19 @@
 
 
 
-(defun ymacs-color-theme-print (&optional name)
+(defun ymacs-color-theme-print (&optional name use-current-buffer)
   (interactive
    (list
     (read-string "Theme name: " (if custom-enabled-themes
                                     (symbol-name (car custom-enabled-themes))
-                                  "NONAME"))))
+                                    "NONAME"))))
   (let ((*ymacs-default-font-size* (+ 0.0 ; force float :-/
                                       (plist-get (font-face-attributes (face-font 'default)) :height)))
         (prefix (concat ".Ymacs-Theme-" name)))
-    (switch-to-buffer (get-buffer-create "*Ymacs Theme*"))
-    (erase-buffer)
+
+    (unless use-current-buffer
+      (switch-to-buffer (get-buffer-create "*Ymacs Theme*"))
+      (erase-buffer))
 
     ;; SASS variables
     (insert
@@ -219,16 +221,17 @@
      "}\n")
 
     (cl-loop for (class . faces) in *ymacs-faces* do
-          (insert class " {")
-          (insert (ymacs-face-css faces))
-          (insert " }\n"))
+      (insert class " {")
+      (insert (ymacs-face-css faces))
+      (insert " }\n"))
     (insert "}\n")))
+
+(load-library "hl-line")
+(load-library "company")
+(load-library "ef-themes")
 
 (defun ymacs-generate-themes ()
   (interactive)
-  (load-library "hl-line")
-  (load-library "company")
-  (load-library "ef-themes")
   (let ((names '(whiteboard
                  base16-apathy
                  material
@@ -248,19 +251,19 @@
     (loop for theme in names
           for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (load-theme theme t t)
-          (mapc (lambda (theme)
-                  (disable-theme theme))
-                custom-enabled-themes)
-          (enable-theme theme)
-          (ymacs-color-theme-print (symbol-name theme))
-          (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))
-          (kill-buffer)
-          (let ((cust (format "~/ymacs/src/css/themes/%s.scss" theme)))
-            (unless (file-exists-p cust)
-              (with-current-buffer (get-buffer-create "*Ymacs Theme*")
-                (erase-buffer)
-                (insert (format "@use \"./_%s.scss\" as theme;\n" theme)
-                        prefix " {\n"
-                        "    @import \"./_customize.scss\";\n"
-                        "}\n")
-                (write-file cust)))))))
+             (mapc (lambda (theme)
+                     (disable-theme theme))
+                   custom-enabled-themes)
+             (enable-theme theme)
+             (ymacs-color-theme-print (symbol-name theme))
+             (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))
+             (kill-buffer)
+             (let ((cust (format "~/ymacs/src/css/themes/%s.scss" theme)))
+               (unless (file-exists-p cust)
+                 (with-current-buffer (get-buffer-create "*Ymacs Theme*")
+                   (erase-buffer)
+                   (insert (format "@use \"./_%s.scss\" as theme;\n" theme)
+                           prefix " {\n"
+                           "    @import \"./_customize.scss\";\n"
+                           "}\n")
+                   (write-file cust)))))))

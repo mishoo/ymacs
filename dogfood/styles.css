@@ -1,0 +1,23 @@
+@import url("../dist/ymacs.css");
+@import url("../dist/themes/material.css");
+@import url("../dist/themes/sanityinc-tomorrow-night.css");
+@import url("../dist/themes/sanityinc-tomorrow-day.css");
+@import url("../dist/themes/sanityinc-tomorrow-blue.css");
+@import url("../dist/themes/sanityinc-tomorrow-bright.css");
+@import url("../dist/themes/sanityinc-tomorrow-eighties.css");
+@import url("../dist/themes/whiteboard.css");
+@import url("../dist/themes/base16-apathy.css");
+@import url("../dist/themes/standard-light.css");
+@import url("../dist/themes/standard-dark.css");
+@import url("../dist/themes/ef-deuteranopia-light.css");
+@import url("../dist/themes/ef-cyprus.css");
+@import url("../dist/themes/ef-elea-dark.css");
+@import url("../dist/themes/ef-autumn.css");
+@import url("../dist/themes/ef-maris-light.css");
+@import url("../dist/themes/ef-maris-dark.css");
+
+html, body {
+  background-color: #997;
+  overflow: hidden;
+  font-size: 16px;
+}

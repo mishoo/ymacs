@@ -299,9 +299,9 @@ Ymacs_Buffer.newCommands({
                 }
             }
 
-            var a = mb.getq("completion_list"),
-                str = mb.cmd("minibuffer_contents"),
-                re = str.replace(/([\[\]\(\)\{\}\.\*\+\?\|\\])/g, "\\$1").replace(/([_-])/g, "[^_-]*[_-]");
+            let a = mb.getq("completion_list");
+            let str = mb.cmd("minibuffer_contents");
+            let re = str.replace(/[\]\[\}\{\)\(\*\+\?\.\\\^\$\|]/g, "\\$&").replace(/([_-])/g, "[^_-]*[_-]");
             re = new RegExp("^" + re, "i");
             if (a instanceof Function) {
                 a.call(self, mb, str, re, function (a) {
