@@ -635,13 +635,13 @@ Ymacs_Buffer.newCommands({
         this.ensureTransientMark();
     }),
 
-    recenter_top_bottom: Ymacs_Interactive(function() {
+    recenter_top_bottom: Ymacs_Interactive("^", function() {
         this.whenActiveFrame(function(frame){
             frame.recenterTopBottom();
         });
     }),
 
-    recenter: Ymacs_Interactive(function() {
+    recenter: Ymacs_Interactive("^", function() {
         this.whenActiveFrame(function(frame){
             frame.centerOnCaret();
         });
