@@ -5,6 +5,12 @@
 let TEMPLATE = document.createElement("template");
 let OVERLAY;
 
+class Raw {
+    constructor(value) { this._value = value }
+    toString() { return this._value }
+    valueOf() { return this._value }
+}
+
 export let DOM = {
     fromHTML(html) {
         TEMPLATE.innerHTML = html.trim();
@@ -68,12 +74,16 @@ export let DOM = {
         };
     },
     htmlEscape: function(str) {
-        return (str+"").replace(/&/g, "&amp;")
+        return str instanceof Raw ? (str+"")
+            : (str+"").replace(/&/g, "&amp;")
             .replace(/\x22/g, "&quot;")
             .replace(/\x27/g, "&#x27;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/\u00A0/g, "&#xa0;");
+    },
+    htmlSafe: function(str) {
+        return new Raw(str);
     },
 };
 
