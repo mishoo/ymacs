@@ -12,9 +12,9 @@ $cursor_fg: #f5f5ff;
 .Ymacs-Theme-ef-deuteranopia-light .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-ef-deuteranopia-light .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #efeff5; border-bottom: 1px solid #efeff5; }
 .Ymacs-Theme-ef-deuteranopia-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #efeff5; border-right: 1px solid #efeff5; }
-.Ymacs-Theme-ef-deuteranopia-light .Ymacs_Frame-active .Ymacs-current-line { background-color: #f3e0d563 }
+.Ymacs-Theme-ef-deuteranopia-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #f3e0d563 }
 .Ymacs-Theme-ef-deuteranopia-light .Ymacs-frame-content div.line:before { color: #70627f; }
-.Ymacs-Theme-ef-deuteranopia-light .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #000000; font-weight: bold; }
+.Ymacs-Theme-ef-deuteranopia-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #000000; font-weight: bold; }
 .Ymacs-Theme-ef-deuteranopia-light .Ymacs-frame-content:before { color: #70627f; background-color: #f5f5ff; }
 .Ymacs-Theme-ef-deuteranopia-light {
 .Ymacs_Popup {

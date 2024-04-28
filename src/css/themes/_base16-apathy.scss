@@ -12,9 +12,9 @@ $cursor_fg: #031a16;
 .Ymacs-Theme-base16-apathy .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-base16-apathy .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
 .Ymacs-Theme-base16-apathy .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
-.Ymacs-Theme-base16-apathy .Ymacs_Frame-active .Ymacs-current-line { background-color: #0b342d63 }
+.Ymacs-Theme-base16-apathy.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #0b342d63 }
 .Ymacs-Theme-base16-apathy .Ymacs-frame-content div.line:before { color: #2b685e; }
-.Ymacs-Theme-base16-apathy .Ymacs_Frame-active div.line.Ymacs-current-line:before { }
+.Ymacs-Theme-base16-apathy.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { }
 .Ymacs-Theme-base16-apathy .Ymacs-frame-content:before { color: #2b685e; background-color: #0b342d; }
 .Ymacs-Theme-base16-apathy {
 .Ymacs_Popup {

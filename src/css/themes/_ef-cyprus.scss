@@ -12,9 +12,9 @@ $cursor_fg: #fcf7ef;
 .Ymacs-Theme-ef-cyprus .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-ef-cyprus .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #f8f3ea; border-bottom: 1px solid #f8f3ea; }
 .Ymacs-Theme-ef-cyprus .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #f8f3ea; border-right: 1px solid #f8f3ea; }
-.Ymacs-Theme-ef-cyprus .Ymacs_Frame-active .Ymacs-current-line { background-color: #f0e0d463 }
+.Ymacs-Theme-ef-cyprus.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #f0e0d463 }
 .Ymacs-Theme-ef-cyprus .Ymacs-frame-content div.line:before { color: #59786f; }
-.Ymacs-Theme-ef-cyprus .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #000000; font-weight: bold; }
+.Ymacs-Theme-ef-cyprus.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #000000; font-weight: bold; }
 .Ymacs-Theme-ef-cyprus .Ymacs-frame-content:before { color: #59786f; background-color: #fcf7ef; }
 .Ymacs-Theme-ef-cyprus {
 .Ymacs_Popup {

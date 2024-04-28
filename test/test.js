@@ -16,6 +16,7 @@ window.addEventListener("beforeunload", ev => {
         width    : "100%",
         height   : "100%"
     });
+    ymacs.addClass("Ymacs-hl-line");
     //ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
     ymacs.setColorTheme([ "ef-maris-dark" ]);

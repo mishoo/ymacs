@@ -29,11 +29,14 @@
   flex-direction: column;
   flex-grow: 1;
   container-type: inline-size;
+}
 
-  &.Ymacs_Frame-hasOverlays {
+// disable current line bg when certain overlays are displayed
+.Ymacs-hl-line {
+  .Ymacs_Frame.Ymacs_Frame-hasOverlays {
     &[data-ymacs-overlays~="selection"],
     &[data-ymacs-overlays~="isearch"] {
-      .Ymacs-current-line {
+      div.line:has(.Ymacs-caret) {
         background-color: inherit;
       }
     }

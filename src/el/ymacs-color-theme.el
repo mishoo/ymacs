@@ -195,11 +195,11 @@
     ;; current line and line numbers /highlight
     (let ((cline (ymacs-style '(hl-line) (face-background face nil t))))
       (when cline
-        (insert (format "%s .Ymacs_Frame-active .Ymacs-current-line { background-color: %s63 }\n"
+        (insert (format "%s.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: %s63 }\n"
                         prefix (ymacs-color-css cline)))))
     (insert (format "%s .Ymacs-frame-content div.line:before {%s }\n"
                     prefix (ymacs-face-css '(line-number) :no-bg t)))
-    (insert (format "%s .Ymacs_Frame-active div.line.Ymacs-current-line:before {%s }\n"
+    (insert (format "%s.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before {%s }\n"
                     prefix (ymacs-face-css '(line-number-current-line) :no-bg t)))
     (insert (format "%s .Ymacs-frame-content:before {%s }\n"
                     prefix (ymacs-face-css '(line-number))))

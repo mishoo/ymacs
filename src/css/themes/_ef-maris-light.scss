@@ -12,9 +12,9 @@ $cursor_fg: #edf4f8;
 .Ymacs-Theme-ef-maris-light .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-ef-maris-light .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #e6ecf2; border-bottom: 1px solid #e6ecf2; }
 .Ymacs-Theme-ef-maris-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #e6ecf2; border-right: 1px solid #e6ecf2; }
-.Ymacs-Theme-ef-maris-light .Ymacs_Frame-active .Ymacs-current-line { background-color: #dae5f063 }
+.Ymacs-Theme-ef-maris-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #dae5f063 }
 .Ymacs-Theme-ef-maris-light .Ymacs-frame-content div.line:before { color: #676470; }
-.Ymacs-Theme-ef-maris-light .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #000000; font-weight: bold; }
+.Ymacs-Theme-ef-maris-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #000000; font-weight: bold; }
 .Ymacs-Theme-ef-maris-light .Ymacs-frame-content:before { color: #676470; background-color: #edf4f8; }
 .Ymacs-Theme-ef-maris-light {
 .Ymacs_Popup {

@@ -98,10 +98,9 @@ export class Ymacs extends Widget {
         this.minibuffer = new Ymacs_Minibuffer({ ymacs: this });
         this.minibuffer.cmd("minibuffer_mode");
         this.minibuffer_frame = this.createFrame({
-            isMinibuffer         : true,
-            buffer               : this.minibuffer,
-            hidden               : true,
-            highlightCurrentLine : false,
+            isMinibuffer : true,
+            buffer       : this.minibuffer,
+            hidden       : true,
         });
 
         /* -----[ main content ]----- */

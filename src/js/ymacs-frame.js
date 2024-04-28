@@ -38,7 +38,6 @@ var COUNT = 0;
 export class Ymacs_Frame extends Widget {
 
     static options = {
-        highlightCurrentLine : true,
         buffer               : null,
         ymacs                : null,
         isMinibuffer         : false,
@@ -261,12 +260,6 @@ export class Ymacs_Frame extends Widget {
         DOM.addClass(this.getCaretElement(), "Ymacs-caret");
     }
 
-    _unhoverLine() {
-        let el = this.__hoverLine != null && this.getLineDivElement(this.__hoverLine);
-        if (el) DOM.delClass(el, "Ymacs-current-line");
-        this.__hoverLine = null;
-    }
-
     redrawCaret(force) {
         if (this.o.isMinibuffer) force = true;
         var isActive = this.ymacs.getActiveFrame() === this;
@@ -277,12 +270,6 @@ export class Ymacs_Frame extends Widget {
             this.caretMarker.setPosition(this.buffer.caretMarker.getPosition());
 
         var rc = this.buffer._rowcol;
-
-        if (this.o.highlightCurrentLine) {
-            this._unhoverLine();
-            DOM.addClass(this.getLineDivElement(rc.row), "Ymacs-current-line");
-            this.__hoverLine = rc.row;
-        }
 
         // hide stale carets :-\
         // mess everywhere.
@@ -425,7 +412,6 @@ export class Ymacs_Frame extends Widget {
 
     _on_bufferBeforeInteractiveCommand() {
         this.__ensureCaretVisible = true;
-        this._unhoverLine();
         this.ymacs.clearPopupMessage();
     }
 

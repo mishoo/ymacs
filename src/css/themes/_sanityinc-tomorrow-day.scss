@@ -12,9 +12,9 @@ $cursor_fg: #ffffff;
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #d6d6d6; border-bottom: 1px solid #d6d6d6; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #d6d6d6; border-right: 1px solid #d6d6d6; }
-.Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Frame-active .Ymacs-current-line { background-color: #efefef63 }
+.Ymacs-Theme-sanityinc-tomorrow-day.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #efefef63 }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs-frame-content div.line:before { color: #8e908c; }
-.Ymacs-Theme-sanityinc-tomorrow-day .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #4d4d4c; font-weight: bold; }
+.Ymacs-Theme-sanityinc-tomorrow-day.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #4d4d4c; font-weight: bold; }
 .Ymacs-Theme-sanityinc-tomorrow-day .Ymacs-frame-content:before { color: #8e908c; background-color: #f7f7f7; }
 .Ymacs-Theme-sanityinc-tomorrow-day {
 .Ymacs_Popup {

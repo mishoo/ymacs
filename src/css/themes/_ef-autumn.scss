@@ -12,9 +12,9 @@ $cursor_fg: #0f0e06;
 .Ymacs-Theme-ef-autumn .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-ef-autumn .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #15140d; border-bottom: 1px solid #15140d; }
 .Ymacs-Theme-ef-autumn .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #15140d; border-right: 1px solid #15140d; }
-.Ymacs-Theme-ef-autumn .Ymacs_Frame-active .Ymacs-current-line { background-color: #302a3a63 }
+.Ymacs-Theme-ef-autumn.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #302a3a63 }
 .Ymacs-Theme-ef-autumn .Ymacs-frame-content div.line:before { color: #887c8a; }
-.Ymacs-Theme-ef-autumn .Ymacs_Frame-active div.line.Ymacs-current-line:before { color: #ffffff; font-weight: bold; }
+.Ymacs-Theme-ef-autumn.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #ffffff; font-weight: bold; }
 .Ymacs-Theme-ef-autumn .Ymacs-frame-content:before { color: #887c8a; background-color: #0f0e06; }
 .Ymacs-Theme-ef-autumn {
 .Ymacs_Popup {
