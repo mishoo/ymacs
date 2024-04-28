@@ -135,6 +135,8 @@ function fuzzy_regexp(query) {
 }
 
 function fuzzy_filter(candidates, query) {
+    query = query.trim();
+    if (!query) return candidates;
     let re = fuzzy_regexp(query);
     let results = [];
     candidates.forEach(item => {
