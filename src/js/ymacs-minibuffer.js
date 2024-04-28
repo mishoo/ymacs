@@ -4,7 +4,7 @@
 
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
-import { DOM, common_prefix } from "./ymacs-utils.js";
+import { DOM, common_prefix, fuzzy_filter } from "./ymacs-utils.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
@@ -124,46 +124,6 @@ function filename_completion(mb, str, cont) {
             }
         }
     });
-}
-
-function fuzzy_regexp(query) {
-    return new RegExp([...query].map(ch => {
-        ch = ch.replace(/[\]\[\}\{\)\(\*\+\?\.\\\^\$\|]/ug, "\\$&")
-            .replace(/[\s_-]/ug, "[\\s_-]");
-        return `(${ch})(.*?)`;
-    }).join(""), "guid");
-}
-
-function fuzzy_filter(candidates, query) {
-    query = query.trim();
-    if (!query) return candidates;
-    let re = fuzzy_regexp(query);
-    let results = [];
-    candidates.forEach(item => {
-        re.lastIndex = 0;
-        while (true) {
-            let m = re.exec(item);
-            if (!m) break;
-            let score = m.index;
-            let hil = "";
-            let j = 0;
-            for (let i = 1; i < m.indices.length;) {
-                let [ li_beg, li_end ] = m.indices[i++];
-                let [ fi_beg, fi_end ] = m.indices[i++];
-                score += 10 * (fi_end - fi_beg);
-                hil += DOM.htmlEscape(item.substring(j, li_beg))
-                    + `<b>${item.substring(li_beg, li_end)}</b>`;
-                j = li_end;
-            }
-            if (j != null) hil += DOM.htmlEscape(item.substr(j));
-            results.push({ label: DOM.htmlSafe(hil), value: item, score: score });
-            re.lastIndex = m.index + 1;
-        }
-    });
-    return results.sort((a, b) => a.score - b.score).reduce((a, item) => {
-        if (!a.some(el => el.value == item.value)) a.push(item);
-        return a;
-    }, []);
 }
 
 Ymacs_Buffer.newCommands({
