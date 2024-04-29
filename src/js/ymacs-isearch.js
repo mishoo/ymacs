@@ -552,7 +552,7 @@ function query_replace(regexp) {
         let args = {
             qreplace: true,
             regexp: regexp == null && ctx ? ctx.regexp : !!regexp,
-            word: !!word,
+            word: ctx ? ctx.word : !!word,
             region: this.transientMarker && this.getRegion(),
         };
         if (ctx) {
