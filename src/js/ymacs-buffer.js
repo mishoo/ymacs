@@ -693,7 +693,7 @@ export class Ymacs_Buffer extends EventProxy {
     // BEGIN: undo queue
 
     _recordChange(type, pos, len, text) {
-        if (len > 0) {
+        if (len > 0 && !this.__preventUndo) {
             var q = this.__undoQueue;
             q.push({
                 type  : type,
@@ -791,8 +791,7 @@ export class Ymacs_Buffer extends EventProxy {
             pos = this.caretMarker.getPosition();
         pos = MRK(pos);
         // *** UNDO RECORDING
-        if (!this.__preventUndo)
-            this._recordChange(1, pos, text.length);
+        this._recordChange(1, pos, text.length);
         var rc = pos == this.point() ? this._rowcol : this._positionToRowCol(pos),
             i = rc.row;
         if (/^\n+$/.test(text) && rc.col == 0) {
@@ -814,7 +813,7 @@ export class Ymacs_Buffer extends EventProxy {
             }
         }
         this._updateMarkers(pos, text.length);
-        this.callHooks("onTextInsert", pos, text);
+        this.callHooks("onChange", 1, pos, text);
     }
 
     _deleteText(begin, end) {
@@ -824,8 +823,7 @@ export class Ymacs_Buffer extends EventProxy {
             return;
         if (end < begin) { var tmp = begin; begin = end; end = tmp; }
         // *** UNDO RECORDING
-        if (!this.__preventUndo)
-            this._recordChange(2, begin, end - begin, this._bufferSubstring(begin, end));
+        this._recordChange(2, begin, end - begin, this._bufferSubstring(begin, end));
         var brc = this._positionToRowCol(begin),
             erc = this._positionToRowCol(end);
         var line = this.code[brc.row];
@@ -842,7 +840,7 @@ export class Ymacs_Buffer extends EventProxy {
             for (let n = erc.row - brc.row; n-- > 0;) this._deleteLine(line);
         }
         this._updateMarkers(begin, begin - end, begin);
-        this.callHooks("onTextDelete", begin, end);
+        this.callHooks("onChange", 2, begin, end);
     }
 
     _replaceText(begin, end, text) {

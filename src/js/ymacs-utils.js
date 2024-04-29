@@ -292,27 +292,32 @@ function fuzzy_regexp(query) {
 export function fuzzy_filter(candidates, query) {
     query = query.trim();
     if (!query) return candidates;
-    let re = fuzzy_regexp(query);
+    let query_rx = fuzzy_regexp(query);
+    let word_rx = /(?<![\p{L}\p{N}])/uy;
     let results = [];
     candidates.forEach(item => {
-        re.lastIndex = 0;
+        let label = typeof item == "string" ? item : item.label;
+        let value = typeof item == "string" ? item : item.value;
+        query_rx.lastIndex = 0;
         while (true) {
-            let m = re.exec(item);
+            let m = query_rx.exec(label);
             if (!m) break;
-            let score = m.index;
+            let score = 0;
             let hil = "";
             let j = 0;
             for (let i = 1; i < m.indices.length;) {
                 let [ li_beg, li_end ] = m.indices[i++];
                 let [ fi_beg, fi_end ] = m.indices[i++];
-                score += 10 * (fi_end - fi_beg);
-                hil += DOM.htmlEscape(item.substring(j, li_beg))
-                    + `<b>${item.substring(li_beg, li_end)}</b>`;
+                score += fi_end - fi_beg;
+                word_rx.lastIndex = li_beg;
+                if (word_rx.test(label)) score -= 5;
+                hil += DOM.htmlEscape(label.substring(j, li_beg))
+                    + `<b>${label.substring(li_beg, li_end)}</b>`;
                 j = li_end;
             }
-            if (j != null) hil += DOM.htmlEscape(item.substr(j));
-            results.push({ label: DOM.htmlSafe(hil), value: item, score: score });
-            re.lastIndex = m.index + 1;
+            if (j != null) hil += DOM.htmlEscape(label.substr(j));
+            results.push({ label: DOM.htmlSafe(hil), value: value, score: score });
+            query_rx.lastIndex = m.index + 1;
         }
     });
     return results.sort((a, b) => a.score - b.score).reduce((a, item) => {

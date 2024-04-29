@@ -4,7 +4,7 @@
 
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
-import { DOM, common_prefix, fuzzy_filter } from "./ymacs-utils.js";
+import { DOM, common_prefix, fuzzy_filter, delayed } from "./ymacs-utils.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
@@ -31,14 +31,24 @@ function popupCompletionMenu(frame, list) {
             if (!DOM.hasClass(item, "Ymacs_Menu_Item")) return;
             select(+item.dataset.index);
             handle_enter.call(this);
-            handle_enter.call(this);
         },
     });
     ymacs._popupAtCaret($menu.getElement());
     select(0);
 
+    // XXX: this is some more aggressive, ivy-like completion, but
+    // it's not working very well with filename completion.
+    let onChange = this.getq("ivy_completion") && delayed(() => {
+        killMenu();
+        this.cmd("minibuffer_complete");
+    }, 1);
+
     this.pushKeymap(KEYMAP_POPUP_ACTIVE);
-    $menu.addEventListener("onDestroy", () => this.popKeymap(KEYMAP_POPUP_ACTIVE));
+    if (onChange) this.addEventListener("onChange", onChange);
+    $menu.addEventListener("onDestroy", () => {
+        this.popKeymap(KEYMAP_POPUP_ACTIVE);
+        if (onChange) this.removeEventListener("onChange", onChange);
+    });
 }
 
 function killMenu() {
@@ -64,6 +74,7 @@ function select(idx) {
 export function read_with_continuation(completions, cont, validate) {
     this.whenMinibuffer(function(mb){
         var changed_vars = mb.setq({
+            ivy_completion: completions !== filename_completion,
             completion_list: completions,
             minibuffer_validation: (what, cont2) => {
                 if (what == null)
@@ -79,6 +90,7 @@ export function read_with_continuation(completions, cont, validate) {
                     cont.call(this, what);
             },
         });
+        mb.cmd("minibuffer_complete");
     });
 }
 
@@ -285,7 +297,7 @@ Ymacs_Buffer.newCommands({
 
             function complete(a) {
                 if (!a || a.length == 0) {
-                    mb.signalError("No completions");
+                    mb.signalError("No completions", false, 2000);
                 } else {
                     popupCompletionMenu.call(mb, self.getMinibufferFrame(), a);
                 }
@@ -359,9 +371,11 @@ function handle_popup_end() {
 
 function handle_enter() {
     if ($menu) {
-        if ($selectedItem) {
-            this.cmd("minibuffer_replace_input", $selectedItem.dataset.value);
+        let item = $selectedItem;
+        if (item) {
             killMenu();
+            this.cmd("minibuffer_replace_input", item.dataset.value);
+            this.cmd("minibuffer_complete_and_exit");
         } else {
             this.signalError("Select something...");
         }
@@ -415,7 +429,7 @@ var KEYMAP_POPUP_ACTIVE = Ymacs_Keymap.define(null, Object.assign({
     }
 }, DEFAULT_KEYS));
 KEYMAP_POPUP_ACTIVE.defaultHandler = [ function() {
-    killMenu();
+    if (!this.getq("ivy_completion")) killMenu();
     return false; // say it's not handled though
 } ];
 
