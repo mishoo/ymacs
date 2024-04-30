@@ -14,7 +14,7 @@
 (setf httpd-root ymacs-srcdir)
 (httpd-start)
 
-(defservlet ymacs-current-theme.css text/css ()
+(defservlet ymacs-current-theme.css "text/css; charset=utf-8" ()
   (ymacs-color-theme-print "_current" t)
   ;; should cleanup SCSS variables.. are they even used?
   (goto-char (point-min))
