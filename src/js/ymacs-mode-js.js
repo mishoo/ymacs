@@ -181,9 +181,9 @@ parseInt undefined window document alert prototype constructor super this");
             var ch, esc = false, inset = 0, start = stream.col;
             while (!stream.eol()) {
                 ch = stream.peek();
-                if (isOpenParen(ch) && !esc && !inset)
+                if (ch == "[" && !esc && !inset)
                     inset++;
-                if (isCloseParen(ch) && !esc) {
+                if (ch == "]" && !esc) {
                     inset--;
                     if (inset < 0)
                         inset = 0;
