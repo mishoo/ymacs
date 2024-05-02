@@ -87,6 +87,34 @@ export let DOM = {
     },
 };
 
+const nextDone = { next: () => ({ done: true }) };
+
+export const NIL = new class NIL {
+    car = this;
+    cdr = this;
+    toString() { return "NIL" }
+    valueOf() { return null }
+    [Symbol.iterator]() { return nextDone };
+};
+
+export class Cons {
+    constructor(car, cdr = NIL) {
+        this.car = car;
+        this.cdr = cdr;
+    }
+    [Symbol.iterator]() {
+        let p = this;
+        return {
+            next() {
+                if (p === NIL) return { done: true };
+                let value = p.car;
+                p = p.cdr;
+                return { value };
+            }
+        };
+    }
+}
+
 OVERLAY = DOM.fromHTML(`<div style="position: fixed; z-index: 20000; left: 0; top: 0; right: 0; bottom: 0"></div>`);
 
 export class EventProxy {

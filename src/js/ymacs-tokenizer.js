@@ -97,7 +97,7 @@ export class Ymacs_Stream {
     }
 
     eol() {
-        return this.col == this.buffer.code[this.line].length;
+        return this.col >= this.buffer.code[this.line].length;
     }
 
     eof() {
