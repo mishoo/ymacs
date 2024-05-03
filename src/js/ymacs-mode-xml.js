@@ -4,15 +4,14 @@
 
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Tokenizer, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
+import { Ymacs_BaseLang } from "./ymacs-baselang.js";
+import { Cons, NIL } from "./ymacs-utils.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 const RX_EMPTY_TAG = /^(?:area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
 const RX_BLOCK_TAG = /^(?:article|aside|blockquote|body|button|caption|col|dd|div|dl|dt|fieldset|figcaption|figure|footer|form|h[1-6]|header|hgroup|li|ol|p|pre|section|table|tbody|textarea|tfoot|th|thead|td|tr|ul)$/i;
-
-Ymacs_Tokenizer.define("xml", xml_tokenizer);
-Ymacs_Tokenizer.define("html", html_tokenizer);
 
 let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
     "C-c /"   : "xml_close_tag",
@@ -48,222 +47,19 @@ let markup_mode = tok_type => function(){
 Ymacs_Buffer.newMode("xml_mode", markup_mode("xml"));
 Ymacs_Buffer.newMode("html_mode", markup_mode("html"));
 
-Ymacs_Buffer.newCommands({
-    xml_get_fill_paragraph_region: function() {
-        this.tokenizer.finishParsing();
-        let blk = this.tokenizer.getPP()
-            .filter(caretInside(this._rowcol, "outer"))
-            .findLast(p => RX_BLOCK_TAG.test(p.type));
-        if (blk) {
-            let r = {
-                begin: this._rowColToPosition(blk.inner.l1, blk.inner.c1),
-                end: this._rowColToPosition(blk.inner.l2, blk.inner.c2)
-            };
-            this.cmd("save_excursion", () => {
-                this.cmd("goto_char", r.begin);
-                if (this.cmd("looking_at", /[^\S\r\n]*\n/gy)) {
-                    this.cmd("goto_char", this.matchData.after);
-                    r.begin = this.point();
-                }
-                this.cmd("goto_char", r.end);
-                if (this.cmd("looking_back", /\n[^\S\r\n]*/g)) {
-                    this.cmd("backward_whitespace");
-                    r.end = this.point();
-                }
-            });
-            return r;
-        }
-    }
-});
+class Ymacs_Lang_XML extends Ymacs_BaseLang {
+    _tags = NIL;
+    _inTag = null;
+    _inline = 0;
 
-function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
-    var $tags = [];
-    var $cont = [];
-    var $parens = [];
-    var $passedParens = [];
-    var $inTag = null;
-    var $inComment = null;
-    var $inString = false;
-    var $inline = 0;
-    var PARSER = {
-        next: next,
-        copy: copy,
-        indentation: indentation,
-        get tags() {
-            return $tags;
-        },
-        get passedParens() {
-            return $passedParens;
-        },
-    };
-
-    function copy() {
-        let _cont = [...$cont];
-        let _tags = [...$tags];
-        let _parens = [...$parens];
-        let _passedParens = [...$passedParens];
-        let _inTag = $inTag;
-        let _inComment = $inComment;
-        let _inString = $inString;
-        let _inline = $inline;
-        return resume;
-        function resume() {
-            $cont = [..._cont];
-            $tags = [..._tags];
-            $parens = [..._parens];
-            $passedParens = [..._passedParens];
-            $inTag = _inTag;
-            $inComment = _inComment;
-            $inString = _inString;
-            $inline = _inline;
-            return PARSER;
-        }
-    }
-
-    function INDENT_LEVEL() {
-        return stream.buffer.getq("indent_level");
-    }
-
-    function foundToken(c1, c2, type, addInline) {
-        if (addInline && inline) {
-            let cls = inline && inline.cls($inline) || "";
-            if (type) cls += " " + type;
-            tok.onToken(stream.line, c1, c2, cls || null);
-        } else {
-            tok.onToken(stream.line, c1, c2, type);
-        }
-    }
-
-    function isLetter(ch) {
-        return ch.toLowerCase() != ch.toUpperCase();
-    }
-
-    function isNameStart(ch) {
-        return ch && (isLetter(ch) || /^[:_-]$/.test(ch));
-    }
-
-    function isNameChar(ch) {
-        return ch && (isLetter(ch) || /^[0-9:_-]$/.test(ch));
-    }
-
-    function readName() {
-        var col = stream.col, ch = stream.next(),
-        name = ch;
-        while (!stream.eol()) {
-            ch = stream.peek();
-            if (!isNameChar(ch))
-                break;
-            name += ch;
-            stream.nextCol();
-        }
-        return ch && { line: stream.line, c1: col, c2: stream.col, id: name };
-    }
-
-    function readString(end) {
-        $inString = true;
-        var ch, esc = false, start = stream.col;
-        while (!stream.eol()) {
-            ch = stream.peek();
-            if (!esc && ch === end) {
-                $cont.pop();
-                $inString = false;
-                foundToken(start, stream.col, "string");
-                var p = $parens.at(-1);
-                if (p && p.type == ch) {
-                    $parens.pop();
-                    p.closed = { line: stream.line, col: stream.col, opened: p };
-                    $passedParens.push(p);
-                }
-                foundToken(stream.col, ++stream.col, "string-stopper");
-                return;
-            }
-            esc = !esc && ch === "\\";
-            stream.nextCol();
-        }
-        foundToken(start, stream.col, "string");
-    }
-
-    function readTag() {
-        var ch = stream.peek(), name;
-        if (stream.lookingAt("/>")) {
-            let p = $parens.at(-1);
-            if (p && p.type == "<") {
-                $parens.pop();
-                p.closed = { line: stream.line, col: stream.col + 1, opened: p };
-                $passedParens.push(p);
-            }
-            $cont.pop();
-            $inTag = null;
-            foundToken(stream.col, ++stream.col, "xml-closetag-slash");
-            foundToken(stream.col, ++stream.col, "xml-close-bracket");
-        }
-        else if (ch === ">") {
-            let p = $parens.at(-1);
-            if (p && p.type == "<") {
-                $parens.pop();
-                p.closed = { line: stream.line, col: stream.col, opened: p };
-                $passedParens.push(p);
-            }
-            $cont.pop();
-            foundToken(stream.col, ++stream.col, "xml-close-bracket");
-            if (!emptyTags?.test($inTag.id)) {
-                $inTag.inner = { l1: stream.line, c1: stream.col };
-                $tags.push($inTag);
-                if (inline) {
-                    $inline ^= inline.code($inTag.id);
-                }
-            }
-            $inTag = null;
-        }
-        else if (isNameStart(ch) && (name = readName())) {
-            foundToken(name.c1, name.c2, "xml-attribute");
-        }
-        else if (ch === '"' || ch === "'") {
-            $parens.push({ line: stream.line, col: stream.col, type: ch });
-            foundToken(stream.col, ++stream.col, "string-starter");
-            $cont.push(readString.bind(null, ch));
-        }
-        else foundToken(stream.col, ++stream.col, null);
-    }
-
-    function readComment(type, end, op) {
-        var line = stream.lineText(), pos = line.indexOf(end, stream.col);
-        if (pos >= 0) {
-            $cont.pop();
-            foundToken(stream.col, pos, type);
-            $inComment = null;
-            op.closed = { line: stream.line, c1: pos, c2: pos + end.length, opened: op };
-            $passedParens.push(op);
-            foundToken(pos, pos += end.length, type + "-stopper");
-            stream.col = pos;
-        } else {
-            foundToken(stream.col, line.length, type);
-            stream.col = line.length;
-        }
-    }
-
-    function readCloseBracket(tag) {
-        var m = stream.lookingAt(/^([\s\xA0]*)(>?)/);
-        if (m && m[0]) {
-            if (m[1])
-                foundToken(stream.col, stream.col += m[1].length, null);
-            if (m[2]) {
-                let p = $parens.pop();
-                p.closed = { line: stream.line, col: stream.col, opened: p };
-                $passedParens.push(p);
-                foundToken(stream.col, stream.col += m[2].length, "xml-close-bracket");
-                $cont.pop();
-                if (tag) {
-                    tag.outer.l2 = stream.line;
-                    tag.outer.c2 = stream.col;
-                }
-            }
-        } else {
-            foundToken(stream.col, ++stream.col, "error");
-        }
-    }
-
-    let OPEN_PAREN = {
+    COMMENT = [
+        [ "<!--", "-->", "-" ],
+        [ "<![CDATA[", "]]>", null,
+          "xml-cdata-starter", "xml-cdata", "xml-cdata-stopper" ]
+    ];
+    NAME_START = /^[$\p{L}:_-]/iu;
+    NAME_CHAR = /^[$\p{L}0-9:_-]/iu;
+    OPEN_PAREN = {
         "(" : ")",
         "{" : "}",
         "[" : "]",
@@ -271,8 +67,7 @@ function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
         "❰" : "❱",
         "“" : "”",
     };
-
-    let CLOSE_PAREN = {
+    CLOSE_PAREN = {
         ")" : "(",
         "}" : "{",
         "]" : "[",
@@ -281,128 +76,245 @@ function xml_tokenizer(stream, tok, { emptyTags, inline } = {}) {
         "”" : "“",
     };
 
-    function isOpenParen(ch) {
-        return OPEN_PAREN[ch];
+    constructor({ stream, tok, emptyTags, inline }) {
+        super({ stream, tok });
+        this.emptyTags = emptyTags;
+        this.inline = inline;
     }
 
-    function isCloseParen(ch) {
-        return CLOSE_PAREN[ch];
+    copy() {
+        let _super = super.copy();
+        let _tags = this._tags;
+        let _inTag = this._inTag;
+        let _inline = this._inline;
+        return () => {
+            let self = _super();
+            self._tags = _tags;
+            self._inTag = _inTag;
+            self._inline = _inline;
+            return self;
+        };
     }
 
-    function next() {
-        stream.checkStop();
-        if ($cont.length > 0)
-            return $cont.at(-1)();
-        let ch = stream.peek(), m;
-        if (stream.lookingAt("<![CDATA[")) {
-            let op = { line: stream.line, c1: stream.col, c2: stream.col + 9, type: "<![CDATA[" };
-            $parens.push(op);
-            foundToken(stream.col, stream.col += 9, "xml-cdata-starter");
-            $inComment = { line: stream.line, c1: stream.col };
-            $cont.push(readComment.bind(null, "xml-cdata", "]]>", op));
+    read() {
+        (this.readComment() ||
+         this.readDeclaration() ||
+         this.readCloseTag() ||
+         this.readOpenTag() ||
+         this.readOpenParen() ||
+         this.readCloseParen() ||
+         this.readTrailingWhitespace() ||
+         this.t(null, 1, this._stream.peek() != " "));
+    }
+
+    t(type = null, len = 1, addInline) {
+        if (addInline && this.inline) {
+            type = this.inline.cls(this._inline) + " " + type;
         }
-        else if (stream.lookingAt("<!--")) {
-            let op = { line: stream.line, c1: stream.col, c2: stream.col + 4, type: "<!--" };
-            $parens.push(op);
-            foundToken(stream.col, stream.col += 4, "mcomment-starter");
-            $inComment = { line: stream.line, c1: stream.col };
-            $cont.push(readComment.bind(null, "mcomment", "-->", op));
+        this.token(this._stream.col, this._stream.col += len, type);
+    }
+
+    readDeclaration() {
+        let s = this._stream, m = s.lookingAt(/^<[?!]/);
+        if (m) {
+            let sp = m[0];
+            this.pushInParen(sp, "xml-open-bracket");
+            this.pushCont(() => {
+                let m = s.lookingAt(/^\??>/);
+                if (m) {
+                    this.popInParen(sp, m[0].length, "xml-close-bracket");
+                    this.popCont();
+                } else {
+                    this.readString() || this.readTrailingWhitespace() || this.t("directive");
+                }
+            });
+            return true;
         }
-        else if ((m = stream.lookingAt(/^<!.*?>/))) {
-            foundToken(stream.col, stream.col += m[0].length, "directive");
+    }
+
+    readOpenTag() {
+        let s = this._stream;
+        if (s.lookingAt("<") && this.NAME_START.test(s.peek(+1))) {
+            let outer = { l1: s.line, c1: s.col };
+            this.pushInParen("<", "xml-open-bracket");
+            let tag = this.readName();
+            tag.outer = outer;
+            this.token(tag.c1, tag.c2, "xml-open-tag");
+            this._inTag = tag;
+            this.pushCont(this.contOpenTag);
+            return true;
         }
-        else if (stream.lookingAt("</") && isNameStart(stream.peek(+2))) {
-            let otag = $tags.pop();
-            if (otag) {
-                otag.inner.l2 = stream.line;
-                otag.inner.c2 = stream.col;
-                if (inline) {
-                    $inline ^= inline.code(otag.id);
+    }
+
+    contOpenTag() {
+        let s = this._stream;
+        let ch = s.peek(), name;
+        if (s.lookingAt("/>")) {
+            this.popInParen("<", 2, "xml-close-bracket");
+            this.popCont();
+            this._inTag = null;
+        }
+        else if (ch === ">") {
+            this.popInParen("<", 1, "xml-close-bracket");
+            this.popCont();
+            if (!this.emptyTags?.test(this._inTag.id)) {
+                this._inTag.inner = { l1: s.line, c1: s.col };
+                this.pushTag(this._inTag);
+                if (this.inline) {
+                    this._inline ^= this.inline.code(this._inTag.id);
                 }
             }
-            $parens.push({ line: stream.line, c1: stream.col, c2: stream.col + 2, type: "</" });
-            foundToken(stream.col, ++stream.col, "xml-open-bracket");
-            foundToken(stream.col, ++stream.col, "xml-closetag-slash");
-            let ctag = readName();
-            foundToken(ctag.c1, ctag.c2, ( otag && otag.id == ctag.id
-                                         ? "xml-close-tag"
-                                         : "error" ));
+            this._inTag = null;
+        }
+        else if ((name = this.readName())) {
+            this.token(name.c1, name.c2, "xml-attribute");
+        }
+        else if (ch === '"' || ch === "'") {
+            this.readString();
+        }
+        else {
+            this.readTrailingWhitespace() || this.t();
+        }
+    }
+
+    readCloseTag() {
+        let s = this._stream;
+        if (s.lookingAt("</") && this.NAME_START.test(s.peek(+2))) {
+            let otag = this.popTag();
+            if (otag) {
+                otag.inner.l2 = s.line;
+                otag.inner.c2 = s.col;
+                if (this.inline) {
+                    this._inline ^= this.inline.code(otag.id);
+                }
+            }
+            this.pushInParen("</", "xml-open-bracket");
+            let ctag = this.readName();
+            this.token(ctag.c1, ctag.c2, (otag && otag.id == ctag.id ? "xml-close-tag" : "error"));
             if (otag) {
                 let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
                               inner: otag.inner, outer: otag.outer };
                 let pclose = { line: ctag.line, c1: ctag.c1, c2: ctag.c2, opened: popen };
                 popen.closed = pclose;
-                $passedParens.push(popen);
+                this.doneParen(popen);
             }
-            $cont.push(readCloseBracket.bind(null, otag));
-        }
-        else if (ch === "<" && isNameStart(stream.peek(+1))) {
-            let outer = { l1: stream.line, c1: stream.col };
-            $parens.push({ line: stream.line, col: stream.col, type: ch });
-            foundToken(stream.col, ++stream.col, "xml-open-bracket");
-            let tag = readName();
-            tag.outer = outer;
-            foundToken(tag.c1, tag.c2, "xml-open-tag");
-            $inTag = tag;
-            $cont.push(readTag);
-        }
-        else if ((m = stream.lookingAt(/^&.*?;/))) {
-            foundToken(stream.col, ++stream.col, "xml-entity-starter");
-            foundToken(stream.col, stream.col += m[0].length - 2, "xml-entity");
-            foundToken(stream.col, ++stream.col, "xml-entity-stopper");
-        }
-        else if (ch === "&") {
-            foundToken(stream.col, ++stream.col, "error");
-        }
-        else if ((m = isOpenParen(ch))) {
-            $parens.push({ line: stream.line, col: stream.col, type: ch });
-            foundToken(stream.col, ++stream.col, "open-paren", true);
-        }
-        else if ((m = isCloseParen(ch))) {
-            let p = $parens.pop();
-            if (!p || p.type != m) {
-                foundToken(stream.col, ++stream.col, "error");
-            } else {
-                p.closed = { line: stream.line, col: stream.col, opened: p };
-                $passedParens.push(p);
-                foundToken(stream.col, ++stream.col, "close-paren", true);
-            }
-        }
-        else {
-            foundToken(stream.col, ++stream.col, null, ch != " ");
+            this.pushCont(this.contCloseTag.bind(this, otag));
+            return true;
         }
     }
 
-    function indentation() {
-        var indent, lastTag;
-        if ($inComment) {
-            indent = stream.lineIndentation($inComment.line) + INDENT_LEVEL();
+    contCloseTag(otag) {
+        let s = this._stream, m = s.lookingAt(/^([\s\xA0]*)(>?)/);
+        if (m && m[0]) {
+            if (m[1]) this.t(null, m[1].length);
+            if (m[2]) {
+                this.popInParen("</", 1, "xml-close-bracket");
+                this.popCont();
+                if (otag) {
+                    otag.outer.l2 = s.line;
+                    otag.outer.c2 = s.col;
+                }
+            }
+        } else {
+            this.readTrailingWhitespace() || this.t("error");
         }
-        else if ($inTag) {
-            var txt = stream.lineText($inTag.line);
-            if (/^\s*$/.test(txt.substr(0, $inTag.c1 - 1))) {
-                indent = $inTag.c1 + $inTag.id.length + 1;
+    }
+
+    indentation() {
+        let s = this._stream;
+        var indent, lastTag;
+
+        let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");
+
+        if (this._inComment) {
+            indent = s.lineIndentation(this._inComment.line) + INDENT_LEVEL();
+        }
+        else if (this._inTag) {
+            var txt = s.lineText(this._inTag.line);
+            if (/^\s*$/.test(txt.substr(0, this._inTag.c1 - 1))) {
+                indent = this._inTag.c1 + this._inTag.id.length + 1;
             } else {
-                indent = stream.lineIndentation($inTag.line);
+                indent = s.lineIndentation(this._inTag.line);
             }
         }
-        else if ((lastTag = $tags.at(-1))) {
-            indent = stream.lineIndentation(lastTag.line) + INDENT_LEVEL();
+        else if ((lastTag = this._tags.car)) {
+            indent = s.lineIndentation(lastTag.line) + INDENT_LEVEL();
             // if current line begins with a closing tag, back one level
-            if (/^\s*<\x2f/.test(stream.lineText()))
+            if (/^\s*<\x2f/.test(s.lineText()))
                 indent -= INDENT_LEVEL();
         }
 
         if (indent == null) {
-            let line = stream.line;
-            while (line > 0 && !/\S/.test(stream.lineText(line))) line--;
-            indent = stream.lineIndentation(line);
+            let line = s.line;
+            while (line > 0 && !/\S/.test(s.lineText(line))) line--;
+            indent = s.lineIndentation(line);
         }
 
         return indent;
     }
 
-    return PARSER;
+    pushTag(tag) {
+        this._tags = new Cons(tag, this._tags);
+    }
+    popTag() {
+        let tag = this._tags.car;
+        this._tags = this._tags.cdr;
+        return tag;
+    }
+    get tag() {
+        return this._tags.car;
+    }
+}
+
+class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
+    _mode = this;
+    _js = this._tok.getLanguage("js");
+    _css = this._tok.getLanguage("css");
+
+    get passedParens() {
+        return [
+            ...super.passedParens,
+            ...this._js.passedParens,
+            ...this._css.passedParens,
+        ];
+    }
+
+    next() {
+        let s = this._stream;
+        if (this._mode === this && this.tag) {
+            if (this.tag.id == "script") this._mode = this._js;
+            if (this.tag.id == "style") this._mode = this._css;
+        }
+        if (this._mode === this._js && s.lookingAt("</script")) {
+            this._mode = this;
+        }
+        if (this._mode === this._css && s.lookingAt("</style")) {
+            this._mode = this;
+        }
+        this._mode === this ? super.next() : this._mode.next();
+    }
+
+    copy() {
+        let _super = super.copy();
+        let _js = this._js.copy();
+        let _css = this._css.copy();
+        let _mode = this._mode;
+        return () => {
+            let self = _super();
+            self._js =_js();
+            self._css = _css();
+            self._mode = _mode;
+            return self;
+        };
+    }
+
+    indentation() {
+        if ((this._mode === this) || (!this._mode._inString && /^\s*<\//.test(this._stream.lineText()))) {
+            return super.indentation();
+        } else {
+            return this._mode.indentation();
+        }
+    }
 }
 
 function inlineCode(tag) {
@@ -428,84 +340,81 @@ function inlineCls(inline) {
     return out.trim() || null;
 }
 
-function html_tokenizer(stream, tok){
-    let $xml = tok.getLanguage("xml", {
-        emptyTags: RX_EMPTY_TAG,
-        inline: { code: inlineCode, cls: inlineCls },
-    });
-    let $js = tok.getLanguage("js");
-    let $css = tok.getLanguage("css");
-    let $mode = $xml;
+Ymacs_Tokenizer.define("xml", (stream, tok) => new Ymacs_Lang_XML({ stream, tok }));
 
-    let PARSER = {
-        next: next,
-        copy: copy,
-        indentation: indentation,
-        get mode() {
-            return $mode === $xml ? "markup"
-                :  $mode === $css ? "css"
-                :  $mode === $js ? "js"
-                :  null;
-        },
-        get tags() {
-            return $xml.tags;
-        },
-        get passedParens() {
-            return [
-                ...$xml.passedParens,
-                ...$js.passedParens,
-                ...$css.passedParens,
-            ];
-        },
-    };
+Ymacs_Tokenizer.define("html", (stream, tok) => new Ymacs_Lang_HTML({
+    stream, tok,
+    emptyTags: RX_EMPTY_TAG,
+    inline: { code: inlineCode, cls: inlineCls },
+}));
 
-    function next() {
-        stream.checkStop();
-        if ($mode === $xml) {
-            let tag = $xml.tags.at(-1);
-            if (tag?.id == "script") {
-                $mode = $js;
-            } else if (tag?.id == "style") {
-                $mode = $css;
+Ymacs_Buffer.newCommands({
+    xml_get_fill_paragraph_region: function() {
+        this.tokenizer.finishParsing();
+        let blk = this.tokenizer.getPP()
+            .filter(caretInside(this._rowcol, "outer"))
+            .findLast(p => RX_BLOCK_TAG.test(p.type));
+        if (blk) {
+            let r = {
+                begin: this._rowColToPosition(blk.inner.l1, blk.inner.c1),
+                end: this._rowColToPosition(blk.inner.l2, blk.inner.c2)
+            };
+            this.cmd("save_excursion", () => {
+                this.cmd("goto_char", r.begin);
+                if (this.cmd("looking_at", /[^\S\r\n]*\n/gy)) {
+                    this.cmd("goto_char", this.matchData.after);
+                    r.begin = this.point();
+                }
+                this.cmd("goto_char", r.end);
+                if (this.cmd("looking_back", /\n[^\S\r\n]*/g)) {
+                    this.cmd("backward_whitespace");
+                    r.end = this.point();
+                }
+            });
+            return r;
+        }
+    },
+    xml_close_tag: Ymacs_Interactive(function() {
+        this.cmd("close_last_xml_tag");
+        this.cmd("indent_line");
+    }),
+    xml_slash_complete_tag: Ymacs_Interactive(function() {
+        this.cmd("self_insert_command");
+        if (this.looking_back("</")) {
+            let rc = this._rowcol;
+            this.tokenizer.parseUntil(rc.row, rc.col);
+            let tag = this.tokenizer.theParser.tag;
+            if (tag) {
+                this._placeUndoBoundary();
+                this.cmd("insert", tag.id, ">");
+                this.cmd("indent_line");
             }
         }
-        if ($mode === $js) {
-            if (stream.lookingAt("</script")) {
-                $mode = $xml;
-            }
+    }),
+    xml_gt_complete_tag: Ymacs_Interactive(function() {
+        this.cmd("self_insert_command");
+        let rc = this._rowcol;
+        this.tokenizer.parseUntil(rc.row, rc.col);
+        let tag = this.tokenizer.theParser.tag;
+        if (tag?.inner?.l1 == rc.row && tag.inner.c1 == rc.col) {
+            this._placeUndoBoundary();
+            let pos = this.point();
+            this.cmd("insert", "</", tag.id, ">");
+            this.cmd("goto_char", pos);
         }
-        if ($mode === $css) {
-            if (stream.lookingAt("</style")) {
-                $mode = $xml;
-            }
+    }),
+    xml_newline_and_indent: Ymacs_Interactive(function(){
+        let inparens = this.looking_at("</") && this.looking_back(">");
+        this.cmd("newline_and_indent");
+        if (inparens) {
+            this.cmd("newline_and_indent");
+            this.cmd("backward_line");
+            this.cmd("indent_line");
         }
-        $mode.next();
-    }
+    }),
+});
 
-    function copy() {
-        let _xml = $xml.copy();
-        let _js = $js.copy();
-        let _css = $css.copy();
-        let _mode = $mode;
-        function resume() {
-            $xml = _xml();
-            $js = _js();
-            $css = _css();
-            $mode = _mode;
-            return PARSER;
-        }
-        return resume;
-    }
-
-    function indentation() {
-        if (/^\s*<\//.test(stream.lineText()))
-            return $xml.indentation();
-        return $mode.indentation();
-    }
-
-    return PARSER;
-}
-
+// not sure "zen mode" is of any interest these days, but let's leave it for now.
 (function(){
 
     let Ymacs_Keymap_XML_Zen = Ymacs_Keymap.define("xml_zen", {
@@ -635,38 +544,6 @@ function html_tokenizer(stream, tok){
 
     Ymacs_Buffer.newCommands({
 
-        xml_close_tag: Ymacs_Interactive(function() {
-            this.cmd("close_last_xml_tag");
-            this.cmd("indent_line");
-        }),
-
-        xml_slash_complete_tag: Ymacs_Interactive(function() {
-            this.cmd("self_insert_command");
-            if (this.looking_back("</")) {
-                let rc = this._rowcol;
-                this.tokenizer.parseUntil(rc.row, rc.col);
-                let tag = this.tokenizer.theParser.tags.at(-1);
-                if (tag) {
-                    this._placeUndoBoundary();
-                    this.cmd("insert", tag.id, ">");
-                    this.cmd("indent_line");
-                }
-            }
-        }),
-
-        xml_gt_complete_tag: Ymacs_Interactive(function() {
-            this.cmd("self_insert_command");
-            let rc = this._rowcol;
-            this.tokenizer.parseUntil(rc.row, rc.col);
-            let tag = this.tokenizer.theParser.tags.at(-1);
-            if (tag?.inner?.l1 == rc.row && tag.inner.c1 == rc.col) {
-                this._placeUndoBoundary();
-                let pos = this.point();
-                this.cmd("insert", "</", tag.id, ">");
-                this.cmd("goto_char", pos);
-            }
-        }),
-
         xml_zen_expand: Ymacs_Interactive(function() {
             this.cmd("xml_zen_stop");
             var html = "";
@@ -749,16 +626,6 @@ function html_tokenizer(stream, tok){
                     this.cmd("goto_char", m.getPosition());
                     break;
                 }
-            }
-        }),
-
-        xml_newline_and_indent: Ymacs_Interactive(function(){
-            let inparens = this.looking_at("</") && this.looking_back(">");
-            this.cmd("newline_and_indent");
-            if (inparens) {
-                this.cmd("newline_and_indent");
-                this.cmd("backward_line");
-                this.cmd("indent_line");
             }
         }),
 

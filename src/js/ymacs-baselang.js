@@ -86,20 +86,24 @@ export class Ymacs_BaseLang {
         }
     }
 
-    readCommentMulti(start, stop, inner) {
+    readCommentMulti(start, stop, inner,
+                     tok1 = "mcomment-starter",
+                     tok2 = "mcomment",
+                     tok3 = "mcomment-stopper")
+    {
         let s = this._stream;
         if (this._inComment) {
             if (s.lookingAt(stop)) {
+                this.popInParen(start, stop.length, tok3);
                 this.popCont();
                 this._inComment = null;
-                this.t("mcomment-stopper", stop.length);
             } else {
-                this.t("mcomment");
+                this.t(tok2);
             }
         } else if (s.lookingAt(start)) {
             this._inComment = { line: s.line, c1: s.col, inner: inner };
-            this.t("mcomment-starter", start.length);
-            this.pushCont(this.readCommentMulti.bind(this, start, stop, inner));
+            this.pushInParen(start, tok1);
+            this.pushCont(this.readCommentMulti.bind(this, start, stop, inner, tok1, tok2, tok3));
             return true;
         }
     }
@@ -144,9 +148,9 @@ export class Ymacs_BaseLang {
     readCustom() {}
 
     readName() {
-        let s = this._stream;
-        if (s.lookingAt(this.NAME_START)) {
-            let col = s.col, name = "";
+        let s = this._stream, name = s.peek();
+        if (this.NAME_START.test(name)) {
+            let col = s.col++;
             while (s.lookingAt(this.NAME_CHAR)) {
                 name += s.peek();
                 s.col++;

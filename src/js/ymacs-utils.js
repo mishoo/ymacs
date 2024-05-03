@@ -90,7 +90,7 @@ export let DOM = {
 const nextDone = { next: () => ({ done: true }) };
 
 export const NIL = new class NIL {
-    car = this;
+    car = null;
     cdr = this;
     toString() { return "NIL" }
     valueOf() { return null }
