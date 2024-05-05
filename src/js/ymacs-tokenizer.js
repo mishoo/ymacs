@@ -16,14 +16,6 @@ export class Ymacs_Stream {
         this.col = col;
     }
 
-    nextCol() {
-        ++this.col;
-    }
-
-    prevCol() {
-        --this.col;
-    }
-
     nextLine() {
         ++this.line;
         this.col = 0;
@@ -41,22 +33,6 @@ export class Ymacs_Stream {
             if (pos < line.length) return line.charAt(pos);
             if (pos == line.length) return "\n";
         }
-    }
-
-    next() {
-        let ch = this.peek();
-        this.nextCol();
-        if (this.col > this.buffer.code[this.line].length)
-            this.nextLine();
-        let stop = this.__stop;
-        if (stop) {
-            if (this.line > stop.line
-                || (this.line == stop.line && this.col >= stop.col)) {
-                this.__stop = null;
-                throw stop.stop ?? this.EOF;
-            }
-        }
-        return ch;
     }
 
     lineText(row = this.line) {

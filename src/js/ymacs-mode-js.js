@@ -6,16 +6,9 @@ import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
 import { Ymacs_BaseLang } from "./ymacs-baselang.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
+import { toHash } from "./ymacs-utils.js";
 
-function toHash(a) {
-    return a.reduce((a, key, i) => (a[key] = i + 1, a), Object.create(null));
-}
-
-function qw(str) {
-    return toHash(str.trim().split(/\s+/));
-}
-
-const KEYWORDS = qw("abstract break case catch class const \
+const KEYWORDS = toHash("abstract break case catch class const \
   async await \
   continue debugger default delete do else \
   enum export extends final finally for \
@@ -26,12 +19,12 @@ const KEYWORDS = qw("abstract break case catch class const \
   throws transient try typeof var void let \
   yield volatile while with");
 
-const KEYWORDS_TYPE = qw("boolean byte char double float int long short void \
+const KEYWORDS_TYPE = toHash("boolean byte char double float int long short void \
   Array Date Function Math Number Object RegExp String");
 
-const KEYWORDS_CONST = qw("false null undefined Infinity NaN true arguments");
+const KEYWORDS_CONST = toHash("false null undefined Infinity NaN true arguments");
 
-const KEYWORDS_BUILTIN = qw("Infinity NaN \
+const KEYWORDS_BUILTIN = toHash("Infinity NaN \
   Packages decodeURI decodeURIComponent \
   encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
   parseInt undefined window document alert prototype constructor");
@@ -59,6 +52,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             this.token(tok.c1, tok.c2, type);
             return true;
         }
+        return this.readNumber();
     }
 
     readLiteralRegexp(op) {
@@ -80,7 +74,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
                 return;
             }
             esc = !esc && ch === "\\";
-            s.nextCol();
+            ++s.col;
         }
         this.token(start, s.col, "regexp");
     }

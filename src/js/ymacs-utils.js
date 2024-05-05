@@ -94,7 +94,8 @@ export const NIL = new class NIL {
     cdr = this;
     toString() { return "NIL" }
     valueOf() { return null }
-    [Symbol.iterator]() { return nextDone };
+    [Symbol.iterator]() { return nextDone }
+    get length() { return 0 }
 };
 
 export class Cons {
@@ -112,6 +113,11 @@ export class Cons {
                 return { value };
             }
         };
+    }
+    get length() {
+        let p = this, count = 0;
+        while (p !== NIL) ++count, p = p.cdr;
+        return count;
     }
 }
 
@@ -266,6 +272,19 @@ export function zeroPad(thing, width, zero = "0") {
     while (s.length < width)
         s = zero + s;
     return s;
+}
+
+export function qw(str) {
+    return str.trim().split(/\s+/);
+}
+
+export function toHash(str) {
+    return qw(str).reduce((a, key, i) => (a[key] = i + 1, a), Object.create(null));
+}
+
+export function regexp_opt(x, mods) {
+    if (typeof x == "string") x = qw(x);
+    return new RegExp("^(" + x.join("|") + ")$", mods);
 }
 
 export function common_prefix(strings) {

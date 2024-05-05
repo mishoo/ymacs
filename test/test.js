@@ -19,14 +19,14 @@ window.addEventListener("beforeunload", ev => {
     ymacs.addClass("Ymacs-hl-line");
     //ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
-    ymacs.setColorTheme([ "ef-maris-dark" ]);
+    ymacs.setColorTheme([ "ef-elea-dark" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-bright" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
     let b = window.b = ymacs.getActiveBuffer.bind(ymacs);
-    b().cmd("load_file", "test.html");
+    b().cmd("load_file", "queen-board.lisp");
     b().setVariable("fill_column", 80);
 
     // b().cmd("load_file", "ymacs-frame.js");

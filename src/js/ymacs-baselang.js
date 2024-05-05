@@ -15,7 +15,7 @@ export class Ymacs_BaseLang {
 
     COMMENT = [ "//", [ "/*", "*/", "*" ] ];
     STRING = [ '"', "'" ];
-    NUMBER = /^0x[0-9a-fA-F]+|^(?:\d*\.)?\d+/u;
+    NUMBER = /^[+-]?(?:0x[0-9a-fA-F]+|(?:\d*\.)?\d+(?:[eE][+-]?\d+)?)/u;
     NAME_START = /^[_$\p{L}]/iu;
     NAME_CHAR = /^[_$\p{L}0-9]/iu;
     OPEN_PAREN = {
@@ -65,7 +65,6 @@ export class Ymacs_BaseLang {
          this.readOpenParen() ||
          this.readCloseParen() ||
          this.readCustom() ||
-         this.readNumber() ||
          this.readTrailingWhitespace() ||
          this.t());
     }
@@ -145,7 +144,9 @@ export class Ymacs_BaseLang {
         }
     }
 
-    readCustom() {}
+    readCustom() {
+        return this.readNumber();
+    }
 
     readName() {
         let s = this._stream, name = s.peek();
