@@ -57,8 +57,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
         [ "<![CDATA[", "]]>", null,
           "xml-cdata-starter", "xml-cdata", "xml-cdata-stopper" ]
     ];
-    NAME_START = /^[$\p{L}:_-]/iu;
-    NAME_CHAR = /^[$\p{L}0-9:_-]/iu;
+    NAME = /^[\p{L}:_$-][\p{L}0-9:_$-]*/iu;
     OPEN_PAREN = {
         "(" : ")",
         "{" : "}",
@@ -134,7 +133,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
 
     readOpenTag() {
         let s = this._stream;
-        if (s.lookingAt("<") && this.NAME_START.test(s.peek(+1))) {
+        if (s.lookingAt("<") && this.NAME.test(s.peek(+1))) {
             let outer = { l1: s.line, c1: s.col };
             this.pushInParen("<", "xml-open-bracket");
             let tag = this.readName();
@@ -179,7 +178,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
 
     readCloseTag() {
         let s = this._stream;
-        if (s.lookingAt("</") && this.NAME_START.test(s.peek(+2))) {
+        if (s.lookingAt("</") && this.NAME.test(s.peek(+2))) {
             let otag = this.popTag();
             if (otag) {
                 otag.inner.l2 = s.line;

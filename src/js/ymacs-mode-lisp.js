@@ -406,12 +406,12 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
     _formStack = NIL;
     _formSym = null;
     _formLen = 0;
+    _rxSpecial = null;
 
     COMMENT = [ ";", [ "#|", "|#" ] ];
     STRING = [ '"' ];
     NUMBER = /^[+-]?(?:#x[0-9a-fA-F]+|#\d+r[0-9a-zA-Z]+|#o[0-7]+|#b[01]+|(?:\d*\.)?\d+(?:[eE][+-]?\d+)?|\d+\/\d+)$/u;
-    NAME_START = /^[-_$\p{L}0-9|!#$%&*+./:<=>?@\^~]/iu;
-    NAME_CHAR = /^[-_$\p{L}0-9|!#$%&*+./:<=>?@\^~]/iu;
+    NAME = /^[-_$\p{L}0-9|!#$%&*+./:<=>?@\^~]+/iu;
     OPEN_PAREN = {
         "(" : ")",
         "{" : "}",
@@ -429,18 +429,16 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
 
     constructor({ stream, tok, rx_special }) {
         super({ stream, tok });
-        this.rx_special = rx_special;
+        this._rxSpecial = rx_special;
     }
 
-    isNameStart(ch) {
-        return this.NAME_START.test(ch) && !this.rx_special?.test(ch);
-    }
     isNameChar(ch) {
-        return this.NAME_CHAR.test(ch) && !this.rx_special?.test(ch);
+        return this.NAME.test(ch) && !this._rxSpecial?.test(ch);
     }
     readName() {
+        if (!this._rxSpecial) return super.readName();
         let s = this._stream, name = s.peek();
-        if (this.isNameStart(name)) {
+        if (this.isNameChar(name)) {
             let col = s.col++, ch;
             while (this.isNameChar(ch = s.peek())) {
                 name += ch;
@@ -455,11 +453,13 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         let _formStack = this._formStack;
         let _formSym = this._formSym;
         let _formLen = this._formLen;
+        let _rxSpecial = this._rxSpecial;
         return () => {
             let self = _super();
             self._formStack = _formStack;
             self._formSym = _formSym;
             self._formLen = _formLen;
+            self._rxSpecial = _rxSpecial;
             return self;
         };
     }
@@ -487,14 +487,14 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
             this.t("constant", m[0].length);
             return true;
         }
-        if (s.lookingAt("#:") && this.isNameStart(s.peek(+2))) {
+        if (s.lookingAt("#:") && this.isNameChar(s.peek(+2))) {
             this.newArg();
             s.col += 2;
             let c = this.readName();
             this.token(c.c1 - 2, c.c2, "lisp-keyword");
             return true;
         }
-        if (s.lookingAt("#'") && this.isNameStart(s.peek(+2))) {
+        if (s.lookingAt("#'") && this.isNameChar(s.peek(+2))) {
             this.newArg();
             s.col += 2;
             let c = this.readName();
@@ -614,7 +614,7 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 return indent;
             }
             var nextNonSpace;
-            if (this.isNameStart(line.charAt(indent))) {
+            if (this.isNameChar(line.charAt(indent))) {
                 var re = /\s\S/g;
                 re.lastIndex = p.col;
                 nextNonSpace = re.exec(line);

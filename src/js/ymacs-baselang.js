@@ -16,8 +16,7 @@ export class Ymacs_BaseLang {
     COMMENT = [ "//", [ "/*", "*/", "*" ] ];
     STRING = [ '"', "'" ];
     NUMBER = /^[+-]?(?:0x[0-9a-fA-F]+|(?:\d*\.)?\d+(?:[eE][+-]?\d+)?)/u;
-    NAME_START = /^[_$\p{L}]/iu;
-    NAME_CHAR = /^[_$\p{L}0-9]/iu;
+    NAME = /^[\p{L}_$][\p{L}0-9_$]*/iu;
     OPEN_PAREN = {
         "("  : ")",
         "{"  : "}",
@@ -149,14 +148,9 @@ export class Ymacs_BaseLang {
     }
 
     readName() {
-        let s = this._stream, name = s.peek();
-        if (this.NAME_START.test(name)) {
-            let col = s.col++;
-            while (s.lookingAt(this.NAME_CHAR)) {
-                name += s.peek();
-                s.col++;
-            }
-            return { line: s.line, c1: col, c2: s.col, id: name };
+        let s = this._stream, m = s.lookingAt(this.NAME);
+        if (m) {
+            return { line: s.line, c1: s.col, c2: s.col += m[0].length, id: m[0] };
         }
     }
 
