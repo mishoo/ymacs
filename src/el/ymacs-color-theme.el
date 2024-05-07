@@ -1,6 +1,9 @@
 (require 'cl)
 (require 'nxml-mode)
 (require 'info)
+(require 'hl-line)
+(require 'company)
+(require 'ef-themes)
 
 (defvar *ymacs-faces*)                  ; XXX: defparameter for Elisp?
 
@@ -225,10 +228,6 @@
       (insert (ymacs-face-css faces))
       (insert " }\n"))
     (insert "}\n")))
-
-(load-library "hl-line")
-(load-library "company")
-(load-library "ef-themes")
 
 (defun ymacs-generate-themes ()
   (interactive)

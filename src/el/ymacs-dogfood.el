@@ -2,11 +2,11 @@
 
 (require 'simple-httpd)
 (require 'cl-lib)
-(require 's)
 
-(defvar ymacs-srcdir (expand-file-name "../.."
-                                       (file-name-directory (or load-file-name
-                                                                buffer-file-name))))
+(defvar ymacs-eldir (file-name-directory (or load-file-name buffer-file-name)))
+(defvar ymacs-srcdir (expand-file-name "../.." ymacs-eldir))
+
+(load (expand-file-name "ymacs-color-theme.el" ymacs-eldir))
 
 (defvar ymacs-httpd-port 8977)
 
@@ -26,7 +26,7 @@
                                                  (buffer-list))))))
 
 (defservlet ymacs-buffer-get application/json (path)
-  (let ((buffer-name (s-chop-prefix "/ymacs-buffer-get/" path)))
+  (let ((buffer-name (replace-regexp-in-string "^/.*?/" "" path)))
     (insert
      (with-current-buffer buffer-name
        (save-excursion
@@ -37,7 +37,7 @@
                         (code . ,(buffer-substring-no-properties (point-min) (point-max)))))))))))
 
 (defservlet ymacs-buffer-save application/json (path _ headers)
-  (let* ((buffer-name (s-chop-prefix "/ymacs-buffer-save/" path))
+  (let* ((buffer-name (replace-regexp-in-string "^/.*?/" "" path))
          (json (cadr (assoc "Content" headers #'string=)))
          (args (json-read-from-string (decode-coding-string json 'utf-8)))
          (code (cdr (assoc 'code args)))
