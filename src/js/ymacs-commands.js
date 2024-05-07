@@ -637,7 +637,14 @@ Ymacs_Buffer.newCommands({
 
     recenter_top_bottom: Ymacs_Interactive("^", function() {
         this.whenActiveFrame(function(frame){
-            frame.recenterTopBottom();
+            let i = this._recenterTopBottomPos;
+            if (this.previousCommand == "recenter_top_bottom") {
+                i = (i + 1) % 3;
+            } else {
+                i = 0;
+            }
+            this._recenterTopBottomPos = i;
+            frame.recenterTopBottom(i);
         });
     }),
 
