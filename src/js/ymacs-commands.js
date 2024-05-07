@@ -286,7 +286,7 @@ Ymacs_Buffer.newCommands({
         if (!(rx instanceof RegExp)) {
             var matchCase = !this.getq("case_fold_search");
             try {
-                rx = new RegExp(rx, matchCase ? "g" : "ig");
+                rx = new RegExp(rx, matchCase ? "mug" : "mugi");
             } catch(ex) {
                 throw new Ymacs_Exception("Invalid regexp");
             }

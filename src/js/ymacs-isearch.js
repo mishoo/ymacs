@@ -201,7 +201,7 @@ function searchRegExp({
     if (lax) {
         searchRX = searchRX.replace(/\s+/g, "\\s+");
     }
-    return new RegExp(searchRX, caseFold.call(this) ? "ugi" : "ug");
+    return new RegExp(searchRX, caseFold.call(this) ? "mugi" : "mug");
 }
 
 Ymacs_Buffer.newCommands({
