@@ -49,3 +49,12 @@
         (goto-char point))
       (save-buffer))
     (insert (json-encode `((ok . ,buffer-name))))))
+
+(defun httpd/ymacs-magit-status (proc path &rest _)
+  (let ((buffer-name (replace-regexp-in-string "^/.*?/" "" path)))
+    (switch-to-buffer buffer-name)
+    (select-frame-set-input-focus
+     (selected-frame))
+    (magit-status-setup-buffer)
+    (with-httpd-buffer proc "application/json"
+      (insert (json-encode `((ok . ,buffer-name)))))))

@@ -54,19 +54,26 @@ Ymacs_Buffer.newCommands({
             }
         });
     }),
-    dogfood_save_file: Ymacs_Interactive(async function(){
+    dogfood_save_file: Ymacs_Interactive(async function(cont){
         let result = await (await post(`ymacs-buffer-save/${this.name}`, {
             code: this.getCode(),
             point: this.point() + 1,
         })).json();
         if (result.ok == this.name) {
             this.dirty(false);
+            cont?.();
         }
     }),
     dogfood_save_some_files: Ymacs_Interactive(function(){
         this.ymacs.buffers
             .filter(b => b.dirty())
             .forEach(b => b.cmd("dogfood_save_file"));
+    }),
+    dogfood_magit_status: Ymacs_Interactive(async function(){
+        this.cmd("dogfood_save_file", async () => {
+            let result = await (await post(`ymacs-magit-status/${this.name}`)).json();
+            console.log(result);
+        });
     }),
 });
 
@@ -75,4 +82,5 @@ Ymacs_Keymap.get("emacs").defineKeys({
     "C-x C-s" : "dogfood_save_file",
     "C-x s"   : "dogfood_save_some_files",
     "C-z"     : "switch_to_buffer",
+    "F1"      : "dogfood_magit_status",
 });
