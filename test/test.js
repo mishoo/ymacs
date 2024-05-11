@@ -19,7 +19,7 @@ window.addEventListener("beforeunload", ev => {
     ymacs.addClass("Ymacs-hl-line");
     //ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
-    ymacs.setColorTheme([ "ef-elea-dark" ]);
+    ymacs.setColorTheme([ "ef-duo-dark" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
