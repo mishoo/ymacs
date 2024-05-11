@@ -72,7 +72,6 @@ export class Ymacs extends Widget {
         /* -----[ variables ]----- */
         this.killRing = [];
         this.killMasterOfRings = [];
-        this.progress = {};
 
         /* -----[ macro vars ]----- */
         // If present, keystrokes are stored in this list.
@@ -176,7 +175,7 @@ export class Ymacs extends Widget {
     renameBuffer(buf, name) {
         buf = this.getBuffer(buf);
         buf.name = name;
-        buf.callHooks("onProgressChange");
+        buf.callHooks("onModelineChange");
     }
 
     _do_switchToBuffer(buf) {

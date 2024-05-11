@@ -4,6 +4,8 @@
 
 import { delayed, EventProxy } from "./ymacs-utils.js";
 
+const TOK_DELAY = 10;
+
 export class Ymacs_Stream {
 
     constructor({
@@ -245,13 +247,6 @@ export class Ymacs_Tokenizer extends EventProxy {
         return LANGUAGES[name](this.stream, this, options);
     }
 
-    showProgress(p) {
-        if (p != null) {
-            p = Math.round(p / this.stream.length() * 100) + "%";
-        }
-        this.buffer.updateProgress("Syntax highlighting", p);
-    }
-
     start() {
         this.stop();
         let stream = this.stream, p, a = this.parsers;
@@ -263,7 +258,6 @@ export class Ymacs_Tokenizer extends EventProxy {
         let doit = () => {
             this.buffer.preventUpdates();
             let n = 100;
-            // this.showProgress(this.stream.line);
             while (true) {
                 try {
                     while (true) p.next();
@@ -274,7 +268,7 @@ export class Ymacs_Tokenizer extends EventProxy {
                         stream.nextLine();
                         if  (--n == 0) {
                             this.buffer.resumeUpdates();
-                            this.timerUpdate = setTimeout(doit, 25);
+                            this.timerUpdate = setTimeout(doit, TOK_DELAY);
                             return;
                         }
                     }
@@ -286,7 +280,6 @@ export class Ymacs_Tokenizer extends EventProxy {
                     else throw ex;
                 }
             }
-            // this.showProgress();
         };
         doit();
     }
@@ -338,7 +331,7 @@ export class Ymacs_Tokenizer extends EventProxy {
         } finally {
             this.buffer.resumeUpdates();
             if (stream.line < stream.length())
-                this.timerUpdate = setTimeout(this.start.bind(this, stream.line), 25);
+                this.timerUpdate = setTimeout(this.start.bind(this, stream.line), TOK_DELAY);
         }
     }
 

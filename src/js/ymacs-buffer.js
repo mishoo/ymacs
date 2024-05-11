@@ -145,7 +145,6 @@ export class Ymacs_Buffer extends EventProxy {
         this.previousCommand = null;
         this.currentCommand = null;
         this.currentKeys = [];
-        this.progress = Object.create(null);
 
         this.variables = Object.create(null);
         this.globalVariables = GLOBAL_VARS;
@@ -656,16 +655,8 @@ export class Ymacs_Buffer extends EventProxy {
         return this.setq("universal_prefix", val);
     }
 
-    updateProgress(name, val) {
-        if (val == null)
-            delete this.progress[name];
-        else
-            this.progress[name] = val;
-        this.callHooks("onProgressChange");
-    }
-
     updateModeline() {
-        this.callHooks("onProgressChange");
+        this.callHooks("onModelineChange");
     }
 
     renderModelineContent(rc, percent) {
@@ -677,13 +668,6 @@ export class Ymacs_Buffer extends EventProxy {
         if (custom) {
             custom = custom.call(this, this, rc);
             if (custom) ml += "[" + custom + "] ";
-        }
-        var pr = [];
-        for (var i in this.progress) {
-            pr.push(i + ": " + this.progress[i]);
-        }
-        if (pr.length > 0) {
-            ml += "{" + pr.join(", ") + "}";
         }
         return ml;
     }

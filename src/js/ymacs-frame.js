@@ -81,7 +81,7 @@ export class Ymacs_Frame extends Widget {
             onPointChange            : this._on_bufferPointChange.bind(this),
             onResetCode              : this._on_bufferResetCode.bind(this),
             onOverwriteMode          : this._on_bufferOverwriteMode.bind(this),
-            onProgressChange         : this._on_bufferProgressChange.bind(this),
+            onModelineChange         : this._on_bufferModelineChange.bind(this),
             beforeInteractiveCommand : this._on_bufferBeforeInteractiveCommand.bind(this),
             afterInteractiveCommand  : this._on_bufferAfterInteractiveCommand.bind(this),
             onOverlayChange          : this._on_bufferOverlayChange.bind(this),
@@ -417,7 +417,7 @@ export class Ymacs_Frame extends Widget {
 
     _on_bufferAfterInteractiveCommand() {}
 
-    _on_bufferProgressChange() {
+    _on_bufferModelineChange() {
         this.redrawModelineWithTimer(null);
     }
 
