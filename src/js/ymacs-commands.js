@@ -637,14 +637,7 @@ Ymacs_Buffer.newCommands({
 
     recenter_top_bottom: Ymacs_Interactive("^", function() {
         this.whenActiveFrame(function(frame){
-            let i = this._recenterTopBottomPos;
-            if (this.previousCommand == "recenter_top_bottom") {
-                i = (i + 1) % 3;
-            } else {
-                i = 0;
-            }
-            this._recenterTopBottomPos = i;
-            frame.recenterTopBottom(i);
+            frame.recenterTopBottom(this.sameCommandCount() % 3);
         });
     }),
 
@@ -853,6 +846,21 @@ Ymacs_Buffer.newCommands({
         this._placeUndoBoundary();
         if (!this._playbackUndo()) {
             this.signalError("No further undo information");
+        }
+    }),
+
+    goto_last_change: Ymacs_Interactive(function() {
+        let a = [], pos = this.point();
+        this.__undoQueue.forEach(x => {
+            if (x.type == 3) {
+                let m = x.markers.find(m => m[0] === this.caretMarker);
+                if (m) a.push(m[1]);
+            }
+        });
+        if (a.length) {
+            a = a.reverse();
+            let i = this.sameCommandCount() % a.length;
+            this.cmd("goto_char", a[i]);
         }
     }),
 
