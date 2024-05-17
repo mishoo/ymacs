@@ -211,7 +211,7 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "C-x 1"                                   : "delete_other_frames",
     "C-x 2"                                   : "split_frame_vertically",
     "C-x 3"                                   : "split_frame_horizontally",
-    "C-x o"                                   : "other_frame",
+    "C-x o && M-o"                            : "other_frame",
     "C-x l"                                   : "toggle_line_numbers",
 
     // eval

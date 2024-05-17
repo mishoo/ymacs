@@ -120,11 +120,6 @@ export class Ymacs_Stream {
         }
     }
 
-    skip_ws() {
-        while (Ymacs_Simple_Stream.is_whitespace(this.peek()))
-            this.next();
-    }
-
 }
 
 Ymacs_Stream.prototype.EOL = {};

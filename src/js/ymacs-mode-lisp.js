@@ -344,7 +344,9 @@ const LOOP_KEYWORDS = regexp_opt("\
   for with = as in on of then across by while until \
   from downfrom upfrom to upto below downto above \
   being each the hash-keys? using hash-values? \
-  collect(?:ing)? summ(?:ing)? into \
+  collect(?:ing)? nconc(?:ing)? summ(?:ing)? into \
+  of-type \
+  repeat finally \
   if else when do");
 
 const ERROR_FORMS = toHash("error warn");
