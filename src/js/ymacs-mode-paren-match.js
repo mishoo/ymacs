@@ -250,10 +250,10 @@ Ymacs_Buffer.newCommands({
         let p = this.tokenizer.getPP().filter(caretInside(rc))[0];
         if (p != null) {
             this.cmd("goto_char", this._rowColToPosition(p.line, startOf(p)));
-            this.cmd("back_to_indentation");
         } else {
             this.cmd("backward_sexp");
         }
+        this.cmd("back_to_indentation");
     }),
 
     end_of_defun: Ymacs_Interactive(function(){

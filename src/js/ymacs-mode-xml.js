@@ -351,7 +351,7 @@ Ymacs_Buffer.newCommands({
     xml_get_fill_paragraph_region: function() {
         // XXX: this function should somehow be a property of the language (for mixed modes),
         // rather than a top-level method. Not yet decided how to best handle this...
-        if (!(this.tokenizer?.theParser instanceof Ymacs_Lang_XML)) return;
+        if (!this.tokenizer) return;
 
         this.tokenizer.finishParsing();
         let blk = this.tokenizer.getPP()
