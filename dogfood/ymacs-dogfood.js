@@ -30,7 +30,9 @@ Ymacs_Buffer.newCommands({
                     buf.cmd("css_mode");
                     break;
                   case /web-mode|html/.test(mode):
-                    buf.cmd(/\.syt/.test(name) ? "sytes_mode" : "html_mode");
+                    buf.cmd(/\.syt/.test(name) ? "sytes_mode" :
+                            /\.twig/.test(name) ? "twig_html_mode" :
+                            "html_mode");
                     break;
                   case /xml/.test(mode):
                     buf.cmd("xml_mode");

@@ -5,7 +5,7 @@
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Tokenizer, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
 import { Ymacs_BaseLang } from "./ymacs-baselang.js";
-import { Cons, NIL } from "./ymacs-utils.js";
+import { Cons, NIL, toHash } from "./ymacs-utils.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
@@ -46,6 +46,7 @@ let markup_mode = tok_type => function(){
 
 Ymacs_Buffer.newMode("xml_mode", markup_mode("xml"));
 Ymacs_Buffer.newMode("html_mode", markup_mode("html"));
+Ymacs_Buffer.newMode("twig_html_mode", markup_mode("twig_html"));
 
 class Ymacs_Lang_XML extends Ymacs_BaseLang {
     _tags = NIL;
@@ -189,7 +190,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
             }
             this.pushInParen("</", "xml-open-bracket");
             let ctag = this.readName();
-            this.token(ctag.c1, ctag.c2, (otag && otag.id == ctag.id ? "xml-close-tag" : "error"));
+            this.token(ctag.c1, ctag.c2, otag?.id == ctag.id ? "xml-close-tag" : "error");
             if (otag) {
                 let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
                               inner: otag.inner, outer: otag.outer };
@@ -316,6 +317,181 @@ class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
     }
 }
 
+const TWIG_BUILTIN = toHash("in or and not is defined \
+  constant divisible empty even iterable \
+  null true false odd same from as \
+  starts with only ends matches");
+
+class Ymacs_Lang_Twig extends Ymacs_BaseLang {
+    STRING = [ "'", [ '"', '"', "#{", "}" ] ];
+    _blocks = NIL;
+    _inBlock = null;
+    _alt = this._tok.getLanguage("html");
+    _mode = this._alt;
+
+    get passedParens() {
+        return [
+            ...super.passedParens,
+            ...this._alt.passedParens,
+        ];
+    }
+
+    copy() {
+        let _super = super.copy();
+        let _alt = this._alt.copy();
+        let _mode = this._mode;
+        let _blocks = this._blocks;
+        let _inBlock = this._inBlock;
+        return () => {
+            let self = _super();
+            self._alt =_alt();
+            self._mode = _mode;
+            self._blocks = _blocks;
+            self._inBlock = _inBlock;
+            return self;
+        };
+    }
+
+    next() {
+        let s = this._stream, m;
+        if (this._mode === this._alt) {
+            if ((m = s.lookingAt(/^\{%-?/))) {
+                this._mode = this;
+                this.pushCont(this.readBlock.bind(this, m[0]));
+            } else if ((m = s.lookingAt(/^\{\{-?/))) {
+                this._mode = this;
+                this.pushInParen(m[0], "exp-starter");
+            } else if ((m = s.lookingAt(/^\{#-?/))) {
+                this._alt.readCommentMulti(m[0], /^-?#\}/, "#");
+                return this.next();
+            }
+        } else if ((m = s.lookingAt(/^-?\}\}/)) && /^\{\{/.test(this._inParens.car?.type)) {
+            this.popInParen(this._inParens.car?.type, m[0].length, "exp-stopper");
+            this._mode = this._alt;
+            return this.next();
+        }
+        this._mode === this ? super.next() : this._alt.next();
+    }
+
+    readCustom() {
+        let tok = this.readName();
+        if (tok) {
+            let type = tok.id in TWIG_BUILTIN ? "builtin" : null;
+            this.token(tok.c1, tok.c2, type);
+            return true;
+        }
+        return this.readNumber();
+    }
+
+    readBlock(start) {
+        let s = this._stream, m;
+        if (this._inBlock) {
+            this.skipWS();
+            if ((m = s.lookingAt(/^-?%\}/))) {
+                this.popInParen(start, m[0].length, "block-stopper");
+                this._mode = this._alt;
+                this.popCont();
+                if (this._inBlock.hasBody) {
+                    this._inBlock.inner = { l1: s.line, c1: s.col };
+                    this.pushBlock(this._inBlock);
+                }
+                this._inBlock = null;
+            } else {
+                this.read();
+            }
+        } else {
+            let outer = { l1: s.line, c1: s.col };
+            this.pushInParen(start, "block-starter");
+            this.skipWS();
+            let ctag = this.readName();
+            if (ctag) {
+                let isEndTag = /^end/.test(ctag.id);
+                if (isEndTag) {
+                    let otag = this.popBlock();
+                    let name = ctag.id.substr(3);
+                    this.token(ctag.c1, ctag.c2, otag?.id == name ? "keyword" : "error");
+                    if (otag) {
+                        let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
+                                      inner: otag.inner, outer: otag.outer };
+                        let pclose = { line: ctag.line, c1: ctag.c1, c2: ctag.c2, opened: popen };
+                        popen.closed = pclose;
+                        this.doneParen(popen);
+                        this._inBlock = otag; // waiting for %}
+                        delete otag.hasBody; // no more body to parse
+                    }
+                    this.skipWS();
+                    if (name == "macro") {
+                        let fname = this.readName();
+                        if (fname) {
+                            this.token(fname.c1, fname.c2, fname.id == otag.fname?.id ? "function-name" : "error");
+                        }
+                        this.skipWS();
+                    }
+                } else {
+                    this.token(ctag.c1, ctag.c2, "keyword");
+                    ctag.outer = outer;
+                    this._inBlock = ctag;
+                    this.littleParseTag(ctag);
+                }
+            }
+        }
+    }
+
+    littleParseTag(ctag) {
+        let s = this._stream;
+        ctag.hasBody = !/^(import|do|from|include|extends|use|else(?:if)?)$/.test(ctag.id);
+        this.skipWS();
+        if (ctag.id == "set") {
+            while (this.maybeName("variable-name")) {
+                this.skipWS();
+                if (s.lookingAt(",")) {
+                    s.col++;
+                    this.skipWS();
+                } else break;
+            }
+            this.skipWS();
+            ctag.hasBody = s.lookingAt(/^-?%\}/);
+        } else if (ctag.id == "block" || ctag.id == "macro") {
+            ctag.fname = this.maybeName("function-name");
+        }
+    }
+
+    maybeName(type = null) {
+        let name = this.readName();
+        if (name) {
+            this.token(name.c1, name.c2, type);
+        }
+        return name;
+    }
+
+    indentation() {
+        let s = this._stream;
+        let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");
+        if (this._mode === this) {
+            return super.indentation();
+        } else if (this.block) {
+            let indent = s.lineIndentation(this.block.line);
+            let closing = /^\s*\{%-?\s*end/.test(s.lineText());
+            if (closing) return indent;
+            if (!this._mode.tag || this._mode.tag.line <= this.block.line)
+                return indent + INDENT_LEVEL();
+        }
+        return this._mode.indentation();
+    }
+
+    pushBlock(block) {
+        this._blocks = new Cons(block, this._blocks);
+    }
+    popBlock() {
+        let block = this._blocks.car;
+        this._blocks = this._blocks.cdr;
+        return block;
+    }
+    get block() {
+        return this._blocks.car;
+    }
+}
+
 function inlineCode(tag) {
     return (tag == "i" || tag == "em" ? 1 :
             tag == "b" || tag == "strong" ? 2 :
@@ -346,6 +522,8 @@ Ymacs_Tokenizer.define("html", (stream, tok) => new Ymacs_Lang_HTML({
     emptyTags: RX_EMPTY_TAG,
     inline: { code: inlineCode, cls: inlineCls },
 }));
+
+Ymacs_Tokenizer.define("twig_html", (stream, tok) => new Ymacs_Lang_Twig({ stream, tok }));
 
 Ymacs_Buffer.newCommands({
     xml_get_fill_paragraph_region: function() {

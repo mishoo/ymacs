@@ -17,6 +17,7 @@ export class Ymacs_BaseLang {
     STRING = [ '"', "'" ];
     NUMBER = /^[+-]?(?:0x[0-9a-fA-F]+|(?:\d*\.)?\d+(?:[eE][+-]?\d+)?)/u;
     NAME = /^[\p{L}_$][\p{L}0-9_$]*/iu;
+    WHITESPACE = /^[ \u00a0\n\r\t\f\u000b\u200b\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\uFEFF]+/;
     OPEN_PAREN = {
         "("  : ")",
         "{"  : "}",
@@ -58,6 +59,14 @@ export class Ymacs_BaseLang {
         };
     }
 
+    skipWS() {
+        let s = this._stream;
+        do {
+            let m = s.lookingAt(this.WHITESPACE);
+            if (m) this.t(null, m[0].length);
+        } while (s.eol() && s.nextLine());
+    }
+
     read() {
         (this.readComment() ||
          this.readString() ||
@@ -89,10 +98,10 @@ export class Ymacs_BaseLang {
                      tok2 = "mcomment",
                      tok3 = "mcomment-stopper")
     {
-        let s = this._stream;
+        let s = this._stream, m;
         if (this._inComment) {
-            if (s.lookingAt(stop)) {
-                this.popInParen(start, stop.length, tok3);
+            if ((m = s.lookingAt(stop))) {
+                this.popInParen(start, m[0].length, tok3);
                 this.popCont();
                 this._inComment = null;
             } else {
