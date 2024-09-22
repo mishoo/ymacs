@@ -428,7 +428,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                         delete otag.hasBody; // no more body to parse
                     }
                     this.skipWS();
-                    if (name == "macro") {
+                    if (/^(?:macro|block)$/.test(name)) {
                         let fname = this.readName();
                         if (fname) {
                             this.token(fname.c1, fname.c2, fname.id == otag.fname?.id ? "function-name" : "error");
