@@ -309,9 +309,17 @@ class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
     }
 
     indentation() {
-        if ((this._mode === this) || (!this._mode._inString && /^\s*<\//.test(this._stream.lineText()))) {
+        let s = this._stream;
+        if ((this._mode === this) || (!this._mode._inString && /^\s*<\//.test(s.lineText()))) {
             return super.indentation();
         } else {
+            let tag = this.tag;
+            if (tag) {
+                let line = s.line;
+                while (--line > tag.line && !/\S/.test(s.lineText(line)));
+                if (line == tag.line)
+                    return s.lineIndentation(line) + this._stream.buffer.getq("indent_level");
+            }
             return this._mode.indentation();
         }
     }
