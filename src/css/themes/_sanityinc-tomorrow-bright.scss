@@ -47,11 +47,11 @@ $cursor_fg: #000000;
 .regexp-stopper { color: #70c0b1; }
 .regexp-modifier { color: #70c0b1; }
 .keyword { color: #b9ca4a; }
-.comment { color: #969896; font-style: italic; }
-.mcomment { color: #969896; font-style: italic; }
-.comment-starter { color: #969896; font-style: italic; }
-.mcomment-starter { color: #969896; font-style: italic; }
-.mcomment-stopper { color: #969896; font-style: italic; }
+.comment { color: #969896; }
+.mcomment { color: #969896; }
+.comment-starter { color: #969896; }
+.mcomment-starter { color: #969896; }
+.mcomment-stopper { color: #969896; }
 .number { color: #7aa6da; }
 .operator { color: #e78c45; }
 .error { color: #d54e53; font-weight: bold; }
@@ -62,19 +62,21 @@ $cursor_fg: #000000;
 .xml-entity-starter { color: #7aa6da; }
 .xml-entity-stopper { color: #7aa6da; }
 .xml-entity { color: #7aa6da; }
-.xml-open-bracket { }
-.xml-close-bracket { }
-.xml-closetag-slash { }
-.xml-cdata { color: #969896; font-style: italic; }
-.xml-cdata-starter { color: #969896; font-style: italic; }
-.xml-cdata-stopper { color: #969896; font-style: italic; }
+.xml-open-bracket { color: #eaeaea; }
+.xml-close-bracket { color: #eaeaea; }
+.xml-closetag-slash { color: #eaeaea; }
+.xml-cdata { color: #eaeaea; }
+.xml-cdata-starter { color: #eaeaea; }
+.xml-cdata-stopper { color: #eaeaea; }
+.block-starter, .block-stopper { color: #c397d8; }
+.exp-starter, .exp-stopper { color: #c397d8; }
 .lisp-keyword { color: #c397d8; }
-.heading1 { font-weight: bold; font-size: 1.383em; }
-.heading2 { font-weight: bold; font-size: 1.192em; }
+.heading1 { font-weight: bold; font-size: 1.414em; }
+.heading2 { font-weight: bold; font-size: 1.180em; }
 .heading3 { color: #e78c45; font-weight: bold; }
 .heading4 { color: #c397d8; font-weight: bold; }
-.markdown-blockquote { color: #969896; font-style: italic; }
-.markdown-blockquote1 { color: #969896; font-style: italic; }
-.markdown-blockquote2 { color: #969896; font-style: italic; }
-.markdown-blockquote3 { color: #969896; font-style: italic; }
+.markdown-blockquote { color: #969896; }
+.markdown-blockquote1 { color: #969896; }
+.markdown-blockquote2 { color: #969896; }
+.markdown-blockquote3 { color: #969896; }
 }

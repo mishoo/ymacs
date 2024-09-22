@@ -62,12 +62,14 @@ $cursor_fg: #ffffff;
 .xml-entity-starter { color: #008b8b; }
 .xml-entity-stopper { color: #008b8b; }
 .xml-entity { color: #008b8b; }
-.xml-open-bracket { }
-.xml-close-bracket { }
-.xml-closetag-slash { }
-.xml-cdata { color: #b22222; }
-.xml-cdata-starter { color: #b22222; }
-.xml-cdata-stopper { color: #b22222; }
+.xml-open-bracket { color: #000000; }
+.xml-close-bracket { color: #000000; }
+.xml-closetag-slash { color: #000000; }
+.xml-cdata { color: #000000; }
+.xml-cdata-starter { color: #000000; }
+.xml-cdata-stopper { color: #000000; }
+.block-starter, .block-stopper { color: #483d8b; }
+.exp-starter, .exp-stopper { color: #483d8b; }
 .lisp-keyword { color: #483d8b; }
 .heading1 { color: #0000ff; font-weight: bold; }
 .heading2 { color: #a0522d; font-weight: bold; }

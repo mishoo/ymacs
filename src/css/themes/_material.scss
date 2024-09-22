@@ -62,16 +62,18 @@ $cursor_fg: #263238;
 .xml-entity-starter { color: #8bc34a; }
 .xml-entity-stopper { color: #8bc34a; }
 .xml-entity { color: #8bc34a; }
-.xml-open-bracket { }
-.xml-close-bracket { }
-.xml-closetag-slash { }
-.xml-cdata { color: #b0bec5; }
-.xml-cdata-starter { color: #b0bec5; }
-.xml-cdata-stopper { color: #b0bec5; }
+.xml-open-bracket { color: #ffffff; }
+.xml-close-bracket { color: #ffffff; }
+.xml-closetag-slash { color: #ffffff; }
+.xml-cdata { color: #ffffff; }
+.xml-cdata-starter { color: #ffffff; }
+.xml-cdata-stopper { color: #ffffff; }
+.block-starter, .block-stopper { color: #ffd700; }
+.exp-starter, .exp-stopper { color: #ffd700; }
 .lisp-keyword { color: #ff8a65; }
-.heading1 { font-weight: bold; font-size: 1.692em; }
-.heading2 { font-weight: bold; font-size: 1.442em; }
-.heading3 { font-weight: bold; font-size: 1.192em; }
+.heading1 { font-weight: bold; font-size: 1.703em; }
+.heading2 { font-weight: bold; font-size: 1.414em; }
+.heading3 { font-weight: bold; font-size: 1.180em; }
 .heading4 { font-weight: bold; }
 .markdown-blockquote { color: #b0bec5; }
 .markdown-blockquote1 { color: #b0bec5; }
