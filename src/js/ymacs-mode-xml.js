@@ -382,9 +382,13 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
     }
 
     readCustom() {
+        let s = this._stream;
         let tok = this.readName();
         if (tok) {
-            let type = tok.id in TWIG_BUILTIN ? "builtin" : null;
+            let type = null;
+            this.skipWS();
+            if (s.lookingAt("(")) type = "function-name";
+            else type = tok.id in TWIG_BUILTIN ? "builtin" : null;
             this.token(tok.c1, tok.c2, type);
             return true;
         }
