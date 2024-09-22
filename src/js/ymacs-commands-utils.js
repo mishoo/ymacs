@@ -354,4 +354,8 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
+    toggle_bar_cursor: Ymacs_Interactive(function(){
+        this.ymacs.toggleBarCursor();
+    }),
+
 });

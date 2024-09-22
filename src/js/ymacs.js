@@ -347,6 +347,22 @@ export class Ymacs extends Widget {
         });
     }
 
+    cursorBar() {
+        this.delClass("Ymacs-cursor-block");
+        this.addClass("Ymacs-cursor-bar");
+    }
+    cursorBlock() {
+        this.delClass("Ymacs-cursor-bar");
+        this.addClass("Ymacs-cursor-block");
+    }
+    toggleBarCursor() {
+        if (this.hasClass("Ymacs-cursor-block")) {
+            this.cursorBar();
+        } else {
+            this.cursorBlock();
+        }
+    }
+
     getFrameInDirection(dir) {
         let frame = this.getActiveFrame();
         let caret = frame.getCaretElement();
