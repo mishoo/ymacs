@@ -468,14 +468,6 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
         }
     }
 
-    maybeName(type = null) {
-        let name = this.readName();
-        if (name) {
-            this.token(name.c1, name.c2, type);
-        }
-        return name;
-    }
-
     indentation() {
         let s = this._stream;
         let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");

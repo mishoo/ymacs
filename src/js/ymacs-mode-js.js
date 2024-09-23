@@ -14,7 +14,7 @@ const KEYWORDS = toHash("abstract break case catch class const \
   enum export extends final finally for \
   function goto if implements import in \
   instanceof interface native new package \
-  private protected public return static \
+  private protected public return \
   super switch synchronized this throw \
   throws transient try typeof var void let \
   yield volatile while with");
@@ -27,12 +27,23 @@ const KEYWORDS_CONST = toHash("false null undefined Infinity NaN true arguments"
 const KEYWORDS_BUILTIN = toHash("Infinity NaN \
   Packages decodeURI decodeURIComponent \
   encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-  parseInt undefined window document alert prototype constructor");
+  parseInt undefined window document alert prototype");
 
 const ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|(?:return|typeof|case)\s+$/;
 
 class Ymacs_Lang_JS extends Ymacs_BaseLang {
     STRING = [ '"', "'", [ "`", "`", "${", "}" ] ];
+    _isProp = null;
+
+    copy() {
+        let _super = super.copy();
+        let _isProp = this._isProp;
+        return () => {
+            let self = _super();
+            self._isProp = _isProp;
+            return self;
+        };
+    }
 
     readCustom() {
         let s = this._stream;
@@ -42,17 +53,72 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             this.pushCont(this.readLiteralRegexp.bind(this, op));
             return true;
         }
+        let isProp = this._isProp;
+        this._isProp = s.peek() == ".";
         let tok = this.readName();
         if (tok) {
-            let type = tok.id in KEYWORDS ? "keyword"
-                : tok.id in KEYWORDS_TYPE ? "type"
-                : tok.id in KEYWORDS_CONST ? "constant"
-                : tok.id in KEYWORDS_BUILTIN ? "builtin"
-                : null;
-            this.token(tok.c1, tok.c2, type);
+            if (isProp) {
+                this.token(tok.c1, tok.c2, null);
+            } else if (!this.parseALittle(tok)) {
+                let type = s.lookingAt(/^\s*:/) ? null
+                    : tok.id in KEYWORDS ? "keyword"
+                    : tok.id in KEYWORDS_TYPE ? "type"
+                    : tok.id in KEYWORDS_CONST ? "constant"
+                    : tok.id in KEYWORDS_BUILTIN ? "builtin"
+                    : null;
+                this.token(tok.c1, tok.c2, type);
+            }
             return true;
         }
         return this.readNumber();
+    }
+
+    parseALittle(tok) {
+        let s = this._stream;
+        let paren = this.inParen();
+
+        switch (tok.id) {
+          case "class":
+            this.token(tok.c1, tok.c2, "keyword");
+            this.skipWS();
+            let name = this.maybeName("type");
+            this.skipWS();
+            if (this.maybeName("keyword")?.id == "extends") {
+                this.skipWS();
+                this.maybeName("type");
+            }
+            this.setParenMeta({ class: tok, name: name });
+            return true;
+
+          case "function":
+            this.token(tok.c1, tok.c2, "keyword");
+            this.skipWS();
+            this.maybeName("function-name");
+            return true;
+
+          case "new":
+            this.token(tok.c1, tok.c2, "keyword");
+            if (!s.lookingAt(/^\s*class/)) {
+                this.skipWS();
+                this.maybeName("type");
+            }
+            return true;
+
+          case "get":
+          case "set":
+          case "static":
+          case "constructor":
+            if (paren?.meta?.class) {
+                this.token(tok.c1, tok.c2, "keyword");
+                return true;
+            }
+        }
+
+        if (paren?.meta?.class && s.lookingAt(/^\s*\(/)) {
+            // method definition
+            this.token(tok.c1, tok.c2, "function-name");
+            return true;
+        }
     }
 
     readLiteralRegexp(op) {
@@ -79,6 +145,8 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
         this.token(start, s.col, "regexp");
     }
 }
+
+Ymacs_Lang_JS.prototype.C_STATEMENTS = true;
 
 Ymacs_Tokenizer.define("js", (stream, tok) => new Ymacs_Lang_JS({ stream, tok }));
 

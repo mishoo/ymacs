@@ -12,6 +12,7 @@ export class Ymacs_BaseLang {
     _parens = NIL;
     _inComment = null;
     _inString = false;
+    _pmeta = null;
 
     COMMENT = [ "//", [ "/*", "*/", "*" ] ];
     STRING = [ '"', "'" ];
@@ -49,12 +50,14 @@ export class Ymacs_BaseLang {
         let _parens = this._parens;
         let _inComment = this._inComment;
         let _inString = this._inString;
+        let _pmeta = this._pmeta;
         return () => {
             this._cont = _cont;
             this._inParens = _inParens;
             this._parens = _parens;
             this._inComment = _inComment;
             this._inString = _inString;
+            this._pmeta = _pmeta;
             return this;
         };
     }
@@ -163,6 +166,14 @@ export class Ymacs_BaseLang {
         }
     }
 
+    maybeName(type = null) {
+        let name = this.readName();
+        if (name) {
+            this.token(name.c1, name.c2, type);
+        }
+        return name;
+    }
+
     readNumber() {
         let m = this._stream.lookingAt(this.NUMBER);
         if (m) {
@@ -171,10 +182,15 @@ export class Ymacs_BaseLang {
         }
     }
 
+    setParenMeta(info) {
+        this._pmeta = info;
+    }
+
     readOpenParen() {
         let ch = this._stream.peek();
         if (this.OPEN_PAREN[ch]) {
-            this.pushInParen(ch);
+            this.pushInParen(ch).meta = this._pmeta;
+            this._pmeta = null;
             return true;
         }
     }
@@ -230,6 +246,9 @@ export class Ymacs_BaseLang {
         } else {
             this.t("error", n);
         }
+    }
+    inParen() {
+        return this._inParens.car;
     }
     doneParen(p) {
         this._parens = new Cons(p, this._parens);
@@ -298,8 +317,11 @@ export class Ymacs_BaseLang {
                 indent = s.lineIndentation(line) + INDENT_LEVEL();
 
                 // but if this line closes the paren, then back one level
-                if (thisLineCloses)
+                if (thisLineCloses) {
                     indent -= INDENT_LEVEL();
+                } else if (this.C_STATEMENTS && /^\s*[.:?+*-]/.test(currentLine)) {
+                    indent += INDENT_LEVEL();
+                }
             }
         }
         else {

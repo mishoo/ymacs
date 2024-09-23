@@ -11,69 +11,69 @@ class Raw {
     valueOf() { return this._value }
 }
 
-export let DOM = {
+export let DOM = new class {
     fromHTML(html) {
         TEMPLATE.innerHTML = html.trim();
         let cont = TEMPLATE.content;
         return cont.children.length > 1 ? cont : cont.children[0];
-    },
+    }
     addClass(el, cls) {
         el.classList.add(cls);
-    },
+    }
     delClass(el, cls) {
         if (cls instanceof RegExp) {
             el.className = el.className.replace(cls, "");
         } else {
             el.classList.remove(cls);
         }
-    },
+    }
     hasClass(el, cls) {
         return el.classList.contains(cls);
-    },
+    }
     condClass(el, cond, clsTrue, clsFalse) {
         el.classList.toggle(clsTrue, !!cond);
         if (clsFalse) {
             el.classList.toggle(clsFalse, !cond);
         }
-    },
+    }
     toggleClass(el, ...args) {
         el.classList.toggle(...args);
-    },
+    }
     trash(el) {
         el && el.remove();
-    },
+    }
     on(element, event, handler, options) {
         if (typeof event == "string") {
             element.addEventListener(event, handler, options || {});
         } else {
             Object.keys(event).forEach(ev => DOM.on(element, ev, event[ev], handler || {}));
         }
-    },
+    }
     off(element, event, handler, options) {
         if (typeof event == "string") {
             element.removeEventListener(event, handler, options || {});
         } else {
             Object.keys(event).forEach(ev => DOM.off(element, ev, event[ev], handler || {}));
         }
-    },
+    }
     overlayOn(cls) {
         document.body.appendChild(OVERLAY);
         if (cls) {
             OVERLAY.className = cls;
         }
         return OVERLAY;
-    },
+    }
     overlayOff() {
         OVERLAY.remove();
-    },
+    }
     mousePos(ev, el) {
         let box = el.getBoundingClientRect();
         return {
             x: ev.clientX - box.left,
             y: ev.clientY - box.top
         };
-    },
-    htmlEscape: function(str) {
+    }
+    htmlEscape(str) {
         return str instanceof Raw ? (str+"")
             : (str+"").replace(/&/g, "&amp;")
             .replace(/\x22/g, "&quot;")
@@ -81,10 +81,10 @@ export let DOM = {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/\u00A0/g, "&#xa0;");
-    },
-    htmlSafe: function(str) {
+    }
+    htmlSafe(str) {
         return new Raw(str);
-    },
+    }
 };
 
 const nextDone = { next: () => ({ done: true }) };
