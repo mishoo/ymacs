@@ -63,11 +63,15 @@ export class Ymacs_BaseLang {
     }
 
     skipWS() {
-        let s = this._stream;
-        do {
-            let m = s.lookingAt(this.WHITESPACE);
-            if (m) this.t(null, m[0].length);
-        } while (s.eol() && s.nextLine());
+        let s = this._stream, m;
+        while ((m = s.lookingAt(this.WHITESPACE))) {
+            this.t(null, m[0].length);
+            if (s.eol() && s.nextLine()) {
+                this._tok.parsers[s.line] = this.copy();
+            } else {
+                break;
+            }
+        }
     }
 
     read() {
@@ -319,14 +323,17 @@ export class Ymacs_BaseLang {
                 // but if this line closes the paren, then back one level
                 if (thisLineCloses) {
                     indent -= INDENT_LEVEL();
-                } else if (this.C_STATEMENTS && /^\s*[.:?+*-]/.test(currentLine)) {
+                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*]|\+[^+]|-[^-])/.test(currentLine)) {
                     indent += INDENT_LEVEL();
                 }
             }
         }
         else {
             let i = row, m;
-            while (i-- > 0) if ((m = /\S/.exec(s.lineText(i)))) break;
+            while (i-- > 0) if ((m = /\S/.exec(s.lineText(i)))) {
+                let p = this._tok.getParserForLine(i);
+                if (!(p._inString || p._inComment)) break;
+            }
             if (m) indent = m.index;
         }
 

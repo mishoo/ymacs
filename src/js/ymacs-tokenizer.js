@@ -232,8 +232,7 @@ export class Ymacs_Tokenizer extends EventProxy {
     reset() {
         this.stream = new Ymacs_Stream({ buffer: this.buffer });
         this.theParser = this.type(this.stream, this);
-        this.parsers = [];
-        this.parsers[-1] = this.theParser.copy();
+        this.parsers = [ this.theParser.copy() ];
         this.timerUpdate = null;
         this.start();
     }
@@ -249,10 +248,9 @@ export class Ymacs_Tokenizer extends EventProxy {
     start() {
         this.stop();
         let stream = this.stream, p, a = this.parsers;
-        stream.line = a.length;
+        stream.line = a.length - 1;
         while (!(p = a[stream.line]))
             stream.prevLine();
-        stream.nextLine();
         p = p();
         let doit = () => {
             this.buffer.preventUpdates();
@@ -263,8 +261,8 @@ export class Ymacs_Tokenizer extends EventProxy {
                 }
                 catch(ex) {
                     if (ex === stream.EOL) {
-                        a[stream.line] = p.copy();
                         stream.nextLine();
+                        a[stream.line] = p.copy();
                         if  (--n == 0) {
                             this.buffer.resumeUpdates();
                             this.timerUpdate = setTimeout(doit, TOK_DELAY);
@@ -272,7 +270,6 @@ export class Ymacs_Tokenizer extends EventProxy {
                         }
                     }
                     else if (ex === stream.EOF) {
-                        a[stream.line] = p.copy();
                         this.buffer.resumeUpdates();
                         break;
                     }
@@ -298,10 +295,9 @@ export class Ymacs_Tokenizer extends EventProxy {
     getParserForLine(row, col) {
         this.stop();
         let stream = this.stream, p, a = this.parsers;
-        stream.line = row - 1;
+        stream.line = row;
         while (!(p = a[stream.line]))
             stream.prevLine();
-        stream.nextLine();
         if (col != null) {
             stream.stopAt(row, col);
         }
@@ -316,8 +312,8 @@ export class Ymacs_Tokenizer extends EventProxy {
                     while (true) p.next();
                 } catch(ex) {
                     if (ex === stream.EOL) {
-                        a[stream.line] = p.copy();
                         stream.nextLine();
+                        a[stream.line] = p.copy();
                     }
                     else if (ex === stream.EOF) {
                         return p;
@@ -359,6 +355,7 @@ export class Ymacs_Tokenizer extends EventProxy {
     }
 
     truncate(row) {
+        row++;
         if (this.parsers.length > row) this.parsers.length = row;
     }
 
