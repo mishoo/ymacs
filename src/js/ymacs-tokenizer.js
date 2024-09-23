@@ -249,6 +249,7 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.stop();
         let stream = this.stream, p, a = this.parsers;
         stream.line = a.length - 1;
+        stream.col = 0;
         while (!(p = a[stream.line]))
             stream.prevLine();
         p = p();
@@ -296,6 +297,7 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.stop();
         let stream = this.stream, p, a = this.parsers;
         stream.line = row;
+        stream.col = 0;
         while (!(p = a[stream.line]))
             stream.prevLine();
         if (col != null) {
