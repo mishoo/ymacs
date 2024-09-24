@@ -370,6 +370,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
             } else if ((m = s.lookingAt(/^\{\{-?/))) {
                 this._mode = this;
                 this.pushInParen(m[0], "exp-starter");
+                return;
             } else if ((m = s.lookingAt(/^\{#-?/))) {
                 this._alt.readCommentMulti(m[0], /^-?#\}/, "#");
                 return this.next();
