@@ -17,6 +17,7 @@ let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
     "C-c /"   : "xml_close_tag",
     "/"       : "xml_slash_complete_tag",
     ">"       : "xml_gt_complete_tag",
+    "%"       : "twig_insert_percent",
     "C-Enter" : "xml_zen_expand",
     "Enter"   : "xml_newline_and_indent"
 });
@@ -445,6 +446,11 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                     this._inBlock = ctag;
                     this.littleParseTag(ctag);
                 }
+            } else if ((m = s.lookingAt(/^-?%\}/))) {
+                // incomplete input but auto-completed end paren
+                this.popInParen(start, m[0].length, "error");
+                this._mode = this._alt;
+                this.popCont();
             }
         }
     }
@@ -613,6 +619,17 @@ Ymacs_Buffer.newCommands({
             this.cmd("newline_and_indent");
             this.cmd("backward_line");
             this.cmd("indent_line");
+        }
+    }),
+    twig_insert_percent: Ymacs_Interactive(function(){
+        this.cmd("self_insert_command");
+        let rc = this._rowcol;
+        this.tokenizer.parseUntil(rc.row, rc.col);
+        let mode = this.tokenizer.theParser._mode;
+        if (mode instanceof Ymacs_Lang_Twig && this.looking_back("{%")) {
+            this._placeUndoBoundary();
+            this.cmd("insert", "  %");
+            this.cmd("backward_char", 2);
         }
     }),
 });
