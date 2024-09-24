@@ -475,7 +475,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
             return super.indentation();
         } else if (this.block) {
             let indent = s.lineIndentation(this.block.line);
-            let closing = /^\s*\{%-?\s*end/.test(s.lineText());
+            let closing = /^\s*\{%-?\s*(?:end|else)/.test(s.lineText());
             if (closing) return indent;
             if (!this._mode.tag || this._mode.tag.line <= this.block.line)
                 return indent + INDENT_LEVEL();
