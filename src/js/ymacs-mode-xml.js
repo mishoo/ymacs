@@ -36,11 +36,11 @@ let markup_mode = tok_type => function(){
         syntax_word_sexp: /^[\p{N}_$\p{L}:#-]$/u,
     });
     return function() {
-        this.setTokenizer(tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_XML);
         this.setq(changed_vars);
+        this.setTokenizer(tok);
     };
 };
 
@@ -617,221 +617,217 @@ Ymacs_Buffer.newCommands({
     }),
 });
 
+/*------------- zen mode -------------*/
+
 // not sure "zen mode" is of any interest these days, but let's leave it for now.
-(function(){
+let Ymacs_Keymap_XML_Zen = Ymacs_Keymap.define("xml_zen", {
+    "Tab"   : "xml_zen_next_poi",
+    "S-Tab" : "xml_zen_prev_poi",
+    "C-g"   : "xml_zen_stop"
+});
 
-    let Ymacs_Keymap_XML_Zen = Ymacs_Keymap.define("xml_zen", {
-        "Tab"   : "xml_zen_next_poi",
-        "S-Tab" : "xml_zen_prev_poi",
-        "C-g"   : "xml_zen_stop"
-    });
+let MODE_TYPE = 1, MODE_CLASS = 2, MODE_ID = 3, MODE_REPEAT = 4, MODE_ATTR = 5;
 
-    var MODE_TYPE = 1, MODE_CLASS = 2, MODE_ID = 3, MODE_REPEAT = 4, MODE_ATTR = 5;
+function zen_render(el, html) {
+    var n = el.repeat || 1;
+    for (var i = 1; i <= n; ++i) {
+        if (i > 1)
+            html("\n");
+        html("<", el.type);
+        if (el.id) {
+            html(' id="', el.id.replace(/\$/g, i), '"');
+        }
+        if (el.klass) {
+            html(' class="', el.klass.replace(/\$/g, i), '"');
+        }
+        if (el.attributes) {
+            el.attributes.forEach(attr => html(" ", attr, '="|"'));
+        }
+        html(">");
+        if (el.child) {
+            html("\n");
+            zen_render(el.child, html);
+            html("\n");
+        } else {
+            html("|");
+        }
+        html("</", el.type, ">");
+        if (el.next) {
+            html("\n");
+            zen_render(el.next, html);
+        }
+    }
+};
 
-    function zen_render(el, html) {
-        var n = el.repeat || 1;
-        for (var i = 1; i <= n; ++i) {
-            if (i > 1)
-                html("\n");
-            html("<", el.type);
-            if (el.id) {
-                html(' id="', el.id.replace(/\$/g, i), '"');
-            }
-            if (el.klass) {
-                html(' class="', el.klass.replace(/\$/g, i), '"');
-            }
-            if (el.attributes) {
-                el.attributes.forEach(attr => html(" ", attr, '="|"'));
-            }
-            html(">");
-            if (el.child) {
-                html("\n");
-                zen_render(el.child, html);
-                html("\n");
+function zen_parse(str, i) {
+    var el = { type: "" }, mode = MODE_TYPE;
+    OUTER: while (i < str.length) {
+        var ch = str.charAt(i++);
+        switch (ch) {
+
+          case "#":
+            mode = MODE_ID;
+            el.id = "";
+            break;
+
+          case ".":
+            mode = MODE_CLASS;
+            if (el.klass != null) {
+                el.klass += " ";
             } else {
-                html("|");
+                el.klass = "";
             }
-            html("</", el.type, ">");
-            if (el.next) {
-                html("\n");
-                zen_render(el.next, html);
+            break;
+
+          case ":":
+            mode = MODE_ATTR;
+            if (el.attributes == null)
+                el.attributes = [];
+            el.attributes.push("");
+            break;
+
+          case "*":
+            mode = MODE_REPEAT;
+            el.repeat = "";
+            break;
+
+          case ">":
+            el.child = zen_parse(str, i);
+            i = el.child.i;
+            break OUTER;
+
+          case "(":
+            el.child = zen_parse(str, i);
+            i = el.child.i;
+            break;
+
+          case ")":
+            break OUTER;
+
+          case "+":
+            el.next = zen_parse(str, i);
+            i = el.next.i;
+            break OUTER;
+
+          default:
+            switch (mode) {
+              case MODE_TYPE:
+                el.type += ch;
+                break;
+              case MODE_CLASS:
+                el.klass += ch;
+                break;
+              case MODE_ID:
+                el.id += ch;
+                break;
+              case MODE_REPEAT:
+                el.repeat = parseInt(String(el.repeat) + ch, 10);
+                break;
+              case MODE_ATTR:
+                el.attributes.push(el.attributes.pop() + ch);
+                break;
             }
         }
-    };
+    }
 
-    function zen_parse(str, i) {
-        var el = { type: "" }, mode = MODE_TYPE;
-        OUTER: while (i < str.length) {
-            var ch = str.charAt(i++);
-            switch (ch) {
+    el.i = i;
+    return el;
+};
 
-              case "#":
-                mode = MODE_ID;
-                el.id = "";
-                break;
+function maybe_stop_zen() {
+    var point = this.point(),
+    a = this.getq("xml_zen_markers"),
+    start = a[0],
+    end = a.at(-1);
+    if (point < start.getPosition() || point > end.getPosition() || end.getPosition() == a.at(-2).getPosition()) {
+        this.cmd("xml_zen_stop");
+    }
+};
 
-              case ".":
-                mode = MODE_CLASS;
-                if (el.klass != null) {
-                    el.klass += " ";
-                } else {
-                    el.klass = "";
-                }
-                break;
+Ymacs_Buffer.newCommands({
 
-              case ":":
-                mode = MODE_ATTR;
-                if (el.attributes == null)
-                    el.attributes = [];
-                el.attributes.push("");
-                break;
+    xml_zen_expand: Ymacs_Interactive(function() {
+        this.cmd("xml_zen_stop");
+        var html = "";
+        var start = this.cmd("save_excursion", function() {
+            this.cmd("backward_whitespace");
+            while (!this.cmd("looking_back", /[\x20\xa0\s\t\n;&]/g))
+                if (!this.cmd("backward_char")) break;
+            return this.point();
+        });
+        var point = this.point();
 
-              case "*":
-                mode = MODE_REPEAT;
-                el.repeat = "";
-                break;
-
-              case ">":
-                el.child = zen_parse(str, i);
-                i = el.child.i;
-                break OUTER;
-
-              case "(":
-                el.child = zen_parse(str, i);
-                i = el.child.i;
-                break;
-
-              case ")":
-                break OUTER;
-
-              case "+":
-                el.next = zen_parse(str, i);
-                i = el.next.i;
-                break OUTER;
-
-              default:
-                switch (mode) {
-                  case MODE_TYPE:
-                    el.type += ch;
-                    break;
-                  case MODE_CLASS:
-                    el.klass += ch;
-                    break;
-                  case MODE_ID:
-                    el.id += ch;
-                    break;
-                  case MODE_REPEAT:
-                    el.repeat = parseInt(String(el.repeat) + ch, 10);
-                    break;
-                  case MODE_ATTR:
-                    el.attributes.push(el.attributes.pop() + ch);
-                    break;
-                }
-            }
+        try {
+            zen_render(
+                zen_parse(
+                    this.cmd("buffer_substring", start, point).trim(), 0
+                ),
+                (...args) => html += args.join("")
+            );
+        } catch(ex) {
+            throw new Ymacs_Exception("The Zen is not strong today :-/");
         }
 
-        el.i = i;
-        return el;
-    };
+        this.cmd("delete_region", start, point);
+        this.cmd("insert", html);
+        start = this.createMarker(start, false, "xml_zen");
 
-    function maybe_stop_zen() {
-        var point = this.point(),
-        a = this.getq("xml_zen_markers"),
-        start = a[0],
-        end = a.at(-1);
-        if (point < start.getPosition() || point > end.getPosition() ||
-            end.getPosition() == a.at(-2).getPosition()) {
-            this.cmd("xml_zen_stop");
+        // locate points of interest
+        var end = this.createMarker(this.point(), true, "xml_zen"), markers = [];
+        this.cmd("goto_char", start.getPosition());
+        while (this.cmd("search_forward", "|", end.getPosition())) {
+            this.cmd("backward_delete_char");
+            markers.push(this.createMarker(this.point(), true, "xml_zen_start"));
+            markers.push(this.createMarker(this.point(), false, "xml_zen_end"));
         }
-    };
 
-    Ymacs_Buffer.newCommands({
+        this.cmd("indent_region", start.getPosition(), end.getPosition());
 
-        xml_zen_expand: Ymacs_Interactive(function() {
-            this.cmd("xml_zen_stop");
-            var html = "";
-            var start = this.cmd("save_excursion", function() {
-                this.cmd("backward_whitespace");
-                while (!this.cmd("looking_back", /[\x20\xa0\s\t\n;&]/g))
-                    if (!this.cmd("backward_char"))
-                        break;
-                return this.point();
-            });
-            var point = this.point();
+        var count = markers.length;
+        if (count > 0) {
+            // move to first POI
+            this.cmd("goto_char", markers[0]);
+            markers.unshift(start);
+            markers.push(end);
+            this.setq("xml_zen_markers", markers);
+            this.pushKeymap(Ymacs_Keymap_XML_Zen);
+            this.addEventListener("afterInteractiveCommand", maybe_stop_zen);
+        } else {
+            start.destroy();
+            end.destroy();
+        }
+    }),
 
-            try {
-                zen_render(
-                    zen_parse(
-                        this.cmd("buffer_substring", start, point).trim(), 0
-                    ),
-                    (...args) => html += args.join("")
-                );
-            } catch(ex) {
-                throw new Ymacs_Exception("The Zen is not strong today :-/");
+    xml_zen_stop: Ymacs_Interactive(function(){
+        var tmp = this.getq("xml_zen_markers");
+        if (tmp) {
+            tmp.map(m => m.destroy());
+            this.setq("xml_zen_markers", null);
+        }
+        this.popKeymap(Ymacs_Keymap_XML_Zen);
+        this.removeEventListener("afterInteractiveCommand", maybe_stop_zen);
+    }),
+
+    xml_zen_next_poi: Ymacs_Interactive(function(){
+        let markers = this.getq("xml_zen_markers"), pos = this.point();
+        for (let i = 0; i < markers.length; ++i) {
+            let m = markers[i];
+            if (m.getPosition() > pos) {
+                this.cmd("goto_char", m.getPosition());
+                break;
             }
+        }
+    }),
 
-            this.cmd("delete_region", start, point);
-            this.cmd("insert", html);
-            start = this.createMarker(start, false, "xml_zen");
-
-            // locate points of interest
-            var end = this.createMarker(this.point(), true, "xml_zen"), markers = [];
-            this.cmd("goto_char", start.getPosition());
-            while (this.cmd("search_forward", "|", end.getPosition())) {
-                this.cmd("backward_delete_char");
-                markers.push(this.createMarker(this.point(), true, "xml_zen_start"));
-                markers.push(this.createMarker(this.point(), false, "xml_zen_end"));
+    xml_zen_prev_poi: Ymacs_Interactive(function(){
+        let markers = this.getq("xml_zen_markers"), pos = this.point();
+        for (let i = markers.length; --i >= 0;) {
+            let m = markers[i];
+            if (m.getPosition() < pos) {
+                this.cmd("goto_char", m.getPosition());
+                break;
             }
+        }
+    }),
 
-            this.cmd("indent_region", start.getPosition(), end.getPosition());
-
-            var count = markers.length;
-            if (count > 0) {
-                // move to first POI
-                this.cmd("goto_char", markers[0]);
-                markers.unshift(start);
-                markers.push(end);
-                this.setq("xml_zen_markers", markers);
-                this.pushKeymap(Ymacs_Keymap_XML_Zen);
-                this.addEventListener("afterInteractiveCommand", maybe_stop_zen);
-            } else {
-                start.destroy();
-                end.destroy();
-            }
-        }),
-
-        xml_zen_stop: Ymacs_Interactive(function(){
-            var tmp = this.getq("xml_zen_markers");
-            if (tmp) {
-                tmp.map(m => m.destroy());
-                this.setq("xml_zen_markers", null);
-            }
-            this.popKeymap(Ymacs_Keymap_XML_Zen);
-            this.removeEventListener("afterInteractiveCommand", maybe_stop_zen);
-        }),
-
-        xml_zen_next_poi: Ymacs_Interactive(function(){
-            let markers = this.getq("xml_zen_markers"), pos = this.point();
-            for (let i = 0; i < markers.length; ++i) {
-                let m = markers[i];
-                if (m.getPosition() > pos) {
-                    this.cmd("goto_char", m.getPosition());
-                    break;
-                }
-            }
-        }),
-
-        xml_zen_prev_poi: Ymacs_Interactive(function(){
-            let markers = this.getq("xml_zen_markers"), pos = this.point();
-            for (let i = markers.length; --i >= 0;) {
-                let m = markers[i];
-                if (m.getPosition() < pos) {
-                    this.cmd("goto_char", m.getPosition());
-                    break;
-                }
-            }
-        }),
-
-    });
-
-})();
+});
