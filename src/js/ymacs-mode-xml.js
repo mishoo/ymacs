@@ -494,6 +494,9 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
     get block() {
         return this._blocks.car;
     }
+    get tag() {
+        return this._alt.tag;
+    }
 }
 
 function inlineCode(tag) {
@@ -560,8 +563,23 @@ Ymacs_Buffer.newCommands({
         }
     },
     xml_close_tag: Ymacs_Interactive(function() {
-        this.cmd("close_last_xml_tag");
-        this.cmd("indent_line");
+        let rc = this._rowcol;
+        this.tokenizer.parseUntil(rc.row, rc.col);
+        let tag = this.tokenizer.theParser.tag; // XML
+        let block = this.tokenizer.theParser.block; // Twig
+        let closeTwig = () => {
+            this.cmd("insert", `{% end${block.id} %}`);
+            this.cmd("indent_line");
+        };
+        let closeXML = () => {
+            this.cmd("insert", `</${tag.id}>`);
+            this.cmd("indent_line");
+        };
+        if (!tag && !block) return;
+        if (!tag && block) return closeTwig();
+        if (!block && tag) return closeXML();
+        if (compareRowCol(block, tag) < 0) return closeXML();
+        closeTwig();
     }),
     xml_slash_complete_tag: Ymacs_Interactive(function() {
         this.cmd("self_insert_command");
