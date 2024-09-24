@@ -451,6 +451,9 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                 this.popInParen(start, m[0].length, "error");
                 this._mode = this._alt;
                 this.popCont();
+            } else {
+                this.t("error");
+                this._inBlock = { hasBody: false };
             }
         }
     }
