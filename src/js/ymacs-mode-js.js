@@ -58,7 +58,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
         let tok = this.readName();
         if (tok) {
             if (isProp) {
-                this.token(tok.c1, tok.c2, null);
+                this.token(tok, null);
             } else if (!this.parseALittle(tok)) {
                 let type = s.lookingAt(/^\s*:/) ? null
                     : tok.id in KEYWORDS ? "keyword"
@@ -66,7 +66,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
                     : tok.id in KEYWORDS_CONST ? "constant"
                     : tok.id in KEYWORDS_BUILTIN ? "builtin"
                     : null;
-                this.token(tok.c1, tok.c2, type);
+                this.token(tok, type);
             }
             return true;
         }
@@ -79,7 +79,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
 
         switch (tok.id) {
           case "class":
-            this.token(tok.c1, tok.c2, "keyword");
+            this.token(tok, "keyword");
             this.skipWS();
             let name = this.maybeName("type");
             this.skipWS();
@@ -91,13 +91,13 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             return true;
 
           case "function":
-            this.token(tok.c1, tok.c2, "keyword");
+            this.token(tok, "keyword");
             this.skipWS();
             this.maybeName("function-name");
             return true;
 
           case "new":
-            this.token(tok.c1, tok.c2, "keyword");
+            this.token(tok, "keyword");
             if (!s.lookingAt(/^\s*class/)) {
                 this.skipWS();
                 this.maybeName("type");
@@ -109,14 +109,14 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
           case "static":
           case "constructor":
             if (paren?.meta?.class) {
-                this.token(tok.c1, tok.c2, "keyword");
+                this.token(tok, "keyword");
                 return true;
             }
         }
 
         if (paren?.meta?.class && s.lookingAt(/^\s*\(/)) {
             // method definition
-            this.token(tok.c1, tok.c2, "function-name");
+            this.token(tok, "function-name");
             return true;
         }
     }
@@ -131,7 +131,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             if (ch === "/" && !esc && !inset) {
                 let c1 = s.col;
                 this.popCont();
-                this.token(start, s.col, "regexp");
+                this.token({ line: s.line, c1: start, c2: s.col }, "regexp");
                 this.t("regexp-stopper");
                 let m = s.lookingAt(/^[dgimsuvy]+/);
                 if (m) this.t("regexp-modifier", m[0].length);
@@ -142,7 +142,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             esc = !esc && ch === "\\";
             ++s.col;
         }
-        this.token(start, s.col, "regexp");
+        this.token({ line: s.line, c1: start, c2: s.col }, "regexp");
     }
 }
 

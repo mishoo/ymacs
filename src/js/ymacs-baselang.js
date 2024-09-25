@@ -95,7 +95,7 @@ export class Ymacs_BaseLang {
         let s = this._stream;
         if (s.lookingAt(start)) {
             this.t("comment-starter", start.length);
-            this.token(s.col, s.col = s.lineLength(), "comment");
+            this.token({ line: s.line, c1: s.col, c2: s.col = s.lineLength() }, "comment");
             return true;
         }
     }
@@ -172,9 +172,7 @@ export class Ymacs_BaseLang {
 
     maybeName(type = null) {
         let name = this.readName();
-        if (name) {
-            this.token(name.c1, name.c2, type);
-        }
+        if (name) this.token(name, type);
         return name;
     }
 
@@ -216,11 +214,15 @@ export class Ymacs_BaseLang {
     }
 
     t(type = null, len = 1) {
-        this.token(this._stream.col, this._stream.col += len, type);
+        this.token({
+            line: this._stream.line,
+            c1: this._stream.col,
+            c2: this._stream.col += len,
+        }, type);
     }
 
-    token(c1, c2, type) {
-        this._tok.onToken(this._stream.line, c1, c2, type);
+    token(tok, type) {
+        this._tok.onToken(tok.line, tok.c1, tok.c2, type);
     }
 
     pushInParen(type, tokType = "open-paren") {

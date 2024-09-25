@@ -112,7 +112,11 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
         if (addInline && this.inline) {
             type = this.inline.cls(this._inline) + " " + type;
         }
-        this.token(this._stream.col, this._stream.col += len, type);
+        this.token({
+            line: this._stream.line,
+            c1: this._stream.col,
+            c2: this._stream.col += len,
+        }, type);
     }
 
     readDeclaration() {
@@ -140,7 +144,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
             this.pushInParen("<", "xml-open-bracket");
             let tag = this.readName();
             tag.outer = outer;
-            this.token(tag.c1, tag.c2, "xml-open-tag");
+            this.token(tag, "xml-open-tag");
             this._inTag = tag;
             this.pushCont(this.contOpenTag);
             return true;
@@ -168,7 +172,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
             this._inTag = null;
         }
         else if ((name = this.readName())) {
-            this.token(name.c1, name.c2, "xml-attribute");
+            this.token(name, "xml-attribute");
         }
         else if (ch === '"' || ch === "'") {
             this.readString();
@@ -191,7 +195,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
             }
             this.pushInParen("</", "xml-open-bracket");
             let ctag = this.readName();
-            this.token(ctag.c1, ctag.c2, otag?.id == ctag.id ? "xml-close-tag" : "error");
+            this.token(ctag, otag?.id == ctag.id ? "xml-close-tag" : "error");
             if (otag) {
                 let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
                               inner: otag.inner, outer: otag.outer };
@@ -391,7 +395,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
             this.skipWS();
             if (s.lookingAt("(")) type = "function-name";
             else type = tok.id in TWIG_BUILTIN ? "builtin" : null;
-            this.token(tok.c1, tok.c2, type);
+            this.token(tok, type);
             return true;
         }
         return this.readNumber();
@@ -423,7 +427,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                 if (isEndTag) {
                     let otag = this.popBlock();
                     let name = ctag.id.substr(3);
-                    this.token(ctag.c1, ctag.c2, otag?.id == name ? "keyword" : "error");
+                    this.token(ctag, otag?.id == name ? "keyword" : "error");
                     if (otag) {
                         let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
                                       inner: otag.inner, outer: otag.outer };
@@ -437,12 +441,12 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                     if (/^(?:macro|block)$/.test(name)) {
                         let fname = this.readName();
                         if (fname) {
-                            this.token(fname.c1, fname.c2, fname.id == otag.fname?.id ? "function-name" : "error");
+                            this.token(fname, fname.id == otag.fname?.id ? "function-name" : "error");
                         }
                         this.skipWS();
                     }
                 } else {
-                    this.token(ctag.c1, ctag.c2, "keyword");
+                    this.token(ctag, "keyword");
                     ctag.outer = outer;
                     this._inBlock = ctag;
                     this.littleParseTag(ctag);

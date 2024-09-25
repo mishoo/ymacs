@@ -492,15 +492,13 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         if (s.lookingAt("#:") && this.isNameChar(s.peek(+2))) {
             this.newArg();
             s.col += 2;
-            let c = this.readName();
-            this.token(c.c1 - 2, c.c2, "lisp-keyword");
+            this.maybeName("lisp-keyword");
             return true;
         }
         if (s.lookingAt("#'") && this.isNameChar(s.peek(+2))) {
             this.newArg();
             s.col += 2;
-            let c = this.readName();
-            this.token(c.c1, c.c2, "function-name");
+            let c = this.maybeName("function-name");
             return true;
         }
         if ((m = s.lookingAt(/^#\/((?:\\.|[^\/])*)\/([dgimsuvy]+)?/))) {
@@ -554,7 +552,7 @@ class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
             }
             m.type = type;
             this.newArg(m);
-            this.token(m.c1, m.c2, type);
+            this.token(m, type);
             return true;
         }
     }
