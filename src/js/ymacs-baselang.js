@@ -235,6 +235,7 @@ export class Ymacs_BaseLang {
         this.t(tokType, n);
         return p;
     }
+
     popInParen(start, n, tokType = "close-paren") {
         let s = this._stream;
         if (this._inParens !== NIL) {
@@ -253,15 +254,19 @@ export class Ymacs_BaseLang {
             this.t("error", n);
         }
     }
+
     inParen() {
         return this._inParens.car;
     }
+
     doneParen(p) {
         this._parens = new Cons(p, this._parens);
     }
+
     pushCont(cont) {
         this._cont = new Cons(cont, this._cont);
     }
+
     popCont() {
         this._cont = this._cont.cdr;
     }

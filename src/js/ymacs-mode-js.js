@@ -57,11 +57,13 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
         this._isProp = s.peek() == ".";
         let tok = this.readName();
         if (tok) {
+            this.skipWS();
             if (isProp) {
-                this.token(tok, null);
+                this.token(tok, s.lookingAt("(") ? "function-name" : null);
             } else if (!this.parseALittle(tok)) {
-                let type = s.lookingAt(/^\s*:/) ? null
+                let type = s.lookingAt(":") ? null
                     : tok.id in KEYWORDS ? "keyword"
+                    : s.lookingAt("(") ? "function-name"
                     : tok.id in KEYWORDS_TYPE ? "type"
                     : tok.id in KEYWORDS_CONST ? "constant"
                     : tok.id in KEYWORDS_BUILTIN ? "builtin"
@@ -76,30 +78,29 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
     parseALittle(tok) {
         let s = this._stream;
         let paren = this.inParen();
+        let name;
 
         switch (tok.id) {
           case "class":
-            this.token(tok, "keyword");
-            this.skipWS();
-            let name = this.maybeName("type");
-            this.skipWS();
-            if (this.maybeName("keyword")?.id == "extends") {
+            if (s.lookingAt("{") || (name = this.maybeName("type"))) {
+                this.token(tok, "keyword");
                 this.skipWS();
-                this.maybeName("type");
+                if (this.maybeName("keyword")?.id == "extends") {
+                    this.skipWS();
+                    this.maybeName("type");
+                }
+                this.setParenMeta({ class: tok, name: name });
             }
-            this.setParenMeta({ class: tok, name: name });
             return true;
 
           case "function":
             this.token(tok, "keyword");
-            this.skipWS();
             this.maybeName("function-name");
             return true;
 
           case "new":
             this.token(tok, "keyword");
-            if (!s.lookingAt(/^\s*class/)) {
-                this.skipWS();
+            if (!s.lookingAt(/^class/)) {
                 this.maybeName("type");
             }
             return true;
