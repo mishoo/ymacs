@@ -330,7 +330,7 @@ export class Ymacs_BaseLang {
                 // but if this line closes the paren, then back one level
                 if (thisLineCloses) {
                     indent -= INDENT_LEVEL();
-                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*]|\+[^+]|-[^-])/.test(currentLine)) {
+                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*=]|\+[^+]|-[^-])/.test(currentLine)) {
                     indent += INDENT_LEVEL();
                 }
             }
@@ -358,7 +358,7 @@ export class Ymacs_BaseLang {
                 // the opening one, which suits us greatly.
                 p = this._parens.car;
                 let stmtLine = s.lineText(p.line);
-                if (/^\s*(if|for|while)\W/.test(stmtLine) && !/^\s*\{/.test(currentLine))
+                if (/^\s*(?:if|for|while)\W/.test(stmtLine) && !/^\s*\{/.test(currentLine))
                     indent += INDENT_LEVEL();
             }
             else if (/\Welse\s*$/.test(before) && !/^\s*\{/.test(currentLine)) {
@@ -367,7 +367,7 @@ export class Ymacs_BaseLang {
         }
 
         // switch labels use half the indent level, which is my favorite
-        if (/^\s*(case|default)\W/.test(currentLine))
+        if (/^\s*(?:case|default)\W/.test(currentLine))
             indent -= INDENT_LEVEL() / 2;
 
         return indent;

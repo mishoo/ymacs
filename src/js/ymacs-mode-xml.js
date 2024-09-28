@@ -243,10 +243,9 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
             }
         }
         else if ((lastTag = this._tags.car)) {
-            indent = s.lineIndentation(lastTag.line) + INDENT_LEVEL();
-            // if current line begins with a closing tag, back one level
-            if (/^\s*<\x2f/.test(s.lineText()))
-                indent -= INDENT_LEVEL();
+            indent = s.lineIndentation(lastTag.line);
+            if (!/^\s*<\x2f/.test(s.lineText()))
+                indent += INDENT_LEVEL();
         }
 
         if (indent == null) {
@@ -315,8 +314,19 @@ class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
 
     indentation() {
         let s = this._stream;
+        let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");
         if ((this._mode === this) || (!this._mode._inString && /^\s*<\//.test(s.lineText()))) {
-            return super.indentation();
+            let indent = super.indentation();
+            let tag = this._tags.car;
+            if (tag) {
+                let txt = s.lineText(tag.outer.l1).substr(0, tag.outer.c1);
+                if (/\S/.test(txt)) {
+                    // there is text before the innermost tag, let's assume
+                    // it's inline text and back one level
+                    indent -= INDENT_LEVEL();
+                }
+            }
+            return indent > 0 ? indent : 0;
         } else {
             let tag = this.tag;
             if (tag) {
