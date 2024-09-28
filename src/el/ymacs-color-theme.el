@@ -4,6 +4,7 @@
 (require 'hl-line)
 (require 'company)
 (require 'ef-themes)
+(require 'web-mode)
 
 (defvar *ymacs-faces*)                  ; XXX: defparameter for Elisp?
 
