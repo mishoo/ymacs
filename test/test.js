@@ -26,7 +26,7 @@ window.addEventListener("beforeunload", ev => {
     //ymacs.setColorTheme([ "sanityinc-tomorrow-bright" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
     let b = window.b = ymacs.getActiveBuffer.bind(ymacs);
-    b().cmd("load_file", "test.html");
+    //b().cmd("load_file", "test.html");
     b().setVariable("fill_column", 80);
 
     // b().cmd("load_file", "ymacs-frame.js");

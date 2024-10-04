@@ -172,7 +172,7 @@ export class Ymacs_BaseLang {
 
     maybeName(type = null) {
         let name = this.readName();
-        if (name) this.token(name, type);
+        if (name) this.token(name, name.type = type);
         return name;
     }
 
@@ -221,7 +221,7 @@ export class Ymacs_BaseLang {
         }, type);
     }
 
-    token(tok, type) {
+    token(tok, type = tok.type) {
         this._tok.onToken(tok.line, tok.c1, tok.c2, type);
     }
 

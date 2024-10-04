@@ -142,9 +142,8 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
         if (s.lookingAt("<") && this.NAME.test(s.peek(+1))) {
             let outer = { l1: s.line, c1: s.col };
             this.pushInParen("<", "xml-open-bracket");
-            let tag = this.readName();
+            let tag = this.maybeName("xml-open-tag");
             tag.outer = outer;
-            this.token(tag, "xml-open-tag");
             this._inTag = tag;
             this.pushCont(this.contOpenTag);
             return true;
@@ -171,8 +170,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
             }
             this._inTag = null;
         }
-        else if ((name = this.readName())) {
-            this.token(name, "xml-attribute");
+        else if ((name = this.maybeName("xml-attribute"))) {
         }
         else if (ch === '"' || ch === "'") {
             this.readString();
@@ -340,10 +338,8 @@ class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
     }
 }
 
-const TWIG_BUILTIN = toHash("in or and not is defined \
-  constant divisible empty even iterable \
-  null true false odd same from as \
-  starts with only ends matches");
+const TWIG_BUILTIN = toHash(`in or and not is defined constant divisible empty
+even iterable null true false odd same from as starts with only ends matches`);
 
 class Ymacs_Lang_Twig extends Ymacs_BaseLang {
     STRING = [ "'", [ '"', '"', "#{", "}" ] ];
@@ -399,13 +395,14 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
 
     readCustom() {
         let s = this._stream;
+        let filter = /\|\s*$/.test(s.textBefore());
         let tok = this.readName();
         if (tok) {
-            let type = null;
             this.skipWS();
-            if (s.lookingAt("(")) type = "function-name";
-            else type = tok.id in TWIG_BUILTIN ? "builtin" : null;
-            this.token(tok, type);
+            tok.type = filter || s.lookingAt("(") ? "function-name"
+                : tok.id in TWIG_BUILTIN ? "builtin"
+                : null;
+            this.token(tok);
             return true;
         }
         return this.readNumber();

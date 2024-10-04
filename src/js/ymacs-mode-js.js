@@ -8,26 +8,20 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
 import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { toHash } from "./ymacs-utils.js";
 
-const KEYWORDS = toHash("abstract break case catch class const \
-  async await \
-  continue debugger default delete do else \
-  enum export extends final finally for \
-  function goto if implements import in \
-  instanceof interface native new package \
-  private protected public return \
-  super switch synchronized this throw \
-  throws transient try typeof var void let \
-  yield volatile while with");
+const KEYWORDS = toHash(`abstract break case catch class const async await
+continue debugger default delete do else enum export final finally for
+function goto if implements import in instanceof interface native new package
+private protected public return super switch synchronized throw throws
+transient try typeof var void let yield volatile while with`);
 
-const KEYWORDS_TYPE = toHash("boolean byte char double float int long short void \
-  Array Date Function Math Number Object RegExp String");
+const KEYWORDS_TYPE = toHash(`boolean byte char double float int long short
+void Array Date Function Math Number Object RegExp String`);
 
-const KEYWORDS_CONST = toHash("false null undefined Infinity NaN true arguments");
+const KEYWORDS_CONST = toHash(`false null undefined Infinity NaN true`);
 
-const KEYWORDS_BUILTIN = toHash("Infinity NaN \
-  Packages decodeURI decodeURIComponent \
-  encodeURI encodeURIComponent eval isFinite isNaN parseFloat \
-  parseInt undefined window document alert prototype");
+const KEYWORDS_BUILTIN = toHash(`this Packages decodeURI decodeURIComponent
+encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt window
+document alert arguments fetch`);
 
 const ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|(?:return|typeof|case)\s+$/;
 
@@ -61,14 +55,14 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             if (isProp) {
                 this.token(tok, s.lookingAt("(") ? "function-name" : null);
             } else if (!this.parseALittle(tok)) {
-                let type = s.lookingAt(":") ? null
+                tok.type = s.lookingAt(":") ? null
                     : tok.id in KEYWORDS ? "keyword"
                     : s.lookingAt("(") ? "function-name"
                     : tok.id in KEYWORDS_TYPE ? "type"
                     : tok.id in KEYWORDS_CONST ? "constant"
                     : tok.id in KEYWORDS_BUILTIN ? "builtin"
                     : null;
-                this.token(tok, type);
+                this.token(tok);
             }
             return true;
         }
@@ -85,9 +79,15 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             if (s.lookingAt("{") || (name = this.maybeName("type"))) {
                 this.token(tok, "keyword");
                 this.skipWS();
-                if (this.maybeName("keyword")?.id == "extends") {
-                    this.skipWS();
-                    this.maybeName("type");
+                let ext = this.readName();
+                if (ext) {
+                    if (ext.id == "extends") {
+                        this.token(ext, ext.type = "keyword");
+                        this.skipWS();
+                        this.maybeName("type");
+                    } else {
+                        this.token(ext, null);
+                    }
                 }
                 this.setParenMeta({ class: tok, name: name });
             }
@@ -129,7 +129,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             ch = s.peek();
             if (ch == "[" && !esc && !inset) inset++;
             if (ch == "]" && !esc && inset) inset--;
-            if (ch === "/" && !esc && !inset) {
+            if (ch == "/" && !esc && !inset) {
                 let c1 = s.col;
                 this.popCont();
                 this.token({ line: s.line, c1: start, c2: s.col }, "regexp");

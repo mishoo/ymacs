@@ -18,6 +18,7 @@ Object.assign(ymacs.getElement().style, {
 ymacs.setColorTheme("_current");
 ymacs.addClass("Ymacs-line-numbers");
 ymacs.addClass("Ymacs-hl-line");
+ymacs.toggleBarCursor();
 // ymacs.delClass("Ymacs-cursor-block");
 // ymacs.addClass("Ymacs-cursor-bar");
 
