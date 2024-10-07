@@ -448,7 +448,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                     if (/^(?:macro|block)$/.test(name)) {
                         let fname = this.readName();
                         if (fname) {
-                            this.token(fname, fname.id == otag.fname?.id ? "function-name" : "error");
+                            this.token(fname, fname.id == otag?.fname?.id ? "function-name" : "error");
                         }
                         this.skipWS();
                     }
