@@ -3,7 +3,7 @@
 /// License: MIT
 
 import { Cons, NIL } from "./ymacs-utils.js";
-import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
+import { Ymacs_Tokenizer, compareRowCol, caretInside } from "./ymacs-tokenizer.js";
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 
 export class Ymacs_BaseLang {
@@ -62,12 +62,22 @@ export class Ymacs_BaseLang {
         };
     }
 
-    skipWS() {
+    maybeSave() {
+        let s = this._stream;
+        if (s.eol() && s.nextLine()) {
+            this._tok.parsers[s.line] = this.copy();
+            return true;
+        }
+    }
+
+    skipWS(skipLines = true) {
         let s = this._stream, m;
-        while ((m = s.lookingAt(this.WHITESPACE))) {
-            this.t(null, m[0].length);
-            if (s.eol() && s.nextLine()) {
-                this._tok.parsers[s.line] = this.copy();
+        while (true) {
+            if ((m = s.lookingAt(this.WHITESPACE))) {
+                this.t(null, m[0].length);
+            }
+            if (skipLines) {
+                if (!this.maybeSave()) break;
             } else {
                 break;
             }
@@ -93,11 +103,28 @@ export class Ymacs_BaseLang {
 
     readCommentLine(start) {
         let s = this._stream;
-        if (s.lookingAt(start)) {
+        let p = null, end = null;
+        while (s.lookingAt(start)) {
+            if (!p) {
+                p = {
+                    line: s.line, col: s.col, c1: s.col, c2: s.col, comment: true, type: "",
+                    inner: { l1: s.line, c1: s.col },
+                    outer: { l1: s.line, c1: s.col },
+                };
+            }
             this.t("comment-starter", start.length);
             this.token({ line: s.line, c1: s.col, c2: s.col = s.lineLength() }, "comment");
-            return true;
+            end = { line: s.line, col: s.col, c1: s.col, c2: s.col, type: "", opened: p };
+            this.maybeSave();
+            this.skipWS(false);
         }
+        if (p) {
+            p.closed = end;
+            p.inner.l2 = p.outer.l2 = end.line;
+            p.inner.c2 = p.outer.c2 = end.c1;
+            this.doneParen(p);
+        }
+        return p;
     }
 
     readCommentMulti(start, stop, inner,
@@ -108,7 +135,11 @@ export class Ymacs_BaseLang {
         let s = this._stream, m;
         if (this._inComment) {
             if ((m = s.lookingAt(stop))) {
-                this.popInParen(start, m[0].length, tok3);
+                let p = this.popInParen(start, m[0].length, tok3);
+                p.inner.l2 = p.closed.line;
+                p.inner.c2 = p.closed.c1;
+                p.outer.l2 = p.closed.line;
+                p.outer.c2 = p.closed.c2;
                 this.popCont();
                 this._inComment = null;
             } else {
@@ -116,7 +147,10 @@ export class Ymacs_BaseLang {
             }
         } else if (s.lookingAt(start)) {
             this._inComment = { line: s.line, c1: s.col, inner: inner };
-            this.pushInParen(start, tok1);
+            let p = this.pushInParen(start, tok1);
+            p.comment = true;
+            p.inner = { l1: p.line, c1: p.c2 };
+            p.outer = { l1: p.line, c1: p.c1 };
             this.pushCont(this.readCommentMulti.bind(this, start, stop, inner, tok1, tok2, tok3));
             return true;
         }
@@ -228,30 +262,28 @@ export class Ymacs_BaseLang {
     pushInParen(type, tokType = "open-paren") {
         let s = this._stream;
         let n = type.length;
-        let p = n == 1
-            ? { line: s.line, col: s.col, type: type }
-            : { line: s.line, c1: s.col, c2: s.col + n, type: type };
+        let p = { line: s.line, col: s.col, c1: s.col, c2: s.col + n, type: type };
         this._inParens = new Cons(p, this._inParens);
-        this.t(tokType, n);
+        if (n) this.t(tokType, n);
         return p;
     }
 
-    popInParen(start, n, tokType = "close-paren") {
+    popInParen(start, n = start.length, tokType = "close-paren") {
         let s = this._stream;
         if (this._inParens !== NIL) {
             let paren = this._inParens.car;
             this._inParens = this._inParens.cdr;
             if (start != paren.type) {
-                this.t("error", n);
+                //debugger;
+                if (n) this.t("error", n);
             } else {
-                paren.closed = n == 1
-                    ? { line: s.line, col: s.col, opened: paren }
-                    : { line: s.line, c1: s.col, c2: s.col + n, opened: paren };
+                paren.closed = { line: s.line, col: s.col, c1: s.col, c2: s.col + n, opened: paren };
                 this.doneParen(paren);
-                this.t(tokType, n);
+                if (n) this.t(tokType, n);
             }
+            return paren;
         } else {
-            this.t("error", n);
+            if (n) this.t("error", n);
         }
     }
 
@@ -377,3 +409,28 @@ export class Ymacs_BaseLang {
         return [...this._parens];
     }
 }
+
+Ymacs_Buffer.newCommands({
+    base_limit_fill_paragraph_region: function() {
+        if (!this.tokenizer) return;
+        let findComment = () => this.tokenizer.getPP()
+            .filter(caretInside(this._rowcol))
+            .findLast(p => p.comment);
+        let comment = findComment() || this.cmd("save_excursion", () => {
+            this.cmd("end_of_line");
+            return findComment();
+        });
+        if (comment?.closed) {
+            let r = {
+                begin: this._rowColToPosition(comment.outer.l1, comment.outer.c1),
+                end: this._rowColToPosition(comment.outer.l2, comment.outer.c2)
+            };
+            this.cmd("save_excursion", () => {
+                this.cmd("goto_char", r.begin);
+                this.cmd("backward_whitespace", true);
+                r.begin = this.point();
+            });
+            return r;
+        }
+    }
+});

@@ -23,7 +23,7 @@ const KEYWORDS_BUILTIN = toHash(`this Packages decodeURI decodeURIComponent
 encodeURI encodeURIComponent eval isFinite isNaN parseFloat parseInt window
 document alert arguments fetch`);
 
-const ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:][\x20\t\n\xa0]*$|(?:return|typeof|case)\s+$/;
+const ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:>][\x20\t\n\xa0]*$|(?:return|typeof|case)\s+$/;
 
 class Ymacs_Lang_JS extends Ymacs_BaseLang {
     STRING = [ '"', "'", [ "`", "`", "${", "}" ] ];

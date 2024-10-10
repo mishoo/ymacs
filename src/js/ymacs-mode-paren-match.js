@@ -84,22 +84,20 @@ function ERROR(o) {
 
 function caretInOP(caret, paren) {
     if (caret.row == paren.line) {
-        if (paren.col != null) {
+        if (paren.c1 == null || paren.c2 - paren.c1 == 1) {
             return caret.col == paren.col;
         } else {
-            return paren.c1 <= caret.col
-                && caret.col <= paren.c2;
+            return paren.c1 <= caret.col && caret.col <= paren.c2;
         }
     }
 }
 
 function caretInCP(caret, paren) {
     if (caret.row == paren.line) {
-        if (paren.col != null) {
+        if (paren.c1 == null || paren.c2 - paren.c1 == 1) {
             return caret.col == paren.col + 1;
         } else {
-            return paren.c1 <= caret.col
-                && caret.col <= paren.c2;
+            return paren.c1 <= caret.col && caret.col <= paren.c2;
         }
     }
 }
@@ -171,7 +169,10 @@ Ymacs_Buffer.newCommands({
         let parens = this.tokenizer.getPP().filter(p => p.closed).map(p => p.closed).sort(compareRowCol);
         for (let i = parens.length; --i >= 0;) {
             let p = parens[i];
-            if (p.line < rc.row || (p.line == rc.row && startOf(p) < rc.col)) {
+            if (p.line < rc.row
+                || (p.line == rc.row
+                    && (startOf(p) < rc.col
+                        || (p.c1 == p.c2 && startOf(p) == rc.col)))) {
                 prev = p;
                 break;
             }
@@ -449,13 +450,15 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
                 let ac1 = par_a.c1 ?? par_a.col, ac2 = par_a.c2 ?? (par_a.col + par_a.type.length);
                 let bc1 = par_b.c1 ?? par_b.col, bc2 = par_b.c2 ?? (par_b.col + 1);
                 if (caretInOP(rc, par_a) || caretInCP(rc, par_b)) {
-                    hl.push({
-                        line1: par_a.line, col1: ac1,
-                        line2: par_a.line, col2: ac2
-                    }, {
-                        line1: par_b.line, col1: bc1,
-                        line2: par_b.line, col2: bc2
-                    });
+                    if (ac2 > ac1 && bc2 > bc1) {
+                        hl.push({
+                            line1: par_a.line, col1: ac1,
+                            line2: par_a.line, col2: ac2
+                        }, {
+                            line1: par_b.line, col1: bc1,
+                            line2: par_b.line, col2: bc2
+                        });
+                    }
                     break;
                 }
             }

@@ -556,11 +556,10 @@ Ymacs_Tokenizer.define("html", (stream, tok) => new Ymacs_Lang_HTML({
 Ymacs_Tokenizer.define("twig_html", (stream, tok) => new Ymacs_Lang_Twig({ stream, tok }));
 
 Ymacs_Buffer.newCommands({
-    xml_get_fill_paragraph_region: function() {
+    xml_limit_fill_paragraph_region: function() {
         // XXX: this function should somehow be a property of the language (for mixed modes),
         // rather than a top-level method. Not yet decided how to best handle this...
         if (!this.tokenizer) return;
-
         this.tokenizer.finishParsing();
         let blk = this.tokenizer.getPP()
             .filter(caretInside(this._rowcol, "outer"))

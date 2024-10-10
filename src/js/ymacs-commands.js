@@ -665,7 +665,8 @@ Ymacs_Buffer.newCommands({
             let begin = this.point();
             return { begin, end };
         });
-        let r2 = this.cmd("xml_get_fill_paragraph_region");
+        let r2 = this.cmd("base_limit_fill_paragraph_region")
+            || this.cmd("xml_limit_fill_paragraph_region");
         if (r2) {
             return { begin: Math.max(r1.begin, r2.begin),
                      end: Math.min(r1.end, r2.end) };
