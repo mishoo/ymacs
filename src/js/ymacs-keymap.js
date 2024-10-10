@@ -26,25 +26,27 @@ export class Ymacs_Keymap {
         return KEYMAPS[name];
     }
 
-    static parseKey(str) {
-        var key = {};
-        var a = str.split(/-/);
-        a.reverse();
-        a.forEach((c, i) => {
-            if (i == 0) {
-                key.key = c == "Space" ? " " : c.length == 1 ? c.toLowerCase() : c;
-            } else switch(c) {
-                case "C": key.ctrlKey = true; break;
-                case "M": key.metaKey = true; break;
-                case "S": key.shiftKey = true; break;
+    static parseKey(orig) {
+        let key = { str: "" };
+        let p = orig;
+        for (;;) {
+            let m = /^([CMS])-/.exec(p);
+            if (m) {
+                if (m[1] == "C") key.ctrlKey = true;
+                if (m[1] == "M") key.metaKey = true;
+                if (m[1] == "S") key.shiftKey = true;
+                p = p.substr(2);
+            } else {
+                key.key = p == "Space" ? " "
+                    : p.length == 1 ? p.toLowerCase()
+                    : p;
+                break;
             }
-        });
-        a.reverse();
-        var c = a.pop();
-        key.str = a.sort().join("-");
-        if (key.str)
-            key.str += "-";
-        key.str += c;
+        }
+        if (key.ctrlKey) key.str += "C-";
+        if (key.metaKey) key.str += "M-";
+        if (key.shiftKey) key.str += "S-";
+        key.str += p;
         return key;
     }
 

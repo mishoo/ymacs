@@ -18,6 +18,7 @@ let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
     "/"       : "xml_slash_complete_tag",
     ">"       : "xml_gt_complete_tag",
     "%"       : "twig_insert_percent",
+    "M--"     : "twig_block_toggle_whitespace",
     "C-Enter" : "xml_zen_expand",
     "Enter"   : "xml_newline_and_indent"
 });
@@ -646,6 +647,34 @@ Ymacs_Buffer.newCommands({
             this._placeUndoBoundary();
             this.cmd("insert", "  %");
             this.cmd("backward_char", 2);
+        }
+    }),
+    twig_block_toggle_whitespace: Ymacs_Interactive(function(){
+        this.tokenizer.finishParsing();
+        let p = this.tokenizer.getPP()
+            .filter(caretInside(this._rowcol))
+            .filter(x => /^\{[{%#]/.test(x.type)).at(-1);
+        if (p?.closed) {
+            let doFront = () => {
+                if (this.looking_back("-")) {
+                    this.cmd("backward_delete_char");
+                } else {
+                    this.cmd("insert", "-");
+                }
+            };
+            let doBack = () => {
+                if (this.looking_at("-")) {
+                    this.cmd("delete_char");
+                } else {
+                    this.cmd("insert", "-");
+                }
+            };
+            this.cmd("save_excursion", () => {
+                this.cmd("goto_char", this._rowColToPosition(p.closed.line, p.closed.c1));
+                doBack();
+                this.cmd("goto_char", this._rowColToPosition(p.line, p.c2));
+                doFront();
+            });
         }
     }),
 });
