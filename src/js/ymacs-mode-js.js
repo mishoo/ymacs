@@ -47,6 +47,10 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             this.pushCont(this.readLiteralRegexp.bind(this, op));
             return true;
         }
+        if (s.lookingAt("...")) {
+            this.t("operator", 3);
+            return true;
+        }
         let isProp = this._isProp;
         this._isProp = s.peek() == ".";
         let tok = this.readName();
