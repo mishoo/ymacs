@@ -39,6 +39,11 @@
       div.line:has(.Ymacs-caret) {
         background-color: inherit;
       }
+      &[data-ymacs-overlays~="match-paren"] {
+        .Ymacs_Overlay.match-paren {
+          display: none;
+        }
+      }
     }
   }
 }
