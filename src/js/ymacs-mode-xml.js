@@ -420,6 +420,9 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                 if (this._inBlock.hasBody) {
                     this._inBlock.inner = { l1: s.line, c1: s.col };
                     this.pushBlock(this._inBlock);
+                } else if (this._inBlock.outer) {
+                    this._inBlock.outer.l2 = s.line;
+                    this._inBlock.outer.c2 = s.col;
                 }
                 this._inBlock = null;
             } else {
@@ -437,6 +440,10 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
                     let name = ctag.id.substr(3);
                     this.token(ctag, otag?.id == name ? "keyword" : "error");
                     if (otag) {
+                        if (otag.inner) {
+                            otag.inner.l2 = outer.l1;
+                            otag.inner.c2 = outer.c1;
+                        }
                         let popen = { line: otag.line, c1: otag.c1, c2: otag.c2, type: otag.id,
                                       inner: otag.inner, outer: otag.outer };
                         let pclose = { line: ctag.line, c1: ctag.c1, c2: ctag.c2, opened: popen };
