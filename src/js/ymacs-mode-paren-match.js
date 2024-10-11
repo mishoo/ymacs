@@ -84,8 +84,8 @@ function ERROR(o) {
 
 function caretInOP(caret, paren) {
     if (caret.row == paren.line) {
-        if (paren.c1 == null || paren.c2 - paren.c1 == 1) {
-            return caret.col == paren.col;
+        if (!/\w/.test(paren.type) && (paren.c1 == null || paren.c2 - paren.c1 == 1)) {
+            return caret.col == paren.c1 ?? paren.col;
         } else {
             return paren.c1 <= caret.col && caret.col <= paren.c2;
         }
@@ -94,8 +94,8 @@ function caretInOP(caret, paren) {
 
 function caretInCP(caret, paren) {
     if (caret.row == paren.line) {
-        if (paren.c1 == null || paren.c2 - paren.c1 == 1) {
-            return caret.col == paren.col + 1;
+        if (!/\w/.test(paren.type) && (paren.c1 == null || paren.c2 - paren.c1 == 1)) {
+            return caret.col == paren.c2 ?? (paren.col + 1);
         } else {
             return paren.c1 <= caret.col && caret.col <= paren.c2;
         }
@@ -112,11 +112,24 @@ function endOf(paren) {
 
 Ymacs_Buffer.newCommands({
 
+    get_current_paren: function() {
+        let rc = this._rowcol;
+        let parens = this.tokenizer.getPP();
+        for (let op of parens) {
+            let cp = op.closed;
+            if (!cp) continue;
+            if (caretInOP(rc, op) || caretInCP(rc, cp)) {
+                return op;
+            }
+        }
+    },
+
     matching_paren: function() {
         let rc = this._rowcol;
         let parens = this.tokenizer.getPP();
         for (let op of parens) {
             let cp = op.closed;
+            if (!cp) continue;
             if (caretInOP(rc, op)) {
                 return this._rowColToPosition(cp.line, endOf(cp));
             } else if (caretInCP(rc, cp)) {
@@ -186,7 +199,16 @@ Ymacs_Buffer.newCommands({
     }),
 
     mark_sexp: Ymacs_Interactive("^r", function(begin, end){
-        this.cmd("save_excursion", function(){
+        this.tokenizer.finishParsing();
+        let paren = this.cmd("get_current_paren");
+        if (paren?.outer) {
+            this.cmd("goto_char", this._rowColToPosition(paren.outer.l1, paren.outer.c1));
+            this.ensureTransientMark();
+            this.cmd("goto_char", this._rowColToPosition(paren.outer.l2, paren.outer.c2));
+            this.setMark(this.point());
+            this.transientMarker.swap(this.caretMarker);
+        }
+        else this.cmd("save_excursion", function(){
             if (this.transientMarker)
                 this.cmd("goto_char", end);
             this.ensureTransientMark();
