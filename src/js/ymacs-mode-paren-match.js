@@ -82,26 +82,6 @@ function ERROR(o) {
     throw new Ymacs_Exception("Balanced expression not found");
 };
 
-function caretInOP(caret, paren) {
-    if (caret.row == paren.line) {
-        if (!/\w/.test(paren.type) && (paren.c1 == null || paren.c2 - paren.c1 == 1)) {
-            return caret.col == paren.c1 ?? paren.col;
-        } else {
-            return paren.c1 <= caret.col && caret.col <= paren.c2;
-        }
-    }
-}
-
-function caretInCP(caret, paren) {
-    if (caret.row == paren.line) {
-        if (!/\w/.test(paren.type) && (paren.c1 == null || paren.c2 - paren.c1 == 1)) {
-            return caret.col == paren.c2 ?? (paren.col + 1);
-        } else {
-            return paren.c1 <= caret.col && caret.col <= paren.c2;
-        }
-    }
-}
-
 function startOf(paren) {
     return paren.c1 ?? paren.col;
 }
@@ -110,31 +90,51 @@ function endOf(paren) {
     return paren.c2 ?? (paren.col + 1);
 }
 
+function typeOf(paren) {
+    if (paren.opened) return paren.opened.type || "";
+    return paren.type || "";
+}
+
+function touches(paren, caret) {
+    return paren.line == caret.row
+        && startOf(paren) <= caret.col
+        && caret.col <= endOf(paren);
+}
+
 Ymacs_Buffer.newCommands({
 
-    get_current_paren: function() {
+    get_paren_at_point() {
         let rc = this._rowcol;
         let parens = this.tokenizer.getPP();
+        let a = [];
         for (let op of parens) {
+            if (!op.type) continue;
             let cp = op.closed;
             if (!cp) continue;
-            if (caretInOP(rc, op) || caretInCP(rc, cp)) {
-                return op;
-            }
+            if (touches(op, rc)) a.push(op);
+            if (touches(cp, rc)) a.push(cp);
         }
+        if (!a.length)
+            return null;
+        if (a.length == 1)
+            return a[0].opened || a[0];
+        if (/\w/.test(typeOf(a[0])) && !/\w/.test(typeOf(a[1])))
+            return a[0].opened || a[0];
+        if (/\w/.test(typeOf(a[1])) && !/\w/.test(typeOf(a[0])))
+            return a[1].opened || a[1];
+        a = a.sort(compareRowCol);
+        a = a[0].opened ? a[0] : a[1];
+        return a.opened || a;
     },
 
-    matching_paren: function() {
+    matching_paren() {
+        this.tokenizer.finishParsing();
         let rc = this._rowcol;
-        let parens = this.tokenizer.getPP();
-        for (let op of parens) {
-            let cp = op.closed;
-            if (!cp) continue;
-            if (caretInOP(rc, op)) {
-                return this._rowColToPosition(cp.line, endOf(cp));
-            } else if (caretInCP(rc, cp)) {
-                return this._rowColToPosition(op.line, startOf(op));
-            }
+        let p = this.cmd("get_paren_at_point");
+        if (p) {
+            if (touches(p, rc))
+                return this._rowColToPosition(p.closed.line, endOf(p.closed));
+            return this._rowColToPosition(p.line, startOf(p));
         }
     },
 
@@ -200,7 +200,7 @@ Ymacs_Buffer.newCommands({
 
     mark_sexp: Ymacs_Interactive("^r", function(begin, end){
         this.tokenizer.finishParsing();
-        let paren = this.cmd("get_current_paren");
+        let paren = this.cmd("get_paren_at_point");
         if (paren?.outer) {
             this.cmd("goto_char", this._rowColToPosition(paren.outer.l1, paren.outer.c1));
             this.ensureTransientMark();
@@ -456,10 +456,6 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
         this.deleteOverlay("match-paren");
     }.bind(this);
 
-    function inside(a, b, c) {
-        return b >= a && b < c;
-    }
-
     let events = {
         beforeInteractiveCommand: function() {
             clearOvl();
@@ -467,22 +463,15 @@ Ymacs_Buffer.newMode("paren_match_mode", function(){
         afterInteractiveCommand: delayed(() => {
             let rc = this._rowcol;
             let hl = [];
-            for (let par_a of this.tokenizer.getPP()) {
-                let par_b = par_a.closed;
-                let ac1 = par_a.c1 ?? par_a.col, ac2 = par_a.c2 ?? (par_a.col + par_a.type.length);
-                let bc1 = par_b.c1 ?? par_b.col, bc2 = par_b.c2 ?? (par_b.col + 1);
-                if (caretInOP(rc, par_a) || caretInCP(rc, par_b)) {
-                    if (ac2 > ac1 && bc2 > bc1) {
-                        hl.push({
-                            line1: par_a.line, col1: ac1,
-                            line2: par_a.line, col2: ac2
-                        }, {
-                            line1: par_b.line, col1: bc1,
-                            line2: par_b.line, col2: bc2
-                        });
-                    }
-                    break;
-                }
+            let p = this.cmd("get_paren_at_point");
+            if (p) {
+                hl.push({
+                    line1: p.line, col1: p.c1,
+                    line2: p.line, col2: p.c2
+                }, {
+                    line1: p.closed.line, col1: p.closed.c1,
+                    line2: p.closed.line, col2: p.closed.c2
+                });
             }
             this.setOverlay("match-paren", hl);
         }, 100)

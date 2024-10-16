@@ -362,7 +362,7 @@ export class Ymacs_BaseLang {
                 // but if this line closes the paren, then back one level
                 if (thisLineCloses) {
                     indent -= INDENT_LEVEL();
-                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*=]|\+[^+]|-[^-])/.test(currentLine)) {
+                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*=&|]|\+[^+]|-[^-])/.test(currentLine)) {
                     indent += INDENT_LEVEL();
                 }
             }

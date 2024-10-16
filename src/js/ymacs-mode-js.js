@@ -57,10 +57,13 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
         if (tok) {
             this.skipWS();
             if (isProp) {
-                this.token(tok, s.lookingAt("(") ? "function-name" : null);
+                tok.type = s.lookingAt("(") ? "function-name" : null;
+                this.token(tok);
+            } else if (s.lookingAt(":")) {
+                tok.type = tok.id == "default" ? "keyword" : null;
+                this.token(tok);
             } else if (!this.parseALittle(tok)) {
-                tok.type = s.lookingAt(":") ? null
-                    : tok.id in KEYWORDS ? "keyword"
+                tok.type = tok.id in KEYWORDS ? "keyword"
                     : s.lookingAt("(") ? "function-name"
                     : tok.id in KEYWORDS_TYPE ? "type"
                     : tok.id in KEYWORDS_CONST ? "constant"
@@ -97,6 +100,18 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
             }
             return true;
 
+          case "for":
+            this.token(tok, "keyword");
+            this.setParenMeta({ for: tok });
+            return true;
+
+          case "of":
+            if (paren?.meta?.for) {
+                this.token(tok, "keyword");
+                return true;
+            }
+            break;
+
           case "function":
             this.token(tok, "keyword");
             this.maybeName("function-name");
@@ -117,6 +132,7 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
                 this.token(tok, "keyword");
                 return true;
             }
+            break;
         }
 
         if (paren?.meta?.class && s.lookingAt(/^\s*\(/)) {
