@@ -400,19 +400,19 @@ Ymacs_Buffer.newCommands({
     }),
 
     paredit_wrap_round: Ymacs_Interactive("^", function(paren, closing, backslash) {
-        var r = this.transientMarker
+        let r = this.transientMarker
             ? this.getRegion()
             : this.cmd("save_excursion", function(){
-                var begin = this.point();
+                let begin = this.point();
                 this.cmd("forward_sexp");
                 return { begin: begin, end: this.point() };
-            }),
-            txt = this._bufferSubstring(r.begin, r.end),
-            before = this.point() < r.end;
+            });
+        let txt = this._bufferSubstring(r.begin, r.end);
+        let before = this.point() < r.end;
         if (backslash) {
             txt = txt.replace(backslash, s => "\\" + s);
         }
-        var m = this.createMarker(r.end);
+        let m = this.createMarker(r.end);
         this.cmd("save_excursion", function(){
             this._replaceText(r.begin, r.end, paren + txt + closing);
         }, before);

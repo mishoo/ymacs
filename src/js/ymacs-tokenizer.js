@@ -293,7 +293,7 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.callHooks("onFoundToken", line, c1, c2, type);
     }
 
-    getParserForLine(row, col) {
+    getParserForLine(row, col = 0) {
         this.stop();
         let stream = this.stream, p, a = this.parsers;
         stream.line = row;
@@ -342,7 +342,7 @@ export class Ymacs_Tokenizer extends EventProxy {
     }
 
     finishParsing() {
-        this.getParserForLine(this.stream.length());
+        this.getParserForLine(this.stream.length(), null);
         return this.getLastParser();
     }
 

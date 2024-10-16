@@ -29,7 +29,7 @@ window.addEventListener("beforeunload", ev => {
     //b().cmd("load_file", "test.html");
     b().setVariable("fill_column", 80);
 
-    // b().cmd("load_file", "ymacs-frame.js");
+    b().cmd("load_file", "test.js");
     // b().callInteractively("split_frame_horizontally");
     // b().cmd("other_frame");
     // b().cmd("load_file", "queen-board.lisp");
