@@ -115,8 +115,10 @@ export class Ymacs_BaseLang {
             this.t("comment-starter", start.length);
             this.token({ line: s.line, c1: s.col, c2: s.col = s.lineLength() }, "comment");
             end = { line: s.line, col: s.col, c1: s.col, c2: s.col, type: "", opened: p };
-            this.maybeSave();
-            this.skipWS(false);
+
+            // XXX: this screws up the parse state after a line comment.
+            // this.maybeSave();
+            // this.skipWS(false);
         }
         if (p) {
             p.closed = end;
