@@ -50,6 +50,9 @@ Ymacs_Buffer.newCommands({
 
           case ".html":
             return "html";
+
+          case ".twig":
+            return "twig_html";
         }
         return null;
     },

@@ -347,9 +347,9 @@ const LOOP_KEYWORDS = regexp_opt("\
   collect(?:ing)? nconc(?:ing)? summ(?:ing)? into \
   of-type \
   repeat finally \
-  if else when do");
+  if else when unless do");
 
-const ERROR_FORMS = toHash("error warn");
+const ERROR_FORMS = toHash("error warn assert");
 
 const CONSTANTS = toHash("t nil");
 
@@ -388,6 +388,8 @@ const FORM_ARGS = {
     "catch"               : "1*",
     "case"                : "1*",
     "ecase"               : "1*",
+    "typecase"            : "1*",
+    "etypecase"           : "1*",
     "cond"                : "0+",
     "handler-bind"        : "1*",
     "handler-case"        : "1*",

@@ -408,6 +408,14 @@ export class Ymacs_BaseLang {
     get passedParens() {
         return [...this._parens];
     }
+
+    get buffer() {
+        return this._stream.buffer;
+    }
+
+    get caret() {
+        return this.buffer._rowcol;
+    }
 }
 
 Ymacs_Buffer.newCommands({
