@@ -56,7 +56,8 @@ export class Ymacs_Keymap {
             key = ev.wheelDelta > 0 ? "WheelUp" : "WheelDown";
         } else {
             key = ev.key;
-            if (key == " ") key = "Space";
+            if (key == " " || (key == "Unidentified" && ev.code == "Space"))
+                key = "Space";
             if (key.length == 1) key = key.toLowerCase();
         }
         if (ev.ctrlKey)
