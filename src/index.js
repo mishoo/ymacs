@@ -14,7 +14,7 @@ import "./js/ymacs-marker.js";
 import "./js/ymacs-minibuffer.js";
 import "./js/ymacs-mode-css.js";
 import "./js/ymacs-mode-js.js";
-import "./js/ymacs-mode-lisp.js";
+export * from "./js/ymacs-mode-lisp.js";
 import "./js/ymacs-mode-markdown.js";
 import "./js/ymacs-mode-paren-match.js";
 import "./js/ymacs-mode-xml.js";

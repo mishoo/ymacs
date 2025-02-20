@@ -406,7 +406,7 @@ const FORM_ARGS = {
 
 const LOCAL_BODYDEF = toHash("labels flet macrolet");
 
-class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
+export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
     _formStack = NIL;
     _formSym = null;
     _formLen = 0;
