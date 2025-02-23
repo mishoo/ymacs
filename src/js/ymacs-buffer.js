@@ -677,18 +677,32 @@ export class Ymacs_Buffer extends EventProxy {
     // BEGIN: undo queue
 
     _recordChange(type, pos, len, text) {
-        if (len > 0 && !this.__preventUndo) {
+        if (len > 0) {
             var q = this.__undoQueue;
-            q.push({
-                type  : type,
-                pos   : pos,
-                len   : len,
-                text  : text,
-                dirty : this.__isDirty
-            });
-            this.__isDirty = true;
-            if (q.length > MAX_UNDO_RECORDS)
-                q.shift();
+            if (!this.__preventUndo) {
+                q.push({
+                    type  : type,
+                    pos   : pos,
+                    len   : len,
+                    text  : text,
+                    dirty : this.__isDirty
+                });
+                if (q.length > MAX_UNDO_RECORDS)
+                    q.shift();
+                this.__isDirty = true;
+            } else {
+                q.forEach(x => {
+                    if (x.type == 3) {
+                        x.markers.forEach(m => {
+                            if (m[1] >= pos) {
+                                m[1] += type == 1 ? len : -len;
+                            }
+                        });
+                    } else if (x.pos >= pos) {
+                        x.pos += type == 1 ? len : -len;
+                    }
+                });
+            }
         }
     }
 
