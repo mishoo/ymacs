@@ -336,15 +336,17 @@ const SPECIAL_FORMS = regexp_opt("\
   if throw eval-when multiple-value-prog1 multiple-value-bind unwind-protect let\\* \
   ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind \
   labels function symbol-macrolet block tagbody catch locally \
-  inc! dec! cons c[ad]{1,4}r list and or not null null\\? \
+  inc! dec! cons c[ad]{1,4}r list list\\* eq eql equal equalp and or not null null\\? \
   loop do while dotimes \
   return return-from setq set! set-car! set-cdr! setf multiple-value-call values", "i");
 
 const LOOP_KEYWORDS = regexp_opt("\
-  for with = as in on of then across by while until \
+  for with and = as in on of then across by while until \
   from downfrom upfrom to upto below downto above \
   being each the hash-keys? using hash-values? \
-  collect(?:ing)? nconc(?:ing)? summ(?:ing)? into \
+  collect(?:ing)? nconc(?:ing)? sum(?:ming)? append(?:ing)? into \
+  minimize minimizing maximize maximizing \
+  named \
   of-type \
   repeat finally \
   if else when unless do");
