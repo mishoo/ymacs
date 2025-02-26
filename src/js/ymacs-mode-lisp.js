@@ -691,6 +691,9 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
             ch: ";;"
         },
         syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u,
+        paredit_space_before() {
+            return !this.looking_back(/[\s\(\)\[\]\{\},.@'`#\\]/g);
+        },
     });
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_LispMode);

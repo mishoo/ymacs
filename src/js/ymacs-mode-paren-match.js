@@ -380,6 +380,13 @@ Ymacs_Buffer.newCommands({
             // presumably close; it's already there, just skip it
             this.cmd("forward_char");
         } else {
+            let maybe_space = this.getq("paredit_space_before");
+            if (typeof maybe_space == "function") {
+                maybe_space = maybe_space.apply(this, arguments);
+            }
+            if (maybe_space) {
+                this.cmd("insert", " ");
+            }
             this.cmd("insert", pair_a);
             this.cmd("insert", pair_b);
             this.cmd("backward_char", pair_b.length);
