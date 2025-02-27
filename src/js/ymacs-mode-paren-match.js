@@ -292,6 +292,13 @@ Ymacs_Buffer.newCommands({
     }),
 
     paredit_raise_sexp: Ymacs_Interactive(function(){
+        this.tokenizer.finishParsing();
+        let p = this.tokenizer.getPP()
+            .filter(caretInside(this._rowcol, "inner")).at(-1);
+        if (!p) {
+            this.signalError("No containing expression");
+            return;
+        }
         this.cmd("forward_sexp");
         this.cmd("backward_sexp");
         var start = this.point();
@@ -311,6 +318,10 @@ Ymacs_Buffer.newCommands({
         this.tokenizer.finishParsing();
         let p = this.tokenizer.getPP()
             .filter(caretInside(this._rowcol, "inner")).at(-1);
+        if (!p) {
+            this.signalError("No containing expression");
+            return;
+        }
         if (p.inner && p.outer) {
             this.cmd("save_excursion", function(){
                 let outer_begin = this._rowColToPosition(p.outer.l1, p.outer.c1);

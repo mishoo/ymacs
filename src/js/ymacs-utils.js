@@ -357,7 +357,7 @@ export function fuzzy_filter(candidates, query) {
                 let [ fi_beg, fi_end ] = m.indices[i++];
                 score += fi_end - fi_beg;
                 word_rx.lastIndex = li_beg;
-                if (word_rx.test(label)) score -= 5;
+                if (word_rx.test(label)) score -= 2;
                 hil += DOM.htmlEscape(label.substring(j, li_beg))
                     + `<b>${label.substring(li_beg, li_end)}</b>`;
                 j = li_end;
