@@ -527,13 +527,21 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 : m.id in CONSTANTS ? "constant"
                 : this.NUMBER.test(m.id) ? "number"
                 : null;
+            if (!type && this._formStack.car == 2) {
+                let pform = this._formStack.cdr?.car?.id;
+                if (pform == "define" && this._formLen == 0) {
+                    type = "function-name";
+                }
+                else if (/^def(?!un|ine)/.test(pform)) {
+                    type = "function-name";
+                }
+            }
             if (!type) {
-                // perhaps function name?
                 if (this._formLen == 0 && SPECIAL_FORMS.test(m.id)) {
                     type = "keyword";
                 }
                 else if (this._formLen == 0 && /^(?::?with(out)?[-\x2f]|def)/i.test(m.id)) {
-                    type = "builtin";
+                    type = "keyword";
                 }
                 else if (this._formLen == 1 && this.isForm(DEFINES_FUNCTION)) {
                     type = "function-name";

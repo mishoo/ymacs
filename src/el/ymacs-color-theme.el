@@ -170,6 +170,12 @@
     (insert prefix " { ")
     (insert "--ymacs-cursor-bg: " (ymacs-color-css (face-background 'cursor nil t)) "; ")
     (insert "--ymacs-cursor-fg: " (ymacs-color-css (face-background 'default nil t)) "; ")
+    (insert "--ymacs-modeline-in-bg: " (ymacs-color-css (ymacs-style '(mode-line-inactive mode-line)
+                                                                     (face-background face nil t)))
+            "; ")
+    (insert "--ymacs-modeline-ac-bg: " (ymacs-color-css (ymacs-style '(mode-line-active mode-line)
+                                                                     (face-background face nil t)))
+            "; ")
     (insert "}\n")
 
     ;; main text

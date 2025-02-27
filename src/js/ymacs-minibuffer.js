@@ -90,7 +90,7 @@ export function read_with_continuation(completions, cont, validate) {
                     cont.call(this, what);
             },
         });
-        mb.cmd("minibuffer_complete");
+        mb.cmd("minibuffer_complete", { noError: true });
     });
 }
 
@@ -289,7 +289,7 @@ Ymacs_Buffer.newCommands({
         });
     },
 
-    minibuffer_complete: function() {
+    minibuffer_complete: function({ noError = false } = {}) {
         var self = this;
         self.whenMinibuffer(function(mb){
             let str = mb.cmd("minibuffer_contents");
@@ -297,7 +297,7 @@ Ymacs_Buffer.newCommands({
 
             function complete(a) {
                 if (!a || a.length == 0) {
-                    mb.signalError("No completions", false, 2000);
+                    if (!noError) mb.signalError("No completions", false, 2000);
                 } else {
                     popupCompletionMenu.call(mb, self.getMinibufferFrame(), a);
                 }

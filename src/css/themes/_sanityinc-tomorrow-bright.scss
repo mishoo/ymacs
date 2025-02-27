@@ -7,7 +7,7 @@ $modeline_ac_fg: #eaeaea;
 $cursor_bg: #d54e53;
 $cursor_fg: #000000;
 
-.Ymacs-Theme-sanityinc-tomorrow-bright { --ymacs-cursor-bg: #d54e53; --ymacs-cursor-fg: #000000; }
+.Ymacs-Theme-sanityinc-tomorrow-bright { --ymacs-cursor-bg: #d54e53; --ymacs-cursor-fg: #000000; --ymacs-modeline-in-bg: #2a2a2a; --ymacs-modeline-ac-bg: #424242; }
 .Ymacs-Theme-sanityinc-tomorrow-bright { color: #eaeaea; background-color: #000000; }
 .Ymacs-Theme-sanityinc-tomorrow-bright .Ymacs_SplitCont > .bar { background-color: #969896; }
 .Ymacs-Theme-sanityinc-tomorrow-bright .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #424242; border-bottom: 1px solid #424242; }
