@@ -651,7 +651,10 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                             formArgs = "2*";
                     }
                     if (!formArgs) try {
-                        if (LOCAL_BODYDEF[this._formStack.cdr.cdr.cdr.car.id] &&
+                        if (this._formStack.cdr?.car?.id == "handler-case") {
+                            formArgs = "1*";
+                        }
+                        else if (LOCAL_BODYDEF[this._formStack.cdr.cdr.cdr.car.id] &&
                             this._formStack.cdr.cdr.car == 2) {
                             formArgs = "1*";
                         }
