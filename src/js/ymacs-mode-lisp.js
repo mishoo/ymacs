@@ -345,11 +345,12 @@ const LOOP_KEYWORDS = regexp_opt("\
   from downfrom upfrom to upto below downto above \
   being each the hash-keys? using hash-values? \
   collect(?:ing)? nconc(?:ing)? sum(?:ming)? append(?:ing)? into \
-  minimize minimizing maximize maximizing \
-  named \
+  minimize minimizing maximize maximizing count counting \
+  symbol symbols external-symbol external-symbols present-symbol present-symbols \
+  named always never thereis \
   of-type \
-  repeat finally \
-  if else when unless do");
+  repeat finally initially return \
+  if else when unless do doing");
 
 const ERROR_FORMS = toHash("error warn assert");
 
