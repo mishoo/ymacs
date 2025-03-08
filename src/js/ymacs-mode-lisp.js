@@ -521,8 +521,29 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
             return true;
         }
         if ((m = this.readName())) {
-            let ch = m.id.charAt(0);
-            var type = ch == ":" ? "lisp-keyword"
+            let ch = m.id.charAt(0), type = null;
+
+            // message to future me: good luck figuring this out.
+            if (/^e?(?:type)?case$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car > 2 && this._formLen == 0) {
+                type = "constant";
+            }
+            else if (/^e?(?:type)?case$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car > 2 && this._formStack.car == 1) {
+                type = "constant";
+            }
+            else if (/^let\*?$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car == 2 && this._formLen == 0) {
+                type = "variable-name";
+            }
+            else if (/^let\*?$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car == 2) {
+                type = "variable-name";
+            }
+            else if (/^(?:flet|labels)$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car == 2 && this._formLen == 0) {
+                type = "function-name";
+            }
+            else if (/^(?:flet|labels)$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car == 2) {
+                type = "function-name";
+            }
+
+            if (!type) type = ch == ":" ? "lisp-keyword"
                 : ch == "&" ? "type"
                 : m.id in ERROR_FORMS ? "error"
                 : m.id in CONSTANTS ? "constant"
