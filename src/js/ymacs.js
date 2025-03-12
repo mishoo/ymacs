@@ -63,6 +63,7 @@ export class Ymacs extends Widget {
 
         this.buffers = [...this.o.buffers];
         this.frames = [...this.o.frames];
+        this.registers = Object.create(null);
         this.cf_frameStyle = {...this.o.cf_frameStyle};
 
         this.buffers.forEach(b => {
@@ -247,9 +248,8 @@ export class Ymacs extends Widget {
         return this.frames.filter(f => f.buffer === buf);
     }
 
-    createBuffer(args) {
-        args = Object.assign({}, args, { ymacs: this });
-        var buf = new Ymacs_Buffer(args);
+    createBuffer(args = {}) {
+        var buf = new Ymacs_Buffer({ ...args, ymacs: this });
         this._addBufferListeners(buf);
         if (!args.hidden)
             this.buffers.push(buf);
@@ -257,9 +257,8 @@ export class Ymacs extends Widget {
         return buf;
     }
 
-    createFrame(args) {
-        args = Object.assign({}, args, { ymacs: this });
-        var frame = new Ymacs_Frame(args);
+    createFrame(args = {}) {
+        var frame = new Ymacs_Frame({ ...args, ymacs: this });
         if (!args.hidden)
             this.frames.unshift(frame);
         frame.setStyle(this.cf_frameStyle);
@@ -305,6 +304,69 @@ export class Ymacs extends Widget {
 
     focusOtherFrame() {
         this.setActiveFrame(this.frames[0]);
+    }
+
+    getMainElement() {
+        const selector = `:scope > .Ymacs_Frame:not(.Ymacs_Minibuffer), :scope > .Ymacs_SplitCont`;
+        return this.getElement().querySelector(selector);
+    }
+
+    getFrameConfig() {
+        let dig = (el) => {
+            if (DOM.hasClass(el, "Ymacs_Frame")) {
+                let frame = el._ymacs_object;
+                let div = frame.getOverlaysContainer();
+                return {
+                    buffer: frame.buffer.name,
+                    point: +frame.caretMarker,
+                    scroll: div.scrollTop / div.scrollHeight,
+                    active: frame === this.getActiveFrame(),
+                };
+            } else {
+                let layout = el._ymacs_object;
+                let horiz = layout.o.horiz;
+                let style = window.getComputedStyle(el);
+                let rx = /^\s*(\d*(?:\.\d+)?)px\s+(?:\d*(?:\.\d+)?)px\s+(\d*(?:\.\d+)?)px\s*$/;
+                let m = rx.exec(horiz ? style.gridTemplateRows : style.gridTemplateColumns);
+                let frac = +m[1] / (+m[1] + +m[2]);
+                return [ horiz, frac, dig(el.children[0]), dig(el.children[2]) ];
+            }
+        };
+        return dig(this.getMainElement());
+    }
+
+    setFrameConfig(config) {
+        this.getMainElement()?.remove();
+        [...this.frames].forEach(frame => {
+            remove(this.frames, frame);
+            frame.destroy();
+        });
+        let ops = [];
+        let active = null;
+        let dig = (el) => {
+            if (Array.isArray(el)) {
+                let split = new Ymacs_SplitCont({ horiz:  el[0] });
+                let frame1 = dig(el[2]);
+                let frame2 = dig(el[3]);
+                ops.push(() => split.setSplit(frame1, frame2, el[1]));
+                return split;
+            } else {
+                let buffer = this.getBuffer(el.buffer)
+                    || this.createBuffer({ name: el.buffer });
+                let frame = this.createFrame({ buffer: buffer, point: el.point });
+                if (el.active) active = frame;
+                ops.push(() => {
+                    let div = frame.getOverlaysContainer();
+                    div.scrollTop = el.scroll * div.scrollHeight;
+                });
+                return frame;
+            }
+        };
+        let main = dig(config);
+        let cont = this.getElement();
+        cont.insertBefore(main.getElement(), cont.firstElementChild);
+        ops.reverse().forEach(f => f());
+        this.setActiveFrame(active || this.frames[0]);
     }
 
     focus() {
@@ -704,5 +766,14 @@ export class Ymacs extends Widget {
         el.style.left = (cbox_center.x - mybox.left) + "px";
         el.style.top = (cbox_center.y - mybox.top) + "px";
         el.style.removeProperty("visibility");
+    }
+
+    jumpToRegister(reg) {
+        let value = this.registers[reg];
+        if (value == null) return false;
+        if (value.frames) {
+            this.setFrameConfig(value.frames);
+            return true;
+        }
     }
 }

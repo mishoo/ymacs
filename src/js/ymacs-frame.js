@@ -41,6 +41,7 @@ export class Ymacs_Frame extends Widget {
         buffer               : null,
         ymacs                : null,
         isMinibuffer         : false,
+        point                : null,
     };
 
     constructor(...args) {
@@ -49,11 +50,6 @@ export class Ymacs_Frame extends Widget {
         this.buffer = this.o.buffer;
         this.ymacs = this.o.ymacs;
         this.isMinibuffer = this.o.isMinibuffer;
-
-        // <XXX> // during transition
-        this.el = this.getElement();
-        this.el._ymacs_object = this;
-        // </XXX>
 
         this.id = `ymacs-frame-${++COUNT}`;
         this.__caretId = `ymacs-caret-${COUNT}`;
@@ -99,7 +95,7 @@ export class Ymacs_Frame extends Widget {
         var buffer = this.buffer;
         this.buffer = null;
         if (buffer)
-            this.setBuffer(buffer);
+            this.setBuffer(buffer, this.o.point);
 
         DOM.on(this.getOverlaysContainer(), "scroll", this._on_scroll.bind(this));
         DOM.on(this.getElement(), {
@@ -174,7 +170,7 @@ export class Ymacs_Frame extends Widget {
         return document.activeElement === this.getElement();
     }
 
-    setBuffer(buffer) {
+    setBuffer(buffer, point) {
         if (this.buffer) {
             if (this.caretMarker && !this.o.isMinibuffer) {
                 this.caretMarker.destroy();
@@ -192,7 +188,7 @@ export class Ymacs_Frame extends Widget {
             if (this.o.isMinibuffer) {
                 this.caretMarker = buffer.caretMarker;
             } else {
-                this.caretMarker = buffer.createMarker(buffer.caretMarker.getPosition(), false, "framecaret");
+                this.caretMarker = buffer.createMarker(point ?? +buffer.caretMarker, false, "framecaret");
             }
             this._redrawBuffer();
             this.redrawCaret(true);
@@ -638,10 +634,18 @@ export class Ymacs_SplitCont extends Widget {
         this._rb = DOM.fromHTML(`<div class="bar" tabindex="0"></div>`);
         DOM.on(this._rb, "mousedown", this._onMouseDown.bind(this));
     }
-    setSplit(a, b) {
+    setSplit(a, b, frac) {
         this.add(a);
         this.add(this._rb);
         this.add(b);
+        if (frac != null) {
+            let cont = this.getElement();
+            if (this.o.horiz) {
+                cont.style.gridTemplateRows = `${frac}fr auto ${1-frac}fr`;
+            } else {
+                cont.style.gridTemplateColumns = `${frac}fr auto ${1-frac}fr`;
+            }
+        }
     }
     _onMouseDown(ev) {
         this.#activeElement = document.activeElement;

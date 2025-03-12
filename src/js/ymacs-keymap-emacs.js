@@ -244,6 +244,9 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "C-x C-s"                                 : "save_buffer",
     "C-x s"                                   : "save_some_buffers",
 
+    "C-x r w"                                 : "window_configuration_to_register",
+    "C-x r j"                                 : "jump_to_register",
+
     "C-h m"                                   : "describe_mode",
 });
 

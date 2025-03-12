@@ -27,6 +27,26 @@ let help_keymap = Ymacs_Keymap.define("help", {
     "q": "bury_buffer",
 });
 
+let read_register_keymap = Ymacs_Keymap.define("read_register", {
+    "Escape && C-g": function() {
+        this.popKeymap(read_register_keymap);
+        this.setMinibuffer("");
+    }
+});
+read_register_keymap.defaultHandler = [ function(){
+    var ev = this.interactiveEvent();
+    var ch = ev.key;
+    if (ch.length != 1) {
+        this.signalError("Non-character input event");
+    } else {
+        this.getq("read_register_callback")(ch);
+        this.setq("read_register_callback");
+    }
+    this.popKeymap(read_register_keymap);
+    this.setMinibuffer("");
+    return true;
+} ];
+
 Ymacs_Buffer.newCommands({
 
     forward_char: Ymacs_Interactive("p", function(x) {
@@ -1303,6 +1323,26 @@ Ymacs_Buffer.newCommands({
         });
         buf.dirty(false);
         buf.cmd("goto_char", 0);
+    }),
+
+    window_configuration_to_register: Ymacs_Interactive(function(){
+        this.whenMinibuffer(mb => {
+            mb.prompt("Window configuration to register:");
+            this.setq("read_register_callback", (reg) => {
+                let ymacs = this.ymacs;
+                ymacs.registers[reg] = { frames: ymacs.getFrameConfig() };
+                this.signalInfo(`Saved to register "${reg}"`, null, 2000);
+            });
+            this.pushKeymap(read_register_keymap);
+        });
+    }),
+
+    jump_to_register: Ymacs_Interactive(function(){
+        this.whenMinibuffer(mb => {
+            mb.prompt("Jump to register:");
+            this.setq("read_register_callback", (reg) => this.ymacs.jumpToRegister(reg));
+            this.pushKeymap(read_register_keymap);
+        });
     }),
 
 });
