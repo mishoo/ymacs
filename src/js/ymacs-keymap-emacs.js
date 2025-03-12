@@ -243,6 +243,8 @@ let emacs_keys = Object.assign({}, minibuffer_keys, {
     "C-x C-w"                                 : "write_file",
     "C-x C-s"                                 : "save_buffer",
     "C-x s"                                   : "save_some_buffers",
+
+    "C-h m"                                   : "describe_mode",
 });
 
 let minibuffer_keymap = Ymacs_Keymap.define("emacs_mb", minibuffer_keys);

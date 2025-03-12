@@ -55,6 +55,7 @@ export class Ymacs extends Widget {
         buffers       : [],
         frames        : [],
         cf_frameStyle : Object.create(null),
+        ls_keyName    : ".ymacs",
     };
 
     constructor(...args) {
@@ -410,12 +411,12 @@ export class Ymacs extends Widget {
 
     ls_get() {
         ensureLocalStorage();
-        return JSON.parse(localStorage.getItem(".ymacs") || "{}");
+        return JSON.parse(localStorage.getItem(this.o.ls_keyName) || "{}");
     }
 
     ls_set(src) {
         ensureLocalStorage();
-        localStorage.setItem(".ymacs", JSON.stringify(src));
+        localStorage.setItem(this.o.ls_keyName, JSON.stringify(src));
     }
 
     ls_getFileContents(name, nothrow) {

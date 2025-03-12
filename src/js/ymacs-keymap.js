@@ -17,6 +17,7 @@ export class Ymacs_Keymap {
             obj = keys instanceof this ? keys : new this(keys);
             if (name) {
                 KEYMAPS[name] = obj;
+                obj.name = name;
             }
         }
         return obj;

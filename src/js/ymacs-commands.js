@@ -3,6 +3,7 @@
 /// License: MIT
 
 import { DOM, delayed, formatBytes } from "./ymacs-utils.js";
+import { Ymacs_Keymap } from "./ymacs-keymap.js";
 import { Ymacs_Keymap_UniversalArgument } from "./ymacs-keymap-emacs.js";
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Exception } from "./ymacs-exception.js";
@@ -21,6 +22,10 @@ function TMPL_CHAR_INFO({
   <tr><td style='text-align: right; font-weight: bold'>Buffer size:</td><td> ${sizeKB} </td></tr>
 </table>`;
 }
+
+let help_keymap = Ymacs_Keymap.define("help", {
+    "q": "bury_buffer",
+});
 
 Ymacs_Buffer.newCommands({
 
@@ -1257,6 +1262,47 @@ Ymacs_Buffer.newCommands({
         } else {
             next(value);
         }
+    }),
+
+    bury_buffer: Ymacs_Interactive(function(){
+        let ymacs = this.ymacs;
+        ymacs.switchToNextBuffer();
+    }),
+
+    describe_mode: Ymacs_Interactive(function(){
+        let ymacs = this.ymacs;
+        let buf = ymacs.switchToBuffer("*Help*");
+        ymacs.switchToBuffer(buf);
+        buf.pushKeymap(help_keymap);
+        buf._disableUndo(() => {
+            buf.setCode(`Active keymaps in buffer "${this.name}".\nPress \`q\` to go back.\n\n`);
+            buf.cmd("end_of_buffer");
+            let dumpKeymap = (prefix, definitions) => {
+                for (let [ key, val ] of Object.entries(definitions)) {
+                    let def = (prefix ? prefix + " " : "") + key;
+                    if (Array.isArray(val)) {
+                        let txt = "  ";
+                        txt += def;
+                        for (let n = 20 - def.length; n-- >= 0;) txt += " ";
+                        txt += " : " + (
+                            typeof val[0] == "function" ? "(lambda)" : JSON.stringify(val)
+                        );
+                        buf.cmd("insert", txt);
+                        buf.cmd("newline");
+                    } else if (val && typeof val == "object") {
+                        dumpKeymap(def, val);
+                    }
+                }
+            };
+            [...this.keymap].reverse().forEach((keymap, index) => {
+                if (index > 0) buf.cmd("insert", "\n");
+                buf.cmd("insert", `Keymap: ${keymap.name || "(unnamed)"}\n`);
+                buf.cmd("newline");
+                dumpKeymap("", keymap.definitions);
+            });
+        });
+        buf.dirty(false);
+        buf.cmd("goto_char", 0);
     }),
 
 });
