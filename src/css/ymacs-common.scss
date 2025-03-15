@@ -48,6 +48,17 @@
   }
 }
 
+.Ymacs_Frame.Ymacs_Frame-hasOverlays {
+  .Ymacs_Overlay.selection {
+    display: none;
+  }
+  &.Ymacs_Frame-active {
+    .Ymacs_Overlay.selection {
+      display: block;
+    }
+  }
+}
+
 .Ymacs-frame-overlays {
   overflow: hidden;
   position: relative;

@@ -337,23 +337,64 @@ export class Ymacs extends Widget {
 
     setFrameConfig(config) {
         this.getMainElement()?.remove();
-        [...this.frames].forEach(frame => {
-            remove(this.frames, frame);
-            frame.destroy();
-        });
+
+        // 1. figure out if we already have some frames for the set of
+        // buffers that we'll need to switch to.
+        let buffers = [];
+        let frames = [ ...this.frames ];
+        (function dig(el){
+            if (Array.isArray(el)) {
+                dig(el[2]);
+                dig(el[3]);
+            } else {
+                for (let i = frames.length; --i >= 0;) {
+                    if (frames[i].buffer?.name == el.buffer) {
+                        buffers.push([ el.buffer, frames[i] ]);
+                        frames.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        })(config);
+
+        let getBuffer = bufferName => {
+            return this.getBuffer(bufferName) || this.createBuffer({ name: bufferName });
+        };
+
+        // this will return a frame associated with the given buffer.
+        let getFrame = (bufferName, point) => {
+            let i = buffers.findIndex(([ buf ]) => buf == bufferName);
+            if (i < 0) {
+                // if we don't have an associated frame...
+                if (frames.length > 0) {
+                    // there's still one to spare
+                    let fr = frames.pop();
+                    fr.setBuffer(getBuffer(bufferName, point));
+                    return fr;
+                } else {
+                    // otherwise, create new frame.
+                    return this.createFrame({ buffer: getBuffer(bufferName), point: point });
+                }
+            } else {
+                // found associated frame; remove it from the list.
+                let fr = buffers[i][1];
+                buffers.splice(i, 1);
+                return fr;
+            }
+        };
+
+        // 2. dig it again, this time creating widgets.
         let ops = [];
         let active = null;
-        let dig = (el) => {
+        let main = (function dig(el){
             if (Array.isArray(el)) {
-                let split = new Ymacs_SplitCont({ horiz:  el[0] });
+                let split = new Ymacs_SplitCont({ horiz: el[0] });
                 let frame1 = dig(el[2]);
                 let frame2 = dig(el[3]);
                 ops.push(() => split.setSplit(frame1, frame2, el[1]));
                 return split;
             } else {
-                let buffer = this.getBuffer(el.buffer)
-                    || this.createBuffer({ name: el.buffer });
-                let frame = this.createFrame({ buffer: buffer, point: el.point });
+                let frame = getFrame(el.buffer, el.point);
                 if (el.active) active = frame;
                 ops.push(() => {
                     let div = frame.getOverlaysContainer();
@@ -361,11 +402,24 @@ export class Ymacs extends Widget {
                 });
                 return frame;
             }
-        };
-        let main = dig(config);
+        })(config);
+
+        // at this point, if we still have any frames left (e.g. the
+        // editor had more frames than required by the new config),
+        // remove/destroy them.
+        frames.forEach(fr => {
+            remove(this.frames, fr);
+            fr.destroy();
+        });
+
         let cont = this.getElement();
         cont.insertBefore(main.getElement(), cont.firstElementChild);
+
+        // ops will contain operations to do after the elements are in
+        // the DOM.
         ops.reverse().forEach(f => f());
+
+        // done, reset active frame.
         this.setActiveFrame(active || this.frames[0]);
     }
 
