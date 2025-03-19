@@ -176,7 +176,7 @@ Ymacs_Buffer.newCommands({
         var self = this;
         name = self.ymacs.fs_normalizePath(name);
         self.ymacs.fs_fileType(name, function (type) {
-            if (type === "directory") {
+            if (type == "directory") {
                 self.signalInfo("Can't open directory");
             } else {
                 self.ymacs.fs_getFileContents(name, true, function (code, stamp) {

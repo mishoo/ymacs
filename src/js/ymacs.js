@@ -627,11 +627,13 @@ export class Ymacs extends Widget {
     }
 
     fs_fileType(name, cont) {
-        try {
-            this.ls_getFileContents(name);
-            cont(true);
-        } catch(ex) {
-            cont(null);
+        let { other, dir } = this.ls_getFileDirectory(name);
+        if (other.length > 0) {
+            return cont(!other[0] ? "directory"
+                        : typeof dir[other[0]] == "string" ? "file"
+                        : "new");
+        } else {
+            return cont("directory");
         }
     }
 
@@ -649,19 +651,39 @@ export class Ymacs extends Widget {
         }
     }
 
+    fs_sortDirectoryEntries(dir) {
+        return Object.keys(dir).sort((a, b) => {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+            let adir = typeof dir[a] != "string";
+            let bdir = typeof dir[b] != "string";
+            if (adir && !bdir) return -1;
+            if (bdir && !adir) return 1;
+            if (!adir && !bdir) {
+                let aobj = this.fs_isObjectFileName(a);
+                let bobj = this.fs_isObjectFileName(b);
+                if (aobj && !bobj) return 1;
+                if (bobj && !aobj) return -1;
+            }
+            return a < b ? -1 : a > b ? 1 : 0;
+        });
+    }
+
+    fs_isObjectFileName(filename) {
+        return /\.fasl$/i.test(filename);
+    }
+
     fs_getDirectory(dirname, cont) {
         var info = this.ls_getFileDirectory(dirname, false);
         dirname = info.path.join("/"); // normalized
         if (info) {
             var files = {};
-            for (var f in info.dir) {
-                if (Object.hasOwn(info.dir, f)) {
-                    files[f] = {
-                        name : f,
-                        path : dirname + "/" + f,
-                        type : typeof info.dir[f] == "string" ? "regular" : "directory"
-                    };
-                }
+            for (let f of this.fs_sortDirectoryEntries(info.dir)) {
+                files[f] = {
+                    name : f,
+                    path : dirname + "/" + f,
+                    type : typeof info.dir[f] == "string" ? "file" : "directory"
+                };
             }
             cont(files);
         } else {

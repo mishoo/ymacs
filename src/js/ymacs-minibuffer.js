@@ -112,7 +112,7 @@ function filename_completion(mb, str, cont) {
             cont(null);
         } else {
             var completions = [];
-            for (var f in files) {
+            for (let f of Object.keys(files)) {
                 if (f.indexOf(partial) == 0) {
                     completions.push(add_trailing_slash_to_dir(f));
                 }
@@ -123,15 +123,11 @@ function filename_completion(mb, str, cont) {
                 var prefix = common_prefix(completions);
                 if (prefix != partial) {
                     mb.cmd("minibuffer_replace_input", dir + prefix);
-                    cont(null);
+                    cont(completions.map(name => ({ label: name, value: dir + name })));
                 } else if (completions.length == 1) {
-                    cont([str]);
+                    cont([ str ]);
                 } else {
-                    completions = completions.map(function(name){
-                        return { label: name, value: dir + name };
-                    });
-                    popupCompletionMenu.call(mb, self.getMinibufferFrame(), completions);
-                    cont(null);
+                    cont(completions.map(name => ({ label: name, value: dir + name })));
                 }
             }
         }
@@ -225,8 +221,8 @@ Ymacs_Buffer.newCommands({
         var self = this;
         self.cmd("minibuffer_replace_input_by_current_dir", function () {
             read_with_continuation.call(self, filename_completion, cont, function(mb, name, cont2){
-                self.ymacs.fs_fileType(name, function (type) {
-                    if (type == null) {
+                self.ymacs.fs_fileType(name, function (type){
+                    if (type != "file") {
                         mb.signalError("No such file: " + name);
                         cont2(false);
                     } else {
@@ -240,7 +236,11 @@ Ymacs_Buffer.newCommands({
     minibuffer_read_file: function(cont) {
         var self = this;
         self.cmd("minibuffer_replace_input_by_current_dir", function () {
-            read_with_continuation.call(self, filename_completion, cont);
+            read_with_continuation.call(self, filename_completion, cont, function(mb, name, cont2){
+                self.ymacs.fs_fileType(name, function (type){
+                    cont2(type != "directory");
+                });
+            });
         });
     },
 
@@ -321,6 +321,8 @@ Ymacs_Buffer.newCommands({
             mb.getq("minibuffer_validation").call(mb, null, valid => {
                 if (valid)
                     mb.cmd("minibuffer_keyboard_quit", this.getq("minibuffer_continuation"));
+                else
+                    mb.cmd("minibuffer_complete");
             });
         });
     },
