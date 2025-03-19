@@ -44,11 +44,6 @@ function selectClosestFrameY(byy, pos) {
     }
 }
 
-function ensureLocalStorage() {
-    if (!(window.localStorage && window.localStorage.getItem))
-        throw new Ymacs_Exception("Local storage facility not available in this browser");
-}
-
 export class Ymacs extends Widget {
 
     static options = {
@@ -486,6 +481,16 @@ export class Ymacs extends Widget {
         let box = caret.getBoundingClientRect();
         var byx = [...this.frames].sort((a, b) => a.getBox().left - b.getBox().left);
         var byy = [...this.frames].sort((a, b) => a.getBox().top - b.getBox().top);
+        switch (dir) {
+          case "left":
+            return this._get_frameInDir_left(byx, byy, box, frame);
+          case "right":
+            return this._get_frameInDir_right(byx, byy, box, frame);
+          case "up":
+            return this._get_frameInDir_up(byx, byy, box, frame);
+          case "down":
+            return this._get_frameInDir_down(byx, byy, box, frame);
+        }
         return this["_get_frameInDir_" + dir](byx, byy, box, frame);
     }
 
@@ -526,12 +531,13 @@ export class Ymacs extends Widget {
     /* -----[ local storage ]----- */
 
     ls_get() {
-        ensureLocalStorage();
-        return JSON.parse(localStorage.getItem(this.o.ls_keyName) || "{}");
+        return this.ls_store || (
+            this.ls_store = JSON.parse(localStorage.getItem(this.o.ls_keyName) || "{}")
+        );
     }
 
     ls_set(src) {
-        ensureLocalStorage();
+        this.ls_store = src;
         localStorage.setItem(this.o.ls_keyName, JSON.stringify(src));
     }
 
@@ -569,7 +575,7 @@ export class Ymacs extends Widget {
                 back = [];
                 dir = store;
             }
-            else if (dir.hasOwnProperty(part) && (typeof dir[part] != "string")) {
+            else if (Object.hasOwn(dir, part) && (typeof dir[part] != "string")) {
                 back.push(dir);
                 dir = dir[part];
                 path.push(part);
