@@ -73,6 +73,14 @@ export let DOM = new class {
             y: ev.clientY - box.top
         };
     }
+    relPos(src, tgt = src.offsetParent) {
+        let srcbox = src.getBoundingClientRect();
+        let tgtbox = tgt.getBoundingClientRect();
+        return {
+            x: srcbox.left - tgtbox.left,
+            y: srcbox.top - tgtbox.top,
+        };
+    }
     htmlEscape(str) {
         return str instanceof Raw ? (str+"")
             : (str+"").replace(/&/g, "&amp;")

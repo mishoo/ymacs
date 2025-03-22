@@ -171,6 +171,7 @@ export class Ymacs_Frame extends Widget {
     }
 
     setBuffer(buffer, point) {
+        if (buffer === this.buffer) return;
         if (this.buffer) {
             if (this.caretMarker && !this.o.isMinibuffer) {
                 this.caretMarker.destroy();

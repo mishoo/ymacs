@@ -39,6 +39,13 @@ window.addEventListener("beforeunload", ev => {
     document.body.appendChild(ymacs.getElement());
     ymacs.focus();
 
+    ymacs.makeDialog({
+        closable: true,
+        content(el, dlg) {
+            dlg.o.draggable = el;
+        }
+    });
+
     b().cmd("toggle_line_numbers");
 }
 

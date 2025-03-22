@@ -202,6 +202,7 @@ $lnwidth: 3.1em;
 
 .Ymacs_Resize_horiz { cursor: ns-resize }
 .Ymacs_Resize_vert { cursor: ew-resize }
+.Ymacs_Resize_move { cursor: move }
 
 .Ymacs_Frame:focus {
   outline: none;
@@ -333,4 +334,46 @@ $lnwidth: 3.1em;
   .bold  { font-weight: bold; }
   .link { text-decoration: underline; }
   .trailing-whitespace { text-decoration: underline; }
+}
+
+.Ymacs {
+  .Ymacs_Dialog {
+    position: absolute;
+    box-shadow: 0 0 10px #999;
+    border: 1.5px solid var(--ymacs-cursor-bg);
+    border-radius: 5px;
+    padding: 1px;
+    overflow: hidden;
+    z-index: 100;
+    background: #ffffffe8;
+
+    &.centered {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .close-button {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      color: #555;
+      text-align: center;
+      z-index: 20;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewbox='0 0 40 40'%3E%3Cpath d='M 10,10 L 30,30 M 30,10 L 10,30' stroke='black' stroke-width='3' stroke-linecap='butt' /%3E%3C/svg%3E") no-repeat 50% 50%;
+      background-color: #fff;
+      background-size: 90%;
+
+      &:hover {
+        background-color: #ccc;
+      }
+
+      &:active {
+        background-color: var(--ymacs-cursor-bg);
+      }
+    }
+  }
 }

@@ -307,7 +307,7 @@ export class Ymacs_Buffer extends EventProxy {
 
     setCode(code) {
         // this.__code = code = code.replace(/\t/g, " ".repeat(this.getq("tab_width")));
-        this.__isDirty = false;
+        this.dirty(false);
         this.__code = code;
         this.__size = code.length;
         this.__undoQueue = [];
@@ -660,7 +660,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     renderModelineContent(rc, percent) {
-        var ml = (this.__isDirty ? "**" : "--") +
+        var ml = (this.dirty() ? "**" : "--") +
             ` <span class="mode-line-buffer-id">${DOM.htmlEscape(this.name)}</span>` +
             "  " + percent + " of " + formatBytes(this.getCodeSize(), 2).toLowerCase() + "  " +
             "(" + (rc.row + 1) + "," + rc.col + ") ";
@@ -685,11 +685,11 @@ export class Ymacs_Buffer extends EventProxy {
                     pos   : pos,
                     len   : len,
                     text  : text,
-                    dirty : this.__isDirty
+                    dirty : this.dirty(),
                 });
                 if (q.length > MAX_UNDO_RECORDS)
                     q.shift();
-                this.__isDirty = true;
+                this.dirty(true);
             } else {
                 q.forEach(x => {
                     if (x.type == 3) {
@@ -740,7 +740,7 @@ export class Ymacs_Buffer extends EventProxy {
                 this._insertText(action.text, pos);
                 break;
             }
-            this.__isDirty = action.dirty;
+            this.dirty(action.dirty);
         }
         --this.__undoInProgress;
         return didit;

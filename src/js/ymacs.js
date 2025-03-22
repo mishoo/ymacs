@@ -858,4 +858,122 @@ export class Ymacs extends Widget {
             return true;
         }
     }
+
+    makeDialog(options) {
+        let dlg = new Ymacs_Dialog({ ...options, ymacs: this });
+        this.add(dlg);
+        return dlg;
+    }
+}
+
+function cssSize(prop) {
+    if (typeof prop == "number") {
+        if (prop <= 1 && prop > 0) prop = prop * 100 + "%";
+        else prop += "px";
+    }
+    return prop;
+}
+
+export class Ymacs_Dialog extends Widget {
+    static options = {
+        draggable: false,
+        resizable: false,
+        closable: false,
+        content: null,
+        centered: false,
+        width: "40%",
+        height: "50%",
+        ymacs: null,
+    };
+
+    constructor(...args) {
+        super(...args);
+        this.ymacs = this.o.ymacs;
+
+        let cont = this.getElement();
+        let content = this.o.content;
+        if (typeof content == "function") {
+            content = content.call(this, cont, this);
+        }
+        if (content) {
+            cont.appendChild(content);
+        }
+        if (this.o.resizable) {
+            cont.style.resize = "both";
+        }
+        if (this.o.width) {
+            cont.style.width = cssSize(this.o.width);
+        }
+        if (this.o.height) {
+            cont.style.height = cssSize(this.o.height);
+        }
+        if (this.o.closable) {
+            if (this.o.closable === true) {
+                let el = DOM.fromHTML(`<div class="close-button"></div>`);
+                cont.appendChild(el);
+                this.o.closable = el;
+            }
+            DOM.on(this.o.closable, {
+                mousedown: ev => ev.stopPropagation(),
+                click: this._closeClick.bind(this),
+            });
+        }
+        if (this.o.draggable) {
+            if (this.o.draggable === true) this.o.draggable = cont;
+            this._dragHandlers = {
+                mousemove : this._dragMouseMove.bind(this),
+                mouseup   : this._dragMouseUp.bind(this),
+            };
+            DOM.on(this.o.draggable, "mousedown", this._dragMouseDown.bind(this));
+        }
+    }
+
+    initClassName() {
+        let a = [ "Ymacs_Dialog" ];
+        if (this.o.centered) a.push("centered");
+        return a.join(" ");
+    }
+
+    close() {
+        this.getElement().remove();
+        this.destroy();
+        this.ymacs.focus();
+        this.callHooks("onClose");
+    }
+
+    _closeClick(ev) {
+        ev.stopPropagation();
+        this.close();
+    }
+
+    _dragMouseDown(ev) {
+        ev.stopPropagation();
+        let cont = this.getElement();
+        this._dragging = {
+            orig: DOM.relPos(cont),
+            start: DOM.mousePos(ev, cont.offsetParent),
+            focus: document.activeElement,
+        };
+        DOM.on(window, this._dragHandlers);
+        DOM.overlayOn("Ymacs_Resize_move");
+    }
+
+    _dragMouseMove(ev) {
+        let cont = this.getElement();
+        let mouse = DOM.mousePos(ev, cont.offsetParent);
+        let drg = this._dragging;
+        let dx = mouse.x - drg.start.x;
+        let dy = mouse.y - drg.start.y;
+        cont.style.removeProperty("bottom");
+        cont.style.removeProperty("right");
+        cont.style.left = drg.orig.x + dx + "px";
+        cont.style.top = drg.orig.y + dy + "px";
+    }
+
+    _dragMouseUp(ev) {
+        DOM.off(window, this._dragHandlers);
+        DOM.overlayOff();
+        this._dragging.focus?.focus();
+        this._dragging = null;
+    }
 }

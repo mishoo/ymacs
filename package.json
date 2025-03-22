@@ -2,7 +2,6 @@
     "name": "ymacs",
     "version": "0.6.0",
     "description": "Emacs-like editor for the browser",
-
     "main": "dist/ymacs.mjs",
     "css": "dist/ymacs.css",
     "targets": {
@@ -37,7 +36,6 @@
             ]
         }
     },
-
     "directories": {
         "test": "test"
     },
