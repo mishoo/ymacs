@@ -121,11 +121,18 @@ export class Ymacs_Text_Properties extends EventProxy {
             }
             if (o && o != last) {
                 if (last)
-                    ret += "</span>";
-                ret += "<span class='" + o + "'>";
+                    ret += "</a>";
+                ret += "<a ";
+                let prev = o;
+                o = o.replace(/:href-([^\s]*)/g, function(s, p){
+                    if (p) ret += `href="${p}" `;
+                    return "";
+                });
+                ret += "class='" + o + "'>";
+                o = prev;
             }
             else if (!o && last) {
-                ret += "</span>";
+                ret += "</a>";
             }
             last = o;
             // XXX: Should have used a hash rather than a
@@ -141,7 +148,7 @@ export class Ymacs_Text_Properties extends EventProxy {
             ++i;
         }
         if (last)
-            ret += "</span>";
+            ret += "</a>";
         if (i === caret) {
             // caret is at EOL
             ret += "<span class='Ymacs-caret'>&nbsp;</span>";

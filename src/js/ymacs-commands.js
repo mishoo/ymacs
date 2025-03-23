@@ -231,6 +231,10 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
+    stupid_indent: Ymacs_Interactive(function(){
+
+    }),
+
     indent_line: Ymacs_Interactive("P", function(noEmpty) {
         if (!this.tokenizer) {
             this.cmd("insert", " ".repeat(this.getq("indent_line")));
@@ -376,10 +380,15 @@ Ymacs_Buffer.newCommands({
     }),
 
     backward_paragraph: Ymacs_Interactive_X(function(){
+        let point = this.point();
         let rx = this.getq("syntax_paragraph_sep");
         this.cmd("beginning_of_line");
         if (this.cmd("looking_back", rx)) {
-            this.cmd("goto_char", this.cmd("match_beginning"));
+            let pos = this.cmd("match_end");
+            if (pos == point) {
+                pos = this.cmd("match_beginning");
+            }
+            this.cmd("goto_char", pos);
         }
         if (this.cmd("search_backward_regexp", rx)) {
             this.cmd("goto_char", this.cmd("match_end"));
@@ -1061,6 +1070,7 @@ Ymacs_Buffer.newCommands({
         var self = this;
         function kill() {
             self.whenYmacs(function(ymacs){
+                ymacs.switchToNextBuffer();
                 ymacs.killBuffer(self);
             });
         }

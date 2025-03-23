@@ -4,37 +4,20 @@
 
 import { Ymacs_Buffer } from "./ymacs-buffer.js";
 import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
+import { Ymacs_BaseLang } from "./ymacs-baselang.js";
+import { Ymacs_Keymap } from "./ymacs-keymap.js";
 
-Ymacs_Tokenizer.define("markdown", function(stream, tok) {
+let RX_URL = /^\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/i;
 
-    let $inline = [];
-    let $parens = [];
-    let $cont = [];
-    let $passedParens = [];
-    let PARSER = {
-        next: next,
-        copy: copy,
-        get passedParens() {
-            return $passedParens;
-        },
-    };
-
-    function copy() {
-        let _cont = [...$cont];
-        let _inline = [...$inline];
-        let _parens = [...$parens];
-        let _passedParens = [...$passedParens];
-        return resume;
-        function resume() {
-            $cont = [..._cont];
-            $inline = [..._inline];
-            $parens = [..._parens];
-            $passedParens = [..._passedParens];
-            return PARSER;
-        }
-    }
-
-    let OPEN_PAREN = {
+class Ymacs_Lang_Markdown extends Ymacs_BaseLang {
+    COMMENT = [];
+    STRING = [
+        [ "`", "`", null, null, "markdown-code" ],
+        [ "**", "**", null, null, "bold" ],
+        [ "__", "__", null, null, "bold" ],
+        [ "*", "*", null, null, "italic" ],
+    ];
+    OPEN_PAREN = {
         "(" : ")",
         "{" : "}",
         "[" : "]",
@@ -42,8 +25,7 @@ Ymacs_Tokenizer.define("markdown", function(stream, tok) {
         "❰" : "❱",
         "“" : "”",
     };
-
-    let CLOSE_PAREN = {
+    CLOSE_PAREN = {
         ")" : "(",
         "}" : "{",
         "]" : "[",
@@ -52,75 +34,95 @@ Ymacs_Tokenizer.define("markdown", function(stream, tok) {
         "”" : "“",
     };
 
-    function foundToken(c1, c2, type) {
-        tok.onToken(stream.line, c1, c2, type);
+    _block = null;
+
+    copy() {
+        let _super = super.copy();
+        let _block = this._block;
+        return () => {
+            let self = _super();
+            self._block = _block;
+            return self;
+        };
     }
 
-    function isOpenParen(ch) {
-        return OPEN_PAREN[ch];
+    t(type = null, len = 1) {
+        if (this._block != null) {
+            type = this._block + (type != null ? " " + type : "");
+        }
+        this.token({
+            line: this._stream.line,
+            c1: this._stream.col,
+            c2: this._stream.col += len,
+        }, type);
     }
 
-    function isCloseParen(ch) {
-        return CLOSE_PAREN[ch];
+    next() {
+        if (this._stream.eol()) this._block = null;
+        return super.next();
     }
 
-    function next() {
-        stream.checkStop();
-        if ($cont.length > 0)
-            return $cont.at(-1)();
-        readToken();
+    read() {
+        ((this._block != "markdown-pre" && this.readInline()) ||
+         this.readCustom() ||
+         this.readOpenParen() ||
+         this.readCloseParen() ||
+         this.readTrailingWhitespace() ||
+         this.t());
     }
 
-    function readToken() {
-        let ch = stream.peek(), tmp;
-        if (stream.col == 0 && (tmp = stream.lookingAt(/^(#+)/))) {
-            foundToken(0, stream.col = stream.lineLength(), "heading" + tmp[0].length);
+    readInline() {
+        return this.readString();
+    }
+
+    readCustom() {
+        let s = this._stream, m;
+        if (s.col == 0 && (m = s.lookingAt(/^#+/))) {
+            this._block = "heading" + m[0].length;
         }
-        else if (stream.line > 0 && stream.col == 0 && (tmp = stream.lookingAt(/^[=-]+$/)) && /\S/.test(stream.lineText(stream.line - 1))) {
-            tmp = tmp[0].charAt(0) == "=" ? 1 : 2;
-            tmp = "heading" + tmp;
-            tok.onToken(stream.line - 1, 0, stream.lineLength(stream.line - 1), tmp);
-            foundToken(0, stream.col = stream.lineLength(), tmp);
+        else if (s.col == 0 && (m = s.lookingAt(/^    /))) {
+            this._block = "markdown-pre";
         }
-        else if (stream.col == 0 && (tmp = stream.lookingAt(/^>\s*[>\s]*/))) {
-            tmp = tmp[0].replace(/\s+/g, "").length;
-            if (tmp > 3)
-                tmp = "";
-            tmp = "markdown-blockquote" + tmp;
-            foundToken(0, stream.col = stream.lineLength(), tmp);
+        else if (s.col == 0 && (m = s.lookingAt(/^>[>\s]*/))) {
+            let level = m[0].replace(/\s+/g, "").length - 1;
+            level = Math.min(3, level);
+            this._block = "markdown-blockquote" + (level > 0 ? level : "");
         }
-        else if ((tmp = isOpenParen(ch))) {
-            $parens.push({ line: stream.line, col: stream.col, type: ch });
-            foundToken(stream.col, ++stream.col, "open-paren");
+        else if ((m = s.lookingAt(RX_URL))) {
+            this.t(`hyperlink :href-${m[0]}`, m[0].length);
+            return true;
         }
-        else if ((tmp = isCloseParen(ch))) {
-            let p = $parens.pop();
-            if (!p || p.type != tmp) {
-                foundToken(stream.col, ++stream.col, "error");
-            } else {
-                p.closed = { line: stream.line, col: stream.col, opened: p };
-                $passedParens.push(p);
-                foundToken(stream.col, ++stream.col, "close-paren");
-            }
-        }
-        else {
-            foundToken(stream.col, ++stream.col, null);
+        else if ((m = s.lookingAt(/^\[[a-zA-Z0-9_-]+\]/))) {
+            this.t("markdown-ref", m[0].length);
+            return true;
         }
     }
 
-    return PARSER;
+    indentation() {
+        let s = this._stream;
+        let row = s.line;
+        return row > 0 && s.lineIndentation(row - 1) || s.lineIndentation(row);
+    }
+}
 
+let Ymacs_Keymap_Markdown = Ymacs_Keymap.define("markdown", {
+    "`"   : [ "paredit_open_pair", "`", "`", /[\`\\]/g ],
+    "M-`" : [ "paredit_wrap_round", "`", "`", /[\`\\]/g ],
 });
+
+Ymacs_Tokenizer.define("markdown", (stream, tok) => new Ymacs_Lang_Markdown({ stream, tok }));
 
 Ymacs_Buffer.newMode("markdown_mode", function() {
 
     var tok = this.tokenizer;
     this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "markdown" }));
     var was_paren_match = this.cmd("paren_match_mode", true);
+    this.pushKeymap(Ymacs_Keymap_Markdown);
     return function() {
         this.setTokenizer(tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
+        this.popKeymap(Ymacs_Keymap_Markdown);
     };
 
 });

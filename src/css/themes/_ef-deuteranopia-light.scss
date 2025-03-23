@@ -33,6 +33,19 @@ $cursor_fg: #f5f5ff;
 .Ymacs_Frame-active .Ymacs_Modeline { color: #0a0a1f; background-color: #99c7ff; }
 .minibuffer-prompt { color: #375cd8; }
 .mode-line-buffer-id { font-weight: bold; }
+.heading1 { color: #805d00; font-weight: bold; }
+.heading2 { color: #4250ef; font-weight: bold; }
+.heading3 { color: #765040; font-weight: bold; }
+.heading4 { color: #065fff; font-weight: bold; }
+.markdown-blockquote { color: #506fa0; font-style: italic; }
+.markdown-blockquote1 { color: #506fa0; font-style: italic; }
+.markdown-blockquote2 { color: #506fa0; font-style: italic; }
+.markdown-blockquote3 { color: #506fa0; font-style: italic; }
+.markdown-pre { color: #065fff; }
+.markdown-code { color: #965000; }
+.markdown-code-starter { color: #965000; }
+.markdown-code-stopper { color: #965000; }
+.markdown-ref { color: #375cd8; }
 .directive { color: #6052cf; }
 .type { color: #805d00; }
 .builtin { color: #1f6fbf; font-weight: bold; }
@@ -71,12 +84,5 @@ $cursor_fg: #f5f5ff;
 .block-starter, .block-stopper { color: #6052cf; }
 .exp-starter, .exp-stopper { color: #6052cf; }
 .lisp-keyword { color: #1f6fbf; font-weight: bold; }
-.heading1 { color: #805d00; font-weight: bold; }
-.heading2 { color: #4250ef; font-weight: bold; }
-.heading3 { color: #765040; font-weight: bold; }
-.heading4 { color: #065fff; font-weight: bold; }
-.markdown-blockquote { color: #77604a; font-style: italic; }
-.markdown-blockquote1 { color: #77604a; font-style: italic; }
-.markdown-blockquote2 { color: #77604a; font-style: italic; }
-.markdown-blockquote3 { color: #77604a; font-style: italic; }
+.hyperlink { color: #375cd8; }
 }

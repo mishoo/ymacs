@@ -295,11 +295,12 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     dirty(dirty) {
-        if (arguments.length > 0) {
+        if (dirty != null) {
             this.__isDirty = dirty;
-            this.__undoQueue.forEach(x => {
-                if (x.type !== 3) x.dirty = true;
-            });
+            // XXX: what was this?
+            // this.__undoQueue.forEach(x => {
+            //     if (x.type !== 3) x.dirty = true;
+            // });
             this.updateModeline();
         }
         return this.__isDirty;

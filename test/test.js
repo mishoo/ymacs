@@ -29,7 +29,8 @@ window.addEventListener("beforeunload", ev => {
     //b().cmd("load_file", "test.html");
     b().setVariable("fill_column", 80);
 
-    b().cmd("load_file", "lisp/compiler.lisp");
+    b().cmd("load_file", "info.md");
+    b().cmd("split_frame_horizontally");
     // b().callInteractively("split_frame_horizontally");
     // b().cmd("other_frame");
     // b().cmd("load_file", "queen-board.lisp");
@@ -39,12 +40,12 @@ window.addEventListener("beforeunload", ev => {
     document.body.appendChild(ymacs.getElement());
     ymacs.focus();
 
-    ymacs.makeDialog({
-        closable: true,
-        content(el, dlg) {
-            dlg.o.draggable = el;
-        }
-    });
+    // ymacs.makeDialog({
+    //     closable: true,
+    //     content(el, dlg) {
+    //         dlg.o.draggable = el;
+    //     }
+    // });
 
     b().cmd("toggle_line_numbers");
 }

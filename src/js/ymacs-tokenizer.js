@@ -351,7 +351,7 @@ export class Ymacs_Tokenizer extends EventProxy {
     }
 
     getIndentation(row, buffer) {
-        var p = this.getParserForLine(row);
+        var p = this.getParserForLine(row, null);
         if (p && p.indentation instanceof Function)
             return p.indentation(buffer);
     }

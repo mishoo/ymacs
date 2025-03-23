@@ -111,7 +111,10 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
 
     t(type = null, len = 1, addInline) {
         if (addInline && this.inline) {
-            type = this.inline.cls(this._inline) + " " + type;
+            let cls = this.inline.cls(this._inline);
+            if (cls != null) {
+                type = cls + (type != null ? " " + type : "");
+            }
         }
         this.token({
             line: this._stream.line,

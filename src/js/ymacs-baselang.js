@@ -158,16 +158,16 @@ export class Ymacs_BaseLang {
         }
     }
 
-    readString(start, stop, expStart, expStop) {
+    readString(start, stop, expStart, expStop, tokType) {
         let s = this._stream;
         if (this._inString) {
             if (s.lookingAt("\\")) {
-                this.t("string");
-                this.t("string");
+                this.t(tokType);
+                this.t(tokType);
             } else if (s.lookingAt(stop)) {
                 this.popCont();
                 this._inString = false;
-                this.popInParen(start, stop.length, "string-stopper");
+                this.popInParen(start, stop.length, `${tokType}-stopper`);
             } else if (expStart && s.lookingAt(expStart)) {
                 this._inString = false;
                 let op = this.pushInParen(expStart);
@@ -181,15 +181,15 @@ export class Ymacs_BaseLang {
                     }
                 });
             } else {
-                this.t("string");
+                this.t(tokType);
             }
         } else for (let syn of this.STRING) {
-            let start = syn, stop = syn, expStart, expStop;
-            if (Array.isArray(syn)) [ start, stop, expStart, expStop ] = syn;
+            let start = syn, stop = syn, expStart, expStop, tokType = "string";
+            if (Array.isArray(syn)) [ start, stop, expStart, expStop, tokType = "string" ] = syn;
             if (s.lookingAt(start)) {
-                this.pushInParen(start, "string-starter");
+                this.pushInParen(start, `${tokType}-starter`);
                 this._inString = true;
-                this.pushCont(this.readString.bind(this, start, stop, expStart, expStop));
+                this.pushCont(this.readString.bind(this, start, stop, expStart, expStop, tokType));
                 return true;
             }
         }

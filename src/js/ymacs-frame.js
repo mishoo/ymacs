@@ -517,7 +517,13 @@ export class Ymacs_Frame extends Widget {
     _dragSelect_onMouseDown(ev) {
         if (ev.ctrlKey && ev.shiftKey)
             return;
+        if (ev.button != 0) {
+            setTimeout(() => this.focus());
+            return;
+        }
+        this.focus();
         ev.stopPropagation();
+        ev.preventDefault();
 
         clearTimeout(CLICK_COUNT_TIMER);
         CLICK_COUNT++;
