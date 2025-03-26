@@ -52,7 +52,7 @@
   .Ymacs_Overlay.selection {
     display: none;
   }
-  &.Ymacs_Frame-active {
+  &.Ymacs_Frame-active, &.Ymacs_Minibuffer {
     .Ymacs_Overlay.selection {
       display: block;
     }

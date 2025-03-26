@@ -9,7 +9,8 @@ import { Ymacs_Popup } from "./ymacs-popup.js";
 import { Ymacs_Interactive } from "./ymacs-interactive.js";
 
 var $menu = null, $selectedIndex = null, $selectedItem = null;
-function popupCompletionMenu(frame, list) {
+function popupCompletionMenu(frame, list, { noError = false, noPrefix = false } = {}) {
+    killMenu();
     let activeElement = document.activeElement;
     let ymacs = this.ymacs; // `this` is the minibuffer
     $menu = new Ymacs_Popup();
@@ -40,7 +41,7 @@ function popupCompletionMenu(frame, list) {
     // it's not working very well with filename completion.
     let onChange = this.getq("ivy_completion") && delayed(() => {
         killMenu();
-        this.cmd("minibuffer_complete");
+        this.cmd("minibuffer_complete", { noError, noPrefix });
     }, 1);
 
     this.pushKeymap(KEYMAP_POPUP_ACTIVE);
@@ -73,8 +74,9 @@ function select(idx) {
 
 export function read_with_continuation(completions, cont, validate) {
     this.whenMinibuffer(function(mb){
+        let ivy = completions !== filename_completion;
         var changed_vars = mb.setq({
-            ivy_completion: completions !== filename_completion,
+            ivy_completion: ivy,
             completion_list: completions,
             minibuffer_validation: (what, cont2) => {
                 if (what == null)
@@ -90,11 +92,11 @@ export function read_with_continuation(completions, cont, validate) {
                     cont.call(this, what);
             },
         });
-        mb.cmd("minibuffer_complete", { noError: true });
+        mb.cmd("minibuffer_complete", { noError: true, noPrefix: !ivy });
     });
 }
 
-function filename_completion(mb, str, cont) {
+function filename_completion(mb, str, cont, { noPrefix = false } = {}) {
     var self = this;
     var lastslash = str.lastIndexOf("/");
     var dir = str.slice(0, lastslash+1);
@@ -121,7 +123,7 @@ function filename_completion(mb, str, cont) {
                 cont([]);
             } else {
                 var prefix = common_prefix(completions);
-                if (prefix != partial) {
+                if (prefix != partial && !noPrefix) {
                     mb.cmd("minibuffer_replace_input", dir + prefix);
                     cont(completions.map(name => ({ label: name, value: dir + name })));
                 } else if (completions.length == 1) {
@@ -282,14 +284,22 @@ Ymacs_Buffer.newCommands({
             var self = this;
             var name = ymacs.getActiveBuffer().name;
             var dir = name.slice(0, name.lastIndexOf("/")+1);
-            ymacs.fs_remapDir(dir, function (dir) {
-                self.cmd("minibuffer_replace_input", dir);
-                cont();
+            ymacs.fs_getDirectory(dir, function (info){
+                if (info && Object.keys(info).length > 0) {
+                    ymacs.fs_remapDir(dir, function (dir) {
+                        self.cmd("minibuffer_replace_input", dir);
+                        self.cmd("minibuffer_complete", { noError: true, noPrefix: true });
+                        cont();
+                    });
+                } else {
+                    self.cmd("minibuffer_replace_input", "");
+                    cont();
+                }
             });
         });
     },
 
-    minibuffer_complete: function({ noError = false } = {}) {
+    minibuffer_complete: function({ noError = false, noPrefix = false } = {}) {
         var self = this;
         self.whenMinibuffer(function(mb){
             let str = mb.cmd("minibuffer_contents");
@@ -299,14 +309,14 @@ Ymacs_Buffer.newCommands({
                 if (!a || a.length == 0) {
                     if (!noError) mb.signalError("No completions", false, 2000);
                 } else {
-                    popupCompletionMenu.call(mb, self.getMinibufferFrame(), a);
+                    popupCompletionMenu.call(mb, self.getMinibufferFrame(), a, { noError, noPrefix });
                 }
             }
 
             if (a instanceof Function) {
                 a.call(self, mb, str, function (a) {
                     if (a) complete(a);
-                });
+                }, { noPrefix });
             }
             else if (a && a.length > 0) {
                 complete(fuzzy_filter(a, str));
@@ -407,11 +417,24 @@ function handle_home_mark() {
     this.ensureTransientMark();
 }
 
+function handle_tilde() {
+    if (this.getq("completion_list") === filename_completion) {
+        if (this.cmd("looking_back", "/")) {
+            killMenu();
+            this.cmd("minibuffer_replace_input", "~/");
+            this.cmd("minibuffer_complete", { noError: true, noPrefix: true });
+            return;
+        }
+    }
+    this.cmd("self_insert_command");
+}
+
 var DEFAULT_KEYS = {
     "Tab"                                : handle_tab,
     "Enter"                              : handle_enter,
     "Home && C-a"                        : handle_home,
-    "S-Home && S-C-a"                    : Ymacs_Interactive("^", handle_home_mark)
+    "~"                                  : handle_tilde,
+    "S-Home && S-C-a"                    : Ymacs_Interactive("^", handle_home_mark),
 };
 
 var KEYMAP_MB_ACTIVE = Ymacs_Keymap.define(null, Object.assign({
