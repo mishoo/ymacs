@@ -349,6 +349,7 @@ const LOOP_KEYWORDS = regexp_opt("\
   symbol symbols external-symbol external-symbols present-symbol present-symbols \
   named always never thereis \
   of-type \
+  find maximizes minimizes that which \
   repeat finally initially return \
   if else when unless do doing");
 
