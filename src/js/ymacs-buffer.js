@@ -848,7 +848,7 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     _swapAreas(a) {
-        a = a.map(MRK).sort();
+        a = a.map(MRK).sort((a, b) => a - b);
         var b1 = a[0];
         var e1 = a[1];
         var b2 = a[2];
