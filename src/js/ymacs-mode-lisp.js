@@ -572,6 +572,9 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 else if (this._formLen == 1 && this.isForm(DEFINES_TYPE)) {
                     type = "type";
                 }
+                else if (this._formLen == 1 && this.isForm("let")) {
+                    type = "function-name";
+                }
                 else if (this._formLen == 1 && this.isForm(DEFINES_VARIABLE)) {
                     type = "variable-name";
                 }
