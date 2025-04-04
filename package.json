@@ -59,7 +59,7 @@
     },
     "homepage": "https://github.com/mishoo/ymacs#readme",
     "devDependencies": {
-	"@parcel/transformer-sass": "^2.12.0",
-	"parcel": "^2.12.0"
+	"@parcel/transformer-sass": "^2.14.0",
+	"parcel": "^2.14.0"
     }
 }
