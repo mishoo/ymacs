@@ -259,6 +259,7 @@
                  standard-dark
                  standard-light
                  ef-elea-dark
+                 ef-elea-light
                  ef-deuteranopia-light
                  ef-cyprus
                  ef-autumn

@@ -5,60 +5,61 @@
     "main": "dist/ymacs.mjs",
     "css": "dist/ymacs.css",
     "targets": {
-        "main": {
-            "source": "src/index.js",
-            "optimize": true
-        },
-        "css": {
-            "source": "src/css/ymacs.scss",
-            "optimize": true
-        },
-        "themes": {
-            "source": [
-                "src/css/themes/sanityinc-tomorrow-day.scss",
-                "src/css/themes/sanityinc-tomorrow-blue.scss",
-                "src/css/themes/sanityinc-tomorrow-night.scss",
-                "src/css/themes/sanityinc-tomorrow-bright.scss",
-                "src/css/themes/sanityinc-tomorrow-eighties.scss",
-                "src/css/themes/material.scss",
-                "src/css/themes/base16-apathy.scss",
-                "src/css/themes/whiteboard.scss",
-                "src/css/themes/standard-light.scss",
-                "src/css/themes/standard-dark.scss",
-                "src/css/themes/ef-deuteranopia-light.scss",
-                "src/css/themes/ef-cyprus.scss",
-                "src/css/themes/ef-elea-dark.scss",
-                "src/css/themes/ef-autumn.scss",
-                "src/css/themes/ef-maris-light.scss",
-                "src/css/themes/ef-maris-dark.scss",
-                "src/css/themes/ef-duo-light.scss",
-                "src/css/themes/ef-duo-dark.scss"
-            ]
-        }
+	"main": {
+	    "source": "src/index.js",
+	    "optimize": true
+	},
+	"css": {
+	    "source": "src/css/ymacs.scss",
+	    "optimize": true
+	},
+	"themes": {
+	    "source": [
+		"src/css/themes/sanityinc-tomorrow-day.scss",
+		"src/css/themes/sanityinc-tomorrow-blue.scss",
+		"src/css/themes/sanityinc-tomorrow-night.scss",
+		"src/css/themes/sanityinc-tomorrow-bright.scss",
+		"src/css/themes/sanityinc-tomorrow-eighties.scss",
+		"src/css/themes/material.scss",
+		"src/css/themes/base16-apathy.scss",
+		"src/css/themes/whiteboard.scss",
+		"src/css/themes/standard-light.scss",
+		"src/css/themes/standard-dark.scss",
+		"src/css/themes/ef-deuteranopia-light.scss",
+		"src/css/themes/ef-cyprus.scss",
+		"src/css/themes/ef-elea-dark.scss",
+		"src/css/themes/ef-elea-light.scss",
+		"src/css/themes/ef-autumn.scss",
+		"src/css/themes/ef-maris-light.scss",
+		"src/css/themes/ef-maris-dark.scss",
+		"src/css/themes/ef-duo-light.scss",
+		"src/css/themes/ef-duo-dark.scss"
+	    ]
+	}
     },
     "directories": {
-        "test": "test"
+	"test": "test"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+	"test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
-        "type": "git",
-        "url": "git+https://github.com/mishoo/ymacs.git"
+	"type": "git",
+	"url": "git+https://github.com/mishoo/ymacs.git"
     },
     "keywords": [
-        "emacs",
-        "editor",
-        "web"
+	"emacs",
+	"editor",
+	"web"
     ],
     "author": "Mihai Bazon <mihai.bazon@gmail.com>",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/mishoo/ymacs/issues"
+	"url": "https://github.com/mishoo/ymacs/issues"
     },
     "homepage": "https://github.com/mishoo/ymacs#readme",
     "devDependencies": {
-        "@parcel/transformer-sass": "^2.12.0",
-        "parcel": "^2.12.0"
+	"@parcel/transformer-sass": "^2.12.0",
+	"parcel": "^2.12.0"
     }
 }
