@@ -364,48 +364,50 @@ const DEFINES_TYPE = toHash("deftype defclass defstruct");
 const DEFINES_VARIABLE = toHash("defvar defparameter defconstant defconst");
 
 const FORM_ARGS = {
-    "if"                  : "3+",
-    "aif"                 : "3+",
-    "when"                : "1*",
-    "awhen"               : "1*",
-    "once-only"           : "1*",
-    "lambda"              : "1*",
-    "unless"              : "1*",
-    "defun"               : "2*",
-    "defpackage"          : "1*",
-    "defgeneric"          : "2*",
-    "defmethod"           : "2*",
-    "defclass"            : "2*",
-    "defstruct"           : "1*",
-    "defmacro"            : "2*",
-    "progn"               : "0+",
-    "begin"               : "0+",
-    "prog1"               : "1*",
-    "prog2"               : "2*",
-    "let"                 : "1*",
-    "labels"              : "1*",
-    "flet"                : "1*",
-    "macrolet"            : "1*",
-    "symbol-macrolet"     : "1*",
-    "destructuring-bind"  : "2*",
-    "unwind-protect"      : "1*",
-    "catch"               : "1*",
-    "case"                : "1*",
-    "ecase"               : "1*",
-    "typecase"            : "1*",
-    "etypecase"           : "1*",
-    "cond"                : "0+",
-    "handler-bind"        : "1*",
-    "handler-case"        : "1*",
-    "restart-bind"        : "1*",
-    "restart-case"        : "1*",
-    "return-from"         : "1*",
-    "block"               : "1*",
-    "dotimes"             : "1*",
-    "dolist"              : "1*",
-    "multiple-value-bind" : "2*",
-    ":method"             : "1*",
-    "eval-when"           : "1*",
+    "if"                   : "3+",
+    "aif"                  : "3+",
+    "when"                 : "1*",
+    "awhen"                : "1*",
+    "once-only"            : "1*",
+    "lambda"               : "1*",
+    "unless"               : "1*",
+    "defun"                : "2*",
+    "defpackage"           : "1*",
+    "deftest"              : "1*",
+    "defgeneric"           : "2*",
+    "defmethod"            : "2*",
+    "defclass"             : "2*",
+    "defstruct"            : "1*",
+    "defmacro"             : "2*",
+    "progn"                : "0+",
+    "begin"                : "0+",
+    "prog1"                : "1*",
+    "multiple-value-prog1" : "1*",
+    "prog2"                : "2*",
+    "let"                  : "1*",
+    "labels"               : "1*",
+    "flet"                 : "1*",
+    "macrolet"             : "1*",
+    "symbol-macrolet"      : "1*",
+    "unwind-protect"       : "1*",
+    "catch"                : "1*",
+    "case"                 : "1*",
+    "ecase"                : "1*",
+    "typecase"             : "1*",
+    "etypecase"            : "1*",
+    "cond"                 : "0+",
+    "handler-bind"         : "1*",
+    "handler-case"         : "1*",
+    "restart-bind"         : "1*",
+    "restart-case"         : "1*",
+    "return-from"          : "1*",
+    "block"                : "1*",
+    "dotimes"              : "1*",
+    "dolist"               : "1*",
+    "destructuring-bind"   : "2*",
+    "multiple-value-bind"  : "2*",
+    ":method"              : "1*",
+    "eval-when"            : "1*",
 };
 
 const LOCAL_BODYDEF = toHash("labels flet macrolet");
@@ -555,7 +557,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 if (pform == "define" && this._formLen == 0) {
                     type = "function-name";
                 }
-                else if (/^def(?!un|ine)/.test(pform)) {
+                else if (/^def(?!un|ine|test)/.test(pform)) {
                     type = "function-name";
                 }
             }
@@ -729,7 +731,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         },
         syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u,
         paredit_space_before() {
-            return !this.looking_back(/[\s\(\)\[\]\{\},.@'`#\\]/g);
+            return !this.looking_back(/[\s\(\)\[\]\{\},.@'`#\\"]/g);
         },
     });
     var was_paren_match = this.cmd("paren_match_mode", true);

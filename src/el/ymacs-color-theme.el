@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (require 'cl)
 (require 'nxml-mode)
 (require 'info)
