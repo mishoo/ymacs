@@ -7,6 +7,21 @@ window.addEventListener("beforeunload", ev => {
     return ev.returnValue = true;
 });
 
+let keymap = Ymacs_Keymap.define(null, {
+    "M-1": function() {
+        this.cmd("popup_menu", {
+            items: [
+                "Ymacs",
+                "SLip",
+                "Stuff",
+            ],
+            onSelect(index) {
+                alert(index);
+            }
+        });
+    }
+});
+
 {
     let ymacs = window.ymacs = new Ymacs();
     Object.assign(ymacs.getElement().style, {
@@ -29,7 +44,7 @@ window.addEventListener("beforeunload", ev => {
     //b().cmd("load_file", "test.html");
     b().setVariable("fill_column", 80);
 
-    b().cmd("load_file", "info.md");
+    //b().cmd("load_file", "info.md");
     b().cmd("split_frame_horizontally");
     // b().callInteractively("split_frame_horizontally");
     // b().cmd("other_frame");
@@ -39,6 +54,8 @@ window.addEventListener("beforeunload", ev => {
 
     document.body.appendChild(ymacs.getElement());
     ymacs.focus();
+
+    b().pushKeymap(keymap);
 
     // ymacs.makeDialog({
     //     closable: true,
