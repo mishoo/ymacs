@@ -268,7 +268,9 @@
                  ef-maris-dark
                  ef-maris-light
                  ef-duo-dark
-                 ef-duo-light)))
+                 ef-duo-light
+                 ef-dream
+                 ef-owl)))
     (cl-loop for theme in names
        for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
        do (load-theme theme t t)

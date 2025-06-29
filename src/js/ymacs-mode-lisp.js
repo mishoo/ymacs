@@ -404,6 +404,8 @@ const FORM_ARGS = {
     "block"                : "1*",
     "dotimes"              : "1*",
     "dolist"               : "1*",
+    "do"                   : "2*",
+    "do*"                  : "2*",
     "destructuring-bind"   : "2*",
     "multiple-value-bind"  : "2*",
     ":method"              : "1*",

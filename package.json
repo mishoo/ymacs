@@ -33,7 +33,9 @@
 		"src/css/themes/ef-maris-light.scss",
 		"src/css/themes/ef-maris-dark.scss",
 		"src/css/themes/ef-duo-light.scss",
-		"src/css/themes/ef-duo-dark.scss"
+		"src/css/themes/ef-duo-dark.scss",
+		"src/css/themes/ef-owl.scss",
+		"src/css/themes/ef-dream.scss"
 	    ]
 	}
     },
