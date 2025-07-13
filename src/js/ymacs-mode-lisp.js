@@ -337,7 +337,7 @@ const SPECIAL_FORMS = regexp_opt("\
   ignore-errors handler-case handler-bind invoke-restart restart-case restart-bind \
   labels function symbol-macrolet block tagbody catch locally \
   inc! dec! cons c[ad]{1,4}r list list\\* eq eql equal equalp and or not null null\\? \
-  loop do while dotimes \
+  loop do do\\* dolist dotimes while dotimes \
   return return-from setq set! set-car! set-cdr! setf multiple-value-call values", "i");
 
 const LOOP_KEYWORDS = regexp_opt("\
