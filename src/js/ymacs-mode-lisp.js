@@ -422,7 +422,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
 
     COMMENT = [ ";", [ "#|", "|#" ] ];
     STRING = [ '"' ];
-    NUMBER = /^[+-]?(?:#x[0-9a-fA-F]+|#\d+r[0-9a-zA-Z]+|#o[0-7]+|#b[01]+|(?:\d*\.)?\d+(?:[eE][+-]?\d+)?|\d+\/\d+)$/u;
+    NUMBER = /^[+-]?(?:#x[0-9a-f]+|#\d+r[0-9a-z]+|#o[0-7]+|#b[01]+|(?:\d*\.)?\d+(?:e[+-]?\d+)?|\d+\/\d+)$/iu;
     NAME = /^[-_$\p{L}0-9|!#$%&*+./:<=>?@\^~]+/iu;
     OPEN_PAREN = {
         "(" : ")",
