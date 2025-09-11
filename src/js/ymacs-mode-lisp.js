@@ -353,7 +353,7 @@ const LOOP_KEYWORDS = regexp_opt("\
   repeat finally initially return \
   if else when unless do doing");
 
-const ERROR_FORMS = toHash("error warn assert");
+const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)? warn(?:[-/]\\w+)? assert");
 
 const CONSTANTS = toHash("t nil");
 
@@ -550,7 +550,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
 
             if (!type) type = ch == ":" ? "lisp-keyword"
                 : ch == "&" ? "type"
-                : m.id in ERROR_FORMS ? "error"
+                : ERROR_FORMS.test(m.id) ? "error"
                 : m.id in CONSTANTS ? "constant"
                 : this.NUMBER.test(m.id) ? "number"
                 : null;
