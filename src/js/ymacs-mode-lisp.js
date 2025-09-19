@@ -353,7 +353,7 @@ const LOOP_KEYWORDS = regexp_opt("\
   repeat finally initially return \
   if else when unless do doing");
 
-const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)? warn(?:[-/]\\w+)? assert");
+const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)? warn(?:[-/]\\w+)? check(?:[-/]\\w+) assert");
 
 const CONSTANTS = toHash("t nil");
 
@@ -382,6 +382,7 @@ const FORM_ARGS = {
     "defparameter"         : "1*",
     "defvar"               : "1*",
     "defconstant"          : "1*",
+    "defglobal"            : "1*",
     "progn"                : "0+",
     "begin"                : "0+",
     "prog1"                : "1*",
@@ -672,11 +673,11 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 if (currentForm) {
                     currentForm = currentForm.replace(/\*$/, "");
                     var formArgs = FORM_ARGS[currentForm];
-                    if (!formArgs && /^with|:with/.test(currentForm)) {
+                    if (!formArgs && /^(?:[\w_-]*::?)?with/u.test(currentForm)) {
                         // "with" macros usually take one argument, then &body
                         formArgs = "0*";
                     }
-                    if (!formArgs && /^def/.test(currentForm)) {
+                    if (!formArgs && /^(?:[\w_-]*::?)?def/u.test(currentForm)) {
                         // definitions usually take two arguments, then &body
                         if (nextNonSpace && /[\(\[\{]/.test(line.charAt(nextNonSpace)))
                             formArgs = "1*";
@@ -688,7 +689,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                             formArgs = "1*";
                         }
                         else if (LOCAL_BODYDEF[this._formStack.cdr.cdr.cdr.car.id] &&
-                            this._formStack.cdr.cdr.car == 2) {
+                                 this._formStack.cdr.cdr.car == 2) {
                             formArgs = "1*";
                         }
                     } catch(ex){}

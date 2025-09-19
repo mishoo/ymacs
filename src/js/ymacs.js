@@ -53,6 +53,10 @@ export class Ymacs extends Widget {
         ls_keyName    : ".ymacs",
     };
 
+    static raw(str) {
+        return DOM.htmlSafe(str);
+    }
+
     constructor(...args) {
         super(...args);
 
