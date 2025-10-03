@@ -361,6 +361,8 @@ const DEFINES_FUNCTION = toHash("defun defmacro defgeneric defmethod");
 
 const DEFINES_TYPE = toHash("deftype defclass defstruct");
 
+const DEFINES_ERROR = toHash("define-condition");
+
 const DEFINES_VARIABLE = toHash("defvar defparameter defconstant defconst");
 
 const FORM_ARGS = {
@@ -579,6 +581,9 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 }
                 else if (this._formLen == 1 && this.isForm(DEFINES_TYPE)) {
                     type = "type";
+                }
+                else if (this._formLen == 1 && this.isForm(DEFINES_ERROR)) {
+                    type = "error";
                 }
                 else if (this._formLen == 1 && this.isForm("let")) {
                     type = "function-name";
