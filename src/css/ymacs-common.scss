@@ -20,6 +20,10 @@
   height: 100%;
   position: relative;
   font-family: "Iosevka Custom", "Iosevka Web", "Iosevka", "Ubuntu Mono", "DejaVu Sans Mono", "Lucida Sans Typewriter", monospace;
+
+  button, input {
+    font-size: 100%;
+  }
 }
 
 .Ymacs_Frame {

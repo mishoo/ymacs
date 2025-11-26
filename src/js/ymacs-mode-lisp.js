@@ -247,7 +247,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                 } else if (cont_exp) {
                     if (cont_exp.type == "list" && cont_exp.end == caret + 1)
                         return cont_exp.value.at(-1);
-                    return cont_exp.parent.value[cont_exp.index];
+                    return cont_exp.parent?.value[cont_exp.index];
                 }
             },
             caret_token: function() {
@@ -304,11 +304,15 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             if (list && list.parent) this.cmd("goto_char", list.start);
         }),
 
-        lisp_handle_string_quote: Ymacs_Interactive(function(){
+        lisp_in_string: function() {
             var p = QuickParser(this);
             p.parse(this.point());
             var tok = p.prev_exp();
-            if (tok && tok.type == "string" && this.point() < tok.end) {
+            return (tok && tok.type == "string" && this.point() < tok.end);
+        },
+
+        lisp_handle_string_quote: Ymacs_Interactive(function(){
+            if (this.cmd("lisp_in_string")) {
                 if (this.cmd("looking_at", /\"/y))
                     this.cmd("forward_char");
                 else if (!this.cmd("looking_back", /\\/g))
@@ -319,7 +323,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                 this.cmd("insert", '""');
                 this.cmd("backward_char");
             }
-        })
+        }),
 
     });
 
@@ -393,6 +397,8 @@ const FORM_ARGS = {
     "let"                  : "1*",
     "labels"               : "1*",
     "flet"                 : "1*",
+    "foreach"              : "1*",
+    "foreach-index"        : "1*",
     "macrolet"             : "1*",
     "symbol-macrolet"      : "1*",
     "unwind-protect"       : "1*",
@@ -678,7 +684,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 if (currentForm) {
                     currentForm = currentForm.replace(/\*$/, "");
                     var formArgs = FORM_ARGS[currentForm];
-                    if (!formArgs && /^(?:[\w_-]*::?)?with/u.test(currentForm)) {
+                    if (!formArgs && /^(?:[\w_-]*::?)?(?:with|for-|foreach|do-)/u.test(currentForm)) {
                         // "with" macros usually take one argument, then &body
                         formArgs = "0*";
                     }
@@ -742,7 +748,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         },
         syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u,
         paredit_space_before() {
-            return !this.looking_back(/[\s\(\)\[\]\{\},.@'`#\\"]/g);
+            return !this.cmd("lisp_in_string") && !this.looking_back(/[\s\(\[\{,.@'`#\\]/g);
         },
     });
     var was_paren_match = this.cmd("paren_match_mode", true);

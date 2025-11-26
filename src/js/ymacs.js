@@ -939,10 +939,15 @@ export class Ymacs_Dialog extends Widget {
     }
 
     close() {
-        this.getElement().remove();
-        this.destroy();
-        this.ymacs.focus();
-        this.callHooks("onClose");
+        let el = this.getElement();
+        let event = document.createEvent("HTMLEvents");
+        event.initEvent("close", true, true);
+        if (el.dispatchEvent(event)) {
+            el.remove();
+            this.destroy();
+            this.ymacs.focus();
+            this.callHooks("onClose");
+        }
     }
 
     _closeClick(ev) {
