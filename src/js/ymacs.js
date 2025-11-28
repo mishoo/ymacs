@@ -982,7 +982,8 @@ export class Ymacs_Dialog extends Widget {
     _dragMouseUp(ev) {
         DOM.off(window, this._dragHandlers);
         DOM.overlayOff();
-        this._dragging.focus?.focus();
+        if (this.getElement().tabIndex < 0)
+            this._dragging.focus?.focus();
         this._dragging = null;
     }
 }
