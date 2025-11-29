@@ -569,6 +569,10 @@ export class Ymacs_Frame extends Widget {
 
     _dragSelect_onMouseUp(ev) {
         DOM.off(window, this._dragSelectHandlers);
+        let buf = this.buffer;
+        if (+buf.transientMarker === buf.point()) {
+            buf.clearTransientMark();
+        }
     }
 
     _on_keyDown(ev) {
