@@ -784,12 +784,13 @@ export class Ymacs extends Widget {
         text,
         isHtml = false,
         atCaret = false,
+        anchor = null,
         timeout
     }) {
         let popup = this.__popup || (this.__popup = new Ymacs_Popup());
         let el = popup.getElement();
-        popup.condClass(atCaret, "with-arrow");
-        if (!atCaret) {
+        popup.condClass(atCaret || anchor, "with-arrow");
+        if (!atCaret && !anchor) {
             el.style.removeProperty("left");
             el.style.removeProperty("top");
             el.style.removeProperty("bottom");
@@ -802,6 +803,8 @@ export class Ymacs extends Widget {
         popup.setContent(text);
         if (atCaret) {
             this._popupAtCaret(popup.getElement());
+        } else if (anchor) {
+            this._popupAtAnchor(popup.getElement(), anchor);
         } else {
             this.add(popup);
         }
@@ -822,12 +825,15 @@ export class Ymacs extends Widget {
     }
 
     _popupAtCaret(el) {
+        this._popupAtAnchor(el, this.__input_frame.getCaretElement());
+    }
+
+    _popupAtAnchor(el, anchor) {
         el.style.visibility = "hidden";
         DOM.delClass(el, /ppos-[a-z-]+/ig);
         this.add(el);
         let mybox = this.getElement().getBoundingClientRect();
-        let caret = this.__input_frame.getCaretElement();
-        let cbox = caret.getBoundingClientRect();
+        let cbox = anchor.getBoundingClientRect();
         let cbox_center = { x: (cbox.left + cbox.right) / 2,
                             y: (cbox.top + cbox.bottom) / 2 };
         let mybox_center = { x: (mybox.left + mybox.right) / 2,
