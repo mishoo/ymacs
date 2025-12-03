@@ -713,11 +713,16 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                             indent = nextNonSpace;
                         }
                         else if ((n > 0 && this._formLen - 1 < n)) {
-                            // still in the arguments
-                            if (nextNonSpace)
-                                indent = nextNonSpace;
-                            else
-                                indent += INDENT_LEVEL();
+                            // if (nextNonSpace) {
+                            //     indent = nextNonSpace;
+                            // } else {
+                            //     indent += INDENT_LEVEL();
+                            // }
+
+                            // this is more Emacsy, though we could
+                            // use some improvements for DO* (for that
+                            // case, nextNonSpace looks better).
+                            indent += INDENT_LEVEL();
                         }
                     }
                 }
