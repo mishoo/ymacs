@@ -513,13 +513,13 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         }
         if (s.lookingAt("#:") && this.isNameChar(s.peek(+2))) {
             this.newArg();
-            s.col += 2;
+            this.t("operator", 2);
             this.maybeName("lisp-keyword");
             return true;
         }
         if (s.lookingAt("#'") && this.isNameChar(s.peek(+2))) {
             this.newArg();
-            s.col += 2;
+            this.t("operator", 2);
             let c = this.maybeName("function-name");
             return true;
         }
