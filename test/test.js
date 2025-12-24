@@ -19,6 +19,9 @@ let keymap = Ymacs_Keymap.define(null, {
                 alert(index);
             }
         });
+    },
+    "s-d": function() {
+        alert("Super-D");
     }
 });
 

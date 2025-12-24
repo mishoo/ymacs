@@ -31,11 +31,12 @@ export class Ymacs_Keymap {
         let key = { str: "" };
         let p = orig;
         for (;;) {
-            let m = /^([CMS])-/.exec(p);
+            let m = /^([CMSs])-/.exec(p);
             if (m) {
                 if (m[1] == "C") key.ctrlKey = true;
-                if (m[1] == "M") key.metaKey = true;
+                if (m[1] == "M") key.altKey = true;
                 if (m[1] == "S") key.shiftKey = true;
+                if (m[1] == "s") key.metaKey = true;
                 p = p.substr(2);
             } else {
                 key.key = p == "Space" ? " "
@@ -45,8 +46,9 @@ export class Ymacs_Keymap {
             }
         }
         if (key.ctrlKey) key.str += "C-";
-        if (key.metaKey) key.str += "M-";
+        if (key.altKey) key.str += "M-";
         if (key.shiftKey) key.str += "S-";
+        if (key.metaKey) key.str += "s-";
         key.str += p;
         return key;
     }
@@ -67,6 +69,8 @@ export class Ymacs_Keymap {
             a.push("M");
         if (ev.shiftKey && (key.length > 1 || key.toLowerCase() != key.toUpperCase()))
             a.push("S");
+        if (ev.metaKey)
+            a.push("s");
         a.sort();
         a.push(key);
         return a.join("-");
