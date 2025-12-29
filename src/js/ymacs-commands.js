@@ -200,7 +200,7 @@ Ymacs_Buffer.newCommands({
         var ev = this.interactiveEvent();
         var ch = ev.key;
         var rc = this._rowcol;
-        if (ch.length == 1 && !ev.altKey && !ev.ctrlKey) {
+        if (ch.length == 1 && !ev.altKey && !ev.ctrlKey && !ev.metaKey) {
             this.deleteTransientRegion();
             if (repeat != null)
                 ch = ch.repeat(repeat);
