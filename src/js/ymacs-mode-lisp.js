@@ -559,6 +559,9 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
             else if (/^(?:flet|labels)$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car == 2) {
                 type = "function-name";
             }
+            else if (/^(?:tagbody|do\*?|dolist|dotimes|prog\*?|go)$/i.test(this._formSym?.id)) {
+                type = "directive";
+            }
 
             if (!type) type = ch == ":" ? "lisp-keyword"
                 : ch == "&" ? "type"
@@ -713,15 +716,14 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                             indent = nextNonSpace;
                         }
                         else if ((n > 0 && this._formLen - 1 < n)) {
-                            // if (nextNonSpace) {
-                            //     indent = nextNonSpace;
-                            // } else {
-                            //     indent += INDENT_LEVEL();
-                            // }
-
-                            // this is more Emacsy, though we could
-                            // use some improvements for DO* (for that
-                            // case, nextNonSpace looks better).
+                            if (nextNonSpace && /^(?:do\*?)$/i.test(currentForm)) {
+                                indent = nextNonSpace;
+                            } else {
+                                indent += INDENT_LEVEL();
+                            }
+                        }
+                    } else if (/^(?:tagbody|do\*?|dolist|dotimes|prog\*?)$/i.test(currentForm)) {
+                        if (/^\s*[\(\[\{]/.test(s.lineText(s.line))) {
                             indent += INDENT_LEVEL();
                         }
                     }
