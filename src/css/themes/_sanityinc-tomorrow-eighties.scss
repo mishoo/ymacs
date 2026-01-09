@@ -9,7 +9,7 @@ $cursor_fg: #2d2d2d;
 
 .Ymacs-Theme-sanityinc-tomorrow-eighties { --ymacs-cursor-bg: #f2777a; --ymacs-cursor-fg: #2d2d2d; --ymacs-modeline-in-bg: #393939; --ymacs-modeline-ac-bg: #515151; }
 .Ymacs-Theme-sanityinc-tomorrow-eighties { color: #cccccc; background-color: #2d2d2d; }
-.Ymacs-Theme-sanityinc-tomorrow-eighties .Ymacs_SplitCont > .bar { background-color: #969896; }
+.Ymacs-Theme-sanityinc-tomorrow-eighties .Ymacs_SplitCont > .bar { background-color: #999999; }
 .Ymacs-Theme-sanityinc-tomorrow-eighties .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #515151; border-bottom: 1px solid #515151; }
 .Ymacs-Theme-sanityinc-tomorrow-eighties .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #515151; border-right: 1px solid #515151; }
 .Ymacs-Theme-sanityinc-tomorrow-eighties.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #39393963 }
@@ -28,9 +28,9 @@ $cursor_fg: #2d2d2d;
 .Ymacs_Overlay.selection div { background-color: #515151; }
 .Ymacs_Overlay.isearch div { background-color: #ffcc66; color: #2d2d2d; }
 .Ymacs_Overlay.isearch-lazy div { background-color: #66cccc; color: #2d2d2d; }
-.Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
-.Ymacs_Modeline { color: #999999; background-color: #393939; border: 1px solid #515151; }
-.Ymacs_Frame-active .Ymacs_Modeline { color: #cccccc; background-color: #515151; border: 1px solid #515151; }
+.Ymacs_Overlay.match-paren div { color: #2d2d2d; background-color: #cc99cc; }
+.Ymacs_Modeline { color: #999999; background-color: #393939; border-top: 1px solid #515151; border-bottom: 1px solid #515151; }
+.Ymacs_Frame-active .Ymacs_Modeline { color: #cccccc; background-color: #515151; border-top: 1px solid #515151; border-bottom: 1px solid #515151; }
 .minibuffer-prompt { color: #6699cc; }
 .mode-line-buffer-id { color: #cc99cc; }
 .heading1 { color: #6699cc; }

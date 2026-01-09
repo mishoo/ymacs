@@ -9,7 +9,7 @@ $cursor_fg: #263238;
 
 .Ymacs-Theme-material { --ymacs-cursor-bg: #ff9800; --ymacs-cursor-fg: #263238; --ymacs-modeline-in-bg: #1c1f26; --ymacs-modeline-ac-bg: #1c1f26; }
 .Ymacs-Theme-material { color: #ffffff; background-color: #263238; }
-.Ymacs-Theme-material .Ymacs_SplitCont > .bar { background-color: #969896; }
+.Ymacs-Theme-material .Ymacs_SplitCont > .bar { background-color: #999999; }
 .Ymacs-Theme-material .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
 .Ymacs-Theme-material .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
 .Ymacs-Theme-material.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #37474f63 }
@@ -28,13 +28,13 @@ $cursor_fg: #263238;
 .Ymacs_Overlay.selection div { background-color: #555555; }
 .Ymacs_Overlay.isearch div { color: #ffffff; background-color: #8bc34a; }
 .Ymacs_Overlay.isearch-lazy div { color: #263238; background-color: #8bc34a; }
-.Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
+.Ymacs_Overlay.match-paren div { background-color: #4f94cd; }
 .Ymacs_Modeline { color: #a7adba; background-color: #1c1f26; }
 .Ymacs_Frame-active .Ymacs_Modeline { color: #ffffff; background-color: #1c1f26; }
 .minibuffer-prompt { color: #4dd0e1; }
 .mode-line-buffer-id { color: #ffffff; font-weight: bold; }
-.heading1 { color: #eceff1; background-color: #455a64; border: 1px outset #455a64; font-weight: bold; font-size: 1.297em; }
-.heading2 { color: #e1f5fe; background-color: #35575b; border: 1px outset #35575b; font-size: 1.180em; }
+.heading1 { color: #eceff1; background-color: #455a64; border-top: 1px outset #455a64; border-bottom: 1px outset #455a64; font-weight: bold; font-size: 1.297em; }
+.heading2 { color: #e1f5fe; background-color: #35575b; border-top: 1px outset #35575b; border-bottom: 1px outset #35575b; font-size: 1.180em; }
 .heading3 { color: #a5d6a7; font-size: 1.117em; }
 .heading4 { color: #ffcc80; }
 .markdown-blockquote { color: #ffe4b5; }

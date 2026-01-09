@@ -547,12 +547,12 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
             else if (/^e?(?:type)?case$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car > 2 && this._formStack.car == 1) {
                 type = "constant";
             }
-            else if (/^let\*?$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car == 2 && this._formLen == 0) {
-                type = "variable-name";
-            }
-            else if (/^let\*?$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car == 2) {
-                type = "variable-name";
-            }
+            // else if (/^let\*?$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car == 2 && this._formLen == 0) {
+            //     type = "variable-name";
+            // }
+            // else if (/^let\*?$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car == 2) {
+            //     type = "variable-name";
+            // }
             else if (/^(?:flet|labels)$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car == 2 && this._formLen == 0) {
                 type = "function-name";
             }

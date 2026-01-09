@@ -9,7 +9,7 @@ $cursor_fg: #031a16;
 
 .Ymacs-Theme-base16-apathy { --ymacs-cursor-bg: #3e9688; --ymacs-cursor-fg: #031a16; --ymacs-modeline-in-bg: #0b342d; --ymacs-modeline-ac-bg: #184e45; }
 .Ymacs-Theme-base16-apathy { color: #81b5ac; background-color: #031a16; }
-.Ymacs-Theme-base16-apathy .Ymacs_SplitCont > .bar { background-color: #969896; }
+.Ymacs-Theme-base16-apathy .Ymacs_SplitCont > .bar { background-color: #999999; }
 .Ymacs-Theme-base16-apathy .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #cccccc; border-bottom: 1px solid #666666; }
 .Ymacs-Theme-base16-apathy .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #cccccc; border-right: 1px solid #666666; }
 .Ymacs-Theme-base16-apathy.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #0b342d63 }
@@ -28,7 +28,7 @@ $cursor_fg: #031a16;
 .Ymacs_Overlay.selection div { background-color: #184e45; }
 .Ymacs_Overlay.isearch div { background-color: #3e4c96; color: #0b342d; }
 .Ymacs_Overlay.isearch-lazy div { background-color: #963e4c; color: #0b342d; }
-.Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
+.Ymacs_Overlay.match-paren div { color: #0b342d; background-color: #96883e; }
 .Ymacs_Modeline { color: #2b685e; background-color: #0b342d; }
 .Ymacs_Frame-active .Ymacs_Modeline { color: #5f9c92; background-color: #184e45; }
 .minibuffer-prompt { color: #96883e; }

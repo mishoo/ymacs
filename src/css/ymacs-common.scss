@@ -79,10 +79,10 @@
 
 .Ymacs-frame-content {
   white-space: pre;
-  /* padding: 4px; */
   padding-bottom: 100cqh;
   z-index: 20;
   position: relative;
+  padding-left: 5px;
 }
 
 .Ymacs_Minibuffer {
@@ -103,18 +103,19 @@
       z-index: 1;
     }
   }
-  &.match-paren {
-    opacity: 0.6;
-    > div {
-      z-index: 30;
-    }
-  }
+  // &.match-paren {
+  //   opacity: 0.6;
+  //   > div {
+  //     z-index: 30;
+  //   }
+  // }
 }
 
 $lnwidth: 3.1em;
 
 .Ymacs.Ymacs-line-numbers {
   .Ymacs-frame-content {
+    padding-left: 0;
     counter-reset: ymacs-line 0;
 
     &:before {
@@ -164,6 +165,7 @@ $lnwidth: 3.1em;
   overflow: hidden;
 
   > .bar {
+    box-sizing: content-box !important;
     position: relative;
     background-color: var(--ymacs-modeline-in-bg);
     z-index: 30;
@@ -184,7 +186,7 @@ $lnwidth: 3.1em;
     grid-template-rows: 1fr auto 1fr;
     cursor: ns-resize;
     > .bar {
-      height: 3px;
+      height: 1px;
       &:before {
         top: -5px;
         bottom: -5px;
@@ -195,7 +197,7 @@ $lnwidth: 3.1em;
     grid-template-columns: 1fr auto 1fr;
     cursor: ew-resize;
     > .bar {
-      width: 3px;
+      width: 1px;
       &:before {
         left: -5px;
         right: -5px;

@@ -116,16 +116,19 @@
                        (if (face-inverse-video-p bgface nil t) "color" "background-color")
                        (ymacs-color-css (face-background bgface nil t)))))
       (when box
+        (when (stringp box)
+          (setf box `(:line-width 1 :color ,box)))
         (cl-destructuring-bind (&key (line-width 1) color style) box
-          (princ (format " border: %dpx %s %s;"
-                         (abs line-width)
-                         (cond
-                           ((eq 'released-button style)
-                            (unless color
-                              (setf color (face-background bgface nil t)))
-                            "outset")
-                           (t "solid"))
-                         (ymacs-color-css color)))))
+          (let ((border (format "%dpx %s %s"
+                                (abs line-width)
+                                (cond
+                                  ((eq 'released-button style)
+                                   (unless color
+                                     (setf color (face-background bgface nil t)))
+                                   "outset")
+                                  (t "solid"))
+                                (ymacs-color-css color))))
+            (princ (format " border-top: %s; border-bottom: %s;" border border)))))
       (when bold
         (princ " font-weight: bold;"))
       (when italic
@@ -250,6 +253,21 @@
 
 (defun ymacs-generate-themes ()
   (interactive)
+
+  (set-face-attribute 'gnus-group-mail-1 nil :inherit nil)
+  (set-face-attribute 'gnus-group-mail-2 nil :inherit nil)
+  (set-face-attribute 'gnus-group-mail-3 nil :inherit nil)
+  
+  (set-face-attribute 'gnus-group-news-1 nil :inherit nil)
+  (set-face-attribute 'gnus-group-news-2 nil :inherit nil)
+  (set-face-attribute 'gnus-group-news-3 nil :inherit nil)
+  (set-face-attribute 'gnus-group-news-4 nil :inherit nil)
+  (set-face-attribute 'gnus-group-news-5 nil :inherit nil)
+  (set-face-attribute 'gnus-group-news-6 nil :inherit nil)
+
+  (setq modus-themes-common-palette-overrides
+        '((bg-paren-match bg-green-intense)))
+
   (let ((names '(whiteboard
                  base16-apathy
                  material
@@ -272,11 +290,11 @@
                  ef-dream
                  ef-owl)))
     (cl-loop for theme in names
-       for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
-       do (load-theme theme t t)
-          (mapc (lambda (theme)
-                  (disable-theme theme))
-                custom-enabled-themes)
+          for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
+          do (mapc (lambda (theme)
+                     (disable-theme theme))
+                   custom-enabled-themes)
+          (load-theme theme t t)
           (enable-theme theme)
           (ymacs-color-theme-print (symbol-name theme))
           (write-file (format "~/ymacs/src/css/themes/_%s.scss" theme))

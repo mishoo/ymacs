@@ -28,9 +28,9 @@ $cursor_fg: #000000;
 .Ymacs_Overlay.selection div { background-color: #424242; }
 .Ymacs_Overlay.isearch div { background-color: #e7c547; color: #000000; }
 .Ymacs_Overlay.isearch-lazy div { background-color: #70c0b1; color: #000000; }
-.Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
-.Ymacs_Modeline { color: #969896; background-color: #2a2a2a; border: 1px solid #424242; }
-.Ymacs_Frame-active .Ymacs_Modeline { color: #eaeaea; background-color: #424242; border: 1px solid #424242; }
+.Ymacs_Overlay.match-paren div { color: #000000; background-color: #c397d8; }
+.Ymacs_Modeline { color: #969896; background-color: #2a2a2a; border-top: 1px solid #424242; border-bottom: 1px solid #424242; }
+.Ymacs_Frame-active .Ymacs_Modeline { color: #eaeaea; background-color: #424242; border-top: 1px solid #424242; border-bottom: 1px solid #424242; }
 .minibuffer-prompt { color: #7aa6da; }
 .mode-line-buffer-id { color: #c397d8; }
 .heading1 { color: #7aa6da; }

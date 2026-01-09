@@ -9,46 +9,46 @@ $cursor_fg: #edf4f8;
 
 .Ymacs-Theme-ef-maris-light { --ymacs-cursor-bg: #036f99; --ymacs-cursor-fg: #edf4f8; --ymacs-modeline-in-bg: #cfd8e3; --ymacs-modeline-ac-bg: #a0c2ef; }
 .Ymacs-Theme-ef-maris-light { color: #151a27; background-color: #edf4f8; }
-.Ymacs-Theme-ef-maris-light .Ymacs_SplitCont > .bar { background-color: #969896; }
+.Ymacs-Theme-ef-maris-light .Ymacs_SplitCont > .bar { background-color: #a2a6af; }
 .Ymacs-Theme-ef-maris-light .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #e6ecf2; border-bottom: 1px solid #e6ecf2; }
 .Ymacs-Theme-ef-maris-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #e6ecf2; border-right: 1px solid #e6ecf2; }
 .Ymacs-Theme-ef-maris-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #dae5f063 }
 .Ymacs-Theme-ef-maris-light .Ymacs-frame-content div.line:before { color: #676470; }
-.Ymacs-Theme-ef-maris-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #000000; font-weight: bold; }
+.Ymacs-Theme-ef-maris-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #003faf; font-weight: bold; }
 .Ymacs-Theme-ef-maris-light .Ymacs-frame-content:before { color: #676470; background-color: #edf4f8; }
 .Ymacs-Theme-ef-maris-light {
 .Ymacs_Popup {
-  --ymacs-popup-bg: #e6ecf2;
+  --ymacs-popup-bg: #e0e7ef;
   --ymacs-popup-fg: #151a27;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
-.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #cddbfa; }
+.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #cddbfa; font-weight: bold; }
 }
 .Ymacs_Overlay.selection div { background-color: #c8dcff; }
-.Ymacs_Overlay.isearch div { color: #000000; background-color: #efbf00; }
-.Ymacs_Overlay.isearch-lazy div { color: #000000; background-color: #cfceff; }
-.Ymacs_Overlay.match-paren div { color: #000000; background-color: #32cd32; }
-.Ymacs_Modeline { color: #676470; background-color: #cfd8e3; }
-.Ymacs_Frame-active .Ymacs_Modeline { color: #142810; background-color: #a0c2ef; }
+.Ymacs_Overlay.isearch div { color: #151a27; background-color: #efbf00; }
+.Ymacs_Overlay.isearch-lazy div { color: #151a27; background-color: #cfceff; }
+.Ymacs_Overlay.match-paren div { color: #151a27; background-color: #96df80; }
+.Ymacs_Modeline { color: #676470; background-color: #cfd8e3; border-top: 1px solid #a2a6af; border-bottom: 1px solid #a2a6af; }
+.Ymacs_Frame-active .Ymacs_Modeline { color: #142810; background-color: #a0c2ef; border-top: 1px solid #a2a6af; border-bottom: 1px solid #a2a6af; }
 .minibuffer-prompt { color: #444fcf; }
 .mode-line-buffer-id { font-weight: bold; }
 .heading1 { color: #444fcf; font-weight: bold; }
 .heading2 { color: #3a6f00; font-weight: bold; }
 .heading3 { color: #1f66af; font-weight: bold; }
 .heading4 { color: #5f2fba; font-weight: bold; }
-.markdown-blockquote { color: #3f627f; font-style: italic; }
-.markdown-blockquote1 { color: #3f627f; font-style: italic; }
-.markdown-blockquote2 { color: #3f627f; font-style: italic; }
-.markdown-blockquote3 { color: #3f627f; font-style: italic; }
-.markdown-pre { color: #3a6f00; }
-.markdown-code { color: #1f66af; }
-.markdown-code-starter { color: #1f66af; }
-.markdown-code-stopper { color: #1f66af; }
+.markdown-blockquote { color: #3f627f; }
+.markdown-blockquote1 { color: #3f627f; }
+.markdown-blockquote2 { color: #3f627f; }
+.markdown-blockquote3 { color: #3f627f; }
+.markdown-pre { color: #9a3a6a; }
+.markdown-code { color: #006f70; }
+.markdown-code-starter { color: #006f70; }
+.markdown-code-stopper { color: #006f70; }
 .markdown-ref { color: #375cc6; }
 .directive { color: #5f2fba; }
 .type { color: #007010; }
-.builtin { color: #6a4a9f; font-weight: bold; }
+.builtin { color: #6a4a9f; }
 .function-name { color: #3a6f00; }
 .variable-name { color: #1f66af; }
 .constant { color: #003faf; }
@@ -59,30 +59,30 @@ $cursor_fg: #edf4f8;
 .regexp-starter { color: #006f70; }
 .regexp-stopper { color: #006f70; }
 .regexp-modifier { color: #006f70; }
-.keyword { color: #444fcf; font-weight: bold; }
-.comment { color: #8b4052; font-style: italic; }
-.mcomment { color: #8b4052; font-style: italic; }
-.comment-starter { color: #8b4052; font-style: italic; }
-.mcomment-starter { color: #8b4052; font-style: italic; }
-.mcomment-stopper { color: #8b4052; font-style: italic; }
-.number { color: #003faf; }
-.operator { }
+.keyword { color: #444fcf; }
+.comment { color: #8b4052; }
+.mcomment { color: #8b4052; }
+.comment-starter { color: #8b4052; }
+.mcomment-starter { color: #8b4052; }
+.mcomment-stopper { color: #8b4052; }
+.number { color: #151a27; }
+.operator { color: #151a27; }
 .error { color: #8b4400; }
-.isearch-fail { color: #d00000; background-color: #f2c2b5; font-weight: bold; }
+.isearch-fail { color: #d00000; background-color: #f2c2b5; }
 .xml-open-tag { color: #3a6f00; }
 .xml-close-tag { color: #3a6f00; }
 .xml-attribute { color: #1f66af; }
-.xml-entity-starter { color: #003faf; }
-.xml-entity-stopper { color: #003faf; }
-.xml-entity { color: #003faf; }
-.xml-open-bracket { color: #151a27; }
-.xml-close-bracket { color: #151a27; }
-.xml-closetag-slash { color: #151a27; }
-.xml-cdata { color: #151a27; font-style: italic; }
-.xml-cdata-starter { color: #151a27; font-style: italic; }
-.xml-cdata-stopper { color: #151a27; font-style: italic; }
-.block-starter, .block-stopper { color: #5f2fba; }
-.exp-starter, .exp-stopper { color: #5f2fba; }
-.lisp-keyword { color: #6a4a9f; font-weight: bold; }
+.xml-entity-starter { color: #676470; }
+.xml-entity-stopper { color: #676470; }
+.xml-entity { color: #676470; }
+.xml-open-bracket { color: #676470; }
+.xml-close-bracket { color: #676470; }
+.xml-closetag-slash { color: #676470; }
+.xml-cdata { color: #151a27; }
+.xml-cdata-starter { color: #d00000; }
+.xml-cdata-stopper { color: #d00000; }
+.block-starter, .block-stopper { color: #151a27; }
+.exp-starter, .exp-stopper { color: #151a27; }
+.lisp-keyword { color: #6a4a9f; }
 .hyperlink { color: #375cc6; }
 }
