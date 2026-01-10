@@ -987,8 +987,9 @@ export class Ymacs_Buffer extends EventProxy {
             let km = this.keymap[i];
             let h = km.getHandler(cc);
             if (h instanceof Array) {
-                this.callInteractively(h[0], h[1]);
-                handled = true;
+                if (this.callInteractively(h[0], h[1]) !== "ymacs-decline-key") {
+                    handled = true;
+                }
             }
             else if (h) {
                 handled = foundPrefix = true;
