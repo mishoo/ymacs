@@ -449,9 +449,6 @@ var KEYMAP_POPUP_ACTIVE = Ymacs_Keymap.define(null, Object.assign({
     "PageUp"                                : handle_arrow_up,
     "C-End && M->"                          : handle_popup_end,
     "C-Home && M-<"                         : handle_popup_home,
-    "Escape"                                : function() {
-        killMenu();
-    }
 }, DEFAULT_KEYS));
 KEYMAP_POPUP_ACTIVE.defaultHandler = [ function() {
     if (!this.getq("ivy_completion")) killMenu();

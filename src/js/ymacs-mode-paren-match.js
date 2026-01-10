@@ -276,7 +276,9 @@ Ymacs_Buffer.newCommands({
         } else {
             this.cmd("backward_sexp");
         }
-        this.cmd("back_to_indentation");
+        if (!this.getq("lisp_mode")) {
+            this.cmd("back_to_indentation");
+        }
     }),
 
     end_of_defun: Ymacs_Interactive(function(){
@@ -288,6 +290,9 @@ Ymacs_Buffer.newCommands({
             this.cmd("goto_char", this._rowColToPosition(p.line, endOf(p)));
         } else {
             this.cmd("forward_sexp");
+        }
+        if (!this.getq("lisp_mode")) {
+            this.cmd("end_of_line");
         }
     }),
 

@@ -763,6 +763,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
         paredit_space_before() {
             return !this.cmd("lisp_in_string") && !this.looking_back(/[\s\(\[\{,.@'`#\\]/g);
         },
+        lisp_mode: true,
     });
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_LispMode);
