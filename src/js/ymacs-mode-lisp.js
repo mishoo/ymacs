@@ -459,6 +459,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
     isNameChar(ch) {
         return this.NAME.test(ch) && !this._rxSpecial?.test(ch);
     }
+
     readName() {
         if (!this._rxSpecial) return super.readName();
         let s = this._stream, name = s.peek();
@@ -472,18 +473,23 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         }
     }
 
+    forgetState() {
+        super.forgetState();
+        this._formStack = NIL;
+        this._formSym = null;
+        this._formLen = 0;
+    }
+
     copy() {
         let _super = super.copy();
         let _formStack = this._formStack;
         let _formSym = this._formSym;
         let _formLen = this._formLen;
-        let _rxSpecial = this._rxSpecial;
         return () => {
             let self = _super();
             self._formStack = _formStack;
             self._formSym = _formSym;
             self._formLen = _formLen;
-            self._rxSpecial = _rxSpecial;
             return self;
         };
     }

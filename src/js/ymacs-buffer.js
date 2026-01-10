@@ -816,9 +816,9 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     _deleteText(begin, end) {
-        begin = this._boundPosition(MRK(begin));
-        end = this._boundPosition(MRK(end));
-        if (begin == end)
+        begin = this._boundPosition(MRK(begin), 0);
+        end = this._boundPosition(MRK(end), 1);
+        if (begin == null || end == null || begin == end)
             return;
         if (end < begin) { var tmp = begin; begin = end; end = tmp; }
         // *** UNDO RECORDING

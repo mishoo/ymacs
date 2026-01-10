@@ -44,6 +44,15 @@ export class Ymacs_BaseLang {
         }
     }
 
+    forgetState() {
+        this._cont = NIL;
+        this._inParens = NIL;
+        this._parens = NIL;
+        this._inComment = null;
+        this._inString = false;
+        this._pmeta = null;
+    }
+
     copy() {
         let _cont = this._cont;
         let _inParens = this._inParens;
