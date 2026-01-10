@@ -2,7 +2,7 @@
 /// Copyright (c) 2009-2024 Mihai Bazon <mihai.bazon@gmail.com>
 /// License: MIT
 
-import { DOM, Widget, remove } from "./ymacs-utils.js";
+import { DOM, Widget, remove, getYmacsThemes } from "./ymacs-utils.js";
 import { Ymacs_Buffer, Ymacs_Minibuffer } from "./ymacs-buffer.js";
 import { Ymacs_Popup } from "./ymacs-popup.js";
 import { Ymacs_Frame, Ymacs_SplitCont } from "./ymacs-frame.js";
@@ -454,13 +454,21 @@ export class Ymacs extends Widget {
         return frame ? frame.buffer : this.buffers.at(-1);
     }
 
-    setColorTheme(themeId) {
-        this.delClass(/Ymacs-Theme-[^\s]*/g);
-        if (!(themeId instanceof Array))
-            themeId = [ themeId ];
-        themeId.forEach(themeId => {
-            this.addClass("Ymacs-Theme-" + themeId);
-        });
+    setColorTheme(themes) {
+        if (!(themes instanceof Array))
+            themes = [ themes ];
+        let loaded = getYmacsThemes();
+        if (themes.every(id => loaded.includes(id))) {
+            // proceed
+            this.delClass(/Ymacs-Theme-[^\s]*/g);
+            themes.forEach(themeId => {
+                this.addClass("Ymacs-Theme-" + themeId);
+            });
+            return true;
+        } else {
+            console.warn(`Won't reset theme, some files might not be loaded: ${themes.join(", ")}`);
+            return false;
+        }
     }
 
     cursorBar() {
