@@ -1,0 +1,88 @@
+$general_bg: #111111;
+$general_fg: #cfdfd5;
+$modeline_in_bg: #303230;
+$modeline_in_fg: #808f80;
+$modeline_ac_bg: #00552f;
+$modeline_ac_fg: #d0ffe0;
+$cursor_bg: #35f038;
+$cursor_fg: #111111;
+
+.Ymacs-Theme-ef-bio { --ymacs-cursor-bg: #35f038; --ymacs-cursor-fg: #111111; --ymacs-modeline-in-bg: #303230; --ymacs-modeline-ac-bg: #00552f; }
+.Ymacs-Theme-ef-bio { color: #cfdfd5; background-color: #111111; }
+.Ymacs-Theme-ef-bio .Ymacs_SplitCont > .bar { background-color: #525959; }
+.Ymacs-Theme-ef-bio .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #161916; border-bottom: 1px solid #161916; }
+.Ymacs-Theme-ef-bio .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #161916; border-right: 1px solid #161916; }
+.Ymacs-Theme-ef-bio.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #00331f63 }
+.Ymacs-Theme-ef-bio .Ymacs-frame-content div.line:before { color: #808f80; }
+.Ymacs-Theme-ef-bio.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #00c089; font-weight: bold; }
+.Ymacs-Theme-ef-bio .Ymacs-frame-content:before { color: #808f80; background-color: #111111; }
+.Ymacs-Theme-ef-bio {
+.Ymacs_Popup {
+  --ymacs-popup-bg: #222522;
+  --ymacs-popup-fg: #cfdfd5;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
+}
+.Ymacs_Popup .Ymacs_Menu {
+.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #0f3c2f; font-weight: bold; }
+}
+.Ymacs_Overlay.selection div { background-color: #3a3027; }
+.Ymacs_Overlay.isearch div { color: #cfdfd5; background-color: #8f5040; }
+.Ymacs_Overlay.isearch-lazy div { color: #cfdfd5; background-color: #4648d0; }
+.Ymacs_Overlay.match-paren div { color: #cfdfd5; background-color: #407430; }
+.Ymacs_Modeline { color: #808f80; background-color: #303230; border-top: 1px solid #525959; border-bottom: 1px solid #525959; }
+.Ymacs_Frame-active .Ymacs_Modeline { color: #d0ffe0; background-color: #00552f; border-top: 1px solid #525959; border-bottom: 1px solid #525959; }
+.minibuffer-prompt { color: #5dc0aa; }
+.mode-line-buffer-id { font-weight: bold; }
+.heading1 { color: #7fc500; font-weight: bold; }
+.heading2 { color: #5dc0aa; font-weight: bold; }
+.heading3 { color: #af9fff; font-weight: bold; }
+.heading4 { color: #7fcfdf; font-weight: bold; }
+.markdown-blockquote { color: #7fc07f; }
+.markdown-blockquote1 { color: #7fc07f; }
+.markdown-blockquote2 { color: #7fc07f; }
+.markdown-blockquote3 { color: #7fc07f; }
+.markdown-pre { color: #e490df; }
+.markdown-code { color: #5dc0aa; }
+.markdown-code-starter { color: #5dc0aa; }
+.markdown-code-stopper { color: #5dc0aa; }
+.markdown-ref { color: #00c089; }
+.directive { color: #5dc0aa; }
+.type { color: #7fcfdf; }
+.builtin { color: #3fb83f; }
+.function-name { color: #7fc500; }
+.variable-name { color: #78afff; }
+.constant { color: #37aff6; }
+.string { color: #af9fff; }
+.string-starter { color: #af9fff; }
+.string-stopper { color: #af9fff; }
+.regexp { color: #af9fff; }
+.regexp-starter { color: #af9fff; }
+.regexp-stopper { color: #af9fff; }
+.regexp-modifier { color: #af9fff; }
+.keyword { color: #00c089; }
+.comment { color: #b7a07f; }
+.mcomment { color: #b7a07f; }
+.comment-starter { color: #b7a07f; }
+.mcomment-starter { color: #b7a07f; }
+.mcomment-stopper { color: #b7a07f; }
+.number { color: #cfdfd5; }
+.operator { color: #cfdfd5; }
+.error { color: #cfc04f; }
+.isearch-fail { color: #ef6560; background-color: #48100f; }
+.xml-open-tag { color: #7fc500; }
+.xml-close-tag { color: #7fc500; }
+.xml-attribute { color: #78afff; }
+.xml-entity-starter { color: #808f80; }
+.xml-entity-stopper { color: #808f80; }
+.xml-entity { color: #808f80; }
+.xml-open-bracket { color: #808f80; }
+.xml-close-bracket { color: #808f80; }
+.xml-closetag-slash { color: #808f80; }
+.xml-cdata { color: #cfdfd5; }
+.xml-cdata-starter { color: #ef6560; }
+.xml-cdata-stopper { color: #ef6560; }
+.block-starter, .block-stopper { color: #cfdfd5; }
+.exp-starter, .exp-stopper { color: #cfdfd5; }
+.lisp-keyword { color: #3fb83f; }
+.hyperlink { color: #00c089; }
+}

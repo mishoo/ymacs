@@ -288,7 +288,10 @@
                  ef-duo-dark
                  ef-duo-light
                  ef-dream
-                 ef-owl)))
+                 ef-owl
+                 ef-bio
+                 ef-frost
+                 ef-eagle)))
     (cl-loop for theme in names
           for prefix = (concat ".Ymacs-Theme-" (symbol-name theme))
           do (mapc (lambda (theme)

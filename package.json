@@ -35,7 +35,10 @@
 		"src/css/themes/ef-duo-light.scss",
 		"src/css/themes/ef-duo-dark.scss",
 		"src/css/themes/ef-owl.scss",
-		"src/css/themes/ef-dream.scss"
+		"src/css/themes/ef-dream.scss",
+		"src/css/themes/ef-bio.scss",
+		"src/css/themes/ef-eagle.scss",
+		"src/css/themes/ef-frost.scss"
 	    ]
 	}
     },

@@ -1,0 +1,88 @@
+$general_bg: #fcffff;
+$general_fg: #232323;
+$modeline_in_bg: #d7dbdb;
+$modeline_in_fg: #66657f;
+$modeline_ac_bg: #9ad0ff;
+$modeline_ac_fg: #051524;
+$cursor_bg: #0055bb;
+$cursor_fg: #fcffff;
+
+.Ymacs-Theme-ef-frost { --ymacs-cursor-bg: #0055bb; --ymacs-cursor-fg: #fcffff; --ymacs-modeline-in-bg: #d7dbdb; --ymacs-modeline-ac-bg: #9ad0ff; }
+.Ymacs-Theme-ef-frost { color: #232323; background-color: #fcffff; }
+.Ymacs-Theme-ef-frost .Ymacs_SplitCont > .bar { background-color: #b0b7c0; }
+.Ymacs-Theme-ef-frost .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #f7f9f9; border-bottom: 1px solid #f7f9f9; }
+.Ymacs-Theme-ef-frost .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #f7f9f9; border-right: 1px solid #f7f9f9; }
+.Ymacs-Theme-ef-frost.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #dff6e463 }
+.Ymacs-Theme-ef-frost .Ymacs-frame-content div.line:before { color: #66657f; }
+.Ymacs-Theme-ef-frost.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #4244ef; font-weight: bold; }
+.Ymacs-Theme-ef-frost .Ymacs-frame-content:before { color: #66657f; background-color: #fcffff; }
+.Ymacs-Theme-ef-frost {
+.Ymacs_Popup {
+  --ymacs-popup-bg: #eaefef;
+  --ymacs-popup-fg: #232323;
+  --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
+}
+.Ymacs_Popup .Ymacs_Menu {
+.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #cceff5; font-weight: bold; }
+}
+.Ymacs_Overlay.selection div { background-color: #d4eaf3; }
+.Ymacs_Overlay.isearch div { color: #232323; background-color: #fac200; }
+.Ymacs_Overlay.isearch-lazy div { color: #232323; background-color: #cbcfff; }
+.Ymacs_Overlay.match-paren div { color: #232323; background-color: #8adf90; }
+.Ymacs_Modeline { color: #66657f; background-color: #d7dbdb; border-top: 1px solid #b0b7c0; border-bottom: 1px solid #b0b7c0; }
+.Ymacs_Frame-active .Ymacs_Modeline { color: #051524; background-color: #9ad0ff; border-top: 1px solid #b0b7c0; border-bottom: 1px solid #b0b7c0; }
+.minibuffer-prompt { color: #1f6fbf; }
+.mode-line-buffer-id { font-weight: bold; }
+.heading1 { color: #004fc0; font-weight: bold; }
+.heading2 { color: #00845f; font-weight: bold; }
+.heading3 { color: #7f5ae0; font-weight: bold; }
+.heading4 { color: #1f6fbf; font-weight: bold; }
+.markdown-blockquote { color: #605f9f; }
+.markdown-blockquote1 { color: #605f9f; }
+.markdown-blockquote2 { color: #605f9f; }
+.markdown-blockquote3 { color: #605f9f; }
+.markdown-pre { color: #c0469a; }
+.markdown-code { color: #007a85; }
+.markdown-code-starter { color: #007a85; }
+.markdown-code-stopper { color: #007a85; }
+.markdown-ref { color: #1f6fbf; }
+.directive { color: #aa44c5; }
+.type { color: #7f5ae0; }
+.builtin { color: #1f6fbf; }
+.function-name { color: #00845f; }
+.variable-name { color: #3a6dd2; }
+.constant { color: #065fff; }
+.string { color: #4244ef; }
+.string-starter { color: #4244ef; }
+.string-stopper { color: #4244ef; }
+.regexp { color: #4244ef; }
+.regexp-starter { color: #4244ef; }
+.regexp-stopper { color: #4244ef; }
+.regexp-modifier { color: #4244ef; }
+.keyword { color: #004fc0; }
+.comment { color: #7a5f2f; }
+.mcomment { color: #7a5f2f; }
+.comment-starter { color: #7a5f2f; }
+.mcomment-starter { color: #7a5f2f; }
+.mcomment-stopper { color: #7a5f2f; }
+.number { color: #232323; }
+.operator { color: #232323; }
+.error { color: #996c4f; }
+.isearch-fail { color: #c42d2f; background-color: #ffdfda; }
+.xml-open-tag { color: #00845f; }
+.xml-close-tag { color: #00845f; }
+.xml-attribute { color: #3a6dd2; }
+.xml-entity-starter { color: #66657f; }
+.xml-entity-stopper { color: #66657f; }
+.xml-entity { color: #66657f; }
+.xml-open-bracket { color: #66657f; }
+.xml-close-bracket { color: #66657f; }
+.xml-closetag-slash { color: #66657f; }
+.xml-cdata { color: #232323; }
+.xml-cdata-starter { color: #c42d2f; }
+.xml-cdata-stopper { color: #c42d2f; }
+.block-starter, .block-stopper { color: #232323; }
+.exp-starter, .exp-stopper { color: #232323; }
+.lisp-keyword { color: #1f6fbf; }
+.hyperlink { color: #1f6fbf; }
+}
