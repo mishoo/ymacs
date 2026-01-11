@@ -355,9 +355,9 @@ const LOOP_KEYWORDS = regexp_opt("\
   of-type \
   find maximizes minimizes that which \
   repeat finally initially return \
-  if else when unless do doing");
+  if else when unless do doing", "i");
 
-const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)? warn(?:[-/]\\w+)? check(?:[-/]\\w+) assert");
+const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)? warn(?:[-/]\\w+)? check(?:[-/]\\w+) assert", "i");
 
 const CONSTANTS = toHash("t nil");
 
@@ -692,7 +692,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                 var currentForm = this.isForm();
                 if (currentForm) {
                     currentForm = currentForm.replace(/\*$/, "");
-                    var formArgs = FORM_ARGS[currentForm];
+                    var formArgs = FORM_ARGS[currentForm.toLowerCase()];
                     if (!formArgs && /^(?:[\w_-]*::?)?(?:with|for-|foreach|do-)/u.test(currentForm)) {
                         // "with" macros usually take one argument, then &body
                         formArgs = "0*";
@@ -708,7 +708,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                         if (this._formStack.cdr?.car?.id == "handler-case") {
                             formArgs = "1*";
                         }
-                        else if (LOCAL_BODYDEF[this._formStack.cdr.cdr.cdr.car.id] &&
+                        else if (LOCAL_BODYDEF[this._formStack.cdr.cdr.cdr.car.id?.toLowerCase()] &&
                                  this._formStack.cdr.cdr.car == 2) {
                             formArgs = "1*";
                         }
