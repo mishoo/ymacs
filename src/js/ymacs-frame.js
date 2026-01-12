@@ -252,6 +252,15 @@ export class Ymacs_Frame extends Widget {
         return this._split(false);
     }
 
+    split() {
+        let box = this.getElement().getBoundingClientRect();
+        if (box.width / box.height > 1.25) {
+            return this.hsplit();
+        } else {
+            return this.vsplit();
+        }
+    }
+
     __showCaret() {
         DOM.addClass(this.getCaretElement(), "Ymacs-caret");
     }
