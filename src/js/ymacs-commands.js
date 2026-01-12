@@ -262,13 +262,16 @@ Ymacs_Buffer.newCommands({
     indent_region: Ymacs_Interactive("r", function(begin, end) {
         if (end < begin) [ begin, end ] = [ end, begin ];
         this.cmd("save_excursion", function() {
-            var m = this.createMarker(end);
+            let m = this.createMarker(end);
             this.cmd("goto_char", begin);
-            while (this.point() < m.getPosition()) {
+            let p = this.point();
+            while (p < m.getPosition()) {
                 this.cmd("indent_line", true);
                 this.cmd("beginning_of_line");
                 if (!this.cmd("forward_line"))
                     break;
+                let q = this.point();
+                if (q > p) p = q; else break;
             };
             m.destroy();
         });
