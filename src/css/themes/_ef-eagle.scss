@@ -37,18 +37,18 @@ $cursor_fg: #f1ecd0;
 .heading2 { color: #702f1f; font-weight: bold; }
 .heading3 { color: #006e50; font-weight: bold; }
 .heading4 { color: #6b4500; font-weight: bold; }
-.markdown-blockquote { color: #42573f; }
-.markdown-blockquote1 { color: #42573f; }
-.markdown-blockquote2 { color: #42573f; }
-.markdown-blockquote3 { color: #42573f; }
+.markdown-blockquote { color: #42573f; font-style: italic; }
+.markdown-blockquote1 { color: #42573f; font-style: italic; }
+.markdown-blockquote2 { color: #42573f; font-style: italic; }
+.markdown-blockquote3 { color: #42573f; font-style: italic; }
 .markdown-pre { color: #960f4f; }
 .markdown-code { color: #00676f; }
 .markdown-code-starter { color: #00676f; }
 .markdown-code-stopper { color: #00676f; }
 .markdown-ref { color: #775228; }
 .directive { color: #9a0000; }
-.type { color: #226022; }
-.builtin { color: #775228; }
+.type { color: #226022; font-weight: bold; }
+.builtin { color: #775228; font-weight: bold; }
 .function-name { color: #882000; }
 .variable-name { color: #125a7f; }
 .constant { color: #006e50; }
@@ -59,30 +59,30 @@ $cursor_fg: #f1ecd0;
 .regexp-starter { color: #3a7800; }
 .regexp-stopper { color: #3a7800; }
 .regexp-modifier { color: #3a7800; }
-.keyword { color: #702f1f; }
-.comment { color: #6a5937; }
-.mcomment { color: #6a5937; }
-.comment-starter { color: #6a5937; }
-.mcomment-starter { color: #6a5937; }
-.mcomment-stopper { color: #6a5937; }
+.keyword { color: #702f1f; font-weight: bold; }
+.comment { color: #6a5937; font-style: italic; }
+.mcomment { color: #6a5937; font-style: italic; }
+.comment-starter { color: #6a5937; font-style: italic; }
+.mcomment-starter { color: #6a5937; font-style: italic; }
+.mcomment-stopper { color: #6a5937; font-style: italic; }
 .number { color: #231a1f; }
 .operator { color: #231a1f; }
-.error { color: #843300; }
+.error { color: #843300; font-weight: bold; }
 .isearch-fail { color: #9a0000; background-color: #f2d4b5; }
 .xml-open-tag { color: #882000; }
 .xml-close-tag { color: #882000; }
 .xml-attribute { color: #125a7f; }
 .xml-entity-starter { color: #685f53; }
 .xml-entity-stopper { color: #685f53; }
-.xml-entity { color: #685f53; }
+.xml-entity { color: #685f53; font-weight: bold; }
 .xml-open-bracket { color: #685f53; }
 .xml-close-bracket { color: #685f53; }
 .xml-closetag-slash { color: #685f53; }
-.xml-cdata { color: #231a1f; }
-.xml-cdata-starter { color: #9a0000; }
-.xml-cdata-stopper { color: #9a0000; }
+.xml-cdata { color: #231a1f; font-style: italic; }
+.xml-cdata-starter { color: #9a0000; font-style: italic; }
+.xml-cdata-stopper { color: #9a0000; font-style: italic; }
 .block-starter, .block-stopper { color: #231a1f; }
 .exp-starter, .exp-stopper { color: #231a1f; }
-.lisp-keyword { color: #775228; }
+.lisp-keyword { color: #775228; font-weight: bold; }
 .hyperlink { color: #775228; }
 }
