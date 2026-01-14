@@ -123,7 +123,28 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             return true;
         }
         function read_symbol() {
-            return read_while(is_symbol_char);
+            let esc = false;
+            let out = "";
+            while (true) {
+                let ch = peek();
+                if (!ch) {
+                    if (esc) throw new Partial(out);
+                    return out;
+                } else if (ch === "\\") {
+                    next();
+                    if (!peek()) throw new Partial(out);
+                    out += next();
+                } else if (ch === "|") {
+                    esc = !esc;
+                    next();
+                } else if (esc) {
+                    out += next();
+                } else if (is_symbol_char(ch)) {
+                    out += next();
+                } else {
+                    return out;
+                }
+            }
         }
         function read_char() {
             return next() + read_while(function(ch){
@@ -152,7 +173,9 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
         }
         function read_token() {
             skip_ws();
-            if (!caret_token && caret != null && input.pos == caret && (!parent || parent.type == "list")) {
+            if (!caret_token && caret != null && input.pos == caret &&
+                (!parent || /^(?:list|vector)$/.test(parent.type)))
+            {
                 return caret_token = token("caret");
             }
             switch (peek()) {
@@ -205,7 +228,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                     depth   : parent ? parent.depth + 1 : 0,
                     partial : false
                 };
-                if (type == "list") parent = tok;
+                if (type == "list" || type == "vector") parent = tok;
                 try {
                     if (reader) {
                         tok.value = reader();
@@ -258,7 +281,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             },
             sexp: function() {
                 var tok = cont_exp;
-                while (tok && (!/^(?:list|string)$/.test(tok.type) || tok.end == caret))
+                while (tok && (!/^(?:list|string|vector|sharp|regexp)$/.test(tok.type) || tok.end == caret))
                     tok = tok.parent;
                 return tok;
             }
@@ -435,7 +458,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
     COMMENT = [ ";", [ "#|", "|#" ] ];
     STRING = [ '"' ];
     NUMBER = /^[+-]?(?:#x[0-9a-f]+|#\d+r[0-9a-z]+|#o[0-7]+|#b[01]+|(?:\d*\.)?\d+(?:e[+-]?\d+)?|\d+\/\d+)$/iu;
-    NAME = /^[-_$\p{L}0-9|!#$%&*+./:<=>?@\^~]+/iu;
+    NAME = /^[-_$\p{L}0-9|!$%&*+./:<=>?@\^~]+/iu;
     OPEN_PAREN = {
         "(" : ")",
         "{" : "}",
