@@ -113,7 +113,7 @@
 
 $lnwidth: 3.1em;
 
-.Ymacs.Ymacs-line-numbers {
+.Ymacs-line-numbers {
   .Ymacs-frame-content {
     padding-left: 0;
     counter-reset: ymacs-line 0;
@@ -330,6 +330,12 @@ $lnwidth: 3.1em;
       &.selected:hover {
         // background-color: var(--ymacs-cursor-bg);
         // color: var(--ymacs-cursor-fg);
+      }
+
+      b {
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-decoration-color: var(--ymacs-cursor-bg);
       }
     }
   }
