@@ -105,19 +105,25 @@ export class Ymacs_Text_Properties extends EventProxy {
             if (!p || p.length == 0) {
                 if (caret === text.length)
                     return DOM.htmlEscape(text) + "<span class='Ymacs-caret'>&nbsp;</span>";
+                let ch = DOM.htmlEscape(text.charAt(caret));
                 return DOM.htmlEscape(text.substr(0, caret)) +
                     "<span class='Ymacs-caret'>" +
-                    DOM.htmlEscape(text.charAt(caret)) +
+                    ch +
                     "</span>" +
                     DOM.htmlEscape(text.substr(caret + 1));
             }
         }
+        //text = [...text];
         var i = 0, n = text.length, last = null, o, ret = "", ch;
         while (i < n) {
             o = p[i];
             o = o && o.css;
-            if (i === caret) {
-                o = o ? o + " Ymacs-caret" : "Ymacs-caret";
+            ch = text[i];
+            switch (ch) {
+              case "<" : ch = "&lt;"; break;
+              case ">" : ch = "&gt;"; break;
+              case "&" : ch = "&amp;"; break;
+              case "\"" : ch = "&quot;"; break;
             }
             if (o && o != last) {
                 if (last)
@@ -135,15 +141,10 @@ export class Ymacs_Text_Properties extends EventProxy {
                 ret += "</a>";
             }
             last = o;
-            // XXX: Should have used a hash rather than a
-            // switch statement?  I'm not sure but I have
-            // a feeling that switch is faster.
-            ch = text.charAt(i);
-            switch (ch) {
-              case "<" : ret += "&lt;"; break;
-              case ">" : ret += "&gt;"; break;
-              case "&" : ret += "&amp;"; break;
-              default  : ret += ch; break;
+            if (i === caret) {
+                ret += `<span class='Ymacs-caret'>${ch}</span>`;
+            } else {
+                ret += ch;
             }
             ++i;
         }

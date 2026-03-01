@@ -216,8 +216,7 @@ $lnwidth: 3.1em;
 
 .Ymacs-cursor-block {
   @keyframes ymacs-caret-block-blink {
-    0% { background-color: unset; }
-    50% { background-color: var(--ymacs-cursor-bg); color: var(--ymacs-cursor-fg); }
+    50% { background-color: unset; color: unset; }
   }
   .Ymacs-overwrite-mode .Ymacs-caret {
     border-radius: 15px;
@@ -233,10 +232,13 @@ $lnwidth: 3.1em;
   }
   .Ymacs_Frame:focus .Ymacs-caret {
     outline: none;
+    background-color: var(--ymacs-cursor-bg);
+    color: var(--ymacs-cursor-fg);
     animation-name: ymacs-caret-block-blink;
-    animation-duration: 0.8s;
+    animation-duration: 0.72s;
     animation-iteration-count: infinite;
     animation-timing-function: step-start;
+    animation-delay: 1s;
   }
 }
 
@@ -246,17 +248,26 @@ $lnwidth: 3.1em;
     0% { --ymacs-cursor-bar: var(--ymacs-cursor-bg); }
     50% { --ymacs-cursor-bar: #0000; }
   }
+  .Ymacs_Frame .Ymacs-caret {
+    outline: 1px solid var(--ymacs-cursor-bg);
+    outline-offset: -1px;
+  }
   .Ymacs_Minibuffer .Ymacs-caret {
     box-shadow: none;
+    outline: none;
   }
   .Ymacs_Frame:focus .Ymacs-caret {
+    outline: none;
     box-shadow: -1px 0px 0px 0px var(--ymacs-cursor-bar),
                 inset 1px 0px 0px 0px var(--ymacs-cursor-bar);
-    animation-duration: 0.8s;
+    animation-duration: 0.72s;
     animation-name: ymacs-caret-bar-blink;
     animation-iteration-count: infinite;
     animation-timing-function: step-start;
-    animation-delay: 0.8s;
+    animation-delay: 1s;
+  }
+  .Ymacs-overwrite-mode .Ymacs-caret {
+    box-shadow: inset 0px -2px 0px 0px var(--ymacs-cursor-bar) !important;
   }
 }
 

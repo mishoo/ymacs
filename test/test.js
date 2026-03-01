@@ -37,15 +37,16 @@ let keymap = Ymacs_Keymap.define(null, {
     ymacs.addClass("Ymacs-hl-line");
     //ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
-    ymacs.setColorTheme([ "ef-elea-light" ]);
+    ymacs.setColorTheme([ "ef-elea-dark" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-bright" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
     let b = window.b = ymacs.getActiveBuffer.bind(ymacs);
-    b().cmd("load_file", "tagbody.lisp");
+    b().cmd("load_file", "blah.lisp");
     b().setVariable("fill_column", 80);
+    //b().cmd("toggle_bar_cursor");
 
     //b().cmd("load_file", "info.md");
     b().cmd("split_frame_horizontally");
