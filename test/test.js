@@ -37,7 +37,7 @@ let keymap = Ymacs_Keymap.define(null, {
     ymacs.addClass("Ymacs-hl-line");
     //ymacs.setColorTheme([ "material" ]);
     //ymacs.setColorTheme([ "ef-deuteranopia-light" ]);
-    ymacs.setColorTheme([ "ef-elea-dark" ]);
+    ymacs.setColorTheme([ "ef-elea-light" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-night" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-day" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-blue" ]);
@@ -46,6 +46,7 @@ let keymap = Ymacs_Keymap.define(null, {
     let b = window.b = ymacs.getActiveBuffer.bind(ymacs);
     b().cmd("load_file", "blah.lisp");
     b().setVariable("fill_column", 80);
+    b().cmd("toggle_line_numbers");
     //b().cmd("toggle_bar_cursor");
 
     //b().cmd("load_file", "info.md");

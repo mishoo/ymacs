@@ -571,7 +571,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
 
             // message to future me: good luck figuring this out.
             if (/^e?(?:type)?case$/i.test(this._formStack.cdr?.car?.id) && this._formStack.car > 2 && this._formLen == 0) {
-                type = "constant";
+                type = /^(otherwise|t)$/i.test(m.id) ? "keyword" : "constant";
             }
             else if (/^e?(?:type)?case$/i.test(this._formStack.cdr?.cdr?.cdr?.car?.id) && this._formStack.cdr?.cdr?.car > 2 && this._formStack.car == 1) {
                 type = "constant";
