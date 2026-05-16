@@ -26,7 +26,7 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "("                            : [ "paredit_open_pair", "(", ")" ],
     "["                            : [ "paredit_open_pair", "[", "]" ],
     "{"                            : [ "paredit_open_pair", "{", "}" ],
-    "❰"                            : [ "paredit_open_pair", "❰", "❱" ],
+    "❰ && C-["                     : [ "paredit_open_pair", "❰", "❱" ],
     "«"                            : [ "paredit_open_pair", "«", "»" ],
     "“"                            : [ "paredit_open_pair", "“", "”" ],
     '"'                            : [ "paredit_open_pair", '"', '"', /[\"\\]/g ],
@@ -34,14 +34,14 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     ")"                            : [ "paredit_close_pair", "(", ")" ],
     "]"                            : [ "paredit_close_pair", "[", "]" ],
     "}"                            : [ "paredit_close_pair", "{", "}" ],
-    "❱"                            : [ "paredit_close_pair", "❰", "❱" ],
+    "❱ && C-]"                     : [ "paredit_close_pair", "❰", "❱" ],
     "»"                            : [ "paredit_close_pair", "«", "»" ],
     "”"                            : [ "paredit_close_pair", "“", "”" ],
 
     "M-("                          : [ "paredit_wrap_round", "(", ")" ],
     "M-["                          : [ "paredit_wrap_round", "[", "]" ],
     "M-{"                          : [ "paredit_wrap_round", "{", "}" ],
-    "M-❰"                          : [ "paredit_wrap_round", "❰", "❱" ],
+    "M-❰ && C-M-["                 : [ "paredit_wrap_round", "❰", "❱" ],
     "M-«"                          : [ "paredit_wrap_round", "«", "»" ],
     "M-“"                          : [ "paredit_wrap_round", "“", "”" ],
     'M-"'                          : [ "paredit_wrap_round", '"', '"', /[\"\\]/g ],
@@ -101,7 +101,7 @@ function touches(paren, caret) {
         && caret.col <= endOf(paren);
 }
 
-Ymacs_Buffer.newCommands({
+let COMMANDS = {
 
     get_paren_at_point() {
         let rc = this._rowcol;
@@ -155,7 +155,7 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
-    forward_sexp: Ymacs_Interactive(function() {
+    paredit_forward_sexp: Ymacs_Interactive(function() {
         this.tokenizer.finishParsing();
         let next;
         let rc = this._rowcol;
@@ -175,7 +175,7 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
-    backward_sexp: Ymacs_Interactive(function() {
+    paredit_backward_sexp: Ymacs_Interactive(function() {
         this.tokenizer.finishParsing();
         let prev;
         let rc = this._rowcol;
@@ -251,7 +251,7 @@ Ymacs_Buffer.newCommands({
         }
     }),
 
-    backward_up_list: Ymacs_Interactive(function(){
+    paredit_backward_up_list: Ymacs_Interactive(function(){
         this.tokenizer.finishParsing();
         let rc = this._rowcol;
         let p = this.tokenizer.getPP().filter(caretInside(rc)).at(-1);
@@ -469,7 +469,13 @@ Ymacs_Buffer.newCommands({
         this.cmd("paredit_maybe_indent");
     }),
 
-});
+};
+
+COMMANDS.forward_sexp = COMMANDS.paredit_forward_sexp;
+COMMANDS.backward_sexp = COMMANDS.paredit_backward_sexp;
+COMMANDS.backward_up_list = COMMANDS.paredit_backward_up_list;
+
+Ymacs_Buffer.newCommands(COMMANDS);
 
 Ymacs_Buffer.newMode("paren_match_mode", function(){
 

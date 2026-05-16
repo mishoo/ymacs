@@ -54,6 +54,7 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
     _tags = NIL;
     _inTag = null;
     _inline = 0;
+    _defaultToken = null;
 
     COMMENT = [
         [ "<!--", "-->", "-" ],
@@ -106,10 +107,10 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
          this.readOpenParen() ||
          this.readCloseParen() ||
          this.readTrailingWhitespace() ||
-         this.t(null, 1, this._stream.peek() != " "));
+         this.t(this._defaultToken, 1, this._stream.peek() != " "));
     }
 
-    t(type = null, len = 1, addInline) {
+    t(type = this._defaultToken, len = 1, addInline) {
         if (addInline && this.inline) {
             let cls = this.inline.cls(this._inline);
             if (cls != null) {
@@ -227,27 +228,40 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
         }
     }
 
+    parserBefore(tag) {
+        let s = this._stream;
+        let pos = s.buffer._rowColToPosition(tag.outer.l1, tag.outer.c1);
+        let parser = s.buffer.getParserAtPoint(false, pos);
+        return parser;
+    }
+
     indentation() {
         let s = this._stream;
         var indent, lastTag;
 
-        let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");
+        let INDENT_LEVEL = () => s.buffer.getq("indent_level");
 
         if (this._inComment) {
             indent = s.lineIndentation(this._inComment.line) + INDENT_LEVEL();
         }
         else if (this._inTag) {
             var txt = s.lineText(this._inTag.line);
-            if (/^\s*$/.test(txt.substr(0, this._inTag.c1 - 1))) {
+            if (/^\s*$/.test(txt.substr(0, this._inTag.c1 - 1)) ||
+                (this.parserBefore(this._inTag) !== this)) {
                 indent = this._inTag.c1 + this._inTag.id.length + 1;
             } else {
                 indent = s.lineIndentation(this._inTag.line);
             }
         }
         else if ((lastTag = this._tags.car)) {
-            indent = s.lineIndentation(lastTag.line);
-            if (!/^\s*<\x2f/.test(s.lineText()))
+            if (this.parserBefore(lastTag) === this) {
+                indent = s.lineIndentation(lastTag.line);
+            } else {
+                indent = lastTag.outer.c1;
+            }
+            if (!/^\s*<\x2f/.test(s.lineText())) {
                 indent += INDENT_LEVEL();
+            }
         }
 
         if (indent == null) {
@@ -316,18 +330,22 @@ class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
 
     indentation() {
         let s = this._stream;
-        let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");
+        let INDENT_LEVEL = () => s.buffer.getq("indent_level");
         if ((this._mode === this) || (!this._mode._inString && /^\s*<\//.test(s.lineText()))) {
             let indent = super.indentation();
-            let tag = this._tags.car;
-            if (tag) {
-                let txt = s.lineText(tag.outer.l1).substr(0, tag.outer.c1);
-                if (/\S/.test(txt)) {
-                    // there is text before the innermost tag, let's assume
-                    // it's inline text and back one level
-                    indent -= INDENT_LEVEL();
-                }
-            }
+            // let tag = this._tags.car;
+            // if (tag) {
+            //     let pos = s.buffer._rowColToPosition(tag.outer.l1, tag.outer.c1);
+            //     let parser = s.buffer.getParserAtPoint(false, pos);
+            //     if (parser === this) {
+            //         let txt = s.lineText(tag.outer.l1).substr(0, tag.outer.c1);
+            //         if (/\S/.test(txt)) {
+            //             // there is text before the innermost tag, let's assume
+            //             // it's inline text and back one level
+            //             indent -= INDENT_LEVEL();
+            //         }
+            //     }
+            // }
             return indent > 0 ? indent : 0;
         } else {
             let tag = this.tag;
@@ -335,7 +353,7 @@ class Ymacs_Lang_HTML extends Ymacs_Lang_XML {
                 let line = s.line;
                 while (--line > tag.line && !/\S/.test(s.lineText(line)));
                 if (line == tag.line)
-                    return s.lineIndentation(line) + this._stream.buffer.getq("indent_level");
+                    return s.lineIndentation(line) + s.buffer.getq("indent_level");
             }
             return this._mode.indentation();
         }
@@ -502,7 +520,7 @@ class Ymacs_Lang_Twig extends Ymacs_BaseLang {
 
     indentation() {
         let s = this._stream;
-        let INDENT_LEVEL = () => this._stream.buffer.getq("indent_level");
+        let INDENT_LEVEL = () => s.buffer.getq("indent_level");
         if (this._mode === this) {
             return super.indentation();
         } else if (this.block) {

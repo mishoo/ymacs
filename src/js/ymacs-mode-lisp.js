@@ -16,6 +16,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
     }
 
     function QuickParser(buffer, pos) {
+        let sl_mode = buffer.tokenizer?.theParser?._sl_mode;
         var input = new Ymacs_Simple_Stream({ buffer: buffer, pos: pos });
         function peek() { return input.peek() }
         function next() { return input.next() }
@@ -55,13 +56,13 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             var comment = read_while(function(){
                 return !input.looking_at("|#");
             });
-            skip(); skip();
+            skip("|"); skip("#");
             return comment;
         }
         function read_string() {
             return read_escaped("\"", "\"");
         }
-        function read_list(beg, end) {
+        function read_list(beg, end, embexp) {
             var save_list_index = list_index;
             list_index = 0;
             try {
@@ -73,7 +74,9 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                       case end: break out;
                       case null: throw new Partial(ret);
                       default:
-                        ret.push(read_token());
+                        let tok = read_token(embexp);
+                        if (tok == null) break out;
+                        ret.push(tok);
                         ++list_index;
                     }
                 }
@@ -97,6 +100,9 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             return { pattern: str, modifiers: mods };
         }
         function is_symbol_char(ch) {
+            if (sl_mode && "❰❱".includes(ch)) {
+                return false;
+            }
             switch (ch) {
               case null:
               case "(":
@@ -122,7 +128,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             }
             return true;
         }
-        function read_symbol() {
+        function read_symbol(embexp) {
             let esc = false;
             let out = "";
             while (true) {
@@ -135,8 +141,14 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                     if (!peek()) throw new Partial(out);
                     out += next();
                 } else if (ch === "|") {
-                    esc = !esc;
-                    next();
+                    if (embexp) {
+                        if (out) return out;
+                        next();
+                        return "|";
+                    } else {
+                        esc = !esc;
+                        next();
+                    }
                 } else if (esc) {
                     out += next();
                 } else if (is_symbol_char(ch)) {
@@ -161,17 +173,75 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
         }
         function read_sharp() {
             skip("#");
+            if (sl_mode && peek() === "❰") {
+                return token("template", read_string_template, -1);
+            }
             switch (peek()) {
-              case "\\": next(); return token("char", read_char);
-              case "/": return token("regexp", read_regexp);
-              case "(": return token("vector", read_list.bind(null, "(", ")"));
-              case "'": next(); return token("function", read_token);
-              case "|": next(); return token("comment", read_multiline_comment);
+              case "\\": next(); return token("char", read_char, -1);
+              case "/": return token("regexp", read_regexp, -1);
+              case "(": return token("vector", read_list.bind(null, "(", ")"), -1);
+              case "'": next(); return token("function", read_token, -1);
+              case "|": next(); return token("comment", read_multiline_comment, -1);
+              case ".": next(); return token("readeval", read_token, -1);
+              case ":": next(); return token("freesymbol", read_token, -1);
               default:
-                return token("unknown", read_token);
+                return token("unknown", read_token, -1);
             }
         }
-        function read_token() {
+        function read_string_template() {
+            skip("❰");
+            let segment = "";
+            let data = [];
+            let start = input.pos;
+            let save_list_index = list_index;
+            list_index = 0;
+            try {
+                while (true) {
+                    let ch = peek();
+                    if (ch == null) {
+                        throw new Partial(data);
+                    }
+                    else if (ch === "❱") {
+                        next();
+                        add_segment();
+                        return data;
+                    }
+                    else if (ch === "\\") {
+                        next();
+                        ch = next();
+                        if (ch == null) {
+                            throw new Partial(data);
+                        }
+                        segment += ch;
+                    }
+                    else if (ch === "❰") {
+                        add_segment();
+                        data.push(token("list", read_list.bind(null, "❰", "❱", true)));
+                    } else {
+                        segment += next();
+                    }
+                }
+            } finally {
+                list_index = save_list_index;
+            }
+            function add_segment() {
+                if (segment !== "") {
+                    ++list_index;
+                    data.push({
+                        type    : "string",
+                        value   : segment,
+                        index   : list_index,
+                        start   : start,
+                        end     : input.pos,
+                        depth   : parent ? parent.depth + 1 : 0,
+                        partial : false,
+                    });
+                    segment = "";
+                    start = input.pos;
+                }
+            }
+        }
+        function read_token(embexp) {
             skip_ws();
             if (!caret_token && caret != null && input.pos == caret &&
                 (!parent || /^(?:list|vector)$/.test(parent.type)))
@@ -198,7 +268,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
               case ")"  : return null;
               case null : return null; // EOF
             }
-            return token("symbol", read_symbol);
+            return token("symbol", read_symbol.bind(null, embexp));
         }
         function read_all() {
             var ret = [];
@@ -228,7 +298,8 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                     depth   : parent ? parent.depth + 1 : 0,
                     partial : false
                 };
-                if (type == "list" || type == "vector") parent = tok;
+                if (type == "list" || type == "vector" || type == "template")
+                    parent = tok;
                 try {
                     if (reader) {
                         tok.value = reader();
@@ -273,6 +344,13 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                     return cont_exp.parent?.value[cont_exp.index];
                 }
             },
+            next_exp: function() {
+                if (caret_token) {
+                    return caret_token.parent.value[caret_token.index + 1];
+                } else if (cont_exp) {
+                    return cont_exp;
+                }
+            },
             caret_token: function() {
                 return caret_token;
             },
@@ -286,6 +364,12 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                 return tok;
             }
         };
+    }
+
+    function checkLispMode(forward) {
+        let p = this.getParserAtPoint(forward);
+        //console.log(p);
+        return p instanceof Ymacs_Lang_Lisp;
     }
 
     Ymacs_Buffer.newCommands({
@@ -308,23 +392,36 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
         },
 
         lisp_forward_sexp: Ymacs_Interactive(function(){
-            var p = QuickParser(this, this.point());
-            var tok = p.read();
-            if (tok) this.cmd("goto_char", tok.end);
+            if (checkLispMode.call(this, true)) {
+                var p = QuickParser(this);
+                p.parse(this.point());
+                var tok = p.next_exp();
+                if (tok) this.cmd("goto_char", tok.end);
+            } else {
+                return this.cmd("paredit_forward_sexp");
+            }
         }),
 
         lisp_backward_sexp: Ymacs_Interactive(function(){
-            var p = QuickParser(this);
-            p.parse(this.point());
-            var tok = p.prev_exp();
-            if (tok) this.cmd("goto_char", tok.start);
+            if (checkLispMode.call(this, false)) {
+                var p = QuickParser(this);
+                p.parse(this.point());
+                var tok = p.prev_exp();
+                if (tok) this.cmd("goto_char", tok.start);
+            } else {
+                return this.cmd("paredit_backward_sexp");
+            }
         }),
 
         lisp_backward_up_list: Ymacs_Interactive(function(){
-            var p = QuickParser(this);
-            p.parse(this.point());
-            var list = p.sexp();
-            if (list && list.parent) this.cmd("goto_char", list.start);
+            if (checkLispMode.call(this, true)) {
+                var p = QuickParser(this);
+                p.parse(this.point());
+                var list = p.sexp();
+                if (list && list.parent) this.cmd("goto_char", list.start);
+            } else {
+                return this.cmd("paredit_backward_up_list");
+            }
         }),
 
         lisp_in_string: function() {
@@ -371,7 +468,7 @@ const LOOP_KEYWORDS = regexp_opt("\
   for with and = as in on of then across by while until \
   from downfrom upfrom to upto below downto above \
   being each the hash-keys? using hash-values? \
-  collect(?:ing)? nconc(?:ing)? sum(?:ming)? append(?:ing)? into \
+  collect(?:ing)? nconc(?:ing)? sum(?:ming)? append(?:ing)? strcat into \
   minimize minimizing maximize maximizing count counting \
   symbol symbols external-symbol external-symbols present-symbol present-symbols \
   named always never thereis \
@@ -380,7 +477,7 @@ const LOOP_KEYWORDS = regexp_opt("\
   repeat finally initially return \
   if else when unless do doing", "i");
 
-const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)? warn(?:[-/]\\w+)? check(?:[-/]\\w+) assert", "i");
+const ERROR_FORMS = regexp_opt("error(?:[-/]\\w+)* warn(?:[-/]\\w+)* check(?:[-/]\\w+)+ assert(?:[-/]\\w+)+", "ui");
 
 const CONSTANTS = toHash("t nil");
 
@@ -474,9 +571,10 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         "»" : "«",
     };
 
-    constructor({ stream, tok, rx_special }) {
+    constructor({ stream, tok, rx_special, sl_mode }) {
         super({ stream, tok });
         this._rxSpecial = rx_special;
+        this._sl_mode = sl_mode;
     }
 
     isNameChar(ch) {
@@ -554,10 +652,9 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         }
         if ((m = s.lookingAt(/^#\/((?:\\.|[^\/])*)\/([dgimsuvy]+)?/))) {
             this.newArg();
-            this.t("regexp-starter", 2);
+            this.pushInParen("#/", "regexp-starter");
             this.t("regexp", m[1].length);
-            this.t("regexp-stopper");
-            if (m[2]) this.t("regexp-modifier", m[2].length);
+            this.popInParen("#/", 1 + (m[2] ? m[2].length : 0), "regexp-stopper");
             return true;
         }
         if ((m = s.lookingAt(/^\?(?:\\?.)/u))) {
@@ -782,9 +879,11 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
             rx: /[^\S\r\n]*;+ ?/gu,
             ch: ";;"
         },
-        syntax_word_dabbrev: /^[-0-9_*%+/@&$.=~\p{L}]$/u,
-        paredit_space_before() {
-            return !this.cmd("lisp_in_string") && !this.looking_back(/[\s\(\[\{,.@'`#\\]/g);
+        syntax_word_dabbrev: /^[-:0-9_*%+/@&$.=~\p{L}]$/u,
+        syntax_word_sexp: /^[-:0-9_*%+/@&$.=~\p{L}]$/u,
+        paredit_space_before(pair_a, pair_b, backslash) {
+            if (pair_a === "❰") return false;
+            return !this.cmd("lisp_in_string") && !this.looking_back(/[\s\(\[\{,.@'`#:\\]/g);
         },
         lisp_mode: true,
     });
@@ -794,7 +893,7 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
     var changed_commands = this.replaceCommands({
         "forward_sexp"            : "lisp_forward_sexp",
         "backward_sexp"           : "lisp_backward_sexp",
-        "backward_up_list"        : "lisp_backward_up_list"
+        //"backward_up_list"        : "lisp_backward_up_list"
     });
 
     return function() {

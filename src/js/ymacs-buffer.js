@@ -355,6 +355,23 @@ export class Ymacs_Buffer extends EventProxy {
         return this.__size = size;
     }
 
+    getParserAtPoint(forward, pos = this.point()) {
+        let p = null;
+        if (forward) {
+            let len = this.getCodeSize();
+            while (pos < len && !p) {
+                let rc = this._positionToRowCol(pos++);
+                p = this._textProperties.getParserFor(rc.row, rc.col);
+            }
+        } else {
+            while (--pos >= 0 && !p) {
+                let rc = this._positionToRowCol(pos);
+                p = this._textProperties.getParserFor(rc.row, rc.col);
+            }
+        }
+        return p;
+    }
+
     getLine(row) {
         if (row == null)
             row = this._rowcol.row;
@@ -1024,12 +1041,13 @@ export class Ymacs_Buffer extends EventProxy {
         return handled || this.isMinibuffer;
     }
 
-    _on_tokenizerFoundToken(row, c1, c2, what) {
+    _on_tokenizerFoundToken(row, c1, c2, what, parser) {
         if (what) {
             this._textProperties.addLineProps(row, c1, c2, "css", what);
         } else {
             this._textProperties.removeLineProps(row, c1, c2, "css");
         }
+        this._textProperties.setLineParser(row, c1, c2, parser);
     }
 
     _on_textPropertiesChange(row) {

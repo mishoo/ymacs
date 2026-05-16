@@ -267,7 +267,7 @@ export class Ymacs_BaseLang {
     }
 
     token(tok, type = tok.type) {
-        this._tok.onToken(tok.line, tok.c1, tok.c2, type);
+        this._tok.onToken(tok.line, tok.c1, tok.c2, type, this);
     }
 
     pushInParen(type, tokType = "open-paren") {

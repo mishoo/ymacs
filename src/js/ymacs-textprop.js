@@ -36,6 +36,22 @@ export class Ymacs_Text_Properties extends EventProxy {
         }
     }
 
+    setLineParser(row, i, j, parser) {
+        var p = this.props, o;
+        if (i < j) {
+            p = p[row] || (p[row] = []);
+            while (i < j) {
+                o = p[i] || (p[i] = {});
+                o.parser = parser;
+                ++i;
+            }
+        }
+    }
+
+    getParserFor(row, i) {
+        return this.props[row]?.[i]?.parser;
+    }
+
     addLineProps(row, i, j, prop, val) {
         var p = this.props, o, changed = false;
         if (i < j) {

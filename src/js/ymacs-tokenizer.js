@@ -289,8 +289,8 @@ export class Ymacs_Tokenizer extends EventProxy {
         this.truncate(row);
     }
 
-    onToken(line, c1, c2, type) {
-        this.callHooks("onFoundToken", line, c1, c2, type);
+    onToken(line, c1, c2, type, parser) {
+        this.callHooks("onFoundToken", line, c1, c2, type, parser);
     }
 
     getParserForLine(row, col = 0) {
