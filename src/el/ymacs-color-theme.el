@@ -58,6 +58,7 @@
     ( ".mcomment-stopper"      (font-lock-comment-delimiter-face)                                  )
     ( ".number"                (font-lock-number-face font-lock-constant-face)                     )
     ( ".operator"              (font-lock-operator-face)                                           )
+    ( ".negation"              (font-lock-negation-char-face)                                      )
     ( ".error"                 (font-lock-warning-face)                                            )
     ( ".isearch-fail"          (isearch-fail)                                                      )
     ( ".xml-open-tag"          (font-lock-function-name-face)                                      )

@@ -18,7 +18,7 @@ $cursor_fg: #f6fff9;
 .Ymacs-Theme-ef-spring .Ymacs-frame-content:before { color: #777294; background-color: #f6fff9; }
 .Ymacs-Theme-ef-spring {
 .Ymacs_Popup {
-  --ymacs-popup-bg: #e8f0f0;
+  --ymacs-popup-bg: #f3f3f3;
   --ymacs-popup-fg: #34494a;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
@@ -41,11 +41,11 @@ $cursor_fg: #f6fff9;
 .markdown-blockquote1 { color: #a04360; font-style: italic; }
 .markdown-blockquote2 { color: #a04360; font-style: italic; }
 .markdown-blockquote3 { color: #a04360; font-style: italic; }
-.markdown-pre { color: #cb26a0; }
-.markdown-code { color: #0f7b8f; }
-.markdown-code-starter { color: #0f7b8f; }
-.markdown-code-stopper { color: #0f7b8f; }
-.markdown-ref { color: #5f5fdf; }
+.markdown-pre { color: #1a870f; }
+.markdown-code { color: #cf2f4f; }
+.markdown-code-starter { color: #cf2f4f; }
+.markdown-code-stopper { color: #cf2f4f; }
+.markdown-ref { color: #0f7b8f; }
 .directive { color: #cb26a0; }
 .type { color: #9435b4; font-weight: bold; }
 .builtin { color: #1a870f; font-weight: bold; }
@@ -67,6 +67,7 @@ $cursor_fg: #f6fff9;
 .mcomment-stopper { color: #876450; font-style: italic; }
 .number { color: #34494a; }
 .operator { color: #34494a; }
+.negation { color: #d03003; }
 .error { color: #a45f22; font-weight: bold; }
 .isearch-fail { color: #d03003; background-color: #ffe8e0; }
 .xml-open-tag { color: #4a7d00; }
@@ -84,5 +85,5 @@ $cursor_fg: #f6fff9;
 .block-starter, .block-stopper { color: #34494a; }
 .exp-starter, .exp-stopper { color: #34494a; }
 .lisp-keyword { color: #1a870f; font-weight: bold; }
-.hyperlink { color: #5f5fdf; }
+.hyperlink { color: #0f7b8f; }
 }
