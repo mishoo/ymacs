@@ -314,6 +314,10 @@ export class Ymacs_BaseLang {
         this._cont = this._cont.cdr;
     }
 
+    indent_level() {
+        return this._stream.buffer.getq("indent_level");
+    }
+
     // copied from JS mode; should be decent for C-like langs
     indentation() {
         let s = this._stream;
