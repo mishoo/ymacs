@@ -472,8 +472,8 @@ const LOOP_KEYWORDS = regexp_opt("\
   minimize minimizing maximize maximizing count counting \
   symbol symbols external-symbol external-symbols present-symbol present-symbols \
   named always never thereis \
-  of-type \
-  find maximizes minimizes that which \
+  of-type loop-finish \
+  find finding maximizes minimizes that which \
   repeat finally initially return \
   if else when unless do doing", "i");
 
