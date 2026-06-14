@@ -110,7 +110,8 @@ let Ymacs_Keymap_Markdown = Ymacs_Keymap.define("markdown", {
     "M-`" : [ "paredit_wrap_round", "`", "`", /[\`\\]/g ],
 });
 
-Ymacs_Tokenizer.define("markdown", (stream, tok) => new Ymacs_Lang_Markdown({ stream, tok }));
+Ymacs_Tokenizer.define("markdown", (stream, tok, options) =>
+    new Ymacs_Lang_Markdown({ stream, tok, ...options }));
 
 Ymacs_Buffer.newMode("markdown_mode", function() {
 

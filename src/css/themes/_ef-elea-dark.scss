@@ -23,7 +23,7 @@ $cursor_fg: #222524;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
-.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #37493f; font-weight: bold; }
+.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #37493f; }
 }
 .Ymacs_Overlay.selection div { background-color: #543040; }
 .Ymacs_Overlay.isearch div { color: #eaf2ef; background-color: #847020; }
@@ -31,7 +31,7 @@ $cursor_fg: #222524;
 .Ymacs_Overlay.match-paren div { color: #eaf2ef; background-color: #408420; }
 .Ymacs_Modeline { color: #969faf; background-color: #3e4140; border-top: 1px solid #5d5f63; border-bottom: 1px solid #5d5f63; }
 .Ymacs_Frame-active .Ymacs_Modeline { color: #ecf0ff; background-color: #35605d; border-top: 1px solid #5d5f63; border-bottom: 1px solid #5d5f63; }
-.minibuffer-prompt { color: #cfaaff; }
+.minibuffer-prompt { color: #cfaaff; font-weight: bold; }
 .mode-line-buffer-id { font-weight: bold; }
 .heading1 { color: #eba8a8; font-weight: bold; }
 .heading2 { color: #a9c99f; font-weight: bold; }

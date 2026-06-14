@@ -173,8 +173,14 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
         }
         function read_sharp() {
             skip("#");
-            if (sl_mode && peek() === "❰") {
-                return token("template", read_string_template, -1);
+            if (sl_mode) {
+                if (peek() === "❰") {
+                    return token("template", read_string_template, -1);
+                }
+                if (input.looking_at(/^[jxc]❰/i)) {
+                    next();
+                    return token("template", read_string_template, -2);
+                }
             }
             switch (peek()) {
               case "\\": next(); return token("char", read_char, -1);

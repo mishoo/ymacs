@@ -13,6 +13,7 @@ export class Ymacs_BaseLang {
     _inComment = null;
     _inString = false;
     _pmeta = null;
+    _addClass = null;
 
     COMMENT = [ "//", [ "/*", "*/", "*" ] ];
     STRING = [ '"', "'" ];
@@ -30,9 +31,10 @@ export class Ymacs_BaseLang {
         "]" : "[",
     };
 
-    constructor({ stream, tok }) {
+    constructor({ stream, tok, addClass }) {
         this._stream = stream;
         this._tok = tok;
+        this._addClass = addClass;
     }
 
     next() {
@@ -267,6 +269,9 @@ export class Ymacs_BaseLang {
     }
 
     token(tok, type = tok.type) {
+        if (this._addClass) {
+            type = type == null ? this._addClass : type + " " + this._addClass;
+        }
         this._tok.onToken(tok.line, tok.c1, tok.c2, type, this);
     }
 
@@ -284,7 +289,9 @@ export class Ymacs_BaseLang {
         if (this._inParens !== NIL) {
             let paren = this._inParens.car;
             this._inParens = this._inParens.cdr;
-            if (start != paren.type) {
+            if (start instanceof RegExp
+                ? !start.test(paren.type)
+                : start != paren.type) {
                 //debugger;
                 if (n) this.t("error", n);
             } else {

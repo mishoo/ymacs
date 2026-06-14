@@ -20,9 +20,10 @@ import "./js/ymacs-mode-paren-match.js";
 import "./js/ymacs-mode-xml.js";
 import "./js/ymacs-popup.js";
 import "./js/ymacs-textprop.js";
-import "./js/ymacs-baselang.js";
+import { Ymacs_BaseLang } from "./js/ymacs-baselang.js";
 import "./js/ymacs-utils.js";
 
 export { Ymacs, Ymacs_Buffer, Ymacs_Keymap,
          Ymacs_Keymap_Emacs, Ymacs_Tokenizer,
-         Ymacs_Interactive, Ymacs_Exception };
+         Ymacs_Interactive, Ymacs_Exception,
+         Ymacs_BaseLang };

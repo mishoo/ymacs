@@ -169,7 +169,8 @@ class Ymacs_Lang_JS extends Ymacs_BaseLang {
 
 Ymacs_Lang_JS.prototype.C_STATEMENTS = true;
 
-Ymacs_Tokenizer.define("js", (stream, tok) => new Ymacs_Lang_JS({ stream, tok }));
+Ymacs_Tokenizer.define("js", (stream, tok, options) =>
+    new Ymacs_Lang_JS({ stream, tok, ...options }));
 
 let Ymacs_Keymap_JS = Ymacs_Keymap.define("js", {
     "`"   : [ "paredit_open_pair", "`", "`", /[\`\\]/g ],

@@ -28,7 +28,8 @@ class Ymacs_Lang_CSS extends Ymacs_BaseLang {
     ];
 }
 
-Ymacs_Tokenizer.define("css", (stream, tok) => new Ymacs_Lang_CSS({ stream, tok }));
+Ymacs_Tokenizer.define("css", (stream, tok, options) =>
+    new Ymacs_Lang_CSS({ stream, tok, ...options }));
 
 Ymacs_Buffer.newMode("css_mode", function(){
     var tok = this.tokenizer;

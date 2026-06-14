@@ -54,7 +54,6 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
     _tags = NIL;
     _inTag = null;
     _inline = 0;
-    _defaultToken = null;
 
     COMMENT = [
         [ "<!--", "-->", "-" ],
@@ -79,10 +78,10 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
         "”" : "“",
     };
 
-    constructor({ stream, tok, emptyTags, inline }) {
-        super({ stream, tok });
-        this.emptyTags = emptyTags;
-        this.inline = inline;
+    constructor(options) {
+        super(options);
+        this.emptyTags = options.emptyTags;
+        this.inline = options.inline;
     }
 
     copy() {
@@ -107,10 +106,10 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
          this.readOpenParen() ||
          this.readCloseParen() ||
          this.readTrailingWhitespace() ||
-         this.t(this._defaultToken, 1, this._stream.peek() != " "));
+         this.t(null, 1, this._stream.peek() != " "));
     }
 
-    t(type = this._defaultToken, len = 1, addInline) {
+    t(type = null, len = 1, addInline) {
         if (addInline && this.inline) {
             let cls = this.inline.cls(this._inline);
             if (cls != null) {
@@ -573,15 +572,19 @@ function inlineCls(inline) {
     return out.trim() || null;
 }
 
-Ymacs_Tokenizer.define("xml", (stream, tok) => new Ymacs_Lang_XML({ stream, tok }));
+Ymacs_Tokenizer.define("xml", (stream, tok, options) =>
+    new Ymacs_Lang_XML({ stream, tok, ...options }));
 
-Ymacs_Tokenizer.define("html", (stream, tok) => new Ymacs_Lang_HTML({
-    stream, tok,
-    emptyTags: RX_EMPTY_TAG,
-    inline: { code: inlineCode, cls: inlineCls },
-}));
+Ymacs_Tokenizer.define("html", (stream, tok, options) =>
+    new Ymacs_Lang_HTML({
+        stream, tok,
+        emptyTags: RX_EMPTY_TAG,
+        inline: { code: inlineCode, cls: inlineCls },
+        ...options
+    }));
 
-Ymacs_Tokenizer.define("twig_html", (stream, tok) => new Ymacs_Lang_Twig({ stream, tok }));
+Ymacs_Tokenizer.define("twig_html", (stream, tok, options) =>
+    new Ymacs_Lang_Twig({ stream, tok, ...options }));
 
 Ymacs_Buffer.newCommands({
     xml_limit_fill_paragraph_region: function() {

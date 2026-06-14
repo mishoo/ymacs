@@ -23,7 +23,7 @@ $cursor_fg: #ffffff;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
-.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #bfe8ff; font-weight: bold; }
+.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #bfe8ff; }
 }
 .Ymacs_Overlay.selection div { background-color: #eedc82; }
 .Ymacs_Overlay.isearch div { color: #000000; background-color: #dfa0f0; }
@@ -31,7 +31,7 @@ $cursor_fg: #ffffff;
 .Ymacs_Overlay.match-paren div { color: #000000; background-color: #8adf80; }
 .Ymacs_Modeline { color: #7f7f7f; background-color: #e5e5e5; border-top: 1px solid #bababa; border-bottom: 1px solid #bababa; }
 .Ymacs_Frame-active .Ymacs_Modeline { color: #000000; background-color: #b3b3b3; border-top: 1px solid #5a5a5a; border-bottom: 1px solid #5a5a5a; }
-.minibuffer-prompt { color: #0000ff; }
+.minibuffer-prompt { color: #0000ff; font-weight: bold; }
 .mode-line-buffer-id { font-weight: bold; }
 .heading1 { color: #0000ff; font-weight: bold; }
 .heading2 { color: #a0522d; font-weight: bold; }
