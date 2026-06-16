@@ -24,25 +24,21 @@ let Ymacs_Keymap_XML = Ymacs_Keymap.define("xml", {
 });
 
 let markup_mode = tok_type => function(){
-    var tok = this.tokenizer;
-    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: tok_type }));
+    var prev_tok = this.tokenizer;
+    var our_tok = new Ymacs_Tokenizer({ buffer: this, type: tok_type });
+    this.setTokenizer(our_tok);
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_XML);
     var changed_vars = this.setq({
         indent_level: 2,
-        syntax_comment_multi: {
-            rx: /[^\S\r\n]*<!--+[^\S\r\n]*(.*?)[^\S\r\n]*-->/ygu,
-            ch: [ "<!--", "-->" ]
-        },
-        syntax_word_dabbrev: /^[\p{N}_$\p{L}:#-]$/u,
-        syntax_word_sexp: /^[\p{N}_$\p{L}:#-]$/u,
+        ...our_tok.OVERRIDE_VARS,
     });
     return function() {
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_XML);
         this.setq(changed_vars);
-        this.setTokenizer(tok);
+        this.setTokenizer(prev_tok);
     };
 };
 
@@ -76,6 +72,15 @@ class Ymacs_Lang_XML extends Ymacs_BaseLang {
         "»" : "«",
         "❱" : "❰",
         "”" : "“",
+    };
+    OVERRIDE_VARS = {
+        syntax_comment_multi: {
+            rx: /[^\S\r\n]*<!--+[^\S\r\n]*(.*?)[^\S\r\n]*-->/ygu,
+            ch: [ "<!--", "-->" ]
+        },
+        syntax_comment_line: null,
+        syntax_word_dabbrev: /^[\p{N}_$\p{L}:#-]$/u,
+        syntax_word_sexp: /^[\p{N}_$\p{L}:#-]$/u,
     };
 
     constructor(options) {

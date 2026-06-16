@@ -214,6 +214,10 @@ export class Ymacs_Buffer extends EventProxy {
     }
 
     getVariable(name) {
+        if (this instanceof Ymacs_Buffer) {
+            let vars = this.getParserAtPoint(true)?.OVERRIDE_VARS;
+            if (vars && (name in vars)) return vars[name];
+        }
         return (name in this.variables)
             ? this.variables[name]
             : GLOBAL_VARS[name];
@@ -355,21 +359,32 @@ export class Ymacs_Buffer extends EventProxy {
         return this.__size = size;
     }
 
-    getParserAtPoint(forward, pos = this.point()) {
-        let p = null;
+    getParserAtPoint(forward = true, pos = this.point()) {
         if (forward) {
-            let len = this.getCodeSize();
-            while (pos < len && !p) {
-                let rc = this._positionToRowCol(pos++);
-                p = this._textProperties.getParserFor(rc.row, rc.col);
+            let { row, col } = this._positionToRowCol(pos);
+            let nlines = this.code.length;
+            while (row < nlines) {
+                while (col < this.code[row].length) {
+                    let p = this._textProperties.getParserFor(row, col);
+                    if (p) return p;
+                    col++;
+                }
+                col = 0;
+                row++;
             }
-        } else {
-            while (--pos >= 0 && !p) {
-                let rc = this._positionToRowCol(pos);
-                p = this._textProperties.getParserFor(rc.row, rc.col);
+        } else if (pos > 0) {
+            let { row, col } = this._positionToRowCol(pos - 1);
+            while (true) {
+                while (col >= 0) {
+                    let p = this._textProperties.getParserFor(row, col);
+                    if (p) return p;
+                    col--;
+                }
+                row--;
+                if (row < 0) break;
+                col = this.code[row].length - 1;
             }
         }
-        return p;
     }
 
     getLine(row) {

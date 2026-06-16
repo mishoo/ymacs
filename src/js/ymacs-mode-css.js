@@ -7,6 +7,17 @@ import { Ymacs_Tokenizer } from "./ymacs-tokenizer.js";
 import { Ymacs_BaseLang } from "./ymacs-baselang.js";
 
 class Ymacs_Lang_CSS extends Ymacs_BaseLang {
+    OVERRIDE_VARS = {
+        syntax_paragraph_sep: /\n(?:[ \t\/\*]*\n)+/g,
+        // syntax_comment_line: {
+        //     rx: /[^\S\r\n]*\/\/+ ?/ygu,
+        //     ch: "//"
+        // },
+        syntax_comment_multi: {
+            rx: /[^\S\r\n]*\/\*+(.*?)\*+\//ygu,
+            ch: [ "/*", "*/" ]
+        },
+    };
     readCustom() {
         let s = this._stream, m;
         for (let [ rx, ...types ] of this.CSSRX) {
@@ -32,23 +43,14 @@ Ymacs_Tokenizer.define("css", (stream, tok, options) =>
     new Ymacs_Lang_CSS({ stream, tok, ...options }));
 
 Ymacs_Buffer.newMode("css_mode", function(){
-    var tok = this.tokenizer;
-    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "css" }));
+    var prev_tok = this.tokenizer;
+    var my_tok = new Ymacs_Tokenizer({ buffer: this, type: "css" });
+    this.setTokenizer(my_tok);
     var was_paren_match = this.cmd("paren_match_mode", true);
-    var changed_vars = this.setq({
-        syntax_paragraph_sep: /\n(?:[ \t\/\*]*\n)+/g,
-        syntax_comment_line: {
-            rx: /[^\S\r\n]*\/\/+ ?/ygu,
-            ch: "//"
-        },
-        syntax_comment_multi: {
-            rx: /[^\S\r\n]*\/\*+(.*?)\*+\//ygu,
-            ch: [ "/*", "*/" ]
-        },
-    });
+    var changed_vars = this.setq(my_tok.OVERRIDE_VARS);
 
     return function() {
-        this.setTokenizer(tok);
+        this.setTokenizer(prev_tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.setq(changed_vars);

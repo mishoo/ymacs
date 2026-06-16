@@ -27,6 +27,17 @@ const ALLOW_REGEXP_AFTER = /[\[({,;+\-*=?&|!:>][\x20\t\n\xa0]*$|(?:return|typeof
 
 class Ymacs_Lang_JS extends Ymacs_BaseLang {
     STRING = [ '"', "'", [ "`", "`", "${", "}" ] ];
+    OVERRIDE_VARS = {
+        syntax_paragraph_sep: /\n(?:[ \t\/\*]*\n)+/g,
+        syntax_comment_line: {
+            rx: /[^\S\r\n]*\/\/+ ?/ygu,
+            ch: "//"
+        },
+        syntax_comment_multi: {
+            rx: /[^\S\r\n]*\/\*+(.*?)\*+\//ygu,
+            ch: [ "/*", "*/" ]
+        },
+    };
     _isProp = null;
 
     copy() {
@@ -180,24 +191,15 @@ let Ymacs_Keymap_JS = Ymacs_Keymap.define("js", {
 });
 
 Ymacs_Buffer.newMode("javascript_mode", function() {
-    let tok = this.tokenizer;
-    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "js" }));
+    let prev_tok = this.tokenizer;
+    let my_tok = new Ymacs_Tokenizer({ buffer: this, type: "js" });
+    this.setTokenizer(my_tok);
     let was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_JS);
-    let changed_vars = this.setq({
-        syntax_paragraph_sep: /\n(?:[ \t\/\*]*\n)+/g,
-        syntax_comment_line: {
-            rx: /[^\S\r\n]*\/\/+ ?/ygu,
-            ch: "//"
-        },
-        syntax_comment_multi: {
-            rx: /[^\S\r\n]*\/\*+(.*?)\*+\//ygu,
-            ch: [ "/*", "*/" ]
-        },
-    });
+    let changed_vars = this.setq(my_tok.OVERRIDE_VARS);
 
     return function() {
-        this.setTokenizer(tok);
+        this.setTokenizer(prev_tok);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_JS);

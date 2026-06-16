@@ -576,6 +576,20 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         "❱" : "❰",
         "»" : "«",
     };
+    OVERRIDE_VARS = {
+        syntax_paragraph_sep: /\n(?:[ \t;]*\n)+/g,
+        syntax_comment_line: {
+            rx: /[^\S\r\n]*;+ ?/gu,
+            ch: ";;"
+        },
+        syntax_word_dabbrev: /^[-:0-9_*%+/@&$.=~\p{L}]$/u,
+        syntax_word_sexp: /^[-:0-9_*%+/@&$.=~\p{L}]$/u,
+        paredit_space_before(pair_a, pair_b, backslash) {
+            if (pair_a === "❰") return false;
+            return !this.cmd("lisp_in_string") && !this.looking_back(/[\s\(\[\{,.@'`#:\\]/g);
+        },
+        lisp_mode: true,
+    };
 
     constructor({ stream, tok, rx_special, sl_mode }) {
         super({ stream, tok });
@@ -875,23 +889,12 @@ let Ymacs_Keymap_LispMode = Ymacs_Keymap.define("lisp", {
 });
 
 Ymacs_Buffer.newMode("lisp_mode", function() {
-
-    var tok = this.tokenizer;
-    this.setTokenizer(new Ymacs_Tokenizer({ buffer: this, type: "lisp" }));
+    var prev_tok = this.tokenizer;
+    var my_tok = new Ymacs_Tokenizer({ buffer: this, type: "lisp" });
+    this.setTokenizer(my_tok);
     var changed_vars = this.setq({
         indent_level: 2,
-        syntax_paragraph_sep: /\n(?:[ \t;]*\n)+/g,
-        syntax_comment_line: {
-            rx: /[^\S\r\n]*;+ ?/gu,
-            ch: ";;"
-        },
-        syntax_word_dabbrev: /^[-:0-9_*%+/@&$.=~\p{L}]$/u,
-        syntax_word_sexp: /^[-:0-9_*%+/@&$.=~\p{L}]$/u,
-        paredit_space_before(pair_a, pair_b, backslash) {
-            if (pair_a === "❰") return false;
-            return !this.cmd("lisp_in_string") && !this.looking_back(/[\s\(\[\{,.@'`#:\\]/g);
-        },
-        lisp_mode: true,
+        ...my_tok.OVERRIDE_VARS,
     });
     var was_paren_match = this.cmd("paren_match_mode", true);
     this.pushKeymap(Ymacs_Keymap_LispMode);
@@ -903,12 +906,11 @@ Ymacs_Buffer.newMode("lisp_mode", function() {
     });
 
     return function() {
-        this.setTokenizer(tok);
+        this.setTokenizer(prev_tok);
         this.setq(changed_vars);
         this.newCommands(changed_commands);
         if (!was_paren_match)
             this.cmd("paren_match_mode", false);
         this.popKeymap(Ymacs_Keymap_LispMode);
     };
-
 });
