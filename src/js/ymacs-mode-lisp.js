@@ -217,6 +217,9 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                         ch = next();
                         if (ch == null) {
                             throw new Partial(data);
+                        } else if (ch === ";") {
+                            read_comment();
+                            continue;
                         }
                         segment += ch;
                     }
