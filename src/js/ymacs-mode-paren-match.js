@@ -14,14 +14,17 @@ let Ymacs_Keymap_ParenMatch = Ymacs_Keymap.define("parenmatch", {
     "C-M-q"                        : "indent_sexp",
     "C-M-f && C-M-n"               : "forward_sexp",
     "C-M-b && C-M-p"               : "backward_sexp",
+    "C-M-S-f && C-M-S-n"           : [ "forward_sexp", true ],
+    "C-M-S-b && C-M-S-p"           : [ "backward_sexp", true ],
     "C-M-u && M-a && C-M-ArrowUp"  : "backward_up_list",
     "C-M-a"                        : "beginning_of_defun",
     "C-M-e"                        : "end_of_defun",
     "M-e"                          : "up_list",
     "C-M-ArrowDown"                : "down_list",
-    "M-C-k"                        : "kill_sexp",
-    "M-C-Space"                    : "mark_sexp",
-    "M-C-t"                        : "transpose_sexps",
+    "C-M-k"                        : "kill_sexp",
+    "C-M-Space"                    : "mark_sexp",
+    "C-M-S-Space"                  : [ "mark_sexp", true ],
+    "C-M-t"                        : "transpose_sexps",
 
     "("                            : [ "paredit_open_pair", "(", ")" ],
     "["                            : [ "paredit_open_pair", "[", "]" ],
@@ -155,7 +158,7 @@ let COMMANDS = {
         }
     }),
 
-    paredit_forward_sexp: Ymacs_Interactive(function() {
+    paredit_forward_sexp: Ymacs_Interactive(function(discrete) {
         this.tokenizer.finishParsing();
         let next;
         let rc = this._rowcol;
@@ -171,15 +174,26 @@ let COMMANDS = {
             syntax_word: this.getq("syntax_word_sexp"),
         }, "forward_word");
         if (next && next.closed && compareRowCol(this._rowcol, next) > 0) {
+            if (!discrete) {
+                let outer = parens.find(p => p.outer && (
+                    p.outer.l1 === (next.line ?? next.l1)
+                        && p.outer.c1 === startOf(next)
+                ))?.outer;
+                if (outer) {
+                    this.cmd("goto_char", this._rowColToPosition(outer.l2, outer.c2));
+                    return;
+                }
+            }
             this.cmd("goto_char", this._rowColToPosition(next.closed.line, endOf(next.closed)));
         }
     }),
 
-    paredit_backward_sexp: Ymacs_Interactive(function() {
+    paredit_backward_sexp: Ymacs_Interactive(function(discrete) {
         this.tokenizer.finishParsing();
         let prev;
         let rc = this._rowcol;
-        let parens = this.tokenizer.getPP().filter(p => p.closed).map(p => p.closed).sort(compareRowCol);
+        let all = this.tokenizer.getPP();
+        let parens = all.filter(p => p.closed).map(p => p.closed).sort(compareRowCol);
         for (let i = parens.length; --i >= 0;) {
             let p = parens[i];
             if (p.line < rc.row
@@ -194,14 +208,31 @@ let COMMANDS = {
             syntax_word: this.getq("syntax_word_sexp"),
         }, "backward_word");
         if (prev && prev.opened && compareRowCol(this._rowcol, { line: prev.line, col: endOf(prev) }) < 0) {
+            if (!discrete) {
+                let outer = all.find(p => p.outer && (
+                    p.outer.l2 === (prev.line ?? prev.l1)
+                        && p.outer.c2 === endOf(prev)
+                ))?.outer;
+                if (outer) {
+                    this.cmd("goto_char", this._rowColToPosition(outer.l1, outer.c1));
+                    return;
+                }
+            }
             this.cmd("goto_char", this._rowColToPosition(prev.opened.line, startOf(prev.opened)));
         }
     }),
 
-    mark_sexp: Ymacs_Interactive("^r", function(begin, end){
+    mark_sexp: Ymacs_Interactive("^r", function(begin, end, discrete){
         this.tokenizer.finishParsing();
         let paren = this.cmd("get_paren_at_point");
-        if (paren?.outer) {
+        if (discrete && paren?.inner) {
+            this.cmd("goto_char", this._rowColToPosition(paren.inner.l1, paren.inner.c1));
+            this.ensureTransientMark();
+            this.cmd("goto_char", this._rowColToPosition(paren.inner.l2, paren.inner.c2));
+            this.setMark(this.point());
+            this.transientMarker.swap(this.caretMarker);
+        }
+        else if (paren?.outer) {
             this.cmd("goto_char", this._rowColToPosition(paren.outer.l1, paren.outer.c1));
             this.ensureTransientMark();
             this.cmd("goto_char", this._rowColToPosition(paren.outer.l2, paren.outer.c2));
@@ -212,7 +243,7 @@ let COMMANDS = {
             if (this.transientMarker)
                 this.cmd("goto_char", end);
             this.ensureTransientMark();
-            this.cmd("forward_sexp");
+            this.cmd("forward_sexp", discrete);
             this.setMark(this.point());
             this.transientMarker.swap(this.caretMarker);
         });

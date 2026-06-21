@@ -55,8 +55,9 @@ export function Ymacs_Interactive(args, func) {
         }
         if (args) {
             let collect;
-            let execute = function(...rest) {
-                collect = collect.concat(rest);
+            let other_args = [];
+            let execute = function() {
+                collect = collect.concat(other_args);
                 return this.callInteractively(func, collect, true);
             };
             while (args.length > 0) {
@@ -66,8 +67,9 @@ export function Ymacs_Interactive(args, func) {
                     return next.call(this);
                 });
             }
-            func.ymacsCallInteractively = function(){
+            func.ymacsCallInteractively = function(...args){
                 collect = [];
+                other_args = args;
                 return execute.call(this);
             };
         }

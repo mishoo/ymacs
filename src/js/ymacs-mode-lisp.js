@@ -400,36 +400,36 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             return QuickParser.apply(this, [this, ...arguments]);
         },
 
-        lisp_forward_sexp: Ymacs_Interactive(function(){
+        lisp_forward_sexp: Ymacs_Interactive(function(...args){
             if (checkLispMode.call(this, true)) {
                 var p = QuickParser(this);
                 p.parse(this.point());
                 var tok = p.next_exp();
                 if (tok) this.cmd("goto_char", tok.end);
             } else {
-                return this.cmd("paredit_forward_sexp");
+                return this.cmd("paredit_forward_sexp", ...args);
             }
         }),
 
-        lisp_backward_sexp: Ymacs_Interactive(function(){
+        lisp_backward_sexp: Ymacs_Interactive(function(...args){
             if (checkLispMode.call(this, false)) {
                 var p = QuickParser(this);
                 p.parse(this.point());
                 var tok = p.prev_exp();
                 if (tok) this.cmd("goto_char", tok.start);
             } else {
-                return this.cmd("paredit_backward_sexp");
+                return this.cmd("paredit_backward_sexp", ...args);
             }
         }),
 
-        lisp_backward_up_list: Ymacs_Interactive(function(){
+        lisp_backward_up_list: Ymacs_Interactive(function(...args){
             if (checkLispMode.call(this, true)) {
                 var p = QuickParser(this);
                 p.parse(this.point());
                 var list = p.sexp();
                 if (list && list.parent) this.cmd("goto_char", list.start);
             } else {
-                return this.cmd("paredit_backward_up_list");
+                return this.cmd("paredit_backward_up_list", ...args);
             }
         }),
 
