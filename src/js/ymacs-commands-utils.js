@@ -361,4 +361,21 @@ Ymacs_Buffer.newCommands({
         this.ymacs.toggleBarCursor();
     }),
 
+    infer_indent_level: function() {
+        let prev = 0;
+        let freq = Object.create(null);
+        for (let row = 0; row < this.code.length - 1; row++) {
+            let curr = /^\s*/.exec(this.code[row])[0].replace(/\t/g, "        ").length;
+            let diff = Math.abs(curr - prev);
+            if (diff > 0) {
+                freq[diff] = (freq[diff] || 0) + 1;
+                prev = curr;
+            }
+        }
+        let x = [...Object.entries(freq)].sort((a, b) => b[1] - a[1]);
+        if (x.length) {
+            this.cmd("set_variable", "indent_level", x[0][0]);
+        }
+    },
+
 });

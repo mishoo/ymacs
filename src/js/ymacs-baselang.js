@@ -115,7 +115,8 @@ export class Ymacs_BaseLang {
     readCommentLine(start) {
         let s = this._stream;
         let p = null, end = null;
-        while (s.lookingAt(start)) {
+        let m;
+        while ((m = s.lookingAt(start))) {
             if (!p) {
                 p = {
                     line: s.line, col: s.col, c1: s.col, c2: s.col, comment: true, type: "",
@@ -123,7 +124,7 @@ export class Ymacs_BaseLang {
                     outer: { l1: s.line, c1: s.col },
                 };
             }
-            this.t("comment-starter", start.length);
+            this.t("comment-starter", m[0].length);
             this.token({ line: s.line, c1: s.col, c2: s.col = s.lineLength() }, "comment");
             end = { line: s.line, col: s.col, c1: s.col, c2: s.col, type: "", opened: p };
 

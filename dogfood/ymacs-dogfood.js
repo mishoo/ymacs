@@ -23,7 +23,7 @@ Ymacs_Buffer.newCommands({
                 let { code, mode, point } = await (await post(`ymacs-buffer-get/${name}`)).json();
                 buf = ymacs.createBuffer({ name, code });
                 switch (true) {
-                  case /js2?-mode|javascript|json/.test(mode):
+                  case /js2?(-ts)?-mode|javascript|json/.test(mode):
                     buf.cmd("javascript_mode");
                     break;
                   case /s?css-mode/.test(mode):
@@ -45,6 +45,7 @@ Ymacs_Buffer.newCommands({
                     buf.cmd("goto_char", point - 1);
                 }
             }
+            buf.cmd("infer_indent_level");
             ymacs.switchToBuffer(buf);
         }, (mb, name, cont) => {
             if (buffers.includes(name)) {
