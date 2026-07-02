@@ -1248,8 +1248,8 @@ Ymacs_Buffer.newCommands({
             if (cmmt1) {
                 this.cmd("insert", " ", cmmt1.ch, " ");
             } else {
-                this.cmd("insert", " ", cmmt2.ch[0], cmmt2.ch[1]);
-                this.cmd("backward_char", cmmt2.ch[1].length);
+                this.cmd("insert", " ", cmmt2.ch[0], "  ", cmmt2.ch[1]);
+                this.cmd("backward_char", cmmt2.ch[1].length + 1);
             }
             this.cmd("indent_line");
         }
