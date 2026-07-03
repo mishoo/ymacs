@@ -44,7 +44,7 @@ let keymap = Ymacs_Keymap.define(null, {
     //ymacs.setColorTheme([ "sanityinc-tomorrow-bright" ]);
     //ymacs.setColorTheme([ "sanityinc-tomorrow-eighties" ]);
     let b = window.b = ymacs.getActiveBuffer.bind(ymacs);
-    b().cmd("load_file", "blah.lisp");
+    b().cmd("load_file", "index.html");
     b().setVariable("fill_column", 80);
     b().cmd("toggle_line_numbers");
     //b().cmd("toggle_bar_cursor");

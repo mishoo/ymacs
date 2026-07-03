@@ -240,10 +240,17 @@ let COMMANDS = {
             this.transientMarker.swap(this.caretMarker);
         }
         else this.cmd("save_excursion", function(){
-            if (this.transientMarker)
-                this.cmd("goto_char", end);
+            let forward = true;
+            if (this.transientMarker) {
+                if (this.transientMarker < this.caretMarker) {
+                    forward = false;
+                    this.cmd("goto_char", begin);
+                } else {
+                    this.cmd("goto_char", end);
+                }
+            }
             this.ensureTransientMark();
-            this.cmd("forward_sexp", discrete);
+            this.cmd(forward ? "forward_sexp" : "backward_sexp", discrete);
             this.setMark(this.point());
             this.transientMarker.swap(this.caretMarker);
         });
