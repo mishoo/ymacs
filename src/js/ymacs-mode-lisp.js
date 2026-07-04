@@ -481,7 +481,7 @@ const LOOP_KEYWORDS = regexp_opt("\
   minimize minimizing maximize maximizing count counting \
   symbol symbols external-symbol external-symbols present-symbol present-symbols \
   named always never thereis \
-  of-type loop-finish \
+  of-type float fixnum t loop-finish \
   find finding maximizes minimizes that which \
   repeat finally initially return \
   if else when unless do doing", "i");
@@ -617,8 +617,8 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         }
     }
 
-    forgetState() {
-        super.forgetState();
+    forgetState(opts) {
+        super.forgetState(opts);
         this._formStack = NIL;
         this._formSym = null;
         this._formLen = 0;
@@ -872,7 +872,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
                             }
                         }
                     } else if (/^(?:tagbody|do\*?|dolist|dotimes|prog\*?)$/i.test(currentForm)) {
-                        if (/^\s*[\(\[\{]/.test(s.lineText(s.line))) {
+                        if (/^\s*[,\(\[\{]/.test(s.lineText(s.line))) {
                             indent += INDENT_LEVEL();
                         }
                     }

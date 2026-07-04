@@ -709,6 +709,10 @@ export class Ymacs_Buffer extends EventProxy {
 
     // BEGIN: undo queue
 
+    resetUndoQueue() {
+        this.__undoQueue = [];
+    }
+
     _recordChange(type, pos, len, text) {
         if (len > 0) {
             var q = this.__undoQueue;
