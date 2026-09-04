@@ -686,6 +686,10 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
             this.t("constant", m[0].length);
             return true;
         }
+        if ((m = s.lookingAt(/^(?:`|,@|,)/u))) {
+            this.t(null, m[0].length);
+            return true;
+        }
         if ((m = this.readName())) {
             let ch = m.id.charAt(0), type = null;
 

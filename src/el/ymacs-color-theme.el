@@ -7,6 +7,7 @@
 (require 'company)
 (require 'ef-themes)
 (require 'web-mode)
+(require 'markdown-mode)
 
 (defvar *ymacs-faces*)                  ; XXX: defparameter for Elisp?
 
