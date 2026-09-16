@@ -292,11 +292,10 @@ export class Ymacs_BaseLang {
         if (this._inParens !== NIL) {
             let paren = this._inParens.car;
             this._inParens = this._inParens.cdr;
-            if (start instanceof RegExp
-                ? !start.test(paren.type)
-                : start != paren.type) {
-                //debugger;
-                if (n) this.t("error", n);
+            if (start instanceof RegExp ? !start.test(paren.type) : start != paren.type) {
+                if (n) {
+                    this.t("error", n);
+                }
             } else {
                 paren.closed = { line: s.line, col: s.col, c1: s.col, c2: s.col + n, opened: paren };
                 this.doneParen(paren);
@@ -366,6 +365,11 @@ export class Ymacs_BaseLang {
             let re = new RegExp("^\\s*\\" + this.OPEN_PAREN[p.type]);
             let thisLineCloses = re.test(currentLine);
 
+            // JS arrow functions, indent one level more than the introducing line.
+            if (/=>\s*$/.test(s.lineText(p.line))) {
+                return indent = s.lineIndentation(p.line) + INDENT_LEVEL();
+            }
+
             // Check if there is text after the opening paren.  If so, indent to that column.
             re = /\S/g;
             re.lastIndex = p.col + 1;
@@ -379,18 +383,27 @@ export class Ymacs_BaseLang {
                 // containing the opening paren. Except that if another paren is closed on that line
                 // before `p`, then we'd like to use that paren's opening line instead. Oh well.
                 let line = p.line;
-                if (this._parens.car?.closed?.line == line) {
-                    line = this._parens.car.line;
+                let clp = this._parens;
+                while (clp.car?.closed?.line == line) {
+                    line = clp.car.line;
+                    // Except that if another paren is closed on that line
+                    // before `p`, then we'd like to use that paren's opening
+                    // line instead. Oh well.
+                    clp = clp.cdr;
                 }
                 indent = s.lineIndentation(line) + INDENT_LEVEL();
 
                 // but if this line closes the paren, then back one level
                 if (thisLineCloses) {
                     indent -= INDENT_LEVEL();
-                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*=&|]|\+[^+]|-[^-])/.test(currentLine)) {
+                } else if (this.C_STATEMENTS && /^\s*(?:[.:?*=&|]|\+[^+]|-[^-])/.test(currentLine) &&
+                           !/^\s*\.\.\./.test(currentLine)) {
                     indent += INDENT_LEVEL();
                 }
             }
+        }
+        else if ((p = this._parens.car)) {
+            indent = s.lineIndentation(p.line);
         }
         else {
             let i = row, m;
