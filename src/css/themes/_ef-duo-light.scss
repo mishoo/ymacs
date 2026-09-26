@@ -10,15 +10,15 @@ $cursor_fg: #fff8f0;
 .Ymacs-Theme-ef-duo-light { --ymacs-cursor-bg: #1144ff; --ymacs-cursor-fg: #fff8f0; --ymacs-modeline-in-bg: #e7e0da; --ymacs-modeline-ac-bg: #f8cf8f; }
 .Ymacs-Theme-ef-duo-light { color: #222222; background-color: #fff8f0; }
 .Ymacs-Theme-ef-duo-light .Ymacs_SplitCont > .bar { background-color: #baafba; }
-.Ymacs-Theme-ef-duo-light .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #f9f2ef; border-bottom: 1px solid #f9f2ef; }
-.Ymacs-Theme-ef-duo-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #f9f2ef; border-right: 1px solid #f9f2ef; }
+.Ymacs-Theme-ef-duo-light .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #f0eae7; border-bottom: 1px solid #f0eae7; }
+.Ymacs-Theme-ef-duo-light .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #f0eae7; border-right: 1px solid #f0eae7; }
 .Ymacs-Theme-ef-duo-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #f9e8c063 }
 .Ymacs-Theme-ef-duo-light .Ymacs-frame-content div.line:before { color: #63728f; }
 .Ymacs-Theme-ef-duo-light.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #4250ef; font-weight: bold; }
 .Ymacs-Theme-ef-duo-light .Ymacs-frame-content:before { color: #63728f; background-color: #fff8f0; }
 .Ymacs-Theme-ef-duo-light {
 .Ymacs_Popup {
-  --ymacs-popup-bg: #f6eddd;
+  --ymacs-popup-bg: #f8efef;
   --ymacs-popup-fg: #222222;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
@@ -79,7 +79,7 @@ $cursor_fg: #fff8f0;
 .xml-open-bracket { color: #63728f; }
 .xml-close-bracket { color: #63728f; }
 .xml-closetag-slash { color: #63728f; }
-.xml-cdata { color: #222222; font-style: italic; }
+.xml-cdata { color: #a2403f; font-style: italic; }
 .xml-cdata-starter { color: #cc3333; font-style: italic; }
 .xml-cdata-stopper { color: #cc3333; font-style: italic; }
 .block-starter, .block-stopper { color: #222222; }

@@ -10,20 +10,20 @@ $cursor_fg: #f6fff9;
 .Ymacs-Theme-ef-spring { --ymacs-cursor-bg: #bf005f; --ymacs-cursor-fg: #f6fff9; --ymacs-modeline-in-bg: #e0e6e3; --ymacs-modeline-ac-bg: #90e8b0; }
 .Ymacs-Theme-ef-spring { color: #34494a; background-color: #f6fff9; }
 .Ymacs-Theme-ef-spring .Ymacs_SplitCont > .bar { background-color: #b4c4c0; }
-.Ymacs-Theme-ef-spring .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #f0f8f4; border-bottom: 1px solid #f0f8f4; }
-.Ymacs-Theme-ef-spring .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #f0f8f4; border-right: 1px solid #f0f8f4; }
+.Ymacs-Theme-ef-spring .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #eaf0e9; border-bottom: 1px solid #eaf0e9; }
+.Ymacs-Theme-ef-spring .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #eaf0e9; border-right: 1px solid #eaf0e9; }
 .Ymacs-Theme-ef-spring.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #f9e0e563 }
 .Ymacs-Theme-ef-spring .Ymacs-frame-content div.line:before { color: #777294; }
 .Ymacs-Theme-ef-spring.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #1a870f; font-weight: bold; }
 .Ymacs-Theme-ef-spring .Ymacs-frame-content:before { color: #777294; background-color: #f6fff9; }
 .Ymacs-Theme-ef-spring {
 .Ymacs_Popup {
-  --ymacs-popup-bg: #f3f3f3;
+  --ymacs-popup-bg: #edf2e9;
   --ymacs-popup-fg: #34494a;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
 .Ymacs_Popup .Ymacs_Menu {
-.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #ccedff; }
+.Ymacs_Menu_Item:hover, .Ymacs_Menu_Item.selected, .Ymacs_Menu_Item.selected:hover { background-color: #d3e4f0; }
 }
 .Ymacs_Overlay.selection div { background-color: #d0e6ff; }
 .Ymacs_Overlay.isearch div { color: #34494a; background-color: #efcf00; }
@@ -79,7 +79,7 @@ $cursor_fg: #f6fff9;
 .xml-open-bracket { color: #777294; }
 .xml-close-bracket { color: #777294; }
 .xml-closetag-slash { color: #777294; }
-.xml-cdata { color: #34494a; font-style: italic; }
+.xml-cdata { color: #876450; font-style: italic; }
 .xml-cdata-starter { color: #d03003; font-style: italic; }
 .xml-cdata-stopper { color: #d03003; font-style: italic; }
 .block-starter, .block-stopper { color: #34494a; }

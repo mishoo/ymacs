@@ -76,12 +76,12 @@ $cursor_fg: #ffffff;
 .xml-entity-starter { color: #4271ae; }
 .xml-entity-stopper { color: #4271ae; }
 .xml-entity { color: #4271ae; }
-.xml-open-bracket { color: #4d4d4c; }
-.xml-close-bracket { color: #4d4d4c; }
-.xml-closetag-slash { color: #4d4d4c; }
-.xml-cdata { color: #4d4d4c; }
-.xml-cdata-starter { color: #4d4d4c; }
-.xml-cdata-stopper { color: #4d4d4c; }
+.xml-open-bracket { }
+.xml-close-bracket { }
+.xml-closetag-slash { }
+.xml-cdata { color: #8e908c; }
+.xml-cdata-starter { color: #8e908c; }
+.xml-cdata-stopper { color: #8e908c; }
 .block-starter, .block-stopper { color: #8959a8; }
 .exp-starter, .exp-stopper { color: #8959a8; }
 .lisp-keyword { color: #8959a8; }

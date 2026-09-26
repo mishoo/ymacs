@@ -10,15 +10,15 @@ $cursor_fg: #222524;
 .Ymacs-Theme-ef-elea-dark { --ymacs-cursor-bg: #ef7fa8; --ymacs-cursor-fg: #222524; --ymacs-modeline-in-bg: #3e4140; --ymacs-modeline-ac-bg: #35605d; }
 .Ymacs-Theme-ef-elea-dark { color: #eaf2ef; background-color: #222524; }
 .Ymacs-Theme-ef-elea-dark .Ymacs_SplitCont > .bar { background-color: #5d5f63; }
-.Ymacs-Theme-ef-elea-dark .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #2b2e2d; border-bottom: 1px solid #2b2e2d; }
-.Ymacs-Theme-ef-elea-dark .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #2b2e2d; border-right: 1px solid #2b2e2d; }
+.Ymacs-Theme-ef-elea-dark .Ymacs_SplitCont.horiz > .bar { border-top: 1px solid #3b3e3d; border-bottom: 1px solid #3b3e3d; }
+.Ymacs-Theme-ef-elea-dark .Ymacs_SplitCont.vert > .bar { border-left: 1px solid #3b3e3d; border-right: 1px solid #3b3e3d; }
 .Ymacs-Theme-ef-elea-dark.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret) { background-color: #2f413f63 }
 .Ymacs-Theme-ef-elea-dark .Ymacs-frame-content div.line:before { color: #969faf; }
 .Ymacs-Theme-ef-elea-dark.Ymacs-hl-line .Ymacs_Frame-active div.line:has(.Ymacs-caret):before { color: #50cf89; font-weight: bold; }
 .Ymacs-Theme-ef-elea-dark .Ymacs-frame-content:before { color: #969faf; background-color: #222524; }
 .Ymacs-Theme-ef-elea-dark {
 .Ymacs_Popup {
-  --ymacs-popup-bg: #0c0c0c;
+  --ymacs-popup-bg: #2c302f;
   --ymacs-popup-fg: #eaf2ef;
   --ymacs-popup-scrollbar-thumb: var(--ymacs-popup-fg);
 }
@@ -79,7 +79,7 @@ $cursor_fg: #222524;
 .xml-open-bracket { color: #969faf; }
 .xml-close-bracket { color: #969faf; }
 .xml-closetag-slash { color: #969faf; }
-.xml-cdata { color: #eaf2ef; font-style: italic; }
+.xml-cdata { color: #cac89f; font-style: italic; }
 .xml-cdata-starter { color: #ff7a5f; font-style: italic; }
 .xml-cdata-stopper { color: #ff7a5f; font-style: italic; }
 .block-starter, .block-stopper { color: #eaf2ef; }
