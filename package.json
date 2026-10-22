@@ -66,6 +66,7 @@
     "homepage": "https://github.com/mishoo/ymacs#readme",
     "devDependencies": {
 	"@parcel/transformer-sass": "^2.16.0",
-	"parcel": "^2.15.0"
+	"parcel": "^2.15.0",
+        "typescript": "^6.0.0"
     }
 }

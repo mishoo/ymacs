@@ -66,7 +66,7 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
             var save_list_index = list_index;
             list_index = 0;
             try {
-                var ret = [], p;
+                var ret = [];
                 skip(beg);
                 out: while (true) {
                     skip_ws();
@@ -670,7 +670,7 @@ export class Ymacs_Lang_Lisp extends Ymacs_BaseLang {
         if (s.lookingAt("#'") && this.isNameChar(s.peek(+2))) {
             this.newArg();
             this.t("operator", 2);
-            let c = this.maybeName("function-name");
+            this.maybeName("function-name");
             return true;
         }
         if ((m = s.lookingAt(/^#\/((?:\\.|[^\/])*)\/([dgimsuvy]+)?/))) {
