@@ -182,6 +182,20 @@ import { Ymacs_BaseLang } from "./ymacs-baselang.js";
                     return token("template", read_string_template, -2);
                 }
             }
+            let m;
+            if ((m = input.looking_at(/^[0-9]+/))) {
+                input.skip_col(m[0].length);
+                if (peek() === "#") {
+                    next();
+                    return token("refget", () => parseInt(m[0], 10), m[0].length - 2);
+                }
+                skip("=");
+                let tok = token("refset", () => ({
+                    ref: parseInt(m[0], 10),
+                    ...read_token()
+                }), m[0].length - 2);
+                return tok;
+            }
             switch (peek()) {
               case "\\": next(); return token("char", read_char, -1);
               case "/": return token("regexp", read_regexp, -1);

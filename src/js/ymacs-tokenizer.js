@@ -186,6 +186,11 @@ export class Ymacs_Simple_Stream {
         return ch;
     }
 
+    skip_col(len) {
+        this.col += len;
+        this.pos += len;
+    }
+
     read_while(pred) {
         var ret = "", ch;
         while ((ch = this.peek()) && pred(ch))
